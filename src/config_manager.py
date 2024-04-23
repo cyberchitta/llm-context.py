@@ -1,21 +1,25 @@
-import os
 import json
+import os
+
 
 class ConfigManager:
     def __init__(self, global_config_file, project_config_file):
         self.global_config_file = global_config_file
         self.project_config_file = project_config_file
-        self.default_global_config = {'root_path': '~/Github/llm-context', 'templates_path': '~/Github/llm-context/templates'}
-        self.default_project_config = {'template': 'all-file-contents.jinja', 'files': []}
+        self.default_global_config = {
+            "root_path": os.path.expanduser("~/Github/llm-code-context"),
+            "templates_path": os.path.expanduser("~/Github/llm-code-context/templates"),
+        }
+        self.default_project_config = {"template": "all-file-contents.j2", "files": []}
 
     def load_config(self, config_file):
-        with open(config_file, 'r') as file:
+        with open(config_file, "r") as file:
             return json.load(file)
 
     def save_config(self, config_file, config):
         directory = os.path.dirname(config_file)
         os.makedirs(directory, exist_ok=True)
-        with open(config_file, 'w') as file:
+        with open(config_file, "w") as file:
             json.dump(config, file, indent=2)
 
     def ensure_config_exists(self, config_file, default_config):
@@ -29,4 +33,3 @@ class ConfigManager:
     def get_project_config(self):
         self.ensure_config_exists(self.project_config_file, self.default_project_config)
         return self.load_config(self.project_config_file)
-
