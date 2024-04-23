@@ -25,14 +25,11 @@ class FileSelector(wx.Frame):
         self.Centre()
 
     def OnSelectFiles(self, event):
-        root_path = (
-            self.configuration_manager.get_global_config().get("root_path", ".") + "/"
-        )
-        default_dir = os.path.expanduser(root_path)
+        root_path = self.configuration_manager.get_global_config().get("root_path", ".")
         with wx.FileDialog(
             self,
             "Select Files",
-            defaultDir=default_dir,
+            defaultDir=root_path,
             wildcard="*.*",
             style=wx.FD_OPEN | wx.FD_MULTIPLE,
         ) as fileDialog:
@@ -41,9 +38,9 @@ class FileSelector(wx.Frame):
                 project_config = self.configuration_manager.get_project_config()
                 project_config["files"] = selected_files
                 self.configuration_manager.save_config(
-                    self.configuration_manager.project_config_file, project_config
+                    self.configuration_manager.project_config_file,
+                    project_config,
                 )
-                print("Selected files:", selected_files)
 
 
 if __name__ == "__main__":

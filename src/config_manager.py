@@ -7,10 +7,13 @@ class ConfigManager:
         self.global_config_file = global_config_file
         self.project_config_file = project_config_file
         self.default_global_config = {
-            "root_path": os.path.expanduser("~/Github/llm-code-context"),
-            "templates_path": os.path.expanduser("~/Github/llm-code-context/templates"),
+            "root_path": os.getcwd(),
+            "templates_path": os.path.expanduser("~/Github/llm-code-context.py/templates"),
         }
-        self.default_project_config = {"template": "all-file-contents.j2", "files": []}
+        self.default_project_config = {
+            "template": "all-file-contents.j2",
+            "files": [],
+        }
 
     def load_config(self, config_file):
         with open(config_file, "r") as file:

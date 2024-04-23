@@ -17,8 +17,8 @@ black = "^24.4.0"
 isort = "^5.13.2"
 
 [tool.black]
-line-length = 88
-target-version = ['py38']
+line-length = 100
+target-version = ['py312']
 
 [build-system]
 requires = ["poetry-core"]

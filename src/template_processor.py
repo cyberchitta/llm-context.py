@@ -6,9 +6,7 @@ from jinja2 import Environment, FileSystemLoader
 
 class TemplateProcessor:
     def __init__(self, templates_path):
-        self.env = Environment(
-            loader=FileSystemLoader(os.path.expanduser(templates_path))
-        )
+        self.env = Environment(loader=FileSystemLoader(templates_path))
 
     def render_template(self, template_name, items):
         template = self.env.get_template(template_name)
@@ -17,8 +15,7 @@ class TemplateProcessor:
     def template_input(self, file_paths):
         file_contents = [Path(file_path).read_text() for file_path in file_paths]
         return [
-            {"path": path, "content": content}
-            for path, content in zip(file_paths, file_contents)
+            {"path": path, "content": content} for path, content in zip(file_paths, file_contents)
         ]
 
     def process_files(self, template_name, file_paths):
