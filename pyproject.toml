@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "llm-code"
+name = "llm-code-context"
 version = "0.0.1"
 description = "Help with copy/paste code into chat"
 authors = ["restlessronin <88921269+restlessronin@users.noreply.github.com>"]
