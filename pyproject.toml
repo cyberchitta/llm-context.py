@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "llm-code"
+version = "0.0.1"
+description = "Help with copy/paste code into chat"
+authors = ["restlessronin <88921269+restlessronin@users.noreply.github.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+jinja2 = "^3.1.3"
+pyperclip = "^1.8.2"
+wxpython = "^4.2.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.python-version
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Virtual environment
+.venv
+.env
+
+# LLM Context
+.llm-context
