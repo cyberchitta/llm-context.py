@@ -5,7 +5,7 @@ import wx
 from config_manager import ConfigManager
 
 
-class FileSelector(wx.Frame):
+class FileSelectorUi(wx.Frame):
     def __init__(self, configuration_manager):
         super().__init__(parent=None, title="File Selector")
         self.configuration_manager = configuration_manager
@@ -49,6 +49,6 @@ if __name__ == "__main__":
     configuration_manager = ConfigManager(global_config_file, project_config_file)
 
     app = wx.App()
-    file_selector = FileSelector(configuration_manager)
+    file_selector = FileSelectorUi(configuration_manager)
     file_selector.Show(True)
     app.MainLoop()
