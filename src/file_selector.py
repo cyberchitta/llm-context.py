@@ -21,15 +21,17 @@ class FileSelector:
     def traverse(self, current_dir):
         entries = os.listdir(current_dir)
         dirs = [
-            os.path.join(current_dir, e)
+            e_path
             for e in entries
-            if os.path.isdir(os.path.join(current_dir, e))
+            if (e_path := os.path.join(current_dir, e))
+            and os.path.isdir(e_path)
             and not self.file_ignorer.ignore(e, is_dir=True)
         ]
         files = [
-            os.path.join(current_dir, e)
+            e_path
             for e in entries
-            if os.path.isfile(os.path.join(current_dir, e))
+            if (e_path := os.path.join(current_dir, e))
+            and os.path.isdir(e_path)
             and not self.file_ignorer.ignore(e, is_dir=False)
         ]
         subdir_files = [file for d in dirs for file in self.traverse(d)]
