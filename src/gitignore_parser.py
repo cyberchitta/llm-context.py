@@ -1,29 +1,28 @@
 import os
 
-class GitIgnoreParser:
+from file_ignorer import FileIgnorer
+
+
+class GitignoreParser:
     @staticmethod
-    def create(root_directory):
-        gitignore_file = os.path.join(root_directory, '.gitignore')
-        additional_ignore_dirs = list(('.git', '.cache', '.venv'))
-        additional_ignore_files = list(('.DS_Store', 'Thumbs.db'))
-        return GitIgnoreParser(gitignore_file, additional_ignore_dirs, additional_ignore_files)
+    def create_default(root_directory):
+        additional_ignore_patterns = list((".git"))
+        return GitignoreParser.create(root_directory, additional_ignore_patterns)
 
-    def __init__(self, gitignore_file, additional_ignore_dirs, additional_ignore_files):
+    @staticmethod
+    def create(root_directory, additional_ignore_patterns):
+        gitignore_file = os.path.join(root_directory, ".gitignore")
+        return GitignoreParser(gitignore_file, additional_ignore_patterns)
+
+    def __init__(self, gitignore_file, additional_ignore_patterns):
         self.gitignore_file = gitignore_file
-        self.additional_ignore_dirs = additional_ignore_dirs
-        self.additional_ignore_files = additional_ignore_files
+        self.additional_ignore_patterns = additional_ignore_patterns
 
-    def parse(self):
+    def create_file_ignorer(self):
         if not os.path.isfile(self.gitignore_file):
-            return self.additional_ignore_dirs, self.additional_ignore_files
+            return self.additional_ignores
 
-        with open(self.gitignore_file, 'r') as file:
+        with open(self.gitignore_file, "r") as file:
             lines = file.readlines()
 
-        ignore_dirs = [line.strip() for line in lines if line.strip().endswith('/')]
-        ignore_files = [line.strip() for line in lines if not line.strip().endswith('/')]
-
-        ignore_dirs = ignore_dirs + self.additional_ignore_dirs
-        ignore_files = ignore_files + self.additional_ignore_files
-
-        return ignore_dirs, ignore_files
+        return FileIgnorer([line.strip() for line in lines] + self.additional_ignore_patterns)
