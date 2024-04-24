@@ -1,7 +1,10 @@
 import os
+
 import pyperclip
+
 from config_manager import ConfigManager
 from template_processor import TemplateProcessor
+
 
 class ContextGenerator:
     @classmethod
@@ -23,9 +26,11 @@ class ContextGenerator:
         pyperclip.copy(output)
         return output
 
+
 def main():
     context_generator = ContextGenerator.create()
     context_generator.process_files()
+
 
 if __name__ == "__main__":
     main()
