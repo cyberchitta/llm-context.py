@@ -8,7 +8,7 @@ from gitignore_parser import GitignoreParser
 
 class FileSelector:
     @classmethod
-    def create(cls):
+    def create(cls) -> 'FileSelector':
         config_manager = ConfigManager.create_default()
         gitignore_parser = GitignoreParser.create(
             config_manager.user["root_path"], list((".git", "*.lock"))
