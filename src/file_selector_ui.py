@@ -1,54 +1,46 @@
 import os
-
 import wx
-
 from config_manager import ConfigManager
 
-
 class FileSelectorUi(wx.Frame):
-    def __init__(self, configuration_manager):
-        super().__init__(parent=None, title="File Selector")
-        self.configuration_manager = configuration_manager
-        self.InitUI()
+    @staticmethod
+    def create():
+        config_manager = ConfigManager.create()
 
-    def InitUI(self):
-        panel = wx.Panel(self)
+        frame = wx.Frame(parent=None, title='File Selector')
+        panel = wx.Panel(frame)
 
-        select_button = wx.Button(panel, label="Select Files")
-        select_button.Bind(wx.EVT_BUTTON, self.OnSelectFiles)
+        select_button = wx.Button(panel, label='Select Files')
+        select_button.Bind(wx.EVT_BUTTON, lambda event: FileSelectorUi.on_select_files(config_manager, event))
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(select_button, 0, wx.ALL | wx.CENTER, 10)
         panel.SetSizer(sizer)
 
-        self.SetSize((300, 200))
-        self.Centre()
+        frame.SetSize((300, 200))
+        frame.Centre()
 
-    def OnSelectFiles(self, event):
-        root_path = self.configuration_manager.get_global_config().get("root_path", ".")
-        with wx.FileDialog(
-            self,
-            "Select Files",
-            defaultDir=root_path,
-            wildcard="*.*",
-            style=wx.FD_OPEN | wx.FD_MULTIPLE,
-        ) as fileDialog:
-            if fileDialog.ShowModal() == wx.ID_OK:
-                selected_files = fileDialog.GetPaths()
-                project_config = self.configuration_manager.get_project_config()
-                project_config["files"] = selected_files
-                self.configuration_manager.save_config(
-                    self.configuration_manager.project_config_file,
-                    project_config,
-                )
+        return FileSelectorUi(config_manager, panel)
 
+    @staticmethod
+    def on_select_files(config_manager, event):
+        root_path = config_manager.global_config.get('root_path', '.') + "/"
+        default_dir = os.path.expanduser(root_path)
+        with wx.FileDialog(None, "Select Files", defaultDir=default_dir, wildcard="*.*", style=wx.FD_OPEN | wx.FD_MULTIPLE) as file_dialog:
+            if file_dialog.ShowModal() == wx.ID_OK:
+                selected_files = file_dialog.GetPaths()
+                config_manager.update_files(selected_files)
 
-if __name__ == "__main__":
-    global_config_file = os.path.expanduser("~/.llm-context/config.json")
-    project_config_file = ".llm-context/config.json"
-    configuration_manager = ConfigManager(global_config_file, project_config_file)
+    def __init__(self, config_manager, panel):
+        super().__init__(parent=None, title='File Selector')
+        self.config_manager = config_manager
+        self.panel = panel
 
+def main():
     app = wx.App()
-    file_selector = FileSelectorUi(configuration_manager)
-    file_selector.Show(True)
+    file_selector = FileSelectorUi.create()
+    file_selector.panel.GetParent().Show(True)
     app.MainLoop()
+
+if __name__ == '__main__':
+    main()

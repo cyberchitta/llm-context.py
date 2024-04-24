@@ -7,7 +7,7 @@ from template_processor import TemplateProcessor
 
 
 def process_files(config_manager, template_processor):
-    project_config = config_manager.get_project_config()
+    project_config = config_manager.project
     template_name = project_config["template"]
     file_paths = project_config["files"]
 
@@ -16,11 +16,8 @@ def process_files(config_manager, template_processor):
 
 
 def main():
-    global_config_file = os.path.expanduser("~/.llm-context/config.json")
-    project_config_file = ".llm-context/config.json"
-
-    config_manager = ConfigManager(global_config_file, project_config_file)
-    template_processor = TemplateProcessor(config_manager.get_global_config()["templates_path"])
+    config_manager = ConfigManager.create_default()
+    template_processor = TemplateProcessor(config_manager.templates_path())
     process_files(config_manager, template_processor)
 
 

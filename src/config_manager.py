@@ -1,38 +1,50 @@
-import json
 import os
-
+import json
 
 class ConfigManager:
-    def __init__(self, global_config_file, project_config_file):
-        self.global_config_file = global_config_file
-        self.project_config_file = project_config_file
-        self.default_global_config = {
-            "root_path": os.getcwd(),
-            "templates_path": os.path.expanduser("~/Github/llm-code-context.py/templates"),
-        }
-        self.default_project_config = {
-            "template": "all-file-contents.j2",
-            "files": [],
-        }
+    user_file = os.path.expanduser('~/.llm-context/config.json')
+    project_file = '.llm-context/config.json'
 
-    def load_config(self, config_file):
-        with open(config_file, "r") as file:
-            return json.load(file)
+    @staticmethod
+    def create_default():
+        default_user = {"root_path": os.getcwd(), "templates_path": os.path.expanduser('~/Github/llm-context/templates')}
+        default_project = {"template": 'all-file-contents.jinja', "files": []}
 
-    def save_config(self, config_file, config):
-        directory = os.path.dirname(config_file)
+        return ConfigManager.create(ConfigManager.user_file, ConfigManager.project_file, default_user, default_project)
+
+    @staticmethod
+    def create(user_file, project_file, default_user, default_project):
+        config_manager = ConfigManager()
+        config_manager.ensure_exists(user_file, default_user)
+        config_manager.ensure_exists(project_file, default_project)
+        config_manager.load(user_file, project_file)
+        return config_manager
+
+    def __init__(self):
+        self.user = None
+        self.project = None
+
+    def ensure_exists(self, file, default):
+        if not os.path.exists(file):
+            self.save(file, default)
+
+    def load(self, user_file, project_file):
+        self.user = self._load(user_file)
+        self.project = self._load(project_file)
+
+    def _load(self, file):
+        with open(file, 'r') as f:
+            return json.load(f)
+
+    def save(self, file, config):
+        directory = os.path.dirname(file)
         os.makedirs(directory, exist_ok=True)
-        with open(config_file, "w") as file:
-            json.dump(config, file, indent=2)
+        with open(file, 'w') as f:
+            json.dump(config, f, indent=2)
 
-    def ensure_config_exists(self, config_file, default_config):
-        if not os.path.exists(config_file):
-            self.save_config(config_file, default_config)
+    def templates_path(self):
+        return self.user['templates_path']
 
-    def get_global_config(self):
-        self.ensure_config_exists(self.global_config_file, self.default_global_config)
-        return self.load_config(self.global_config_file)
-
-    def get_project_config(self):
-        self.ensure_config_exists(self.project_config_file, self.default_project_config)
-        return self.load_config(self.project_config_file)
+    def update_files(self, files):
+        self.project['files'] = files
+        self.save(ConfigManager.project_file, self.project)
