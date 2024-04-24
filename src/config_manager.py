@@ -1,16 +1,22 @@
-import os
 import json
+import os
+
 
 class ConfigManager:
-    user_file = os.path.expanduser('~/.llm-context/config.json')
-    project_file = '.llm-context/config.json'
+    user_file = os.path.expanduser("~/.llm-context/config.json")
+    project_file = ".llm-context/config.json"
 
     @staticmethod
     def create_default():
-        default_user = {"root_path": os.getcwd(), "templates_path": os.path.expanduser('~/Github/llm-context/templates')}
-        default_project = {"template": 'all-file-contents.jinja', "files": []}
+        default_user = {
+            "root_path": os.getcwd(),
+            "templates_path": os.path.expanduser("~/Github/llm-context/templates"),
+        }
+        default_project = {"template": "all-file-contents.jinja", "files": []}
 
-        return ConfigManager.create(ConfigManager.user_file, ConfigManager.project_file, default_user, default_project)
+        return ConfigManager.create(
+            ConfigManager.user_file, ConfigManager.project_file, default_user, default_project
+        )
 
     @staticmethod
     def create(user_file, project_file, default_user, default_project):
@@ -33,18 +39,18 @@ class ConfigManager:
         self.project = self._load(project_file)
 
     def _load(self, file):
-        with open(file, 'r') as f:
+        with open(file, "r") as f:
             return json.load(f)
 
     def save(self, file, config):
         directory = os.path.dirname(file)
         os.makedirs(directory, exist_ok=True)
-        with open(file, 'w') as f:
+        with open(file, "w") as f:
             json.dump(config, f, indent=2)
 
     def templates_path(self):
-        return self.user['templates_path']
+        return self.user["templates_path"]
 
     def update_files(self, files):
-        self.project['files'] = files
+        self.project["files"] = files
         self.save(ConfigManager.project_file, self.project)
