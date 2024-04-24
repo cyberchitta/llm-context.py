@@ -31,7 +31,7 @@ class FileSelector:
             e_path
             for e in entries
             if (e_path := os.path.join(current_dir, e))
-            and os.path.isdir(e_path)
+            and not os.path.isdir(e_path)
             and not self.file_ignorer.ignore(e, is_dir=False)
         ]
         subdir_files = [file for d in dirs for file in self.traverse(d)]
