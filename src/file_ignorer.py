@@ -5,7 +5,17 @@ from typing import List
 class FileIgnorer:
     @staticmethod
     def should_ignore(pattern: str, name: str, is_dir: bool) -> bool:
-        if pattern.endswith("/") and is_dir:
+        if pattern.startswith("/") and pattern.endswith("/"):
+            if is_dir:
+                return fnmatch.fnmatch(name, pattern[1:-1])
+            else:
+                return False
+        elif pattern.startswith("/"):
+            if is_dir:
+                return fnmatch.fnmatch(name, pattern[1:])
+            else:
+                return False
+        elif pattern.endswith("/") and is_dir:
             return fnmatch.fnmatch(name, pattern[:-1])
         elif not pattern.endswith("/"):
             return fnmatch.fnmatch(name, pattern)
