@@ -12,7 +12,7 @@ class ConfigManager:
             "root_path": os.getcwd(),
             "templates_path": os.path.expanduser("~/Github/llm-context/templates"),
         }
-        default_project = {"template": "all-file-contents.jinja", "files": [], "gitignores": [".git"]}
+        default_project = {"template": "all-file-contents.j2", "files": [], "gitignores": [".git"]}
         user_file = ConfigManager.user_file
         project_file = ConfigManager.get_project_file(user_file)
 
