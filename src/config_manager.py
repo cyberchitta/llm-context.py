@@ -17,7 +17,6 @@ class ConfigManager:
         ConfigManager.ensure_exists(user_file, default_user)
         project_file = ConfigManager.get_project_file(user_file)
         ConfigManager.ensure_exists(project_file, default_project)
-
         return ConfigManager.create(user_file, project_file)
 
     @staticmethod
@@ -53,7 +52,6 @@ class ConfigManager:
         self.project_file = project_file
         self.user = user
         self.project = project
-
 
     def templates_path(self):
         return self.user["templates_path"]
