@@ -8,7 +8,7 @@ from config_manager import ConfigManager
 class FileSelectorUi(wx.Frame):
     @staticmethod
     def create():
-        config_manager = ConfigManager.create()
+        config_manager = ConfigManager.create_default()
 
         frame = wx.Frame(parent=None, title="File Selector")
         panel = wx.Panel(frame)
@@ -29,7 +29,7 @@ class FileSelectorUi(wx.Frame):
 
     @staticmethod
     def on_select_files(config_manager, event):
-        root_path = config_manager.global_config.get("root_path", ".") + "/"
+        root_path = config_manager.user.get("root_path", ".") + "/"
         default_dir = os.path.expanduser(root_path)
         with wx.FileDialog(
             None,
