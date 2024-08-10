@@ -15,6 +15,11 @@ wxpython = "^4.2.1"
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.0"
 isort = "^5.13.2"
+pytest = "^7.3.1"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
 
 [tool.black]
 line-length = 100
