@@ -1,6 +1,7 @@
 import unittest
 from src.file_ignorer import FileIgnorer
 
+
 class TestFileIgnorer(unittest.TestCase):
     def test_simple_filename(self):
         ignorer = FileIgnorer.create(["*.txt"])
@@ -96,5 +97,6 @@ class TestFileIgnorer(unittest.TestCase):
         self.assertTrue(ignorer.ignore("logs", False))
         self.assertFalse(ignorer.ignore("logs.txt", False))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

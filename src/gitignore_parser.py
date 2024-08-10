@@ -25,4 +25,6 @@ class GitignoreParser:
         with open(self.gitignore_file, "r") as file:
             lines = file.readlines()
 
-        return FileIgnorer.create([line.strip() for line in lines] + self.additional_ignore_patterns)
+        return FileIgnorer.create(
+            [line.strip() for line in lines] + self.additional_ignore_patterns
+        )
