@@ -2,8 +2,9 @@ import os
 from typing import List
 
 from config_manager import ConfigManager
-from composite_ignorer import CompositeIgnorer
+from pathspec_ignorer import CompositeIgnorer
 from gitignore_parser import GitignoreParser
+
 
 class FileSelector:
     @classmethod
@@ -12,12 +13,12 @@ class FileSelector:
         gitignore_parser = GitignoreParser.create(
             config_manager.user["root_path"], config_manager.project["gitignores"]
         )
-        composite_ignorer = gitignore_parser.create_composite_ignorer()
-        return cls(config_manager, composite_ignorer)
+        pathspec_ignorer = gitignore_parser.create_composite_ignorer()
+        return cls(config_manager, pathspec_ignorer)
 
-    def __init__(self, config_manager: ConfigManager, composite_ignorer: CompositeIgnorer):
+    def __init__(self, config_manager: ConfigManager, pathspec_ignorer: CompositeIgnorer):
         self.config_manager = config_manager
-        self.composite_ignorer = composite_ignorer
+        self.pathspec_ignorer = pathspec_ignorer
 
     def traverse(self, current_dir: str) -> List[str]:
         entries = os.listdir(current_dir)
@@ -26,14 +27,14 @@ class FileSelector:
             for e in entries
             if (e_path := os.path.join(current_dir, e))
             and os.path.isdir(e_path)
-            and not self.composite_ignorer.ignore(e_path, e, is_dir=True)
+            and not self.pathspec_ignorer.ignore(e_path + "/")
         ]
         files = [
             e_path
             for e in entries
             if (e_path := os.path.join(current_dir, e))
             and not os.path.isdir(e_path)
-            and not self.composite_ignorer.ignore(e_path, e, is_dir=False)
+            and not self.pathspec_ignorer.ignore(e_path)
         ]
         subdir_files = [file for d in dirs for file in self.traverse(d)]
         return files + subdir_files

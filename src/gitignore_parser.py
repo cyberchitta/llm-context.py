@@ -1,5 +1,6 @@
 import os
-from composite_ignorer import CompositeIgnorer
+from pathspec_ignorer import PathspecIgnorer
+
 
 class GitignoreParser:
     @staticmethod
@@ -16,16 +17,10 @@ class GitignoreParser:
         self.gitignore_file = gitignore_file
         self.additional_ignore_patterns = additional_ignore_patterns
 
-    def create_composite_ignorer(self):
+    def create_path_ignorer(self):
         patterns = self.additional_ignore_patterns.copy()
         if os.path.isfile(self.gitignore_file):
             with open(self.gitignore_file, "r") as file:
                 patterns.extend(file.read().splitlines())
-        
-        try:
-            return CompositeIgnorer.create(patterns)
-        except ValueError as e:
-            print(f"Error creating CompositeIgnorer: {e}")
-            print("Falling back to using only valid patterns.")
-            valid_patterns = [p for p in patterns if CompositeIgnorer.is_valid_pattern(p)]
-            return CompositeIgnorer.create(valid_patterns)
+
+        return PathspecIgnorer.create(patterns)
