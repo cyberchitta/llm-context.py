@@ -22,6 +22,5 @@ class CompositeIgnorer:
         self.file_ignorer = file_ignorer
         self.path_ignorer = path_ignorer
 
-    def ignore(self, path: str, is_dir: bool) -> bool:
-        name = os.path.basename(path)
-        return self.file_ignorer.ignore(name, is_dir) or self.path_ignorer.ignore(path, is_dir)
+    def ignore(self, path: str, basename: str, is_dir: bool) -> bool:
+        return self.file_ignorer.ignore(basename, is_dir) or self.path_ignorer.ignore(path, is_dir)
