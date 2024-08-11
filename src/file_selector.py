@@ -2,8 +2,8 @@ import os
 from typing import List
 
 from config_manager import ConfigManager
-from pathspec_ignorer import CompositeIgnorer
 from gitignore_parser import GitignoreParser
+from pathspec_ignorer import CompositeIgnorer
 
 
 class FileSelector:

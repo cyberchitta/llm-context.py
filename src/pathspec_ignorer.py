@@ -1,5 +1,6 @@
-from pathspec import GitIgnoreSpec
 from typing import List
+
+from pathspec import GitIgnoreSpec
 
 
 class PathspecIgnorer:
