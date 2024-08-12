@@ -64,23 +64,14 @@ Typical workflow:
 
 LLM Code Context uses three configuration files:
 
-1. User Configuration (`~/.llm-context/config.json`):
-   - Stores global settings like the templates directory.
-
-2. Project Configuration (`.llm-context/config.json` in your project root):
-   - Defines project-specific settings like the template to use and additional ignore patterns.
-
-3. Scratch Configuration (`.llm-context/scratch.json` in your project root):
-   - Keeps track of the currently selected files.
-
-Example user configuration:
+1. User Configuration (`~/.llm-context/config.json`). Example:
 ```json
 {
   "templates_path": "/path/to/your/templates"
 }
 ```
 
-Example project configuration:
+2. Project Configuration (`.llm-context/config.json` in your project root). Example:
 ```json
 {
   "template": "all-file-contents.j2",
@@ -88,6 +79,9 @@ Example project configuration:
   "root_path": "/path/to/your/project"
 }
 ```
+
+3. Scratch Configuration (`.llm-context/scratch.json` in your project root). Example:
+   - Keeps track of the currently selected files.
 
 You can edit these files manually or use the provided interfaces to update them.
 
