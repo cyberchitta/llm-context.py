@@ -20,8 +20,9 @@ isort = "^5.13.2"
 pytest = "^8.3.2"
 
 [tool.poetry.scripts]
+llc-dirtree = "llm_code_context.folder_structure_diagram:main"
+llc-genctxt = "llm_code_context.context_generator:main"
 llc-select = "llm_code_context.file_selector:main"
-llc-generate = "llm_code_context.context_generator:main"
 llc-ui-select = "llm_code_context.file_selector_ui:main"
 
 [tool.pytest.ini_options]

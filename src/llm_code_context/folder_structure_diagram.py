@@ -1,55 +1,56 @@
 import os
-from functools import reduce
-from typing import List, Tuple
+from typing import List
+
+import pyperclip
+
+from llm_code_context.config_manager import ConfigManager
+from llm_code_context.file_selector import FileSelector
 
 
 class FolderStructureDiagram:
-    indent: str = "    "
-
-    def __init__(self, root_dir: str, ignored_dirs: List[str], ignored_files: List[str]):
+    def __init__(self, root_dir: str):
         self.root_dir: str = root_dir
-        self.ignored_dirs: List[str] = ignored_dirs
-        self.ignored_files: List[str] = ignored_files
 
-    def is_ignored(self, name: str, is_dir: bool) -> bool:
-        if is_dir:
-            return any(name == d.rstrip("/") for d in self.ignored_dirs)
-        else:
-            return name in self.ignored_files
+    def generate_tree(self, file_paths: List[str]) -> str:
+        sorted_paths = sorted(self._make_relative(path) for path in file_paths)
+        tree_structure = self._build_tree_structure(sorted_paths)
+        return self._format_tree(tree_structure)
 
-    def is_last(self, entries: List[str], i: int) -> bool:
-        return i == len(entries) - 1
+    def _make_relative(self, path: str) -> str:
+        return os.path.relpath(path, self.root_dir)
 
-    def get_prefix(self, is_last: bool) -> str:
-        return "└── " if is_last else "├── "
+    def _build_tree_structure(self, paths: List[str]) -> dict:
+        root = {}
+        for path in paths:
+            current = root
+            for part in path.split(os.sep):
+                current = current.setdefault(part, {})
+        return root
 
-    def process(
-        self, entries: List[str], current_dir: str, level: int, entry: str, i: int
-    ) -> List[str]:
-        if self.is_ignored(entry, os.path.isdir(os.path.join(current_dir, entry))):
-            return []
+    def _format_tree(self, tree: dict, prefix: str = "") -> str:
+        lines = []
+        items = list(tree.items())
+        for i, (name, subtree) in enumerate(items):
+            is_last = i == len(items) - 1
+            lines.append(f"{prefix}{'└── ' if is_last else '├── '}{name}")
+            if subtree:
+                extension = "    " if is_last else "│   "
+                lines.append(self._format_tree(subtree, prefix + extension))
+        return "\n".join(lines)
 
-        prefix = self.get_prefix(self.is_last(entries, i))
-        entry_path = os.path.join(current_dir, entry)
-        fmt_entry = f"{FolderStructureDiagram.indent * level}{prefix}{entry}"
 
-        if os.path.isdir(entry_path):
-            sub_structure = self.generate(entry_path, level + 1)
-            return [f"{fmt_entry}/"] + sub_structure
-        else:
-            return [f"{fmt_entry}"]
+def main():
+    config_manager = ConfigManager.create_default()
+    file_selector = FileSelector.create()
 
-    def generate(self, current_dir: str, level: int = 0) -> List[str]:
-        entries = os.listdir(current_dir)
-        entries.sort()
+    root_path = config_manager.user.get("root_path", ".")
+    file_paths = file_selector.get_all()
 
-        structure = reduce(
-            lambda acc, x: acc + self.process(entries, current_dir, level, x[1], x[0]),
-            enumerate(entries),
-            [],
-        )
+    diagram = FolderStructureDiagram(root_path)
+    tree_structure = diagram.generate_tree(file_paths)
 
-        return structure
+    pyperclip.copy(tree_structure)
 
-    def diagram(self) -> str:
-        return "\n".join(self.generate(self.root_dir))
+
+if __name__ == "__main__":
+    main()
