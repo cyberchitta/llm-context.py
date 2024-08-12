@@ -13,8 +13,9 @@ class FolderStructureDiagram:
 
     def generate_tree(self, file_paths: List[str]) -> str:
         sorted_paths = sorted(self._make_relative(path) for path in file_paths)
-        tree_structure = self._build_tree_structure(sorted_paths)
-        return self._format_tree(tree_structure)
+        root_name = os.path.basename(self.root_dir)
+        tree_dict = {root_name:  self._build_tree_structure(sorted_paths)}
+        return self._format_tree(tree_dict)
 
     def _make_relative(self, path: str) -> str:
         return os.path.relpath(path, self.root_dir)
