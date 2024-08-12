@@ -2,8 +2,8 @@ import os
 
 import pyperclip
 
-from config_manager import ConfigManager
-from template_processor import TemplateProcessor
+from llm_code_context.config_manager import ConfigManager
+from llm_code_context.template_processor import TemplateProcessor
 
 
 class ContextGenerator:

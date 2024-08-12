@@ -1,6 +1,6 @@
 import os
 
-from pathspec_ignorer import PathspecIgnorer
+from llm_code_context.pathspec_ignorer import PathspecIgnorer
 
 
 class GitignoreParser:

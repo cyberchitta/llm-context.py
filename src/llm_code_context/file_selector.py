@@ -1,9 +1,9 @@
 import os
 from typing import List
 
-from config_manager import ConfigManager
-from gitignore_parser import GitignoreParser
-from pathspec_ignorer import PathspecIgnorer
+from llm_code_context.config_manager import ConfigManager
+from llm_code_context.gitignore_parser import GitignoreParser
+from llm_code_context.pathspec_ignorer import PathspecIgnorer
 
 
 class FileSelector:

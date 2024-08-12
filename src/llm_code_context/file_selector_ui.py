@@ -2,7 +2,7 @@ import os
 
 import wx
 
-from config_manager import ConfigManager
+from llm_code_context.config_manager import ConfigManager
 
 
 class FileSelectorUi(wx.Frame):
