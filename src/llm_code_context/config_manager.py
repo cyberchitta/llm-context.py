@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+
 from platformdirs import user_config_dir, user_data_dir
 
 
@@ -15,7 +16,11 @@ class ConfigManager:
         default_user = {
             "templates_path": str(user_data_path / "templates"),
         }
-        default_project = {"template": "all-file-contents.j2", "gitignores": [".git"]}
+        default_project = {
+            "template": "all-file-contents.j2",
+            "gitignores": [".git"],
+            "root_path": str(Path.cwd()),
+        }
         default_scratch = {"files": []}
 
         user_file = user_config_path / "config.json"

@@ -29,7 +29,7 @@ class FileSelectorUi(wx.Frame):
 
     @staticmethod
     def on_select_files(config_manager, event):
-        root_path = config_manager.user.get("root_path", ".") + "/"
+        root_path = config_manager.project.get("root_path", ".") + "/"
         default_dir = os.path.expanduser(root_path)
         with wx.FileDialog(
             None,

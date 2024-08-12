@@ -11,7 +11,7 @@ class FileSelector:
     def create(cls) -> "FileSelector":
         config_manager = ConfigManager.create_default()
         gitignore_parser = GitignoreParser.create(
-            config_manager.user["root_path"], config_manager.project["gitignores"]
+            config_manager.project["root_path"], config_manager.project["gitignores"]
         )
         pathspec_ignorer = gitignore_parser.create_path_ignorer()
         return cls(config_manager, pathspec_ignorer)
@@ -40,7 +40,7 @@ class FileSelector:
         return files + subdir_files
 
     def get_all(self) -> List[str]:
-        return self.traverse(self.config_manager.user["root_path"])
+        return self.traverse(self.config_manager.project["root_path"])
 
     def update_selected(self) -> None:
         all_files = self.get_all()
