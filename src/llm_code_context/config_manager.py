@@ -20,9 +20,9 @@ class ConfigManager:
 
         user_file = user_config_path / "config.json"
         ConfigManager.ensure_exists(user_file, default_user)
-        project_file = Path.cwd() / "llm-context" / "config.json"
+        project_file = Path.cwd() / ".llm-context" / "config.json"
         ConfigManager.ensure_exists(project_file, default_project)
-        scratch_file = Path.cwd() / "llm-context" / "scratch.json"
+        scratch_file = Path.cwd() / ".llm-context" / "scratch.json"
         ConfigManager.ensure_exists(scratch_file, default_scratch)
 
         return ConfigManager.create(user_file, project_file, scratch_file)
