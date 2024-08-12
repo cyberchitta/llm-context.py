@@ -3,7 +3,7 @@ from typing import List
 
 from config_manager import ConfigManager
 from gitignore_parser import GitignoreParser
-from pathspec_ignorer import CompositeIgnorer
+from pathspec_ignorer import PathspecIgnorer
 
 
 class FileSelector:
@@ -13,10 +13,10 @@ class FileSelector:
         gitignore_parser = GitignoreParser.create(
             config_manager.user["root_path"], config_manager.project["gitignores"]
         )
-        pathspec_ignorer = gitignore_parser.create_composite_ignorer()
+        pathspec_ignorer = gitignore_parser.create_path_ignorer()
         return cls(config_manager, pathspec_ignorer)
 
-    def __init__(self, config_manager: ConfigManager, pathspec_ignorer: CompositeIgnorer):
+    def __init__(self, config_manager: ConfigManager, pathspec_ignorer: PathspecIgnorer):
         self.config_manager = config_manager
         self.pathspec_ignorer = pathspec_ignorer
 
