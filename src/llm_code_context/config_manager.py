@@ -1,19 +1,22 @@
 import json
 import os
-
+from pathlib import Path
+from platformdirs import user_config_dir, user_data_dir
 
 class ConfigManager:
-    user_file = os.path.expanduser("~/.llm-context/config.json")
-    project_file_leaf = ".llm-context/config.json"
-
     @staticmethod
     def create_default():
+        app_name = "llm-context"
+        app_author = "restlessronin"
+        user_config_path = Path(user_config_dir(app_name, app_author))
+        user_data_path = Path(user_data_dir(app_name, app_author))
+
         default_user = {
-            "root_path": os.getcwd(),
-            "templates_path": os.path.expanduser("~/.llm-context/templates"),
+            "templates_path": str(user_data_path / "templates"),
         }
         default_project = {"template": "all-file-contents.j2", "files": [], "gitignores": [".git"]}
-        user_file = ConfigManager.user_file
+        
+        user_file = user_config_path / "config.json"
         ConfigManager.ensure_exists(user_file, default_user)
         project_file = ConfigManager.get_project_file(user_file)
         ConfigManager.ensure_exists(project_file, default_project)
@@ -29,7 +32,7 @@ class ConfigManager:
     def get_project_file(user_file):
         user = ConfigManager._load(user_file)
         root_path = user["root_path"]
-        return os.path.join(root_path, ConfigManager.project_file_leaf)
+        return Path(root_path) / ".llm-context" / "config.json"
 
     @staticmethod
     def _load(file):
@@ -38,13 +41,12 @@ class ConfigManager:
 
     @staticmethod
     def ensure_exists(file, default):
-        if not os.path.exists(file):
+        if not file.exists():
             ConfigManager.save(file, default)
 
     @staticmethod
     def save(file, config):
-        directory = os.path.dirname(file)
-        os.makedirs(directory, exist_ok=True)
+        file.parent.mkdir(parents=True, exist_ok=True)
         with open(file, "w") as f:
             json.dump(config, f, indent=2)
 
@@ -60,10 +62,8 @@ class ConfigManager:
         self.project["files"] = files
         ConfigManager.save(self.project_file, self.project)
 
-
 def main():
     ConfigManager.create_default()
-
 
 if __name__ == "__main__":
     main()
