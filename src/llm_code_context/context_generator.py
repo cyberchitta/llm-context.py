@@ -18,9 +18,9 @@ class ContextGenerator:
         self.template_processor = template_processor
 
     def process_files(self):
-        project_config = self.config_manager.project
-        template_name = project_config["template"]
-        file_paths = project_config["files"]
+        config_manager = self.config_manager
+        template_name = config_manager.project["template"]
+        file_paths = config_manager.scratch["files"]
         output = self.template_processor.process_files(template_name, file_paths)
         pyperclip.copy(output)
         return output

@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from platformdirs import user_config_dir, user_data_dir
 
+
 class ConfigManager:
     @staticmethod
     def create_default():
@@ -14,25 +15,24 @@ class ConfigManager:
         default_user = {
             "templates_path": str(user_data_path / "templates"),
         }
-        default_project = {"template": "all-file-contents.j2", "files": [], "gitignores": [".git"]}
-        
+        default_project = {"template": "all-file-contents.j2", "gitignores": [".git"]}
+        default_scratch = {"files": []}
+
         user_file = user_config_path / "config.json"
         ConfigManager.ensure_exists(user_file, default_user)
-        project_file = ConfigManager.get_project_file(user_file)
+        project_file = Path.cwd() / "llm-context" / "config.json"
         ConfigManager.ensure_exists(project_file, default_project)
-        return ConfigManager.create(user_file, project_file)
+        scratch_file = Path.cwd() / "llm-context" / "scratch.json"
+        ConfigManager.ensure_exists(scratch_file, default_scratch)
+
+        return ConfigManager.create(user_file, project_file, scratch_file)
 
     @staticmethod
-    def create(user_file, project_file):
+    def create(user_file, project_file, scratch_file):
         user = ConfigManager._load(user_file)
         project = ConfigManager._load(project_file)
-        return ConfigManager(project_file, user, project)
-
-    @staticmethod
-    def get_project_file(user_file):
-        user = ConfigManager._load(user_file)
-        root_path = user["root_path"]
-        return Path(root_path) / ".llm-context" / "config.json"
+        scratch = ConfigManager._load(scratch_file)
+        return ConfigManager(scratch_file, user, project, scratch)
 
     @staticmethod
     def _load(file):
@@ -50,20 +50,26 @@ class ConfigManager:
         with open(file, "w") as f:
             json.dump(config, f, indent=2)
 
-    def __init__(self, project_file, user, project):
-        self.project_file = project_file
+    def __init__(self, scratch_file, user, project, scratch):
+        self.scratch_file = scratch_file
         self.user = user
         self.project = project
+        self.scratch = scratch
 
     def templates_path(self):
         return self.user["templates_path"]
 
     def update_files(self, files):
-        self.project["files"] = files
-        ConfigManager.save(self.project_file, self.project)
+        self.scratch["files"] = files
+        ConfigManager.save(self.scratch_file, self.scratch)
+
+    def get_files(self):
+        return self.scratch.get("files", [])
+
 
 def main():
     ConfigManager.create_default()
+
 
 if __name__ == "__main__":
     main()
