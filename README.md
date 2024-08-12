@@ -15,20 +15,17 @@ This project was developed with significant input from Claude 3 Opus and Claude 
 
 ## Installation
 
-1. Ensure you have Python 3.12 or later installed on your system.
+### Using pipx (Recommended)
 
-2. Clone the repository:
-   ```
-   git clone https://github.com/your-username/llm-code-context.git
-   cd llm-code-context
-   ```
+[pipx](https://pypa.github.io/pipx/) is a tool to help you install and run end-user applications written in Python.
 
-3. Install the project using Poetry:
+1. If you haven't installed pipx yet, follow the installation instructions in the pipx documentation.
+2. Once pipx is installed, you can install LLM Code Context:
    ```
-   poetry install
+   pipx install llm-code-context
    ```
 
-   If you don't have Poetry installed, you can install it by following the instructions at https://python-poetry.org/docs/#installation
+This will install LLM Code Context in an isolated environment and make its commands available in your shell.
 
 ## Usage
 
@@ -36,22 +33,22 @@ LLM Code Context provides several command-line entry points for different functi
 
 1. Select files (CLI):
    ```
-   poetry run lcc-select
+   lcc-select
    ```
 
 2. Select files (GUI):
    ```
-   poetry run lcc-ui-select
+   lcc-ui-select
    ```
 
 3. Generate context from selected files:
    ```
-   poetry run lcc-genfiles
+   lcc-genfiles
    ```
 
 4. Generate folder structure diagram:
    ```
-   poetry run lcc-dirtree
+   lcc-dirtree
    ```
 
 Typical workflow:
@@ -113,15 +110,3 @@ llm-code-context/
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
-## Testing
-
-Run tests using pytest:
-
-```
-poetry run pytest
-```
-
-## License
-
-This project is licensed under the MIT License.
