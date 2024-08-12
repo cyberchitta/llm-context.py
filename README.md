@@ -1,83 +1,133 @@
-# LLM Context
+# LLM Code Context
 
-LLM Context is a Python application that helps users easily collect and prepare code snippets for pasting into chat conversations with language models like ChatGPT.
+LLM Code Context is a Python-based tool designed to streamline the process of sharing code context with Large Language Models (LLMs). It allows developers to easily select, format, and copy relevant code snippets and project structure information, enhancing the quality of interactions with AI assistants in coding tasks.
 
-It allows users to select multiple files, processes them using customizable Jinja2 templates, and automatically copies the formatted output to the clipboard for easy pasting.
-
-The code in this repository was developed in collaboration with Claude 3 Opus. 
+This project was developed with significant input from Claude 3 Opus and Claude 3.5 Sonnet. All of the code that makes it into the repo is human curated (by me 😇).
 
 ## Features
 
-- Select multiple files using a graphical file selector
-- Process selected files using customizable Jinja2 templates
-- Automatically copy the formatted output to the clipboard
+- **File Selection**: Offers both command-line and graphical user interfaces for selecting files from your project.
+- **Intelligent Ignoring**: Respects `.gitignore` rules and additional custom ignore patterns to exclude irrelevant files.
+- **Customizable Output**: Uses Jinja2 templates for flexible formatting of the selected code context.
+- **Folder Structure Visualization**: Generates a textual representation of your project's folder structure.
+- **Clipboard Integration**: Automatically copies the generated context to your clipboard for easy pasting.
+- **Configuration Management**: Supports user-specific and project-specific configurations for a tailored experience.
 
 ## Installation
 
-1. Clone the repository:
+1. Ensure you have Python 3.12 or later installed on your system.
+
+2. Clone the repository:
    ```
-   git clone https://github.com/yourusername/llm-context.git
+   git clone https://github.com/your-username/llm-code-context.git
+   cd llm-code-context
    ```
 
-2. Change to the project directory:
-   ```
-   cd llm-context
-   ```
-
-3. Install the required dependencies using Poetry:
+3. Install the project using Poetry:
    ```
    poetry install
    ```
 
+   If you don't have Poetry installed, you can install it by following the instructions at https://python-poetry.org/docs/#installation
+
 ## Usage
 
-1. Run the application:
-   ```
-   poetry run python src/select_files.py
-   ```
+LLM Code Context provides several command-line entry points for different functionalities:
 
-2. Click the "Select Files" button in the file selector window and choose the files you want to process.
-
-3. Run the application:
+1. Select files (CLI):
    ```
-   poetry run python src/main.py
+   poetry run lcc-select
    ```
 
-4. The selected files will be processed using the configured Jinja2 template, and the formatted output will be automatically copied to your clipboard.
+2. Select files (GUI):
+   ```
+   poetry run lcc-ui-select
+   ```
 
-5. Paste the formatted code into your chat conversation with the language model.
+3. Generate context from selected files:
+   ```
+   poetry run lcc-genfiles
+   ```
+
+4. Generate folder structure diagram:
+   ```
+   poetry run lcc-dirtree
+   ```
+
+Typical workflow:
+
+1. Run `lcc-select` or `lcc-ui-select` to choose the files you want to include in your context.
+2. Run `lcc-genfiles` to process the selected files and copy the formatted context to your clipboard.
+3. Paste the context into your conversation with the LLM.
 
 ## Configuration
 
-LLM Context uses two configuration files:
+LLM Code Context uses three configuration files:
 
-- Global configuration (`~/.llm-context/config.json`): Contains global settings like the current project root path and templates folder path.
-- Project configuration (`.llm-context/config.json`): Contains project-specific settings like the the selected files and current template.
+1. User Configuration (`~/.llm-context/config.json`):
+   - Stores global settings like the templates directory.
 
-The default configurations are:
+2. Project Configuration (`.llm-context/config.json` in your project root):
+   - Defines project-specific settings like the template to use and additional ignore patterns.
 
-Global configuration:
+3. Scratch Configuration (`.llm-context/scratch.json` in your project root):
+   - Keeps track of the currently selected files.
+
+Example user configuration:
 ```json
 {
-  "root_path": "~/Github/my-project-name",
-  "templates_path": "~/Github/llm-context/templates"
+  "templates_path": "/path/to/your/templates"
 }
 ```
 
-Project configuration:
+Example project configuration:
 ```json
 {
-  "template": "all-file-contents.jinja",
-  "files": []
+  "template": "all-file-contents.j2",
+  "gitignores": [".git", "node_modules"],
+  "root_path": "/path/to/your/project"
 }
 ```
 
-You can modify these configurations to suit your needs.
+You can edit these files manually or use the provided interfaces to update them.
 
-## License
+## Project Structure
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+```
+llm-code-context/
+├── src/
+│   └── llm_code_context/
+│       ├── __init__.py
+│       ├── config_manager.py
+│       ├── context_generator.py
+│       ├── file_selector.py
+│       ├── file_selector_ui.py
+│       ├── folder_structure_diagram.py
+│       ├── gitignore_parser.py
+│       ├── pathspec_ignorer.py
+│       └── template_processor.py
+├── templates/
+│   └── all-file-contents.j2
+├── tests/
+│   └── test_pathspec_ignorer.py
+├── .gitignore
+├── README.md
+├── poetry.lock
+└── pyproject.toml
+```
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a pull request or open an issue if you have any suggestions or find any bugs.
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Testing
+
+Run tests using pytest:
+
+```
+poetry run pytest
+```
+
+## License
+
+This project is licensed under the MIT License.
