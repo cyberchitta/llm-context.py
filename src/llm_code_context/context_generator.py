@@ -10,7 +10,9 @@ class ContextGenerator:
     @classmethod
     def create(cls):
         config_manager = ConfigManager.create_default()
-        template_processor = TemplateProcessor(config_manager.templates_path())
+        template_processor = TemplateProcessor(
+            config_manager.project["root_path"], config_manager.templates_path()
+        )
         return cls(config_manager, template_processor)
 
     def __init__(self, config_manager, template_processor):

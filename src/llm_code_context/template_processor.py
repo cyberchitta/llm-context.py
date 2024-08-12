@@ -6,7 +6,8 @@ from jinja2 import Environment, FileSystemLoader
 
 
 class TemplateProcessor:
-    def __init__(self, templates_path: str):
+    def __init__(self, project_root: str, templates_path: str):
+        self.project_root = project_root
         self.env = Environment(loader=FileSystemLoader(templates_path))
 
     def render_template(self, template_name: str, items: List[Dict[str, str]]) -> str:

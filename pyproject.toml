@@ -5,7 +5,7 @@ description = "A tool to help with copying and pasting code context into LLM cha
 authors = ["restlessronin <88921269+restlessronin@users.noreply.github.com>"]
 readme = "README.md"
 packages = [{ include = "llm_code_context", from = "src" }]
-include = ["templates/*.j2"]
+include = ["src/llm_code_context/templates/*.j2"]
 repository = "https://github.com/restlessronin/llm-code-context"
 license = "Apache-2.0"
 classifiers = [

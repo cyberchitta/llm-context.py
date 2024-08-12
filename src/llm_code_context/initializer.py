@@ -1,11 +1,10 @@
-import os
-import shutil
 from importlib import resources
 from pathlib import Path
 
 from platformdirs import user_config_dir, user_data_dir
 
 from llm_code_context.config_manager import ConfigManager
+from llm_code_context import templates
 
 
 class Initializer:
@@ -28,22 +27,15 @@ class Initializer:
             }
             ConfigManager.save(self.user_config_file, default_user)
             print(f"Created user configuration at {self.user_config_file}")
-        else:
-            print(f"User configuration already exists at {self.user_config_file}")
 
     def _copy_templates(self):
-        if not self.templates_dir.exists():
-            self.templates_dir.mkdir(parents=True, exist_ok=True)
-            import llm_code_context
-
-            for template_file in resources.contents(llm_code_context):
-                if template_file.endswith(".j2"):
-                    with resources.path(llm_code_context, template_file) as template_path:
-                        dest_file = self.templates_dir / template_file
-                        shutil.copy2(template_path, dest_file)
-                        print(f"Copied template {template_file} to {dest_file}")
-        else:
-            print(f"Templates directory already exists at {self.templates_dir}")
+        self.templates_dir.mkdir(parents=True, exist_ok=True)
+        template_files = [r for r in resources.contents(templates) if r.endswith(".j2")]
+        for template_file in template_files:
+            template_content = resources.read_text(templates, template_file)
+            dest_file = self.templates_dir / template_file
+            dest_file.write_text(template_content)
+            print(f"Copied template {template_file} to {dest_file}")
 
 
 def initialize():
