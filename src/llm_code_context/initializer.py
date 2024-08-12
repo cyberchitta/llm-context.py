@@ -29,13 +29,14 @@ class Initializer:
             print(f"Created user configuration at {self.user_config_file}")
 
     def _copy_templates(self):
-        self.templates_dir.mkdir(parents=True, exist_ok=True)
-        template_files = [r for r in resources.contents(templates) if r.endswith(".j2")]
-        for template_file in template_files:
-            template_content = resources.read_text(templates, template_file)
-            dest_file = self.templates_dir / template_file
-            dest_file.write_text(template_content)
-            print(f"Copied template {template_file} to {dest_file}")
+        if not self.templates_dir.exists():
+            self.templates_dir.mkdir(parents=True, exist_ok=True)
+            template_files = [r for r in resources.contents(templates) if r.endswith(".j2")]
+            for template_file in template_files:
+                template_content = resources.read_text(templates, template_file)
+                dest_file = self.templates_dir / template_file
+                dest_file.write_text(template_content)
+                print(f"Copied template {template_file} to {dest_file}")
 
 
 def initialize():
