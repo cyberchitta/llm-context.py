@@ -14,9 +14,12 @@ class TemplateProcessor:
         return template.render(items=items)
 
     def template_input(self, file_paths: List[str]) -> List[Dict[str, str]]:
-        file_contents = [Path(file_path).read_text() for file_path in file_paths]
         return [
-            {"path": path, "content": content} for path, content in zip(file_paths, file_contents)
+            {
+                "path": str(Path(file_path).relative_to(self.project_root)),
+                "content": Path(file_path).read_text(),
+            }
+            for file_path in file_paths
         ]
 
     def process_files(self, template_name: str, file_paths: List[str]) -> str:
