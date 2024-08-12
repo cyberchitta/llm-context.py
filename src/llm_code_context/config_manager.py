@@ -11,11 +11,7 @@ class ConfigManager:
         app_name = "llm-context"
         app_author = "restlessronin"
         user_config_path = Path(user_config_dir(app_name, app_author))
-        user_data_path = Path(user_data_dir(app_name, app_author))
 
-        default_user = {
-            "templates_path": str(user_data_path / "templates"),
-        }
         default_project = {
             "template": "all-file-contents.j2",
             "gitignores": [".git"],
@@ -24,7 +20,6 @@ class ConfigManager:
         default_scratch = {"files": []}
 
         user_file = user_config_path / "config.json"
-        ConfigManager.ensure_exists(user_file, default_user)
         project_file = Path.cwd() / ".llm-context" / "config.json"
         ConfigManager.ensure_exists(project_file, default_project)
         scratch_file = Path.cwd() / ".llm-context" / "scratch.json"

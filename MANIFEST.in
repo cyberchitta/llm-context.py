@@ -1,0 +1,4 @@
+include LICENSE
+include README.md
+recursive-include templates *.j2
+recursive-include src/llm_code_context *.py
