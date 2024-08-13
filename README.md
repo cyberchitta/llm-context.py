@@ -87,25 +87,25 @@ You can edit these files manually or use the provided interfaces to update them.
 
 ```
 llm-code-context/
+├── .gitignore
+├── MANIFEST.in
+├── README.md
+├── pyproject.toml
 ├── src/
 │   └── llm_code_context/
 │       ├── __init__.py
 │       ├── config_manager.py
 │       ├── context_generator.py
 │       ├── file_selector.py
-│       ├── file_selector_ui.py
 │       ├── folder_structure_diagram.py
 │       ├── gitignore_parser.py
+│       ├── initializer.py
 │       ├── pathspec_ignorer.py
-│       └── template_processor.py
-├── templates/
-│   └── all-file-contents.j2
-├── tests/
-│   └── test_pathspec_ignorer.py
-├── .gitignore
-├── README.md
-├── poetry.lock
-└── pyproject.toml
+│       ├── template_processor.py
+│       └── templates/
+│           └── all-file-contents.j2
+└── tests/
+    └── test_pathspec_ignorer.py
 ```
 
 ## Contributing
