@@ -6,7 +6,7 @@ authors = ["restlessronin <88921269+restlessronin@users.noreply.github.com>"]
 readme = "README.md"
 packages = [{ include = "llm_code_context", from = "src" }]
 include = ["src/llm_code_context/templates/*.j2"]
-repository = "https://github.com/restlessronin/llm-code-context"
+repository = "https://github.com/cyberchitta/llm-code-context.py"
 license = "Apache-2.0"
 classifiers = [
     "Development Status :: 3 - Alpha",
