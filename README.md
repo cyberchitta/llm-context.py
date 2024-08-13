@@ -6,7 +6,7 @@ This project was developed with significant input from Claude 3 Opus and Claude 
 
 ## Features
 
-- **File Selection**: Offers both command-line and graphical user interfaces for selecting files from your project.
+- **File Selection**: Offers a command-line interface for selecting files from your project.
 - **Intelligent Ignoring**: Respects `.gitignore` rules and additional custom ignore patterns to exclude irrelevant files.
 - **Customizable Output**: Uses Jinja2 templates for flexible formatting of the selected code context.
 - **Folder Structure Visualization**: Generates a textual representation of your project's folder structure.
@@ -31,29 +31,24 @@ This will install LLM Code Context in an isolated environment and make its comma
 
 LLM Code Context provides several command-line entry points for different functionalities:
 
-1. Select files (CLI):
+1. Select files:
    ```
    lcc-select
    ```
 
-2. Select files (GUI):
-   ```
-   lcc-ui-select
-   ```
-
-3. Generate context from selected files:
+2. Generate context from selected files:
    ```
    lcc-genfiles
    ```
 
-4. Generate folder structure diagram:
+3. Generate folder structure diagram:
    ```
    lcc-dirtree
    ```
 
 Typical workflow:
 
-1. Run `lcc-select` or `lcc-ui-select` to choose the files you want to include in your context.
+1. Run `lcc-select` to choose the files you want to include in your context.
 2. Run `lcc-genfiles` to process the selected files and copy the formatted context to your clipboard.
 3. Paste the context into your conversation with the LLM.
 

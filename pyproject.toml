@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "llm-code-context"
-version = "0.0.2"
+version = "0.0.3"
 description = "A tool to help with copying and pasting code context into LLM chats"
 authors = ["restlessronin <88921269+restlessronin@users.noreply.github.com>"]
 readme = "README.md"
@@ -22,7 +22,6 @@ jinja2 = "^3.1.4"
 pathspec = "^0.12.1"
 platformdirs = "^4.2.2"
 pyperclip = "^1.9.0"
-wxpython = "^4.2.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"
@@ -33,7 +32,6 @@ pytest = "^8.3.2"
 lcc-dirtree = "llm_code_context.folder_structure_diagram:main"
 lcc-genfiles = "llm_code_context.context_generator:main"
 lcc-select = "llm_code_context.file_selector:main"
-lcc-ui-select = "llm_code_context.file_selector_ui:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
