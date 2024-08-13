@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "llm-code-context"
-version = "0.0.3"
+version = "0.0.4"
 description = "A tool to help with copying and pasting code context into LLM chats"
 authors = ["restlessronin <88921269+restlessronin@users.noreply.github.com>"]
 readme = "README.md"
