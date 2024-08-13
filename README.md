@@ -29,7 +29,12 @@ This will install LLM Code Context in an isolated environment and make its comma
 
 ## Usage
 
-LLM Code Context provides several command-line entry points for different functionalities:
+LLM Code Context provides several command-line entry points for different functionalities. All commands should be run from the root directory of your project, where the `.gitignore` file is located. This is crucial because:
+
+1. The default file selection process starts from this root directory and selects all files that are not ignored by .gitignore rules.
+2. It ensures that file selection and ignore rules are applied correctly and consistently.
+
+Here are the main commands:
 
 1. Select files:
    ```
@@ -48,9 +53,10 @@ LLM Code Context provides several command-line entry points for different functi
 
 Typical workflow:
 
-1. Run `lcc-select` to choose the files you want to include in your context.
-2. Run `lcc-genfiles` to process the selected files and copy the formatted context to your clipboard.
-3. Paste the context into your conversation with the LLM.
+1. Navigate to your project's root directory in the terminal.
+2. Run `lcc-select` to choose the files you want to include in your context.
+3. Run `lcc-genfiles` to process the selected files and copy the formatted context to your clipboard.
+4. Paste the context into your conversation with the LLM.
 
 ## Configuration
 
