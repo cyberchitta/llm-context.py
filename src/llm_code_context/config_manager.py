@@ -1,8 +1,13 @@
 import json
-import os
 from pathlib import Path
 
 from platformdirs import user_config_dir, user_data_dir
+
+PROJECT_INFO: str = (
+    "This project uses llm-code-context. For more information, visit: "
+    "https://github.com/cyberchitta/llm-code-context.py or "
+    "https://pypi.org/project/llm-code-context/"
+)
 
 
 class ConfigManager:
@@ -10,16 +15,27 @@ class ConfigManager:
     def create_default():
         app_name = "llm-code-context"
         app_author = "cyberchitta"
+
         user_config_path = Path(user_config_dir(app_name, app_author))
-
-        default_project = {"template": "all-file-contents.j2", "gitignores": [".git"]}
-        default_scratch = {"files": []}
-
         user_file = user_config_path / "config.json"
-        project_file = Path.cwd() / ".llm-code-context" / "config.json"
-        ConfigManager.ensure_exists(project_file, default_project)
-        scratch_file = Path.cwd() / ".llm-code-context" / "scratch.json"
-        ConfigManager.ensure_exists(scratch_file, default_scratch)
+
+        project_path = Path.cwd() / ".llm-code-context"
+
+        project_file = project_path / "config.json"
+        ConfigManager.ensure_exists_json(
+            project_file,
+            {
+                "__info__": PROJECT_INFO,
+                "template": "all-file-contents.j2",
+                "gitignores": [".git", ".gitignore", ".llm-code-context/"],
+            },
+        )
+
+        scratch_file = project_path / "scratch.json"
+        ConfigManager.ensure_exists_json(scratch_file, {"files": []})
+
+        gitignore_file = project_path / ".gitignore"
+        ConfigManager.ensure_exists_text(gitignore_file, "scratch.json\n")
 
         return ConfigManager.create(user_file, project_file, scratch_file)
 
@@ -36,9 +52,14 @@ class ConfigManager:
             return json.load(f)
 
     @staticmethod
-    def ensure_exists(file, default):
+    def ensure_exists_text(file, text):
         if not file.exists():
-            ConfigManager.save(file, default)
+            file.write_text(text)
+
+    @staticmethod
+    def ensure_exists_json(file, json):
+        if not file.exists():
+            ConfigManager.save(file, json)
 
     @staticmethod
     def save(file, config):

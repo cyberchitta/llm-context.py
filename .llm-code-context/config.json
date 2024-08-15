@@ -1,6 +1,9 @@
 {
+  "__info__": "This project uses llm-code-context. For more information, visit: https://github.com/cyberchitta/llm-code-context.py or https://pypi.org/project/llm-code-context/",
   "template": "all-file-contents.j2",
   "gitignores": [
-    ".git", ".gitignore", "LICENSE", ".llm-code-context/", "poetry.lock"
+    ".git",
+    ".gitignore",
+    ".llm-code-context/"
   ]
 }
