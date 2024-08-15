@@ -8,7 +8,7 @@ from platformdirs import user_config_dir, user_data_dir
 class ConfigManager:
     @staticmethod
     def create_default():
-        app_name = "llm-context"
+        app_name = "llm-code-context"
         app_author = "restlessronin"
         user_config_path = Path(user_config_dir(app_name, app_author))
 
@@ -20,9 +20,9 @@ class ConfigManager:
         default_scratch = {"files": []}
 
         user_file = user_config_path / "config.json"
-        project_file = Path.cwd() / ".llm-context" / "config.json"
+        project_file = Path.cwd() / ".llm-code-context" / "config.json"
         ConfigManager.ensure_exists(project_file, default_project)
-        scratch_file = Path.cwd() / ".llm-context" / "scratch.json"
+        scratch_file = Path.cwd() / ".llm-code-context" / "scratch.json"
         ConfigManager.ensure_exists(scratch_file, default_scratch)
 
         return ConfigManager.create(user_file, project_file, scratch_file)

@@ -9,7 +9,7 @@ from llm_code_context import templates
 
 class Initializer:
     def __init__(self):
-        self.app_name = "llm-context"
+        self.app_name = "llm-code-context"
         self.app_author = "restlessronin"
         self.user_config_path = Path(user_config_dir(self.app_name, self.app_author))
         self.user_data_path = Path(user_data_dir(self.app_name, self.app_author))
