@@ -3,8 +3,8 @@ from pathlib import Path
 
 from platformdirs import user_config_dir, user_data_dir
 
-from llm_code_context.config_manager import ConfigManager
 from llm_code_context import templates
+from llm_code_context.config_manager import ConfigManager
 
 
 class Initializer:
