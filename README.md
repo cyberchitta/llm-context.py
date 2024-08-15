@@ -54,7 +54,7 @@ Here are the main commands:
 Typical workflow:
 
 1. Navigate to your project's root directory in the terminal.
-2. Edit the project configuration file `.llm-code-context/config.json` to add any files to the "gitignores" key that should be in git but may not be useful for code context (e.g., "LICENSE").
+2. Edit the project configuration file `.llm-code-context/config.json` to add any files to the "gitignores" key that should be in git but may not be useful for code context (e.g., "LICENSE" and "poetry.lock", maybe even "README.md").
 3. Run `lcc-select` to choose the files you want to include in your context.
 4. Run `lcc-genfiles` to process the selected files and copy the formatted context to your clipboard.
 5. Paste the context into your conversation with the LLM.

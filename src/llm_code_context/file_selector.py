@@ -45,7 +45,7 @@ class FileSelector:
 
     def update_selected(self) -> None:
         all_files = self.get_all()
-        self.config_manager.update_files(all_files)
+        self.config_manager.select_files(all_files)
 
 
 def main():

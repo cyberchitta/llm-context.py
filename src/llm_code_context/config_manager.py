@@ -79,7 +79,7 @@ class ConfigManager:
     def templates_path(self):
         return self.user["templates_path"]
 
-    def update_files(self, files):
+    def select_files(self, files):
         self.scratch["files"] = files
         ConfigManager.save(self.scratch_file, self.scratch)
 
