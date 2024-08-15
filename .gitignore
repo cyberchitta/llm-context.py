@@ -36,3 +36,5 @@ Thumbs.db
 # Virtual environment
 .venv
 .env
+
+.DS_Store

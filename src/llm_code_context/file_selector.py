@@ -2,7 +2,7 @@ import os
 from typing import List, Optional
 
 from llm_code_context.config_manager import ConfigManager
-from llm_code_context.gitignore_parser import GitignoreParser
+from llm_code_context.git_ignorer import GitIgnorer
 from llm_code_context.pathspec_ignorer import PathspecIgnorer
 
 
@@ -12,9 +12,8 @@ class FileSelector:
         config_manager = ConfigManager.create_default()
         if pathspecs is None:
             pathspecs = config_manager.project["gitignores"]
-        gitignore_parser = GitignoreParser.create(config_manager.project_path(), pathspecs)
-        ignorer = gitignore_parser.create_path_ignorer()
-        return cls(config_manager, ignorer)
+        git_ignorer = GitIgnorer.from_git_root(config_manager.project_path(), pathspecs)
+        return cls(config_manager, git_ignorer)
 
     def __init__(self, config_manager: ConfigManager, ignorer: PathspecIgnorer):
         self.config_manager = config_manager

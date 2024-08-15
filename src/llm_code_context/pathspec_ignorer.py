@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 from pathspec import GitIgnoreSpec
@@ -12,4 +13,5 @@ class PathspecIgnorer:
         self.pathspec = GitIgnoreSpec.from_lines(ignore_patterns)
 
     def ignore(self, path: str) -> bool:
+        assert path not in ("/", ""), "Root directory cannot be an input for ignore method"
         return self.pathspec.match_file(path)
