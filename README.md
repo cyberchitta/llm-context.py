@@ -54,15 +54,16 @@ Here are the main commands:
 Typical workflow:
 
 1. Navigate to your project's root directory in the terminal.
-2. Run `lcc-select` to choose the files you want to include in your context.
-3. Run `lcc-genfiles` to process the selected files and copy the formatted context to your clipboard.
-4. Paste the context into your conversation with the LLM.
+2. Edit the project configuration file `.llm-code-context/config.json` to add any files to the "gitignores" key that should be in git but may not be useful for code context (e.g., "LICENSE").
+3. Run `lcc-select` to choose the files you want to include in your context.
+4. Run `lcc-genfiles` to process the selected files and copy the formatted context to your clipboard.
+5. Paste the context into your conversation with the LLM.
 
 ## Configuration
 
 LLM Code Context uses three configuration files:
 
-1. User Configuration (`~/.llm-code-context/config.json`). Example:
+1. User Configuration (located in a platform-specific directory determined by `platformdirs`):
 ```json
 {
   "templates_path": "/path/to/your/templates"
@@ -73,7 +74,7 @@ LLM Code Context uses three configuration files:
 ```json
 {
   "template": "all-file-contents.j2",
-  "gitignores": [".git", "node_modules"],
+  "gitignores": [".git", "LICENSE"],
   "root_path": "/path/to/your/project"
 }
 ```
