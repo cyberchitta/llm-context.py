@@ -17,7 +17,7 @@ This project was developed with significant input from Claude 3 Opus and Claude 
 
 ### Using pipx (Recommended)
 
-[pipx](https://pypa.github.io/pipx/) is a tool to help you install and run end-user applications written in Python.
+[pipx](https://pypa.github.io/pipx/) is a tool to help you install and run end-user CLI applications written in Python.
 
 1. If you haven't installed pipx yet, follow the installation instructions in the pipx documentation.
 2. Once pipx is installed, you can install LLM Code Context:
@@ -29,7 +29,7 @@ This will install LLM Code Context in an isolated environment and make its comma
 
 ## Usage
 
-LLM Code Context provides several command-line entry points for different functionalities. All commands should be run from the root directory of your project, where the `.gitignore` file is located. This is crucial because:
+LLM Code Context offers various command-line tools, each designed for a specific task. All commands should be run from the root directory of your project, where the `.gitignore` file is located. This is crucial because:
 
 1. The default file selection process starts from this root directory and selects all files that are not ignored by .gitignore rules.
 2. It ensures that file selection and ignore rules are applied correctly and consistently.
@@ -55,7 +55,7 @@ Typical workflow:
 
 1. Navigate to your project's root directory in the terminal.
 2. Edit the project configuration file `.llm-code-context/config.json` to add any files to the "gitignores" key that should be in git but may not be useful for code context (e.g., "LICENSE" and "poetry.lock", maybe even "README.md").
-3. Run `lcc-select` to choose the files you want to include in your context.
+3. Run `lcc-select` to choose the files you want to include in your context. You can look at `.llm-code-context/scratch.json` to see what files are currently selected. If you prefer, you can edit the scratch file directly, before the next step.
 4. Run `lcc-genfiles` to process the selected files and copy the formatted context to your clipboard.
 5. Paste the context into your conversation with the LLM.
 
