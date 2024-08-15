@@ -36,6 +36,3 @@ Thumbs.db
 # Virtual environment
 .venv
 .env
-
-# LLM Context
-.llm-context
