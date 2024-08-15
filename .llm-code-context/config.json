@@ -4,6 +4,8 @@
   "gitignores": [
     ".git",
     ".gitignore",
-    ".llm-code-context/"
+    ".llm-code-context/",
+    "LICENSE",
+    "poetry.lock"
   ]
 }
