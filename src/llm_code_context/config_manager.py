@@ -9,7 +9,7 @@ class ConfigManager:
     @staticmethod
     def create_default():
         app_name = "llm-code-context"
-        app_author = "restlessronin"
+        app_author = "cyberchitta"
         user_config_path = Path(user_config_dir(app_name, app_author))
 
         default_project = {"template": "all-file-contents.j2", "gitignores": [".git"]}
