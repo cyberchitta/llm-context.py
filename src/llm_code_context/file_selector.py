@@ -22,7 +22,7 @@ class FileSelector:
 
     def traverse(self, current_dir: str) -> List[str]:
         entries = os.listdir(current_dir)
-        root_path = self.config_manager.project["root_path"]
+        root_path = self.config_manager.project_path()
         relative_current_dir = os.path.relpath(current_dir, root_path)
         dirs = [
             e_path

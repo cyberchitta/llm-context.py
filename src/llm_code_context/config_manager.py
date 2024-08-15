@@ -12,11 +12,7 @@ class ConfigManager:
         app_author = "restlessronin"
         user_config_path = Path(user_config_dir(app_name, app_author))
 
-        default_project = {
-            "template": "all-file-contents.j2",
-            "gitignores": [".git"],
-            "root_path": str(Path.cwd()),
-        }
+        default_project = {"template": "all-file-contents.j2", "gitignores": [".git"]}
         default_scratch = {"files": []}
 
         user_file = user_config_path / "config.json"
@@ -55,6 +51,9 @@ class ConfigManager:
         self.user = user
         self.project = project
         self.scratch = scratch
+
+    def project_path(self):
+        return str(Path.cwd())
 
     def templates_path(self):
         return self.user["templates_path"]

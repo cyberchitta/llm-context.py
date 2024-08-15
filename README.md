@@ -74,8 +74,7 @@ LLM Code Context uses three configuration files:
 ```json
 {
   "template": "all-file-contents.j2",
-  "gitignores": [".git", "LICENSE"],
-  "root_path": "/path/to/your/project"
+  "gitignores": [".git", "LICENSE"]
 }
 ```
 

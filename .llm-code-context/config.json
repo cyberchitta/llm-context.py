@@ -1,0 +1,6 @@
+{
+  "template": "all-file-contents.j2",
+  "gitignores": [
+    ".git", ".gitignore", "LICENSE", ".llm-code-context/", "poetry.lock"
+  ]
+}
