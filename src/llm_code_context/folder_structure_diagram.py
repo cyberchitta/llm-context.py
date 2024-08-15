@@ -40,15 +40,9 @@ class FolderStructureDiagram:
 
 
 def main():
-    config_manager = ConfigManager.create_default()
-    file_selector = FileSelector.create()
-
-    root_path = config_manager.user.get("root_path", ".")
-    file_paths = file_selector.get_all()
-
-    diagram = FolderStructureDiagram(root_path)
-    tree_structure = diagram.generate_tree(file_paths)
-
+    project_path = ConfigManager.create_default().project_path()
+    file_paths = FileSelector.create([".git"]).get_all()
+    tree_structure = FolderStructureDiagram(project_path).generate_tree(file_paths)
     pyperclip.copy(tree_structure)
 
 
