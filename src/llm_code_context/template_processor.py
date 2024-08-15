@@ -15,9 +15,10 @@ class TemplateProcessor:
         return template.render(items=items)
 
     def template_input(self, file_paths: List[str]) -> List[Dict[str, str]]:
+        root_name = os.path.basename(self.project_root)
         return [
             {
-                "path": str(Path(file_path).relative_to(self.project_root)),
+                "path": f"/{root_name}/{Path(file_path).relative_to(self.project_root)}",
                 "content": Path(file_path).read_text(),
             }
             for file_path in file_paths
