@@ -13,12 +13,12 @@ class FileSelector:
         if pathspecs is None:
             pathspecs = config_manager.project["gitignores"]
         gitignore_parser = GitignoreParser.create(config_manager.project_path(), pathspecs)
-        pathspec_ignorer = gitignore_parser.create_path_ignorer()
-        return cls(config_manager, pathspec_ignorer)
+        ignorer = gitignore_parser.create_path_ignorer()
+        return cls(config_manager, ignorer)
 
-    def __init__(self, config_manager: ConfigManager, pathspec_ignorer: PathspecIgnorer):
+    def __init__(self, config_manager: ConfigManager, ignorer: PathspecIgnorer):
         self.config_manager = config_manager
-        self.pathspec_ignorer = pathspec_ignorer
+        self.ignorer = ignorer
 
     def traverse(self, current_dir: str) -> List[str]:
         entries = os.listdir(current_dir)
@@ -29,14 +29,14 @@ class FileSelector:
             for e in entries
             if (e_path := os.path.join(current_dir, e))
             and os.path.isdir(e_path)
-            and not self.pathspec_ignorer.ignore(f"/{os.path.join(relative_current_dir, e)}/")
+            and not self.ignorer.ignore(f"/{os.path.join(relative_current_dir, e)}/")
         ]
         files = [
             e_path
             for e in entries
             if (e_path := os.path.join(current_dir, e))
             and not os.path.isdir(e_path)
-            and not self.pathspec_ignorer.ignore(f"/{os.path.join(relative_current_dir, e)}")
+            and not self.ignorer.ignore(f"/{os.path.join(relative_current_dir, e)}")
         ]
         subdir_files = [file for d in dirs for file in self.traverse(d)]
         return files + subdir_files
