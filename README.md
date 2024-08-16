@@ -29,25 +29,16 @@ This will install LLM Code Context in an isolated environment and make its comma
 
 ## Usage
 
-LLM Code Context offers various command-line tools, each designed for a specific task. All commands should be run from the root directory of your project, where the `.gitignore` file is located. This is crucial because:
-
-1. The default file selection process starts from this root directory and selects all files that are not ignored by .gitignore rules.
-2. It ensures that file selection and ignore rules are applied correctly and consistently.
+LLM Code Context offers several command-line tools, each designed for a specific task. All commands should be run from the root directory of your project, where the primary `.gitignore` file is located.
 
 Here are the main commands:
 
-1. Select files:
-   ```
+   ```sh
+   # Select files
    lcc-select
-   ```
-
-2. Generate context from selected files:
-   ```
+   # Generate context from selected files
    lcc-genfiles
-   ```
-
-3. Generate folder structure diagram:
-   ```
+   # Generate folder structure diagram:
    lcc-dirtree
    ```
 
@@ -58,30 +49,6 @@ Typical workflow:
 3. Run `lcc-select` to choose the files you want to include in your context. You can look at `.llm-code-context/scratch.json` to see what files are currently selected. If you prefer, you can edit the scratch file directly, before the next step.
 4. Run `lcc-genfiles` to process the selected files and copy the formatted context to your clipboard.
 5. Paste the context into your conversation with the LLM.
-
-## Configuration
-
-LLM Code Context uses three configuration files:
-
-1. User Configuration (located in a platform-specific directory determined by `platformdirs`):
-```json
-{
-  "templates_path": "/path/to/your/templates"
-}
-```
-
-2. Project Configuration (`.llm-code-context/config.json` in your project root). Example:
-```json
-{
-  "template": "all-file-contents.j2",
-  "gitignores": [".git", "LICENSE"]
-}
-```
-
-3. Scratch Configuration (`.llm-code-context/scratch.json` in your project root). Example:
-   - Keeps track of the currently selected files.
-
-You can edit these files manually or use the provided interfaces to update them.
 
 ## Project Structure
 
