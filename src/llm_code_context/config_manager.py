@@ -90,7 +90,7 @@ class ConfigManager:
         return Path.cwd()
 
     def project_root(self):
-        return str(self.project_root_path)
+        return str(self.project_root_path())
 
     def templates_path(self):
         return self.project_root_path() / ".llm-code-context" / "templates"

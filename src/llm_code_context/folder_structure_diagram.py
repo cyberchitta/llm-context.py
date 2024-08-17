@@ -9,7 +9,7 @@ from llm_code_context.file_selector import FileSelector
 
 class FolderStructureDiagram:
     def __init__(self, root_dir: str):
-        self.root_dir: str = root_dir
+        self.root_dir = root_dir
 
     def generate_tree(self, file_paths: List[str]) -> str:
         sorted_paths = sorted(self._make_relative(path) for path in file_paths)
