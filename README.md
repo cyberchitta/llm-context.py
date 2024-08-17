@@ -61,7 +61,7 @@ For a more comprehensive context that includes the folder structure and technica
 
 LLM Code Context supports an optional technical summary feature, although **its utility is currently unclear**. This feature allows you to include a markdown file that provides project-specific information that may not be easily inferred from the code alone. To use this feature:
 
-1. Create a markdown file in your project root (e.g., `tech-summary.md`).
+1. Create a markdown file in your `.llm-code-context` folder (e.g., `.llm-code-context/tech-summary.md`).
 2. In your `.llm-code-context/config.json` file, set the `summary_file` key to the name of your summary file:
    ```json
    {
