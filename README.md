@@ -81,38 +81,36 @@ For an example of a technical summary, you can refer to the [tech-summary.md](.l
 ## Project Structure
 
 ```
-└── <bound method ConfigManager.project_root_path of <llm_code_context.config_manager.ConfigManager object at 0x104f0be00>>
-    └── ..
-        ├── .gitignore
-        ├── .llm-code-context
-        │   ├── .gitignore
-        │   ├── claude-custom.md
-        │   ├── config.json
-        │   ├── scratch.json
-        │   ├── tech-summary.md
-        │   └── templates
-        │       ├── full-context.j2
-        │       └── sel-file-contents.j2
-        ├── LICENSE
-        ├── MANIFEST.in
-        ├── README.md
-        ├── poetry.lock
-        ├── pyproject.toml
-        ├── src
-        │   └── llm_code_context
-        │       ├── __init__.py
-        │       ├── config_manager.py
-        │       ├── context_generator.py
-        │       ├── file_selector.py
-        │       ├── folder_structure_diagram.py
-        │       ├── git_ignorer.py
-        │       ├── pathspec_ignorer.py
-        │       ├── template.py
-        │       └── templates
-        │           ├── full-context.j2
-        │           └── sel-file-contents.j2
-        └── tests
-            └── test_pathspec_ignorer.py
+└── llm-code-context.py
+    ├── .gitignore
+    ├── .llm-code-context
+    │   ├── .gitignore
+    │   ├── claude-custom.md
+    │   ├── config.json
+    │   ├── tech-summary.md
+    │   └── templates
+    │       ├── full-context.j2
+    │       └── sel-file-contents.j2
+    ├── LICENSE
+    ├── MANIFEST.in
+    ├── README.md
+    ├── poetry.lock
+    ├── pyproject.toml
+    ├── src
+    │   └── llm_code_context
+    │       ├── __init__.py
+    │       ├── config_manager.py
+    │       ├── context_generator.py
+    │       ├── file_selector.py
+    │       ├── folder_structure_diagram.py
+    │       ├── git_ignorer.py
+    │       ├── pathspec_ignorer.py
+    │       ├── template.py
+    │       └── templates
+    │           ├── full-context.j2
+    │           └── sel-file-contents.j2
+    └── tests
+        └── test_pathspec_ignorer.py
 ```
 
 ## Contributing
