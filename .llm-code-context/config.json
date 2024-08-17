@@ -10,6 +10,5 @@
     ".llm-code-context/",
     "LICENSE",
     "poetry.lock"
-  ],
-  "summary_file": "tech_summary.md"
+  ]
 }
