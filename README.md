@@ -71,10 +71,12 @@ LLM Code Context supports an optional technical summary feature, although **its 
 
 The summary can include information like architectural decisions, non-obvious performance considerations, or future plans. For example:
 - "We chose a microservices architecture to allow for independent scaling of components."
-- "The process_data() function uses custom caching to optimize repeated calls with similar inputs."
+- "The `process_data()` function uses custom caching to optimize repeated calls with similar inputs."
 - "The authentication system is slated for an overhaul in Q3 to implement OAuth2."
 
 When you run `lcc-gencontext`, this summary will be included after the folder structure diagram in the generated context.
+
+For an example of a technical summary, you can refer to the [tech-summary.md](.llm-code-context/tech-summary.md) file in this repository.
 
 ## Project Structure
 
