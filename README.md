@@ -12,6 +12,7 @@ This project was developed with significant input from Claude 3 Opus and Claude 
 - **Folder Structure Visualization**: Generates a textual representation of your project's folder structure.
 - **Clipboard Integration**: Automatically copies the generated context to your clipboard for easy pasting.
 - **Configuration Management**: Supports user-specific and project-specific configurations for a tailored experience.
+- **Optional Technical Summary**: Allows inclusion of a markdown file summarizing the project's technical aspects.
 
 ## Installation
 
@@ -38,6 +39,8 @@ Here are the main commands:
    lcc-select
    # Generate context from selected files
    lcc-genfiles
+   # Generate full context (including folder structure and summary)
+   lcc-gencontext
    # Generate folder structure diagram:
    lcc-dirtree
    ```
@@ -50,34 +53,63 @@ Typical workflow:
 4. Run `lcc-genfiles` to process the selected files and copy the formatted context to your clipboard.
 5. Paste the context into your conversation with the LLM.
 
+For a more comprehensive context that includes the folder structure and technical summary:
+6. Run `lcc-gencontext` to generate and copy the full context, including the folder structure diagram and the technical summary (if available).
+   
+## Technical Summary
+
+LLM Code Context supports an optional technical summary feature, although **its utility is currently unclear**. This feature allows you to include a markdown file that provides project-specific information that may not be easily inferred from the code alone. To use this feature:
+
+1. Create a markdown file in your project root (e.g., `tech-summary.md`).
+2. In your `.llm-code-context/config.json` file, set the `summary_file` key to the name of your summary file:
+   ```json
+   {
+     "summary_file": "tech-summary.md"
+   }
+   ```
+
+The summary can include information like architectural decisions, non-obvious performance considerations, or future plans. For example:
+- "We chose a microservices architecture to allow for independent scaling of components."
+- "The process_data() function uses custom caching to optimize repeated calls with similar inputs."
+- "The authentication system is slated for an overhaul in Q3 to implement OAuth2."
+
+When you run `lcc-gencontext`, this summary will be included after the folder structure diagram in the generated context.
+
 ## Project Structure
 
 ```
-└── llm-code-context.py
-    ├── .gitignore
-    ├── .llm-code-context
-    │   ├── .gitignore
-    │   └── config.json
-    ├── LICENSE
-    ├── MANIFEST.in
-    ├── README.md
-    ├── poetry.lock
-    ├── pyproject.toml
-    ├── src
-    │   └── llm_code_context
-    │       ├── __init__.py
-    │       ├── config_manager.py
-    │       ├── context_generator.py
-    │       ├── file_selector.py
-    │       ├── folder_structure_diagram.py
-    │       ├── git_ignorer.py
-    │       ├── initializer.py
-    │       ├── pathspec_ignorer.py
-    │       ├── template_processor.py
-    │       └── templates
-    │           └── all-file-contents.j2
-    └── tests
-        └── test_pathspec_ignorer.py
+└── <bound method ConfigManager.project_root_path of <llm_code_context.config_manager.ConfigManager object at 0x104f0be00>>
+    └── ..
+        ├── .gitignore
+        ├── .llm-code-context
+        │   ├── .gitignore
+        │   ├── claude-custom.md
+        │   ├── config.json
+        │   ├── scratch.json
+        │   ├── tech-summary.md
+        │   └── templates
+        │       ├── full-context.j2
+        │       └── sel-file-contents.j2
+        ├── LICENSE
+        ├── MANIFEST.in
+        ├── README.md
+        ├── poetry.lock
+        ├── pyproject.toml
+        ├── src
+        │   └── llm_code_context
+        │       ├── __init__.py
+        │       ├── config_manager.py
+        │       ├── context_generator.py
+        │       ├── file_selector.py
+        │       ├── folder_structure_diagram.py
+        │       ├── git_ignorer.py
+        │       ├── pathspec_ignorer.py
+        │       ├── template.py
+        │       └── templates
+        │           ├── full-context.j2
+        │           └── sel-file-contents.j2
+        └── tests
+            └── test_pathspec_ignorer.py
 ```
 
 ## Contributing

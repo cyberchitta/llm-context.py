@@ -4,7 +4,7 @@ When I share code snippets, unless stated otherwise, please assume they are from
 Ensure that any suggestions or solutions you provide are consistent with the existing project structure, coding standards, and tech stack as outlined in the summary.
 We will work on refinements and bug fixes iteratively. Please provide step-by-step guidance when suggesting changes.
 When you suggest code changes, be prepared to explain the rationale behind them if I ask.
-Keep in mind the performance considerations mentioned in the summary when suggesting solutions.
+Keep performance considerations in mind when suggesting solutions.
 Always consider how changes might affect existing tests and suggest new test cases when appropriate, in line with our testing approach.
 Assume we're using Git for version control. When suggesting multi-step changes, consider how these might be broken into commits.
 If changes might affect project documentation, please mention this.
