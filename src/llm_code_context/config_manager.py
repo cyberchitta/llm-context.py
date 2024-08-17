@@ -27,7 +27,8 @@ class ConfigManager:
             {
                 "__info__": PROJECT_INFO,
                 "templates": {"selfiles": "sel-file-contents.j2", "context": "full-context.j2"},
-                "gitignores": [".git", ".gitignore", ".llm-code-context/"]
+                "gitignores": [".git", ".gitignore", ".llm-code-context/"],
+                "summary_file": None
             },
         )
 

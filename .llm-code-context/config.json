@@ -1,6 +1,6 @@
 {
   "__info__": "This project uses llm-code-context. For more information, visit: https://github.com/cyberchitta/llm-code-context.py or https://pypi.org/project/llm-code-context/",
-  "templates" : {
+  "templates": {
     "selfiles": "sel-file-contents.j2",
     "context": "full-context.j2"
   },
@@ -10,5 +10,6 @@
     ".llm-code-context/",
     "LICENSE",
     "poetry.lock"
-  ]
+  ],
+  "summary_file": null
 }
