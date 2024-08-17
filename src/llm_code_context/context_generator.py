@@ -1,36 +1,55 @@
 import os
+from pathlib import Path
+from typing import Dict, List, Optional
 
 import pyperclip
 
 from llm_code_context.config_manager import ConfigManager
-from llm_code_context.template_processor import TemplateProcessor
+from llm_code_context.template import Template
 
 
 class ContextGenerator:
-    @classmethod
-    def create(cls):
-        config_manager = ConfigManager.create_default()
-        template_processor = TemplateProcessor(
-            config_manager.project_root_path(), config_manager.templates_path()
-        )
-        return cls(config_manager, template_processor)
+    @staticmethod
+    def create():
+        return ContextGenerator(ConfigManager.create_default())
 
-    def __init__(self, config_manager, template_processor):
+    def __init__(self, config_manager):
         self.config_manager = config_manager
-        self.template_processor = template_processor
 
-    def process_files(self):
-        config_manager = self.config_manager
-        file_paths = config_manager.scratch["files"]
-        template_name = config_manager.project["templates"]["selfiles"]
-        output = self.template_processor.process_files(template_name, file_paths)
+    def _context(
+        self, file_paths: List[str], folder: Optional[str] = None, summary: Optional[str] = None
+    ) -> Dict:
+        root_name = os.path.basename(self.config_manager.project_root_path())
+        items = [
+            {
+                "path": f"/{root_name}/{Path(path).relative_to(self.config_manager.project_root_path())}",
+                "content": Path(path).read_text(),
+            }
+            for path in file_paths
+        ]
+        return (
+            {"items": items}
+            | ({"folder": folder} if folder is not None else {})
+            | ({"summary": summary} if summary is not None else {})
+        )
+
+    def files(self, file_paths: List[str]) -> str:
+        template_name = self.config_manager.project["templates"]["selfiles"]
+        context = self._context(file_paths)
+        template = Template.create(template_name, context, self.config_manager.templates_path())
+        output = template.render()
         pyperclip.copy(output)
         return output
 
 
-def main():
+def files():
     context_generator = ContextGenerator.create()
-    context_generator.process_files()
+    files = context_generator.config_manager.get_files()
+    context_generator.files(files)
+
+
+def main():
+    files()
 
 
 if __name__ == "__main__":
