@@ -1,7 +1,10 @@
 import json
+from importlib import resources
 from pathlib import Path
 
 from platformdirs import user_config_dir, user_data_dir
+
+from llm_code_context import templates
 
 PROJECT_INFO: str = (
     "This project uses llm-code-context. For more information, visit: "
@@ -16,9 +19,6 @@ class ConfigManager:
         app_name = "llm-code-context"
         app_author = "cyberchitta"
 
-        user_config_path = Path(user_config_dir(app_name, app_author))
-        user_file = user_config_path / "config.json"
-
         project_path = Path.cwd() / ".llm-code-context"
 
         project_file = project_path / "config.json"
@@ -26,7 +26,7 @@ class ConfigManager:
             project_file,
             {
                 "__info__": PROJECT_INFO,
-                "template": "all-file-contents.j2",
+                "templates": {"selfiles": "sel-file-contents.j2", "selcontext": "full-context.j2"},
                 "gitignores": [".git", ".gitignore", ".llm-code-context/"],
             },
         )
@@ -37,14 +37,15 @@ class ConfigManager:
         gitignore_file = project_path / ".gitignore"
         ConfigManager.ensure_exists_text(gitignore_file, "scratch.json\n")
 
-        return ConfigManager.create(user_file, project_file, scratch_file)
+        ConfigManager._copy_templates(project_path)
+
+        return ConfigManager.create(project_file, scratch_file)
 
     @staticmethod
-    def create(user_file, project_file, scratch_file):
-        user = ConfigManager._load(user_file)
+    def create(project_file, scratch_file):
         project = ConfigManager._load(project_file)
         scratch = ConfigManager._load(scratch_file)
-        return ConfigManager(scratch_file, user, project, scratch)
+        return ConfigManager(scratch_file, project, scratch)
 
     @staticmethod
     def _load(file):
@@ -67,17 +68,31 @@ class ConfigManager:
         with open(file, "w") as f:
             json.dump(config, f, indent=2)
 
-    def __init__(self, scratch_file, user, project, scratch):
+    @staticmethod
+    def _copy_templates(project_path):
+        templates_dir = project_path / "templates"
+        if not templates_dir.exists():
+            templates_dir.mkdir(parents=True, exist_ok=True)
+            template_files = [r for r in resources.contents(templates) if r.endswith(".j2")]
+            for template_file in template_files:
+                template_content = resources.read_text(templates, template_file)
+                dest_file = templates_dir / template_file
+                dest_file.write_text(template_content)
+                print(f"Copied template {template_file} to {dest_file}")
+
+    def __init__(self, scratch_file, project, scratch):
         self.scratch_file = scratch_file
-        self.user = user
         self.project = project
         self.scratch = scratch
 
-    def project_path(self):
-        return str(Path.cwd())
+    def project_root_path(self):
+        return Path.cwd()
+
+    def project_root(self):
+        return str(self.project_root_path)
 
     def templates_path(self):
-        return self.user["templates_path"]
+        return self.project_root_path() / ".llm-code-context" / "templates"
 
     def select_files(self, files):
         self.scratch["files"] = files
