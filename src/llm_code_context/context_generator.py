@@ -60,7 +60,7 @@ def files():
 
 def context():
     context_generator = ContextGenerator.create()
-    files = FileSelector.create([".git", ".llm-code-context/"]).get_all()
+    files = context_generator.config_manager.get_files()
     fs_diagram = get_fs_diagram()
     summary = context_generator.config_manager.get_summary()
     return context_generator.context(files, fs_diagram, summary)
