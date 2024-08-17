@@ -37,12 +37,10 @@ Here are the main commands:
    ```sh
    # Select files
    lcc-select
-   # Generate context from selected files
-   lcc-genfiles
    # Generate full context (including folder structure and summary)
    lcc-gencontext
-   # Generate folder structure diagram:
-   lcc-dirtree
+   # Generate context from a list of paths
+   lcc-genfiles
    ```
 
 Typical workflow:
