@@ -26,8 +26,9 @@ class ConfigManager:
             project_file,
             {
                 "__info__": PROJECT_INFO,
-                "templates": {"selfiles": "sel-file-contents.j2", "selcontext": "full-context.j2"},
+                "templates": {"selfiles": "sel-file-contents.j2", "context": "full-context.j2"},
                 "gitignores": [".git", ".gitignore", ".llm-code-context/"],
+                "summary_file": "tech_summary.md",
             },
         )
 
@@ -100,6 +101,12 @@ class ConfigManager:
 
     def get_files(self):
         return self.scratch.get("files", [])
+    
+    def get_summary(self):
+        summary_file = self.project_root_path() / self.project["summary_file"]
+        if summary_file.exists():
+            return summary_file.read_text()
+        return None
 
 
 def main():

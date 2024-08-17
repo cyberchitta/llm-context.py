@@ -39,11 +39,14 @@ class FolderStructureDiagram:
         return "\n".join(lines)
 
 
-def main():
+def get_fs_diagram():
     project_root = ConfigManager.create_default().project_root()
     file_paths = FileSelector.create([".git"]).get_all()
-    tree_structure = FolderStructureDiagram(project_root).generate_tree(file_paths)
-    pyperclip.copy(tree_structure)
+    return FolderStructureDiagram(project_root).generate_tree(file_paths)
+
+
+def main():
+    pyperclip.copy(get_fs_diagram())
 
 
 if __name__ == "__main__":

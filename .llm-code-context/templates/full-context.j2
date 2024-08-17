@@ -1,0 +1,15 @@
+{% if summary %}
+# Technical Summary
+
+{{ summary }}
+{% endif %}
+
+# Folder Diagram
+
+```
+{{ folder_structure_diagram }}
+```
+
+# All Source Files
+
+{% include 'sel-file-contents.j2' %}
