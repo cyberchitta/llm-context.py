@@ -54,6 +54,7 @@ Typical workflow:
 5. Paste the context into your conversation with the LLM.
 
 For a more comprehensive context that includes the folder structure and technical summary:
+
 6. Run `lcc-gencontext` to generate and copy the full context, including the folder structure diagram and the technical summary (if available).
    
 ## Technical Summary
