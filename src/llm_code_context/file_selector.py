@@ -3,19 +3,18 @@ from typing import List, Optional
 
 from llm_code_context.config_manager import ConfigManager
 from llm_code_context.git_ignorer import GitIgnorer
-from llm_code_context.pathspec_ignorer import PathspecIgnorer
 
 
 class FileSelector:
-    @classmethod
-    def create(cls, pathspecs: Optional[List[str]] = None) -> "FileSelector":
+    @staticmethod
+    def create(pathspecs: Optional[List[str]] = None) -> "FileSelector":
         config_manager = ConfigManager.create_default()
         if pathspecs is None:
             pathspecs = config_manager.project["gitignores"]
         git_ignorer = GitIgnorer.from_git_root(config_manager.project_root_path(), pathspecs)
-        return cls(config_manager, git_ignorer)
+        return FileSelector(config_manager, git_ignorer)
 
-    def __init__(self, config_manager: ConfigManager, ignorer: PathspecIgnorer):
+    def __init__(self, config_manager: ConfigManager, ignorer: GitIgnorer):
         self.config_manager = config_manager
         self.ignorer = ignorer
 

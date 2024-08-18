@@ -5,12 +5,13 @@ from pathspec import GitIgnoreSpec
 
 
 class PathspecIgnorer:
-    @classmethod
-    def create(cls, ignore_patterns: List[str]) -> "PathspecIgnorer":
-        return cls(ignore_patterns)
+    @staticmethod
+    def create(ignore_patterns: List[str]) -> "PathspecIgnorer":
+        pathspec = GitIgnoreSpec.from_lines(ignore_patterns)
+        return PathspecIgnorer(pathspec)
 
-    def __init__(self, ignore_patterns: List[str]):
-        self.pathspec = GitIgnoreSpec.from_lines(ignore_patterns)
+    def __init__(self, pathspec: GitIgnoreSpec):
+        self.pathspec = pathspec
 
     def ignore(self, path: str) -> bool:
         assert path not in ("/", ""), "Root directory cannot be an input for ignore method"
