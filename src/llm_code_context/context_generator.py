@@ -9,12 +9,14 @@ from llm_code_context.folder_structure_diagram import get_fs_diagram
 from llm_code_context.template import Template
 from llm_code_context.path_converter import PathConverter
 
+
 def _format_size(size_bytes):
-    for unit in ['B', 'KB', 'MB', 'GB']:
+    for unit in ["B", "KB", "MB", "GB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.1f} {unit}"
         size_bytes /= 1024.0
     return f"{size_bytes:.1f} TB"
+
 
 class ContextGenerator:
     @staticmethod
@@ -73,6 +75,7 @@ def _context():
     fs_diagram = get_fs_diagram()
     summary = context_generator.config_manager.get_summary()
     return context_generator.context(files, fs_diagram, summary)
+
 
 def size_feedback(content: str):
     if content is None:
