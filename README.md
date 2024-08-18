@@ -55,7 +55,7 @@ Let's say that you are collaborating with an LLM on a code repo. Use a system or
 4. Run `lcc-gencontext` to generate and copy the full text of all selected files, the folder structure diagram and the technical summary of the project (if available).
 5. Paste the context into the first message of your conversation with the LLM, or equivalently into a Claude project file.
 
-### Respond to LLM requests for files
+#### Respond to LLM requests for files
 
 1. The LLM will request a list of files in a markdown block quote.
 2. Select the block and copy into the clipboard
