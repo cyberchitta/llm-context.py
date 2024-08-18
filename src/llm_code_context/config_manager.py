@@ -16,9 +16,6 @@ PROJECT_INFO: str = (
 class ConfigManager:
     @staticmethod
     def create_default():
-        app_name = "llm-code-context"
-        app_author = "cyberchitta"
-
         project_path = Path.cwd() / ".llm-code-context"
 
         project_file = project_path / "config.json"
@@ -28,13 +25,11 @@ class ConfigManager:
                 "__info__": PROJECT_INFO,
                 "templates": {"selfiles": "sel-file-contents.j2", "context": "full-context.j2"},
                 "gitignores": [".git", ".gitignore", ".llm-code-context/"],
-                "summary_file": None
+                "summary_file": None,
             },
         )
-
         scratch_file = project_path / "scratch.json"
         ConfigManager.ensure_exists_json(scratch_file, {"files": []})
-
         gitignore_file = project_path / ".gitignore"
         ConfigManager.ensure_exists_text(gitignore_file, "scratch.json\n")
 
