@@ -8,7 +8,6 @@ This project was developed with significant input from Claude 3 Opus and Claude 
 
 - **File Selection**: Offers a command-line interface for selecting files from your project.
 - **Intelligent Ignoring**: Respects `.gitignore` rules and additional custom ignore patterns to exclude irrelevant files.
-- **Folder Structure Visualization**: Generates a textual representation of your project's folder structure.
 - **Clipboard Integration**: Automatically copies the generated context to your clipboard for easy pasting.
 - **Optional Technical Summary**: Allows inclusion of a markdown file summarizing the project's technical aspects.
 
