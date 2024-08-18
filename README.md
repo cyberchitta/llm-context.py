@@ -8,10 +8,8 @@ This project was developed with significant input from Claude 3 Opus and Claude 
 
 - **File Selection**: Offers a command-line interface for selecting files from your project.
 - **Intelligent Ignoring**: Respects `.gitignore` rules and additional custom ignore patterns to exclude irrelevant files.
-- **Customizable Output**: Uses Jinja2 templates for flexible formatting of the selected code context.
 - **Folder Structure Visualization**: Generates a textual representation of your project's folder structure.
 - **Clipboard Integration**: Automatically copies the generated context to your clipboard for easy pasting.
-- **Configuration Management**: Supports user-specific and project-specific configurations for a tailored experience.
 - **Optional Technical Summary**: Allows inclusion of a markdown file summarizing the project's technical aspects.
 
 ## Installation
@@ -73,6 +71,7 @@ LLM Code Context supports an optional technical summary feature, although **its 
      "summary_file": "tech-summary.md"
    }
    ```
+If the key is missing or null, no summary will be included in the context.
 
 The summary can include information like architectural decisions, non-obvious performance considerations, or future plans. For example:
 - "We chose a microservices architecture to allow for independent scaling of components."
@@ -109,12 +108,14 @@ For an example of a technical summary, you can refer to the [`tech-summary.md` f
     │       ├── file_selector.py
     │       ├── folder_structure_diagram.py
     │       ├── git_ignorer.py
+    │       ├── path_converter.py
     │       ├── pathspec_ignorer.py
     │       ├── template.py
     │       └── templates
     │           ├── full-context.j2
     │           └── sel-file-contents.j2
     └── tests
+        ├── test_path_converter.py
         └── test_pathspec_ignorer.py
 ```
 
