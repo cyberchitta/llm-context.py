@@ -9,6 +9,12 @@ from llm_code_context.folder_structure_diagram import get_fs_diagram
 from llm_code_context.template import Template
 from llm_code_context.path_converter import PathConverter
 
+def _format_size(size_bytes):
+    for unit in ['B', 'KB', 'MB', 'GB']:
+        if size_bytes < 1024.0:
+            return f"{size_bytes:.1f} {unit}"
+        size_bytes /= 1024.0
+    return f"{size_bytes:.1f} TB"
 
 class ContextGenerator:
     @staticmethod
@@ -68,18 +74,31 @@ def _context():
     summary = context_generator.config_manager.get_summary()
     return context_generator.context(files, fs_diagram, summary)
 
+def size_feedback(content: str):
+    if content is None:
+        print("No content to copy")
+    else:
+        bytes_copied = len(content.encode("utf-8"))
+        print(f"Copied {_format_size(bytes_copied)} to clipboard")
+
 
 def files_from_scratch():
-    pyperclip.copy(_files())
+    text = _files()
+    pyperclip.copy(text)
+    size_feedback(text)
 
 
 def files_from_clip():
     files = pyperclip.paste().strip().split("\n")
-    pyperclip.copy(_files(files))
+    text = _files(files)
+    pyperclip.copy(text)
+    size_feedback(text)
 
 
 def context():
-    pyperclip.copy(_context())
+    text = _context()
+    pyperclip.copy(text)
+    size_feedback(text)
 
 
 def main():
