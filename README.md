@@ -1,6 +1,6 @@
 # LLM Code Context
 
-LLM Code Context is a Python-based tool designed to streamline the process of sharing code context with Large Language Models (LLMs). It allows developers to easily select, format, and copy relevant code snippets and project structure information, enhancing the quality of interactions with AI assistants in coding tasks.
+LLM Code Context is a Python-based tool designed to streamline the process of sharing code context with Large Language Models (LLMs) *using a standard Chat UI*. It allows developers to easily select, format, and copy relevant code snippets and project structure information, enhancing the quality of interactions with AI assistants in coding tasks.
 
 This project was developed with significant input from Claude 3 Opus and Claude 3.5 Sonnet. All of the code that makes it into the repo is human curated (by me 😇, [@restlessronin](https://github.com/restlessronin)).
 
