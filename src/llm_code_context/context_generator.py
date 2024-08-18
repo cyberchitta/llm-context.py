@@ -5,9 +5,9 @@ from typing import Dict, List, Optional
 import pyperclip
 
 from llm_code_context.config_manager import ConfigManager
-from llm_code_context.file_selector import FileSelector
 from llm_code_context.folder_structure_diagram import get_fs_diagram
 from llm_code_context.template import Template
+from llm_code_context.path_converter import PathConverter
 
 
 class ContextGenerator:
@@ -47,18 +47,21 @@ class ContextGenerator:
 
     def _render(self, template_name, context) -> str:
         template = Template.create(template_name, context, self.config_manager.templates_path())
-        output = template.render()
-        pyperclip.copy(output)
-        return
+        return template.render()
 
 
-def files():
+def _files(in_files: List[str] = None) -> str:
     context_generator = ContextGenerator.create()
-    files = context_generator.config_manager.get_files()
+    cm = context_generator.config_manager
+    path_converter = PathConverter(cm.project_root_path())
+    if in_files is not None and not path_converter.validate(in_files):
+        print("Invalid file paths")
+        return
+    files = cm.get_files() if in_files is None else path_converter.to_absolute(in_files)
     return context_generator.files(files)
 
 
-def context():
+def _context():
     context_generator = ContextGenerator.create()
     files = context_generator.config_manager.get_files()
     fs_diagram = get_fs_diagram()
@@ -66,8 +69,21 @@ def context():
     return context_generator.context(files, fs_diagram, summary)
 
 
+def files_from_scratch():
+    pyperclip.copy(_files())
+
+
+def files_from_clip():
+    files = pyperclip.paste().strip().split("\n")
+    pyperclip.copy(_files(files))
+
+
+def context():
+    pyperclip.copy(_context())
+
+
 def main():
-    files()
+    files_from_scratch()
 
 
 if __name__ == "__main__":

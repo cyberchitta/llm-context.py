@@ -39,21 +39,28 @@ Here are the main commands:
    lcc-select
    # Generate full context (including folder structure and summary)
    lcc-gencontext
-   # Generate context from a list of paths
+   # Generate full text from a list of paths
    lcc-genfiles
    ```
 
-Typical workflow:
+### Typical workflow
+
+Let's say that you are collaborating with an LLM on a code repo. Use a system or custom prompt similar to [this `custom-prompt.md`](.llm-code-context/custom-prompt.md).
+
+#### Provide context for your chat.
 
 1. Navigate to your project's root directory in the terminal.
 2. Edit the project configuration file `.llm-code-context/config.json` to add any files to the "gitignores" key that should be in git but may not be useful for code context (e.g., "LICENSE" and "poetry.lock", maybe even "README.md").
 3. Run `lcc-select` to choose the files you want to include in your context. You can look at `.llm-code-context/scratch.json` to see what files are currently selected. If you prefer, you can edit the scratch file directly, before the next step.
-4. Run `lcc-genfiles` to process the selected files and copy the formatted context to your clipboard.
-5. Paste the context into your conversation with the LLM.
+4. Run `lcc-gencontext` to generate and copy the full text of all selected files, the folder structure diagram and the technical summary of the project (if available).
+5. Paste the context into the first message of your conversation with the LLM, or equivalently into a Claude project file.
 
-For a more comprehensive context that includes the folder structure and technical summary:
+### Respond to LLM requests for files
 
-6. Run `lcc-gencontext` to generate and copy the full context, including the folder structure diagram and the technical summary (if available).
+1. The LLM will request a list of files in a markdown block quote.
+2. Select the block and copy into the clipboard
+3. Run `lcc-genfiles` to copy the text context of the requested files into the clipboard (thus replacing it's original contents - the file list).
+4. Paste the file content list into the next user message in the chat.
    
 ## Technical Summary
 
@@ -74,7 +81,7 @@ The summary can include information like architectural decisions, non-obvious pe
 
 When you run `lcc-gencontext`, this summary will be included after the folder structure diagram in the generated context.
 
-For an example of a technical summary, you can refer to the [tech-summary.md](.llm-code-context/tech-summary.md) file in this repository.
+For an example of a technical summary, you can refer to the [`tech-summary.md` file for this repository](.llm-code-context/tech-summary.md).
 
 ## Project Structure
 
@@ -83,8 +90,8 @@ For an example of a technical summary, you can refer to the [tech-summary.md](.l
     ├── .gitignore
     ├── .llm-code-context
     │   ├── .gitignore
-    │   ├── claude-custom.md
     │   ├── config.json
+    │   ├── custom-prompt.md
     │   ├── tech-summary.md
     │   └── templates
     │       ├── full-context.j2
