@@ -33,11 +33,11 @@ LLM Code Context offers several command-line tools, each designed for a specific
 Here are the main commands:
 
    ```sh
-   # Select files
+   # Select all files which are not gitignored
    lcc-select
-   # Generate full context (including folder structure and summary)
+   # Generate full context (including folder structure and summary), using selected files
    lcc-gencontext
-   # Generate full text from a list of paths
+   # Generate full text contents from a list of paths in the clipboard
    lcc-genfiles
    ```
 
