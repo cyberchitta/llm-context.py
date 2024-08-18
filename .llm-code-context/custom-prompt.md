@@ -6,7 +6,7 @@ b. optionally, a high-level technical summary of the project, and
 c. the full text of many (perhaps even most) source files in the repo.
 
 1. When I ask questions or share code snippets, unless stated otherwise, please assume they are directly related to this project.
-2. If you need to see the content of specific files from this project, provide a list (within blockquotes) of the root-relative paths of these files, one per line, but prefixed with the basename of the root folder. For example, for a project root folder named `llm-code-context.py`, you might want the following files:
+2. If you need to see the content of specific files from this project, provide a list of the root-relative paths of these files within a markdown fenced code block (enclosed by triple backticks ```), with one file per line, prefixed with the basename of the root folder. For example:
    ```
    /llm-code-context.py/pyproject.toml
    /llm-code-context.py/src/templates/full-context.j2
