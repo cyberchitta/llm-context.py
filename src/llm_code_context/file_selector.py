@@ -1,8 +1,56 @@
 import os
-from typing import List, Optional
+from typing import List, Optional, Tuple
+
+from pathspec import GitIgnoreSpec
 
 from llm_code_context.config_manager import ConfigManager
-from llm_code_context.git_ignorer import GitIgnorer
+
+
+class PathspecIgnorer:
+    @staticmethod
+    def create(ignore_patterns: List[str]) -> "PathspecIgnorer":
+        pathspec = GitIgnoreSpec.from_lines(ignore_patterns)
+        return PathspecIgnorer(pathspec)
+
+    def __init__(self, pathspec: GitIgnoreSpec):
+        self.pathspec = pathspec
+
+    def ignore(self, path: str) -> bool:
+        assert path not in ("/", ""), "Root directory cannot be an input for ignore method"
+        return self.pathspec.match_file(path)
+
+
+class GitIgnorer:
+    @staticmethod
+    def from_git_root(root_dir: str, xtra_root_patterns: List[str] = None) -> "GitIgnorer":
+        ignorer_data = [("/", PathspecIgnorer.create(xtra_root_patterns or []))]
+        gitignores = GitIgnorer._collect_gitignores(root_dir)
+        for relative_path, patterns in gitignores:
+            ignorer_data.append((relative_path, PathspecIgnorer.create(patterns)))
+        return GitIgnorer(ignorer_data)
+
+    @staticmethod
+    def _collect_gitignores(top) -> List[Tuple[str, List[str]]]:
+        gitignores = []
+        for root, _, files in os.walk(top):
+            if ".gitignore" in files:
+                with open(os.path.join(root, ".gitignore"), "r") as file:
+                    patterns = file.read().splitlines()
+                relpath = os.path.relpath(root, top)
+                fixpath = "/" if relpath == "." else f"/{os.path.relpath(root, top)}"
+                gitignores.append((fixpath, patterns))
+        return gitignores
+
+    def __init__(self, ignorer_data: List[Tuple[str, PathspecIgnorer]]):
+        self.ignorer_data = ignorer_data
+
+    def ignore(self, path: str) -> bool:
+        assert path not in ("/", ""), "Root directory cannot be an input for ignore method"
+        for prefix, ignorer in self.ignorer_data:
+            if path.startswith(prefix):
+                if ignorer.ignore(path):
+                    return True
+        return False
 
 
 class FileSelector:

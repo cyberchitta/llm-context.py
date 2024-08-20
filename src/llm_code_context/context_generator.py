@@ -3,11 +3,10 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import pyperclip
+from jinja2 import Environment, FileSystemLoader
 
 from llm_code_context.config_manager import ConfigManager
 from llm_code_context.folder_structure_diagram import get_fs_diagram
-from llm_code_context.template import Template
-from llm_code_context.path_converter import PathConverter
 
 
 def _format_size(size_bytes):
@@ -16,6 +15,36 @@ def _format_size(size_bytes):
             return f"{size_bytes:.1f} {unit}"
         size_bytes /= 1024.0
     return f"{size_bytes:.1f} TB"
+
+
+class Template:
+    @staticmethod
+    def create(name: str, context: Dict, templates_path) -> "Template":
+        env = Environment(loader=FileSystemLoader(str(templates_path)))
+        return Template(name, context, env)
+
+    def __init__(self, name: str, context: Dict, env: Environment):
+        self.name = name
+        self.context = context
+        self.env = env
+
+    def render(self) -> str:
+        template = self.env.get_template(self.name)
+        return template.render(**self.context)
+
+
+class PathConverter:
+    def __init__(self, root: Path):
+        self.root = root
+        self.root_name = self.root.name
+
+    def validate(self, paths: List[str]) -> bool:
+        return all(path.startswith(f"/{self.root_name}/") for path in paths)
+
+    def to_absolute(self, relative_paths: List[str]) -> List[str]:
+        if not self.validate(relative_paths):
+            raise ValueError("Invalid paths provided")
+        return [str(self.root / Path(path[len(self.root_name) + 2 :])) for path in relative_paths]
 
 
 class ContextGenerator:
