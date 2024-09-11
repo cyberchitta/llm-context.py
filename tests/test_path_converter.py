@@ -10,7 +10,7 @@ class TestPathConverter(unittest.TestCase):
 
     def test_init(self):
         self.assertEqual(self.path_converter.root, Path("/home/user/project"))
-        self.assertEqual(self.path_converter.root_name, "project")
+        self.assertEqual(self.path_converter.root.name, "project")
 
     def test_validate_valid_paths(self):
         valid_paths = ["/project/src/main.py", "/project/tests/test_main.py", "/project/README.md"]

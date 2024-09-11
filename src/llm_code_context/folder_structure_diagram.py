@@ -1,7 +1,6 @@
 import os
-from typing import List
 
-import pyperclip
+import pyperclip  # type: ignore
 
 from llm_code_context.config_manager import ConfigManager
 from llm_code_context.file_selector import FileSelector
@@ -11,7 +10,7 @@ class FolderStructureDiagram:
     def __init__(self, root_dir: str):
         self.root_dir = root_dir
 
-    def generate_tree(self, file_paths: List[str]) -> str:
+    def generate_tree(self, file_paths: list[str]) -> str:
         sorted_paths = sorted(self._make_relative(path) for path in file_paths)
         tree_dict = self._build_tree_structure(sorted_paths)
         return self._format_tree({os.path.basename(self.root_dir): tree_dict})
@@ -19,8 +18,8 @@ class FolderStructureDiagram:
     def _make_relative(self, path: str) -> str:
         return os.path.relpath(path, self.root_dir)
 
-    def _build_tree_structure(self, paths: List[str]) -> dict:
-        root = {}
+    def _build_tree_structure(self, paths: list[str]) -> dict:
+        root: dict = {}
         for path in paths:
             current = root
             for part in path.split(os.sep):

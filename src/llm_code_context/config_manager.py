@@ -1,8 +1,8 @@
 import json
+from dataclasses import dataclass
 from importlib import resources
 from pathlib import Path
-
-from platformdirs import user_config_dir, user_data_dir
+from typing import Any
 
 from llm_code_context import templates
 
@@ -13,7 +13,12 @@ PROJECT_INFO: str = (
 )
 
 
+@dataclass(frozen=True)
 class ConfigManager:
+    scratch_file: Path
+    project: dict[str, Any]
+    scratch: dict[str, Any]
+
     @staticmethod
     def create_default():
         project_path = Path.cwd() / ".llm-code-context"
@@ -75,11 +80,6 @@ class ConfigManager:
                 dest_file = templates_dir / template_file
                 dest_file.write_text(template_content)
                 print(f"Copied template {template_file} to {dest_file}")
-
-    def __init__(self, scratch_file, project, scratch):
-        self.scratch_file = scratch_file
-        self.project = project
-        self.scratch = scratch
 
     def project_root_path(self):
         return Path.cwd()

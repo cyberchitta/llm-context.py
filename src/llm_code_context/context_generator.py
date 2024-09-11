@@ -1,8 +1,8 @@
 import os
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
 
-import pyperclip
+import pyperclip  # type: ignore
 from jinja2 import Environment, FileSystemLoader
 
 from llm_code_context.config_manager import ConfigManager
@@ -17,47 +17,46 @@ def _format_size(size_bytes):
     return f"{size_bytes:.1f} TB"
 
 
+@dataclass(frozen=True)
 class Template:
+    name: str
+    context: dict
+    env: Environment
+
     @staticmethod
-    def create(name: str, context: Dict, templates_path) -> "Template":
+    def create(name: str, context: dict, templates_path) -> "Template":
         env = Environment(loader=FileSystemLoader(str(templates_path)))
         return Template(name, context, env)
-
-    def __init__(self, name: str, context: Dict, env: Environment):
-        self.name = name
-        self.context = context
-        self.env = env
 
     def render(self) -> str:
         template = self.env.get_template(self.name)
         return template.render(**self.context)
 
 
+@dataclass(frozen=True)
 class PathConverter:
-    def __init__(self, root: Path):
-        self.root = root
-        self.root_name = self.root.name
+    root: Path
 
-    def validate(self, paths: List[str]) -> bool:
-        return all(path.startswith(f"/{self.root_name}/") for path in paths)
+    def validate(self, paths: list[str]) -> bool:
+        return all(path.startswith(f"/{self.root.name}/") for path in paths)
 
-    def to_absolute(self, relative_paths: List[str]) -> List[str]:
+    def to_absolute(self, relative_paths: list[str]) -> list[str]:
         if not self.validate(relative_paths):
             raise ValueError("Invalid paths provided")
-        return [str(self.root / Path(path[len(self.root_name) + 2 :])) for path in relative_paths]
+        return [str(self.root / Path(path[len(self.root.name) + 2 :])) for path in relative_paths]
 
 
+@dataclass(frozen=True)
 class ContextGenerator:
+    config_manager: ConfigManager
+
     @staticmethod
-    def create():
+    def create() -> "ContextGenerator":
         return ContextGenerator(ConfigManager.create_default())
 
-    def __init__(self, config_manager):
-        self.config_manager = config_manager
-
     def _context(
-        self, file_paths: List[str], fs_diagram: Optional[str] = None, summary: Optional[str] = None
-    ) -> Dict:
+        self, file_paths: list[str], fs_diagram: str | None = None, summary: str | None = None
+    ) -> dict:
         root_name = os.path.basename(self.config_manager.project_root_path())
         items = [
             {
@@ -72,33 +71,33 @@ class ContextGenerator:
             | ({"summary": summary} if summary is not None else {})
         )
 
-    def files(self, file_paths: List[str]) -> str:
+    def files(self, file_paths: list[str]) -> str:
         template_name = self.config_manager.project["templates"]["selfiles"]
         context = self._context(file_paths)
         return self._render(template_name, context)
 
-    def context(self, file_paths: List[str], fs_diagram: str, summary: Optional[str]) -> str:
+    def context(self, file_paths: list[str], fs_diagram: str, summary: str | None) -> str:
         template_name = self.config_manager.project["templates"]["context"]
         context = self._context(file_paths, fs_diagram, summary)
         return self._render(template_name, context)
 
-    def _render(self, template_name, context) -> str:
+    def _render(self, template_name: str, context: dict) -> str:
         template = Template.create(template_name, context, self.config_manager.templates_path())
         return template.render()
 
 
-def _files(in_files: List[str] = None) -> str:
+def _files(in_files: list[str] = []) -> str:
     context_generator = ContextGenerator.create()
     cm = context_generator.config_manager
     path_converter = PathConverter(cm.project_root_path())
-    if in_files is not None and not path_converter.validate(in_files):
+    if not in_files and not path_converter.validate(in_files):
         print("Invalid file paths")
-        return
-    files = cm.get_files() if in_files is None else path_converter.to_absolute(in_files)
+        return ""
+    files = cm.get_files() if not in_files else path_converter.to_absolute(in_files)
     return context_generator.files(files)
 
 
-def _context():
+def _context() -> str:
     context_generator = ContextGenerator.create()
     files = context_generator.config_manager.get_files()
     fs_diagram = get_fs_diagram()
@@ -106,7 +105,7 @@ def _context():
     return context_generator.context(files, fs_diagram, summary)
 
 
-def size_feedback(content: str):
+def size_feedback(content: str) -> None:
     if content is None:
         print("No content to copy")
     else:
@@ -114,13 +113,13 @@ def size_feedback(content: str):
         print(f"Copied {_format_size(bytes_copied)} to clipboard")
 
 
-def files_from_scratch():
+def files_from_scratch() -> None:
     text = _files()
     pyperclip.copy(text)
     size_feedback(text)
 
 
-def files_from_clip():
+def files_from_clip() -> None:
     files = pyperclip.paste().strip().split("\n")
     text = _files(files)
     pyperclip.copy(text)
