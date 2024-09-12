@@ -7,6 +7,9 @@ from jinja2 import Environment, FileSystemLoader
 
 from llm_context.config_manager import ConfigManager
 from llm_context.folder_structure_diagram import get_fs_diagram
+from llm_context.highlighter.language_mapping import to_language
+from llm_context.highlighter.outliner import generate_outlines
+from llm_context.highlighter.parser import Source
 
 
 def _format_size(size_bytes):
@@ -72,29 +75,37 @@ class ContextGenerator:
         )
 
     def files(self, file_paths: list[str]) -> str:
-        template_name = self.config_manager.project["templates"]["selfiles"]
         context = self._context(file_paths)
-        return self._render(template_name, context)
+        return self._render("selfiles", context)
 
     def context(self, file_paths: list[str], fs_diagram: str, summary: str | None) -> str:
-        template_name = self.config_manager.project["templates"]["context"]
         context = self._context(file_paths, fs_diagram, summary)
-        return self._render(template_name, context)
+        return self._render("context", context)
 
-    def _render(self, template_name: str, context: dict) -> str:
+    def outlines(self, file_paths: list[str]) -> str:
+        source_set = [Source(path, Path(path).read_text()) for path in file_paths]
+        outlines = generate_outlines(source_set)
+        context = {"items": outlines} if outlines else {"items": []}
+        return self._render("outlines", context)
+
+    def _render(self, template_id: str, context: dict) -> str:
+        template_name = self.config_manager.project["templates"][template_id]
         template = Template.create(template_name, context, self.config_manager.templates_path())
         return template.render()
 
 
+def _file_list(cm: ConfigManager, in_files: list[str] = []) -> list[str]:
+    path_converter = PathConverter(cm.project_root_path())
+    if in_files and not path_converter.validate(in_files):
+        print("Invalid file paths")
+        return []
+    return cm.get_files() if not in_files else path_converter.to_absolute(in_files)
+
+
 def _files(in_files: list[str] = []) -> str:
     context_generator = ContextGenerator.create()
-    cm = context_generator.config_manager
-    path_converter = PathConverter(cm.project_root_path())
-    if not in_files and not path_converter.validate(in_files):
-        print("Invalid file paths")
-        return ""
-    files = cm.get_files() if not in_files else path_converter.to_absolute(in_files)
-    return context_generator.files(files)
+    files = _file_list(context_generator.config_manager, in_files)
+    return context_generator.files(files) if files else ""
 
 
 def _context() -> str:
@@ -103,6 +114,14 @@ def _context() -> str:
     fs_diagram = get_fs_diagram()
     summary = context_generator.config_manager.get_summary()
     return context_generator.context(files, fs_diagram, summary)
+
+
+def _outlines(in_files: list[str] = []) -> str:
+    context_generator = ContextGenerator.create()
+    files = [
+        file for file in _file_list(context_generator.config_manager, in_files) if to_language(file)
+    ]
+    return context_generator.outlines(files) if files else ""
 
 
 def size_feedback(content: str) -> None:
@@ -128,6 +147,12 @@ def files_from_clip() -> None:
 
 def context():
     text = _context()
+    pyperclip.copy(text)
+    size_feedback(text)
+
+
+def outlines():
+    text = _outlines()
     pyperclip.copy(text)
     size_feedback(text)
 

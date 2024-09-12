@@ -18,24 +18,28 @@ classifiers = [
 python = "^3.12"
 jinja2 = "^3.1.4"
 pathspec = "^0.12.1"
-platformdirs = "^4.2.2"
 pyperclip = "^1.9.0"
+tree-sitter = "0.21.3"
+tree-sitter-languages = "^1.10.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"
 isort = "^5.13.2"
 pytest = "^8.3.2"
+mypy = "^1.11.2"
 
 [tool.poetry.scripts]
 lcc-clipfiles = "llm_context.context_generator:files_from_clip"
 lcc-dirtree = "llm_context.folder_structure_diagram:main"
 lcc-files = "llm_context.context_generator:files_from_scratch"
 lcc-gencontext = "llm_context.context_generator:context"
+lcc-outlines = "llm_context.context_generator:outlines"
 lcc-select = "llm_context.file_selector:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+filterwarnings = ["ignore::FutureWarning"]
 
 [tool.black]
 line-length = 100

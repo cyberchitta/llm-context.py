@@ -28,7 +28,11 @@ class ConfigManager:
             project_file,
             {
                 "__info__": PROJECT_INFO,
-                "templates": {"selfiles": "sel-file-contents.j2", "context": "full-context.j2"},
+                "templates": {
+                    "selfiles": "sel-file-contents.j2",
+                    "context": "full-context.j2",
+                    "outlines": "highlights.j2",
+                },
                 "gitignores": [".git", ".gitignore", ".llm-context/"],
                 "summary_file": None,
             },
@@ -94,7 +98,7 @@ class ConfigManager:
         self.scratch["files"] = files
         ConfigManager.save(self.scratch_file, self.scratch)
 
-    def get_files(self):
+    def get_files(self) -> list[str]:
         return self.scratch.get("files", [])
 
     def get_summary(self):
