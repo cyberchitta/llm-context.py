@@ -2,8 +2,8 @@ import os
 
 import pyperclip  # type: ignore
 
-from llm_code_context.config_manager import ConfigManager
-from llm_code_context.file_selector import FileSelector
+from llm_context.config_manager import ConfigManager
+from llm_context.file_selector import FileSelector
 
 
 class FolderStructureDiagram:

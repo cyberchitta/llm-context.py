@@ -5,8 +5,8 @@ from pathlib import Path
 import pyperclip  # type: ignore
 from jinja2 import Environment, FileSystemLoader
 
-from llm_code_context.config_manager import ConfigManager
-from llm_code_context.folder_structure_diagram import get_fs_diagram
+from llm_context.config_manager import ConfigManager
+from llm_context.folder_structure_diagram import get_fs_diagram
 
 
 def _format_size(size_bytes):

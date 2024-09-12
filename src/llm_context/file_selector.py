@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from pathspec import GitIgnoreSpec
 
-from llm_code_context.config_manager import ConfigManager
+from llm_context.config_manager import ConfigManager
 
 
 @dataclass(frozen=True)

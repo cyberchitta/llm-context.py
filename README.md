@@ -100,7 +100,7 @@ For an example of a technical summary, you can refer to the [`tech-summary.md` f
     ├── poetry.lock
     ├── pyproject.toml
     ├── src
-    │   └── llm_code_context
+    │   └── llm_context
     │       ├── __init__.py
     │       ├── config_manager.py
     │       ├── context_generator.py

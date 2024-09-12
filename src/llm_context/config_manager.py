@@ -4,7 +4,7 @@ from importlib import resources
 from pathlib import Path
 from typing import Any
 
-from llm_code_context import templates
+from llm_context import templates
 
 PROJECT_INFO: str = (
     "This project uses llm-context. For more information, visit: "

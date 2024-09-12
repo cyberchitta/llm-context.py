@@ -1,6 +1,6 @@
 import unittest
 
-from llm_code_context.file_selector import PathspecIgnorer
+from llm_context.file_selector import PathspecIgnorer
 
 
 class TestPathspecIgnorerBasicFunctionality(unittest.TestCase):
