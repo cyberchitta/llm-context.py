@@ -7,9 +7,9 @@ from typing import Any
 from llm_code_context import templates
 
 PROJECT_INFO: str = (
-    "This project uses llm-code-context. For more information, visit: "
-    "https://github.com/cyberchitta/llm-code-context.py or "
-    "https://pypi.org/project/llm-code-context/"
+    "This project uses llm-context. For more information, visit: "
+    "https://github.com/cyberchitta/llm-context.py or "
+    "https://pypi.org/project/llm-context/"
 )
 
 
@@ -21,7 +21,7 @@ class ConfigManager:
 
     @staticmethod
     def create_default():
-        project_path = Path.cwd() / ".llm-code-context"
+        project_path = Path.cwd() / ".llm-context"
 
         project_file = project_path / "config.json"
         ConfigManager.ensure_exists_json(
@@ -29,7 +29,7 @@ class ConfigManager:
             {
                 "__info__": PROJECT_INFO,
                 "templates": {"selfiles": "sel-file-contents.j2", "context": "full-context.j2"},
-                "gitignores": [".git", ".gitignore", ".llm-code-context/"],
+                "gitignores": [".git", ".gitignore", ".llm-context/"],
                 "summary_file": None,
             },
         )
@@ -88,7 +88,7 @@ class ConfigManager:
         return str(self.project_root_path())
 
     def templates_path(self):
-        return self.project_root_path() / ".llm-code-context" / "templates"
+        return self.project_root_path() / ".llm-context" / "templates"
 
     def select_files(self, files):
         self.scratch["files"] = files
