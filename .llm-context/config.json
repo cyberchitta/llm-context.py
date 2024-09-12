@@ -10,7 +10,8 @@
     ".gitignore",
     ".llm-context/",
     "LICENSE",
-    "poetry.lock"
+    "poetry.lock",
+    "*.scm"
   ],
   "summary_file": null
 }
