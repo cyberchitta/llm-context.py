@@ -1,7 +1,7 @@
 import pytest
 
 from llm_context.highlighter.parser import AST, Source
-from llm_context.highlighter.tagger import ASTBasedTagger, DefRef, Position, Tag
+from llm_context.highlighter.tagger import ASTBasedTagger, DefRef, Position
 
 
 @pytest.fixture

@@ -1,23 +1,17 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable
 
 import pyperclip  # type: ignore
 from jinja2 import Environment, FileSystemLoader
 
 from llm_context.config_manager import ConfigManager
 from llm_context.folder_structure_diagram import get_fs_diagram
+from llm_context.highlighter.highlighter import generate_highlights
 from llm_context.highlighter.language_mapping import to_language
 from llm_context.highlighter.outliner import generate_outlines
 from llm_context.highlighter.parser import Source
-
-
-def _format_size(size_bytes):
-    for unit in ["B", "KB", "MB", "GB"]:
-        if size_bytes < 1024.0:
-            return f"{size_bytes:.1f} {unit}"
-        size_bytes /= 1024.0
-    return f"{size_bytes:.1f} TB"
 
 
 @dataclass(frozen=True)
@@ -88,6 +82,12 @@ class ContextGenerator:
         context = {"items": outlines} if outlines else {"items": []}
         return self._render("outlines", context)
 
+    def highlights(self, file_paths: list[str]) -> str:
+        sources = [Source(path, Path(path).read_text()) for path in file_paths]
+        highlights = generate_highlights(sources)
+        context = {"items": highlights} if highlights else {"items": []}
+        return self._render("highlights", context)
+
     def _render(self, template_id: str, context: dict) -> str:
         template_name = self.config_manager.project["templates"][template_id]
         template = Template.create(template_name, context, self.config_manager.templates_path())
@@ -124,6 +124,22 @@ def _outlines(in_files: list[str] = []) -> str:
     return context_generator.outlines(files) if files else ""
 
 
+def _highlights(in_files: list[str] = []) -> str:
+    context_generator = ContextGenerator.create()
+    files = [
+        file for file in _file_list(context_generator.config_manager, in_files) if to_language(file)
+    ]
+    return context_generator.highlights(files) if files else ""
+
+
+def _format_size(size_bytes):
+    for unit in ["B", "KB", "MB", "GB"]:
+        if size_bytes < 1024.0:
+            return f"{size_bytes:.1f} {unit}"
+        size_bytes /= 1024.0
+    return f"{size_bytes:.1f} TB"
+
+
 def size_feedback(content: str) -> None:
     if content is None:
         print("No content to copy")
@@ -132,29 +148,20 @@ def size_feedback(content: str) -> None:
         print(f"Copied {_format_size(bytes_copied)} to clipboard")
 
 
-def files_from_scratch() -> None:
-    text = _files()
-    pyperclip.copy(text)
-    size_feedback(text)
+def create_entry_point(func: Callable[..., str]) -> Callable[[], None]:
+    def entry_point():
+        text = func()
+        pyperclip.copy(text)
+        size_feedback(text)
+
+    return entry_point
 
 
-def files_from_clip() -> None:
-    files = pyperclip.paste().strip().split("\n")
-    text = _files(files)
-    pyperclip.copy(text)
-    size_feedback(text)
-
-
-def context():
-    text = _context()
-    pyperclip.copy(text)
-    size_feedback(text)
-
-
-def outlines():
-    text = _outlines()
-    pyperclip.copy(text)
-    size_feedback(text)
+files_from_scratch = create_entry_point(lambda: _files())
+files_from_clip = create_entry_point(lambda: _files(pyperclip.paste().strip().split("\n")))
+context = create_entry_point(_context)
+outlines = create_entry_point(_outlines)
+highlights = create_entry_point(_highlights)
 
 
 def main():

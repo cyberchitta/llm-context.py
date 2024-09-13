@@ -29,12 +29,12 @@ pytest = "^8.3.2"
 mypy = "^1.11.2"
 
 [tool.poetry.scripts]
-lcc-clipfiles = "llm_context.context_generator:files_from_clip"
-lcc-dirtree = "llm_context.folder_structure_diagram:main"
-lcc-files = "llm_context.context_generator:files_from_scratch"
-lcc-gencontext = "llm_context.context_generator:context"
-lcc-outlines = "llm_context.context_generator:outlines"
-lcc-select = "llm_context.file_selector:main"
+lc-clipfiles = "llm_context.context_generator:files_from_clip"
+lc-dirtree = "llm_context.folder_structure_diagram:main"
+lc-files = "llm_context.context_generator:files_from_scratch"
+lc-gencontext = "llm_context.context_generator:context"
+lc-outlines = "llm_context.context_generator:outlines"
+lc-select = "llm_context.file_selector:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -32,6 +32,7 @@ class ConfigManager:
                     "selfiles": "sel-file-contents.j2",
                     "context": "full-context.j2",
                     "outlines": "highlights.j2",
+                    "highlights": "highlights.j2",
                 },
                 "gitignores": [".git", ".gitignore", ".llm-context/"],
                 "summary_file": None,

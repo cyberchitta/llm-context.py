@@ -1,122 +1,68 @@
 # LLM Context
 
-LLM Context is a Python-based tool designed to streamline the process of sharing code context with Large Language Models (LLMs) *using a standard Chat UI*. It allows developers to easily select, format, and copy relevant code snippets and project structure information, enhancing the quality of interactions with AI assistants in coding tasks.
+LLM Context is a Python-based tool designed to streamline the process of sharing code context with Large Language Models (LLMs) using a standard Chat UI. It intelligently selects relevant files using `.gitignore` rules, generates comprehensive code context, and copies it directly to your clipboard for easy sharing with AI assistants.
 
-This project was developed with significant input from Claude 3 Opus and Claude 3.5 Sonnet. All of the code that makes it into the repo is human curated (by me 😇, [@restlessronin](https://github.com/restlessronin)).
+## Key Features
 
-## Features
-
-- **File Selection**: Offers a command-line interface for selecting files from your project.
-- **Intelligent Ignoring**: Respects `.gitignore` rules and additional custom ignore patterns to exclude irrelevant files.
-- **Clipboard Integration**: Automatically copies the generated context to your clipboard for easy pasting.
-- **Optional Technical Summary**: Allows inclusion of a markdown file summarizing the project's technical aspects.
+- **Intelligent File Selection**: Automatically respects `.gitignore` rules and additional custom ignore patterns to exclude irrelevant files.
+- **Clipboard Integration**: Automatically copies the generated context to your clipboard for easy pasting into LLM chats.
+- **Code Structure Visualization**: Generates outlines of selected files to provide a quick overview of code structure.
+- **Customizable Ignore Patterns**: Allows additional ignore patterns to be specified, giving you fine-grained control over what's included in the context.
 
 ## Installation
 
-### Using pipx (Recommended)
+Use [pipx](https://pypa.github.io/pipx/) to install LLM Context:
 
-[pipx](https://pypa.github.io/pipx/) is a tool to help you install and run end-user CLI applications written in Python.
-
-1. If you haven't installed pipx yet, follow the installation instructions in the pipx documentation.
-2. Once pipx is installed, you can install LLM Context:
-   ```
-   pipx install llm-context
-   ```
-
-This will install LLM Context in an isolated environment and make its commands available in your shell.
+```
+pipx install llm-context
+```
 
 ## Usage
 
-LLM Context offers several command-line tools, each designed for a specific task. All commands should be run from the root directory of your project, where the primary `.gitignore` file is located.
+LLM Context offers flexibility in how you share your code context, depending on the size of your repository:
 
-Here are the main commands:
+### For Small Repositories
 
-   ```sh
-   # Select all files which are not gitignored
-   lcc-select
-   # Generate full context (including folder structure and summary), using selected files
-   lcc-gencontext
-   # Generate full text contents from a list of paths in the clipboard
-   lcc-genfiles
-   ```
+If your entire repository fits within the LLM's context window:
 
-### Typical workflow
+1. Use `lc-gencontext` to generate and copy the full content of all selected files, including the folder structure.
+2. Paste this complete context into your LLM chat.
 
-Let's say that you are collaborating with an LLM on a code repo. Use a system or custom prompt similar to [this `custom-prompt.md`](.llm-context/custom-prompt.md).
+### For Large Repositories
 
-#### Provide context for your chat.
+When the entire repo is too large to fit in the LLM's context window:
 
-1. Navigate to your project's root directory in the terminal.
-2. Edit the project configuration file `.llm-context/config.json` to add any files to the "gitignores" key that should be in git but may not be useful for code context (e.g., "LICENSE" and "poetry.lock", maybe even "README.md").
-3. Run `lcc-select` to choose the files you want to include in your context. You can look at `.llm-context/scratch.json` to see what files are currently selected. If you prefer, you can edit the scratch file directly, before the next step.
-4. Run `lcc-gencontext` to generate and copy the full text of all selected files, the folder structure diagram and the technical summary of the project (if available).
-5. Paste the context into the first message of your conversation with the LLM, or equivalently into a Claude project file.
+1. Use `lc-gencontext` to generate the folder structure.
+2. Use `lc-outlines` to generate code outlines for all selected files.
+3. Combine the output from steps 1 and 2, and paste this into your LLM chat.
+4. When the LLM requests specific files, use `lc-files` to generate their full content.
 
-#### Respond to LLM requests for files
+## Main Commands
 
-1. The LLM will request a list of files in a markdown block quote.
-2. Select the block and copy into the clipboard
-3. Run `lcc-genfiles` to copy the text context of the requested files into the clipboard (thus replacing it's original contents - the file list).
-4. Paste the file content list into the next user message in the chat.
-   
-## Technical Summary
+- `lc-select`: Choose files based on gitignore rules and custom patterns.
+- `lc-gencontext`: Generate full context or folder structure.
+- `lc-outlines`: Generate outlines of selected files.
+- `lc-files`: Generate full text contents of specific files.
+- `lc-clipfiles`: Generate full text contents of files listed in the clipboard.
 
-LLM Context supports an optional technical summary feature, although **its utility is currently unclear**. This feature allows you to include a markdown file that provides project-specific information that may not be easily inferred from the code alone. To use this feature:
+## Typical Workflow
 
-1. Create a markdown file in your `.llm-context` folder (e.g., `.llm-context/tech-summary.md`).
-2. In your `.llm-context/config.json` file, set the `summary_file` key to the name of your summary file:
-   ```json
-   {
-     "summary_file": "tech-summary.md"
-   }
-   ```
-If the key is missing or null, no summary will be included in the context.
+1. Navigate to your project's root directory.
+2. (Optional) Edit `.llm-context/config.json` to add custom ignore patterns.
+3. Run `lc-select` to choose files for context.
+4. For small repos: Run `lc-gencontext`.
+   For large repos: Run both `lc-gencontext` and `lc-outlines`, and combine their output.
+5. Paste the generated context into your LLM chat.
+6. Inform the LLM about the presence and nature of the context you've provided.
 
-The summary can include information like architectural decisions, non-obvious performance considerations, or future plans. For example:
-- "We chose a microservices architecture to allow for independent scaling of components."
-- "The `process_data()` function uses custom caching to optimize repeated calls with similar inputs."
-- "The authentication system is slated for an overhaul in Q3 to implement OAuth2."
+### Providing Files to LLM (for large repos)
 
-When you run `lcc-gencontext`, this summary will be included after the folder structure diagram in the generated context.
+1. When the LLM requests specific files, it will typically do so in a markdown block quote.
+2. Copy the LLM's file request to your clipboard.
+3. Run `lc-clipfiles` to generate the content of the requested files.
+4. Paste the generated file contents back into your chat with the LLM.
 
-For an example of a technical summary, you can refer to the [`tech-summary.md` file for this repository](.llm-context/tech-summary.md).
-
-## Project Structure
-
-```
-└── llm-context.py
-    ├── .gitignore
-    ├── .llm-context
-    │   ├── .gitignore
-    │   ├── config.json
-    │   ├── custom-prompt.md
-    │   ├── tech-summary.md
-    │   └── templates
-    │       ├── full-context.j2
-    │       └── sel-file-contents.j2
-    ├── LICENSE
-    ├── MANIFEST.in
-    ├── README.md
-    ├── poetry.lock
-    ├── pyproject.toml
-    ├── src
-    │   └── llm_context
-    │       ├── __init__.py
-    │       ├── config_manager.py
-    │       ├── context_generator.py
-    │       ├── file_selector.py
-    │       ├── folder_structure_diagram.py
-    │       ├── git_ignorer.py
-    │       ├── path_converter.py
-    │       ├── pathspec_ignorer.py
-    │       ├── template.py
-    │       └── templates
-    │           ├── full-context.j2
-    │           └── sel-file-contents.j2
-    └── tests
-        ├── test_path_converter.py
-        └── test_pathspec_ignorer.py
-```
+This workflow allows for dynamic interaction with the LLM, providing initial context and responding to specific file requests as needed during the conversation.
 
 ## Contributing
 

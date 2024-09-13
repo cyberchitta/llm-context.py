@@ -1,5 +1,8 @@
+import warnings
 from dataclasses import dataclass
 from typing import NamedTuple
+
+warnings.filterwarnings("ignore", category=FutureWarning, module="tree_sitter")
 
 from tree_sitter import Language, Parser, Tree
 from tree_sitter_languages import get_language, get_parser

@@ -1,5 +1,6 @@
 import pytest
 
+from llm_context.highlighter.highlighter import generate_highlights
 from llm_context.highlighter.outliner import Outliner, Outlines
 from llm_context.highlighter.parser import Source
 from llm_context.highlighter.tagger import Position, Tag
@@ -149,3 +150,21 @@ def test_outliner_highlights(sample_source):
 ⋮...
 """
     assert highlights["highlights"].strip() == expected_output.strip()
+
+
+def test_generate_highlights(sample_source):
+    highlights = generate_highlights([sample_source])
+
+    assert highlights is not None
+    assert len(highlights) == 1
+    assert "rel_path" in highlights[0]
+    assert "highlights" in highlights[0]
+    assert highlights[0]["rel_path"] == "test.py"
+
+    expected_highlights = """█def test_function():
+⋮...
+█class TestClass:
+█    def test_method(self):
+⋮...
+"""
+    assert highlights[0]["highlights"].strip() == expected_highlights.strip()
