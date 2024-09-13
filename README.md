@@ -40,7 +40,7 @@ When the entire repo is too large to fit in the LLM's context window:
 ## Main Commands
 
 - `lc-select`: Choose files based on gitignore rules and custom patterns.
-- `lc-gencontext`: Generate full context or folder structure.
+- `lc-gencontext`: Generate full context including folder structure, summary (if available), and contents of selected files.
 - `lc-outlines`: Generate outlines of selected files.
 - `lc-files`: Generate full text contents of specific files.
 - `lc-clipfiles`: Generate full text contents of files listed in the clipboard.
@@ -52,8 +52,8 @@ When the entire repo is too large to fit in the LLM's context window:
 3. Run `lc-select` to choose files for context.
 4. For small repos: Run `lc-gencontext`.
    For large repos: Run both `lc-gencontext` and `lc-outlines`, and combine their output.
-5. Paste the generated context into your LLM chat.
-6. Inform the LLM about the presence and nature of the context you've provided.
+5. Paste the generated context into your LLM chat, Claude Project, or GPT uploaded files.
+6. Inform the LLM about the presence and nature of the context you've provided, most likely via the System or Custom prompt.
 
 ### Providing Files to LLM (for large repos)
 
