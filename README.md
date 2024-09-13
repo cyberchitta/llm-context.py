@@ -76,7 +76,7 @@ LLM Context has evolved from several projects and influences:
 - LLM Code Highlighter included functionality for ranking and highlighting tags, based on a translation of Aider Chat's Python code to TypeScript (with the help of Chat GPT 4). This functionality is not yet implemented in LLM Context.
 - The outlining functionality, developed in LLM Code Highlighter, has been moved to this project.
 - Parts of the outlining and highlighting code in LLM Context were translated from TypeScript to Python with Claude 3.5 Sonnet's help, bringing the project full circle.
-- This project currently uses the tree-sitter tag query files from Aider Chat.
+- This project currently uses the tree-sitter [tag query files](src/llm_context/highlighter/tag-qry/) from Aider Chat.
 
 We are grateful for the open-source community and the innovations that have influenced this project's development. The evolution from LLM Code Highlighter to LLM Context demonstrates the iterative nature of software development and the value of building upon and adapting existing ideas.
 
