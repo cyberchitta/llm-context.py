@@ -6,7 +6,7 @@ LLM Context is a Python-based tool designed to streamline the process of sharing
 
 ## Key Features
 
-- **Intelligent File Selection**: Automatically respects `.gitignore` rules and additional custom ignore patterns to exclude irrelevant files.
+- **Intelligent File Selection**: Respects `.gitignore` rules and additional custom ignore patterns to exclude irrelevant files.
 - **Clipboard Integration**: Automatically copies the generated context to your clipboard for easy pasting into LLM chats.
 - **Code Structure Visualization**: Generates outlines of selected files to provide a quick overview of code structure.
 - **Customizable Ignore Patterns**: Allows additional ignore patterns to be specified, giving you fine-grained control over what's included in the context.
