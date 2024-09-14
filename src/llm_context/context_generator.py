@@ -5,8 +5,7 @@ from pathlib import Path
 import pyperclip  # type: ignore
 from jinja2 import Environment, FileSystemLoader
 
-from llm_context.folder_structure_diagram import get_fs_diagram
-from llm_context.highlighter.highlighter import generate_highlights
+from llm_context.folder_structure_diagram import get_annotated_fsd
 from llm_context.highlighter.language_mapping import to_language
 from llm_context.highlighter.outliner import generate_outlines
 from llm_context.highlighter.parser import Source
@@ -79,13 +78,14 @@ class ContextGenerator:
         return self._render("files", {"files": self._files(paths)})
 
     def context(self) -> str:
+        project_root = self.project_settings.project_root_path
         selected_files = self.project_settings.context_storage.get_stored_context()
-        full_content_files = selected_files.get("full", [])
+        full_files = selected_files.get("full", [])
         outline_files = [file for file in selected_files.get("outline", []) if to_language(file)]
         context = {
-            "folder_structure_diagram": get_fs_diagram(),
+            "folder_structure_diagram": get_annotated_fsd(project_root, full_files, outline_files),
             "summary": self.project_settings.get_summary(),
-            "files": self._files(full_content_files),
+            "files": self._files(full_files),
             "highlights": self._outlines(outline_files),
         }
         return self._render("context", context)
