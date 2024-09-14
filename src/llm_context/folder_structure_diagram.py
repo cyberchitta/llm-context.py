@@ -2,8 +2,8 @@ import os
 
 import pyperclip  # type: ignore
 
-from llm_context.config_manager import ConfigManager
 from llm_context.file_selector import FileSelector
+from llm_context.project_settings import ProjectSettings
 
 
 class FolderStructureDiagram:
@@ -39,8 +39,8 @@ class FolderStructureDiagram:
 
 
 def get_fs_diagram():
-    project_root = ConfigManager.create_default().project_root()
-    file_paths = FileSelector.create([".git"]).get_all()
+    project_root = ProjectSettings.create().project_root
+    file_paths = FileSelector.create(project_root, [".git"]).get_all()
     return FolderStructureDiagram(project_root).generate_tree(file_paths)
 
 

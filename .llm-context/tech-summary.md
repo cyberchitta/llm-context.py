@@ -3,7 +3,7 @@ LLM Context is a Python tool designed to streamline the process of sharing code 
 Key architectural decisions:
 1. Modular design: The project is structured into separate modules (e.g., file_selector, context_generator, template_processor) to promote separation of concerns and maintainability.
 
-2. Configuration management: A ConfigManager class handles both project-wide and user-specific configurations, supporting flexible customization.
+2. Configuration management: A ProjectSettings class handles both project-wide and user-specific configurations, supporting flexible customization.
 
 3. Template-based output: Jinja2 templating is used for formatting output, allowing for easy customization of the generated context.
 

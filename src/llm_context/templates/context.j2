@@ -1,0 +1,23 @@
+# Folder Diagram
+
+```
+{{ folder_structure_diagram }}
+```
+
+{% if summary %}
+# Summary
+
+{{ summary }}
+{% endif %}
+
+{% if files %}
+# Full File Contents
+
+{% include 'files.j2' %}
+{% endif %}
+
+{% if highlights %}
+# Files in Outline
+
+{% include 'highlights.j2' %}
+{% endif %}

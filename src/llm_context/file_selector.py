@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from pathspec import GitIgnoreSpec
 
-from llm_context.config_manager import ConfigManager
+from llm_context.project_settings import ProjectSettings
 
 
 @dataclass(frozen=True)
@@ -55,21 +55,20 @@ class GitIgnorer:
 
 @dataclass(frozen=True)
 class FileSelector:
-    config_manager: ConfigManager
+    root_path: str
     ignorer: GitIgnorer
 
     @staticmethod
-    def create(pathspecs: list[str] | None = None) -> "FileSelector":
-        config_manager = ConfigManager.create_default()
-        if pathspecs is None:
-            pathspecs = config_manager.project["gitignores"]
-        git_ignorer = GitIgnorer.from_git_root(config_manager.project_root_path(), pathspecs)
-        return FileSelector(config_manager, git_ignorer)
+    def create(root_path: str, pathspecs: list[str]) -> "FileSelector":
+        ignorer = GitIgnorer.from_git_root(root_path, pathspecs)
+        return FileSelector(root_path, ignorer)
+
+    def get_files(self) -> list[str]:
+        return self.traverse(self.root_path)
 
     def traverse(self, current_dir: str) -> list[str]:
         entries = os.listdir(current_dir)
-        root_path = self.config_manager.project_root()
-        relative_current_dir = os.path.relpath(current_dir, root_path)
+        relative_current_dir = os.path.relpath(current_dir, self.root_path)
         dirs = [
             e_path
             for e in entries
@@ -88,15 +87,42 @@ class FileSelector:
         return files + subdir_files
 
     def get_all(self) -> list[str]:
-        return self.traverse(self.config_manager.project_root_path())
+        return self.traverse(self.root_path)
 
-    def update_selected(self) -> None:
-        all_files = self.get_all()
-        self.config_manager.select_files(all_files)
+
+@dataclass(frozen=True)
+class ContextSelector:
+    project_settings: ProjectSettings
+    full_selector: FileSelector
+    outline_selector: FileSelector
+
+    @staticmethod
+    def create() -> "ContextSelector":
+        project_settings = ProjectSettings.create()
+        root_path = project_settings.project_root_path
+        context_config = project_settings.context_config
+        full_pathspecs = context_config.get_ignore_patterns("full")
+        outline_pathspecs = context_config.get_ignore_patterns("outline")
+        full_selector = FileSelector.create(root_path, full_pathspecs)
+        outline_selector = FileSelector.create(root_path, outline_pathspecs)
+        return ContextSelector(project_settings, full_selector, outline_selector)
+
+    def select_files(self) -> tuple[list[str], list[str]]:
+        full_content_files = self.full_selector.get_files()
+        all_outline_files = self.outline_selector.get_files()
+        outline_files = [f for f in all_outline_files if f not in set(full_content_files)]
+        return full_content_files, outline_files
+
+    def update_selected(self):
+        full_content_files, outline_files = self.select_files()
+        self.project_settings.context_storage.store_context(
+            {"full": full_content_files, "outline": outline_files}
+        )
 
 
 def main():
-    select_files = FileSelector.create()
+    select_files = ContextSelector.create()
+    select_files.select_files()
     select_files.update_selected()
 
 

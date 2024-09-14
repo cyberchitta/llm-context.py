@@ -34,10 +34,9 @@ If your entire repository fits within the LLM's context window:
 
 When the entire repo is too large to fit in the LLM's context window:
 
-1. Use `lc-gencontext` to generate the folder structure.
-2. Use `lc-outlines` to generate code outlines for all selected files.
-3. Combine the output from steps 1 and 2, and paste this into your LLM chat.
-4. When the LLM requests specific files, use `lc-files` to generate their full content.
+1. Use `lc-select` to distinguish which files go into the context in full form, and which are "outlined".
+2. Use `lc-gencontext` to generate the folder structure, full contents of specified files and outlines of those specified as such.
+3. When the LLM requests specific files, use `lc-files` to generate their full content.
 
 ## Main Commands
 
@@ -65,6 +64,10 @@ When the entire repo is too large to fit in the LLM's context window:
 4. Paste the generated file contents back into your chat with the LLM.
 
 This workflow allows for dynamic interaction with the LLM, providing initial context and responding to specific file requests as needed during the conversation.
+
+## Advanced Usage
+
+For more detailed information on customizing ignore patterns and manually editing the selected file list, please refer to our [Usage Guide](docs/USAGE.md).
 
 ## Acknowledgments
 

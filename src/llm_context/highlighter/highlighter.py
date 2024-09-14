@@ -99,7 +99,7 @@ class TagProcessor:
         source = Source(rel_path=rel_path, code=code)
         return TagProcessor(source, lines_of_interest)
 
-    def to_highlights(self) -> str:
+    def to_highlights(self) -> dict[str, str]:
         ast = AST.create_from_code(self.source)
         scope_tracker = Scoper.create(
             len(self.source.code.splitlines())

@@ -1,18 +1,29 @@
 {
   "__info__": "This project uses llm-context. For more information, visit: https://github.com/cyberchitta/llm-context.py or https://pypi.org/project/llm-context/",
-  "templates": {
-    "selfiles": "sel-file-contents.j2",
-    "context": "full-context.j2",
-    "outlines": "highlights.j2",
-    "highlights": "highlights.j2"
+  "gitignores": {
+    "full_files": [
+      ".git",
+      ".gitignore",
+      ".llm-context/",
+      "poetry.lock",
+      "LICENSE",
+      "README.md",
+      "*.scm"
+    ],
+    "outline_files": [
+      ".git",
+      ".gitignore",
+      ".llm-context/",
+      "poetry.lock",
+      "LICENSE",
+      "README.md",
+      "*.scm"
+    ]
   },
-  "gitignores": [
-    ".git",
-    ".gitignore",
-    ".llm-context/",
-    "LICENSE",
-    "poetry.lock",
-    "*.scm"
-  ],
-  "summary_file": null
+  "summary_file": null,
+  "templates": {
+    "context": "context.j2",
+    "files": "files.j2",
+    "highlights": "highlights.j2"
+  }
 }

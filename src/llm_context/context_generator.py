@@ -6,12 +6,12 @@ from typing import Callable
 import pyperclip  # type: ignore
 from jinja2 import Environment, FileSystemLoader
 
-from llm_context.config_manager import ConfigManager
 from llm_context.folder_structure_diagram import get_fs_diagram
 from llm_context.highlighter.highlighter import generate_highlights
 from llm_context.highlighter.language_mapping import to_language
 from llm_context.highlighter.outliner import generate_outlines
 from llm_context.highlighter.parser import Source
+from llm_context.project_settings import ProjectSettings
 
 
 @dataclass(frozen=True)
@@ -45,91 +45,65 @@ class PathConverter:
 
 @dataclass(frozen=True)
 class ContextGenerator:
-    config_manager: ConfigManager
+    project_settings: ProjectSettings
 
     @staticmethod
     def create() -> "ContextGenerator":
-        return ContextGenerator(ConfigManager.create_default())
+        return ContextGenerator(ProjectSettings.create())
 
-    def _context(
-        self, file_paths: list[str], fs_diagram: str | None = None, summary: str | None = None
-    ) -> dict:
-        root_name = os.path.basename(self.config_manager.project_root_path())
-        items = [
+    def _files(self, file_paths: list[str]) -> str:
+        root_name = os.path.basename(self.project_settings.project_root_path)
+        return [
             {
-                "path": f"/{root_name}/{Path(path).relative_to(self.config_manager.project_root_path())}",
+                "path": f"/{root_name}/{Path(path).relative_to(self.project_settings.project_root_path)}",
                 "content": Path(path).read_text(),
             }
             for path in file_paths
         ]
-        return (
-            {"items": items}
-            | ({"folder_structure_diagram": fs_diagram} if fs_diagram is not None else {})
-            | ({"summary": summary} if summary is not None else {})
-        )
+
+    def _outlines(self, file_paths: list[str]) -> str:
+        source_set = [Source(path, Path(path).read_text()) for path in file_paths]
+        return generate_outlines(source_set)
 
     def files(self, file_paths: list[str]) -> str:
-        context = self._context(file_paths)
-        return self._render("selfiles", context)
+        path_converter = PathConverter(self.project_settings.project_root_path)
+        if file_paths and not path_converter.validate(file_paths):
+            print("Invalid file paths")
+            return False
+        valid_paths = path_converter.to_absolute(file_paths)
+        paths = (
+            valid_paths
+            if valid_paths
+            else self.project_settings.context_storage.get_stored_context().get("full", [])
+        )
+        return self._render("files", {"files": self._files(paths)})
 
-    def context(self, file_paths: list[str], fs_diagram: str, summary: str | None) -> str:
-        context = self._context(file_paths, fs_diagram, summary)
+    def context(self) -> str:
+        selected_files = self.project_settings.context_storage.get_stored_context()
+        full_content_files = selected_files.get("full", [])
+        outline_files = [file for file in selected_files.get("outline", []) if to_language(file)]
+        context = {
+            "folder_structure_diagram": get_fs_diagram(),
+            "summary": self.project_settings.get_summary(),
+            "files": self._files(full_content_files),
+            "highlights": self._outlines(outline_files),
+        }
         return self._render("context", context)
 
-    def outlines(self, file_paths: list[str]) -> str:
-        source_set = [Source(path, Path(path).read_text()) for path in file_paths]
-        outlines = generate_outlines(source_set)
-        context = {"items": outlines} if outlines else {"items": []}
-        return self._render("outlines", context)
-
-    def highlights(self, file_paths: list[str]) -> str:
-        sources = [Source(path, Path(path).read_text()) for path in file_paths]
-        highlights = generate_highlights(sources)
-        context = {"items": highlights} if highlights else {"items": []}
-        return self._render("highlights", context)
-
     def _render(self, template_id: str, context: dict) -> str:
-        template_name = self.config_manager.project["templates"][template_id]
-        template = Template.create(template_name, context, self.config_manager.templates_path())
+        template_name = self.project_settings.context_config.config["templates"][template_id]
+        template = Template.create(
+            template_name, context, self.project_settings.project_layout.templates_path
+        )
         return template.render()
 
 
-def _file_list(cm: ConfigManager, in_files: list[str] = []) -> list[str]:
-    path_converter = PathConverter(cm.project_root_path())
-    if in_files and not path_converter.validate(in_files):
-        print("Invalid file paths")
-        return []
-    return cm.get_files() if not in_files else path_converter.to_absolute(in_files)
-
-
 def _files(in_files: list[str] = []) -> str:
-    context_generator = ContextGenerator.create()
-    files = _file_list(context_generator.config_manager, in_files)
-    return context_generator.files(files) if files else ""
+    return ContextGenerator.create().files(in_files)
 
 
 def _context() -> str:
-    context_generator = ContextGenerator.create()
-    files = context_generator.config_manager.get_files()
-    fs_diagram = get_fs_diagram()
-    summary = context_generator.config_manager.get_summary()
-    return context_generator.context(files, fs_diagram, summary)
-
-
-def _outlines(in_files: list[str] = []) -> str:
-    context_generator = ContextGenerator.create()
-    files = [
-        file for file in _file_list(context_generator.config_manager, in_files) if to_language(file)
-    ]
-    return context_generator.outlines(files) if files else ""
-
-
-def _highlights(in_files: list[str] = []) -> str:
-    context_generator = ContextGenerator.create()
-    files = [
-        file for file in _file_list(context_generator.config_manager, in_files) if to_language(file)
-    ]
-    return context_generator.highlights(files) if files else ""
+    return ContextGenerator.create().context()
 
 
 def _format_size(size_bytes):
@@ -160,8 +134,6 @@ def create_entry_point(func: Callable[..., str]) -> Callable[[], None]:
 files_from_scratch = create_entry_point(lambda: _files())
 files_from_clip = create_entry_point(lambda: _files(pyperclip.paste().strip().split("\n")))
 context = create_entry_point(_context)
-outlines = create_entry_point(_outlines)
-highlights = create_entry_point(_highlights)
 
 
 def main():
