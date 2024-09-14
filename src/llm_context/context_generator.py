@@ -1,7 +1,6 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
 
 import pyperclip  # type: ignore
 from jinja2 import Environment, FileSystemLoader
@@ -12,6 +11,7 @@ from llm_context.highlighter.language_mapping import to_language
 from llm_context.highlighter.outliner import generate_outlines
 from llm_context.highlighter.parser import Source
 from llm_context.project_settings import ProjectSettings
+from llm_context.utils import create_entry_point
 
 
 @dataclass(frozen=True)
@@ -104,31 +104,6 @@ def _files(in_files: list[str] = []) -> str:
 
 def _context() -> str:
     return ContextGenerator.create().context()
-
-
-def _format_size(size_bytes):
-    for unit in ["B", "KB", "MB", "GB"]:
-        if size_bytes < 1024.0:
-            return f"{size_bytes:.1f} {unit}"
-        size_bytes /= 1024.0
-    return f"{size_bytes:.1f} TB"
-
-
-def size_feedback(content: str) -> None:
-    if content is None:
-        print("No content to copy")
-    else:
-        bytes_copied = len(content.encode("utf-8"))
-        print(f"Copied {_format_size(bytes_copied)} to clipboard")
-
-
-def create_entry_point(func: Callable[..., str]) -> Callable[[], None]:
-    def entry_point():
-        text = func()
-        pyperclip.copy(text)
-        size_feedback(text)
-
-    return entry_point
 
 
 files_from_scratch = create_entry_point(lambda: _files())
