@@ -25,7 +25,7 @@ class SettingsInitializer:
     def initialize(self):
         self._create_directory_structure()
         self._create_config_file()
-        self._create_scratch_file()
+        self._create_curr_ctx_file()
         self._copy_default_templates()
 
     def _create_directory_structure(self):
@@ -51,8 +51,8 @@ class SettingsInitializer:
             }
             ConfigLoader.save(config_path, default_config)
 
-    def _create_scratch_file(self):
-        scratch_path = self.project_root / ".llm-context" / "scratch.json"
+    def _create_curr_ctx_file(self):
+        scratch_path = self.project_root / ".llm-context" / "curr_ctx.json"
         if not scratch_path.exists():
             ConfigLoader.save(scratch_path, {"context": {}})
 
@@ -91,7 +91,7 @@ class ProjectLayout:
 
     @property
     def context_storage_path(self) -> Path:
-        return self.root_path / ".llm-context" / "scratch.json"
+        return self.root_path / ".llm-context" / "curr_ctx.json"
 
     @property
     def templates_path(self) -> Path:

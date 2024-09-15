@@ -29,7 +29,7 @@ This example will ignore the default items plus any `.log` files and the `node_m
 
 You can manually edit the list of selected files to fine-tune the context provided to the LLM.
 
-1. Locate the `.llm-context/scratch.json` file in your project root.
+1. Locate the `.llm-context/curr_ctx.json` file in your project root.
 2. Edit the `files` array in this JSON file.
 
 Example:
