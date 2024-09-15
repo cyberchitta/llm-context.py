@@ -15,73 +15,6 @@ GIT_IGNORE_DEFAULT: list[str] = [".git", ".gitignore", ".llm-context/"]
 
 
 @dataclass(frozen=True)
-class SettingsInitializer:
-    project_root: Path
-
-    @staticmethod
-    def create(project_root: Path = Path.cwd()) -> "SettingsInitializer":
-        return SettingsInitializer(project_root)
-
-    def initialize(self):
-        self._create_directory_structure()
-        self._create_config_file()
-        self._create_curr_ctx_file()
-        self._copy_default_templates()
-
-    def _create_directory_structure(self):
-        llm_context_dir = self.project_root / ".llm-context"
-        llm_context_dir.mkdir(exist_ok=True)
-        (llm_context_dir / "templates").mkdir(exist_ok=True)
-
-    def _create_config_file(self):
-        config_path = self.project_root / ".llm-context" / "config.json"
-        if not config_path.exists():
-            default_config = {
-                "__info__": PROJECT_INFO,
-                "gitignores": {
-                    "full_files": GIT_IGNORE_DEFAULT,
-                    "outline_files": GIT_IGNORE_DEFAULT,
-                },
-                "summary_file": None,
-                "templates": {
-                    "context": "context.j2",
-                    "files": "files.j2",
-                    "highlights": "highlights.j2",
-                },
-            }
-            ConfigLoader.save(config_path, default_config)
-
-    def _create_curr_ctx_file(self):
-        scratch_path = self.project_root / ".llm-context" / "curr_ctx.json"
-        if not scratch_path.exists():
-            ConfigLoader.save(scratch_path, {"context": {}})
-
-    def _copy_default_templates(self):
-        templates_path = self.project_root / ".llm-context" / "templates"
-        if not templates_path.exists():
-            templates_path.mkdir(parents=True, exist_ok=True)
-            template_files = [r for r in resources.contents(templates) if r.endswith(".j2")]
-            for template_file in template_files:
-                template_content = resources.read_text(templates, template_file)
-                dest_file = templates_path / template_file
-                dest_file.write_text(template_content)
-                print(f"Copied template {template_file} to {dest_file}")
-
-
-@dataclass(frozen=True)
-class ConfigLoader:
-    @staticmethod
-    def load(file_path: Path) -> dict[str, Any]:
-        with open(file_path, "r") as f:
-            return json.load(f)
-
-    @staticmethod
-    def save(file_path: Path, data: dict[str, Any]):
-        with open(file_path, "w") as f:
-            json.dump(data, f, indent=2)
-
-
-@dataclass(frozen=True)
 class ProjectLayout:
     root_path: Path
 
@@ -99,6 +32,68 @@ class ProjectLayout:
 
     def get_template_path(self, template_name: str) -> Path:
         return self.templates_path / template_name
+
+
+@dataclass(frozen=True)
+class SettingsInitializer:
+    project_layout: ProjectLayout
+
+    @staticmethod
+    def create(project_layout: ProjectLayout) -> "SettingsInitializer":
+        return SettingsInitializer(project_layout)
+
+    def initialize(self):
+        self._create_directory_structure()
+        self._create_config_file()
+        self._create_curr_ctx_file()
+        self._copy_default_templates()
+
+    def _create_directory_structure(self):
+        self.project_layout.templates_path.mkdir(parents=True, exist_ok=True)
+
+    def _create_config_file(self):
+        if not self.project_layout.config_path.exists():
+            default_config = {
+                "__info__": PROJECT_INFO,
+                "gitignores": {
+                    "full_files": GIT_IGNORE_DEFAULT,
+                    "outline_files": GIT_IGNORE_DEFAULT,
+                },
+                "summary_file": None,
+                "templates": {
+                    "context": "context.j2",
+                    "files": "files.j2",
+                    "highlights": "highlights.j2",
+                },
+            }
+            ConfigLoader.save(self.project_layout.config_path, default_config)
+
+    def _create_curr_ctx_file(self):
+        if not self.project_layout.context_storage_path.exists():
+            ConfigLoader.save(self.project_layout.context_storage_path, {"context": {}})
+
+    def _copy_default_templates(self):
+        if not self.project_layout.templates_path.exists():
+            self.project_layout.templates_path.mkdir(parents=True, exist_ok=True)
+            template_files = [r for r in resources.contents(templates) if r.endswith(".j2")]
+            for template_file in template_files:
+                template_content = resources.read_text(templates, template_file)
+                dest_file = self.project_layout.get_template_path(template_file)
+                dest_file.write_text(template_content)
+                print(f"Copied template {template_file} to {dest_file}")
+
+
+@dataclass(frozen=True)
+class ConfigLoader:
+    @staticmethod
+    def load(file_path: Path) -> dict[str, Any]:
+        with open(file_path, "r") as f:
+            return json.load(f)
+
+    @staticmethod
+    def save(file_path: Path, data: dict[str, Any]):
+        with open(file_path, "w") as f:
+            json.dump(data, f, indent=2)
 
 
 @dataclass(frozen=True)
@@ -144,9 +139,9 @@ class ProjectSettings:
 
     @staticmethod
     def create(project_root: Path = Path.cwd()) -> "ProjectSettings":
-        initializer = SettingsInitializer.create(project_root)
-        initializer.initialize()
         project_layout = ProjectLayout(project_root)
+        initializer = SettingsInitializer.create(project_layout)
+        initializer.initialize()
         context_config = ContextConfig.create(project_layout)
         context_storage = ContextStorage(project_layout.context_storage_path)
         return ProjectSettings(project_layout, context_config, context_storage)

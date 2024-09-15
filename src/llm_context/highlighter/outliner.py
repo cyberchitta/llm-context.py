@@ -73,6 +73,5 @@ class Outlines:
         return code_outlines
 
 
-def generate_outlines(source_set: list[Source]) -> list[dict[str, str]] | None:
-    outlines = Outlines.create(source_set)
-    return outlines.to_code_outlines() if outlines else None
+def generate_outlines(source_set: list[Source]) -> list[dict[str, str]]:
+    return Outlines.create(source_set).to_code_outlines()
