@@ -65,7 +65,7 @@ For larger repositories, LLM Context uses a combination of full file content and
 - Full content is included for key files that require detailed analysis.
 - Outlines are provided for less critical files or those that are too large for full inclusion.
 
-This approach allows you to include more files in the context without overwhelming the LLM with excessive content.
+This approach allows you to provide context for more files without exceeding the LLM's context window limit.
 
 **Note:** The outlining feature currently supports the following programming languages:
 C, C++, C#, Elisp, Elixir, Elm, Go, Java, JavaScript, OCaml, PHP, Python, QL, Ruby, Rust, and TypeScript.
