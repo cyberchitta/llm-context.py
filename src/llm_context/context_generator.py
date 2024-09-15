@@ -44,17 +44,17 @@ class PathConverter:
 
 @dataclass(frozen=True)
 class ContextGenerator:
-    project_settings: ProjectSettings
+    settings: ProjectSettings
 
     @staticmethod
     def create() -> "ContextGenerator":
         return ContextGenerator(ProjectSettings.create())
 
     def _files(self, file_paths: list[str]) -> list[dict[str, str]]:
-        root_name = os.path.basename(self.project_settings.project_root_path)
+        root_name = os.path.basename(self.settings.project_root_path)
         return [
             {
-                "path": f"/{root_name}/{Path(path).relative_to(self.project_settings.project_root_path)}",
+                "path": f"/{root_name}/{Path(path).relative_to(self.settings.project_root_path)}",
                 "content": Path(path).read_text(),
             }
             for path in file_paths
@@ -65,7 +65,7 @@ class ContextGenerator:
         return generate_outlines(source_set)
 
     def files(self, file_paths: list[str]) -> str:
-        path_converter = PathConverter(self.project_settings.project_root_path)
+        path_converter = PathConverter(self.settings.project_root_path)
         if file_paths and not path_converter.validate(file_paths):
             print("Invalid file paths")
             return ""
@@ -73,27 +73,27 @@ class ContextGenerator:
         paths = (
             valid_paths
             if valid_paths
-            else self.project_settings.context_storage.get_stored_context().get("full", [])
+            else self.settings.context_storage.get_stored_context().get("full", [])
         )
         return self._render("files", {"files": self._files(paths)})
 
     def context(self) -> str:
-        project_root = self.project_settings.project_root_path
-        selected_files = self.project_settings.context_storage.get_stored_context()
+        project_root = self.settings.project_root_path
+        selected_files = self.settings.context_storage.get_stored_context()
         full_files = selected_files.get("full", [])
         outline_files = [file for file in selected_files.get("outline", []) if to_language(file)]
         context = {
             "folder_structure_diagram": get_annotated_fsd(project_root, full_files, outline_files),
-            "summary": self.project_settings.get_summary(),
+            "summary": self.settings.get_summary(),
             "files": self._files(full_files),
             "highlights": self._outlines(outline_files),
         }
         return self._render("context", context)
 
     def _render(self, template_id: str, context: dict) -> str:
-        template_name = self.project_settings.context_config.config["templates"][template_id]
+        template_name = self.settings.context_config.config["templates"][template_id]
         template = Template.create(
-            template_name, context, self.project_settings.project_layout.templates_path
+            template_name, context, self.settings.project_layout.templates_path
         )
         return template.render()
 

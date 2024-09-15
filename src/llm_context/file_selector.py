@@ -93,24 +93,24 @@ class FileSelector:
 
 @dataclass(frozen=True)
 class ContextSelector:
-    project_settings: ProjectSettings
+    settings: ProjectSettings
     full_selector: FileSelector
     outline_selector: FileSelector
 
     @staticmethod
     def create() -> "ContextSelector":
-        project_settings = ProjectSettings.create()
-        root_path = project_settings.project_root_path
-        context_config = project_settings.context_config
+        settings = ProjectSettings.create()
+        root_path = settings.project_root_path
+        context_config = settings.context_config
         full_pathspecs = context_config.get_ignore_patterns("full")
         outline_pathspecs = context_config.get_ignore_patterns("outline")
         full_selector = FileSelector.create(root_path, full_pathspecs)
         outline_selector = FileSelector.create(root_path, outline_pathspecs)
-        return ContextSelector(project_settings, full_selector, outline_selector)
+        return ContextSelector(settings, full_selector, outline_selector)
 
     def select_full_files(self) -> list[str]:
         full_files = self.full_selector.get_files()
-        stored_context = self.project_settings.context_storage.get_stored_context()
+        stored_context = self.settings.context_storage.get_stored_context()
         outline_files = stored_context.get("outline", [])
         updated_outline_files = [f for f in outline_files if f not in set(full_files)]
         if len(outline_files) != len(updated_outline_files):
@@ -121,7 +121,7 @@ class ContextSelector:
         return full_files
 
     def select_outline_files(self) -> list[str]:
-        stored_context = self.project_settings.context_storage.get_stored_context()
+        stored_context = self.settings.context_storage.get_stored_context()
         full_files = stored_context.get("full", [])
         if not full_files:
             warnings.warn(
@@ -133,7 +133,7 @@ class ContextSelector:
         return outline_files
 
     def update_selected(self, full_files: list[str], outline_files: list[str]):
-        self.project_settings.context_storage.store_context(
+        self.settings.context_storage.store_context(
             {"full": full_files, "outline": outline_files}
         )
 
