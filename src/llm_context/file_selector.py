@@ -133,27 +133,23 @@ class ContextSelector:
         return outline_files
 
     def update_selected(self, full_files: list[str], outline_files: list[str]):
-        self.settings.context_storage.store_context(
-            {"full": full_files, "outline": outline_files}
-        )
+        self.settings.context_storage.store_context({"full": full_files, "outline": outline_files})
 
 
 def select_full_files():
-    selector = ContextSelector.create()
-    full_files = selector.select_full_files()
+    full_files = ContextSelector.create().select_full_files()
     print(f"Selected {len(full_files)} full files.")
 
 
 def select_outline_files():
-    selector = ContextSelector.create()
-    outline_files = selector.select_outline_files()
+    outline_files = ContextSelector.create().select_outline_files()
     print(f"Selected {len(outline_files)} outline files.")
 
 
 def main():
     selector = ContextSelector.create()
     full_files = selector.select_full_files()
-    outline_files = selector.select_outline_files(full_files)
+    outline_files = selector.select_outline_files()
     selector.update_selected(full_files, outline_files)
 
 
