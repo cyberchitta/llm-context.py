@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from importlib import resources
+from typing import Optional
 
 
-def to_language(filename: str) -> str | None:
+def to_language(filename: str) -> Optional[str]:
     ext_to_lang = {
         "c": "c",
         "cc": "cpp",
@@ -27,7 +28,7 @@ def to_language(filename: str) -> str | None:
     return ext_to_lang.get(extension)
 
 
-def to_query_file_name(lang: str) -> str | None:
+def to_query_file_name(lang: str) -> Optional[str]:
     return f"tree-sitter-{lang}-tags.scm" if lang else None
 
 

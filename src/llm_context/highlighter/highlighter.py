@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Optional
 
 from llm_context.highlighter.parser import AST, Source
 from llm_context.highlighter.tagger import ASTBasedTagger, DefRef, Tag
@@ -133,6 +134,6 @@ class Highlights:
         return code_highlights
 
 
-def generate_highlights(source_set: list[Source]) -> list[dict[str, str]] | None:
+def generate_highlights(source_set: list[Source]) -> Optional[list[dict[str, str]]]:
     highlights = Highlights.create(source_set)
     return highlights.to_code_highlights() if highlights else None

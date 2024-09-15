@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass
 from importlib import resources
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from llm_context import templates
 
@@ -123,7 +123,7 @@ class ContextConfig:
         gi = self.config.get("gitignores", {})
         return gi.get(f"{context_type}_files", [])
 
-    def get_summary(self) -> str | None:
+    def get_summary(self) -> Optional[str]:
         summary_file = self.config.get("summary_file")
         if summary_file:
             summary_path = self.project_layout.root_path / summary_file
@@ -149,7 +149,7 @@ class ProjectSettings:
     def get_ignore_patterns(self, context_type: str) -> list[str]:
         return self.context_config.get_ignore_patterns(context_type)
 
-    def get_summary(self) -> str | None:
+    def get_summary(self) -> Optional[str]:
         return self.context_config.get_summary()
 
     def get_stored_context(self) -> dict[str, list[str]]:
