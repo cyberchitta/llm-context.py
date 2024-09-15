@@ -7,7 +7,6 @@
       ".llm-context/",
       "poetry.lock",
       "LICENSE",
-      "README.md",
       "*.scm"
     ],
     "outline_files": [

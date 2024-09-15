@@ -19,53 +19,50 @@ Use [pipx](https://pypa.github.io/pipx/) to install LLM Context:
 pipx install llm-context
 ```
 
-## Usage
+## Basic Usage
 
 LLM Context provides several commands for file selection, context generation, and project visualization:
 
-### Main Commands
+1. `lc-sel-full`: Select files for full content inclusion
+2. `lc-context`: Generate and copy context to clipboard
+3. `lc-clipfiles`: Generate full file content for files listed in the clipboard
 
-- `lc-sel-full`: Select files for full content inclusion
-- `lc-sel-outline`: Select files for outline inclusion
-- `lc-context`: Generate and copy context to clipboard
-- `lc-clipfiles`: Generate full file content for files listed in the clipboard
+### Quick Start
 
-### Selecting Files
+1. Navigate to your project's root directory.
+2. Run `lc-sel-full` to select files for full content inclusion.
+3. Run `lc-context` to generate and copy the context to your clipboard.
+4. Paste the generated context into your LLM chat.
 
-To select files for full content:
+For smaller repositories, it's often better to include full contents for all files rather than using outlines. The `lc-sel-outline` command is more useful for larger projects where including all file contents might exceed the LLM's context window.
 
-```
-lc-sel-full
-```
+For more detailed instructions on customizing ignore patterns, handling LLM file requests, and using outlines for larger projects, please refer to our [Usage Guide](docs/USAGE.md).
 
-This command selects files for full content inclusion and updates the stored context. If any previously selected outline files are now included in the full selection, they will be automatically removed from the outline selection.
+## Typical Workflow
 
-To select files for outline:
+1. Navigate to your project's root directory.
+2. (Optional) Edit `.llm-context/config.json` to add custom ignore patterns.
+3. Run `lc-sel-full` to choose files for context.
+4. Run `lc-context` to generate the context.
+5. Paste the generated context into your LLM chat, Claude Project, or GPT Knowledge Source.
+6. Inform the LLM about the presence and nature of the context you've provided, most likely via the System or Custom prompt.
 
-```
-lc-sel-outline
-```
+### Handling LLM File Requests
 
-This command selects files for outline inclusion, excluding any files already selected for full content. If no full files have been selected, a warning will be displayed.
+When the LLM requests specific files:
 
-### Generating Context
+1. Copy the LLM's file request (typically in a markdown block) to your clipboard.
+2. Run `lc-clipfiles` to generate the content of the requested files.
+3. Paste the generated file contents back into your chat with the LLM.
 
-After selecting files, you can generate the context:
-
-```
-lc-context
-```
-
-This command generates a context based on the selected files and copies it to your clipboard.
-
-### Large Repositories and Outlining
+## Large Repositories and Outlining
 
 For larger repositories, LLM Context uses a combination of full file content and file outlines to provide a comprehensive yet manageable context:
 
 - Full content is included for key files that require detailed analysis.
 - Outlines are provided for less critical files or those that are too large for full inclusion.
 
-This approach allows you to provide context for more files without exceeding the LLM's context window limit.
+This approach allows you to provide context for more files without exceeding the LLM's context window limit. For these larger projects, you can use the `lc-sel-outline` command after `lc-sel-full` to select files for outline inclusion.
 
 **Note:** The outlining feature currently supports the following programming languages:
 C, C++, C#, Elisp, Elixir, Elm, Go, Java, JavaScript, OCaml, PHP, Python, QL, Ruby, Rust, and TypeScript.
@@ -90,29 +87,9 @@ Your feedback is invaluable in helping us enhance LLM Context for all users. We'
 
 Together, we can make LLM Context an even more powerful tool for developers working with LLMs.
 
-
-## Typical Workflow
-
-1. Navigate to your project's root directory.
-2. (Optional) Edit `.llm-context/config.json` to add custom ignore patterns.
-3. Run `lc-select` to choose files for context.
-4. For small repos: Run `lc-gencontext`.
-   For large repos: Run both `lc-gencontext` and `lc-outlines`, and combine their output.
-5. Paste the generated context into your LLM chat, Claude Project, or GPT Knowledge Source.
-6. Inform the LLM about the presence and nature of the context you've provided, most likely via the System or Custom prompt.
-
-### Providing Files to LLM (for large repos)
-
-1. When the LLM requests specific files, it will typically do so in a markdown block quote.
-2. Copy the LLM's file request to your clipboard.
-3. Run `lc-clipfiles` to generate the content of the requested files.
-4. Paste the generated file contents back into your chat with the LLM.
-
-This workflow allows for dynamic interaction with the LLM, providing initial context and responding to specific file requests as needed during the conversation.
-
 ## Advanced Usage
 
-For more detailed information on customizing ignore patterns and manually editing the selected file list, please refer to our [Usage Guide](docs/USAGE.md).
+For more detailed information on customizing ignore patterns, manually editing the selected file list, and using outlines for larger projects, please refer to our [Usage Guide](docs/USAGE.md).
 
 ## Acknowledgments
 
@@ -122,11 +99,11 @@ LLM Context has evolved from several projects and influences:
 - LLM Code Highlighter was inspired by [Aider Chat](https://github.com/paul-gauthier/aider), particularly its [RepoMap](https://aider.chat/docs/repomap.html) functionality.
 - The original concept grew out of a project for [RubberDuck](https://github.com/rubberduck-ai/rubberduck-vscode) and was later used for [Continue](https://github.com/continuedev/continuedev).
 - LLM Code Highlighter included functionality for ranking and highlighting tags, based on a translation of Aider Chat's Python code to TypeScript (with the help of Chat-GPT-4). This functionality is not yet implemented in LLM Context.
-- The outlining functionality, developed in LLM Code Highlighter, has been moved to this project.
-- Parts of the outlining and highlighting code in LLM Context were translated from TypeScript to Python with Claude-3.5-Sonnet's help, bringing the project full circle.
+- The outlining functionality, independently developed in LLM Code Highlighter, has been moved to this project.
+- Parts of the code in LLM Context were translated from TypeScript to Python with Claude-3.5-Sonnet's help, bringing the project full circle (Python -> TypeScript -> Python).
 - This project currently uses the tree-sitter [tag query files](src/llm_context/highlighter/tag-qry/) from Aider Chat.
 
-We are grateful for the open-source community and the innovations that have influenced this project's development. The evolution from ideas/code in Aider Chat to LLM Code Highlighter (via RubberDuck and Continue) to LLM Context demonstrates the iterative nature of software development and the value of building upon and adapting existing ideas.
+We are grateful for the open-source community and the innovations that have influenced this project's development.
 
 I am grateful for the help of Claude-3.5-Sonnet in the development of this project.
 
