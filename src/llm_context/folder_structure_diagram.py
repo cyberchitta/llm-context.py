@@ -32,7 +32,7 @@ class FolderStructureDiagram:
         tree_dict = self._build_tree_structure(sorted_paths)
         diagram = self._format_tree({os.path.basename(self.root_dir): tree_dict})
         if self.is_enhanced:
-            key = "Key: ✓ Full content, ○ Outline only, ✗ Not included\n\n"
+            key = "Key: ✓ Full content, ○ Outline only, ✗ Excluded\n\n"
             return key + diagram
         return diagram
 
