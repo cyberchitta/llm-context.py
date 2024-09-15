@@ -36,7 +36,7 @@ LLM Context provides several commands for file selection, context generation, an
 
 For smaller repositories, it's often better to include full contents for all files rather than using outlines. The `lc-sel-outline` command is more useful for larger projects where including all file contents might exceed the LLM's context window.
 
-For more detailed instructions on customizing ignore patterns, handling LLM file requests, and using outlines for larger projects, please refer to our [Usage Guide](docs/USAGE.md).
+For more detailed instructions on customizing ignore patterns, handling LLM file requests, and using outlines for larger projects, please refer to our [Usage Guide](docs/usage.md).
 
 ## Typical Workflow
 
@@ -89,7 +89,7 @@ Together, we can make LLM Context an even more powerful tool for developers work
 
 ## Advanced Usage
 
-For more detailed information on customizing ignore patterns, manually editing the selected file list, and using outlines for larger projects, please refer to our [Usage Guide](docs/USAGE.md).
+For more detailed information on customizing ignore patterns, manually editing the selected file list, and using outlines for larger projects, please refer to our [Usage Guide](docs/usage.md).
 
 ## Acknowledgments
 
