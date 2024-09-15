@@ -1,4 +1,5 @@
 import os
+import warnings
 from dataclasses import dataclass
 
 from pathspec import GitIgnoreSpec
@@ -107,23 +108,53 @@ class ContextSelector:
         outline_selector = FileSelector.create(root_path, outline_pathspecs)
         return ContextSelector(project_settings, full_selector, outline_selector)
 
-    def select_files(self) -> tuple[list[str], list[str]]:
-        full_content_files = self.full_selector.get_files()
-        all_outline_files = self.outline_selector.get_files()
-        outline_files = [f for f in all_outline_files if f not in set(full_content_files)]
-        return full_content_files, outline_files
+    def select_full_files(self) -> list[str]:
+        full_files = self.full_selector.get_files()
+        stored_context = self.project_settings.context_storage.get_stored_context()
+        outline_files = stored_context.get("outline", [])
+        updated_outline_files = [f for f in outline_files if f not in set(full_files)]
+        if len(outline_files) != len(updated_outline_files):
+            warnings.warn(
+                "Some files previously in outline selection have been moved to full selection."
+            )
+        self.update_selected(full_files, updated_outline_files)
+        return full_files
 
-    def update_selected(self):
-        full_content_files, outline_files = self.select_files()
+    def select_outline_files(self) -> list[str]:
+        stored_context = self.project_settings.context_storage.get_stored_context()
+        full_files = stored_context.get("full", [])
+        if not full_files:
+            warnings.warn(
+                "No full files have been selected. Consider running full file selection first."
+            )
+        all_outline_files = self.outline_selector.get_files()
+        outline_files = [f for f in all_outline_files if f not in set(full_files)]
+        self.update_selected(full_files, outline_files)
+        return outline_files
+
+    def update_selected(self, full_files: list[str], outline_files: list[str]):
         self.project_settings.context_storage.store_context(
-            {"full": full_content_files, "outline": outline_files}
+            {"full": full_files, "outline": outline_files}
         )
 
 
+def select_full_files():
+    selector = ContextSelector.create()
+    full_files = selector.select_full_files()
+    print(f"Selected {len(full_files)} full files.")
+
+
+def select_outline_files():
+    selector = ContextSelector.create()
+    outline_files = selector.select_outline_files()
+    print(f"Selected {len(outline_files)} outline files.")
+
+
 def main():
-    select_files = ContextSelector.create()
-    select_files.select_files()
-    select_files.update_selected()
+    selector = ContextSelector.create()
+    full_files = selector.select_full_files()
+    outline_files = selector.select_outline_files(full_files)
+    selector.update_selected(full_files, outline_files)
 
 
 if __name__ == "__main__":
