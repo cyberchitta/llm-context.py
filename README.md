@@ -9,7 +9,7 @@ LLM Context is a tool designed to help developers efficiently copy and paste rel
 - **Intelligent File Selection**: Respects `.gitignore` rules and additional custom ignore patterns to exclude irrelevant files.
 - **Clipboard Integration**: Automatically copies the generated context to your clipboard for easy pasting into LLM chats.
 - **Code Structure Visualization**: Generates outlines of selected files to provide a quick overview of code structure.
-- **Customizable Ignore Patterns**: Allows additional ignore patterns to be specified, giving you fine-grained control over what's included in the context.
+- **Customizable Ignore Patterns**: Allows [additional ignore patterns to be specified](docs/usage.md#customizing-ignore-patterns), giving you fine-grained control over what's included in the context.
 
 ## Installation
 
@@ -19,33 +19,16 @@ Use [pipx](https://pypa.github.io/pipx/) to install LLM Context:
 pipx install llm-context
 ```
 
-## Basic Usage
+## Usage
 
-LLM Context provides several commands for file selection, context generation, and project visualization:
-
-1. `lc-sel-full`: Select files for full content inclusion
-2. `lc-context`: Generate and copy context to clipboard
-3. `lc-clipfiles`: Generate full file content for files listed in the clipboard
-
-### Quick Start
-
-1. Navigate to your project's root directory.
-2. Run `lc-sel-full` to select files for full content inclusion.
-3. Run `lc-context` to generate and copy the context to your clipboard.
-4. Paste the generated context into your LLM chat.
-
-For smaller repositories, it's often better to include full contents for all files rather than using outlines. The `lc-sel-outline` command is more useful for larger projects where including all file contents might exceed the LLM's context window.
-
-For more detailed instructions on customizing ignore patterns, handling LLM file requests, and using outlines for larger projects, please refer to our [Usage Guide](docs/usage.md).
-
-## Typical Workflow
+### Quick Start and Typical Workflow
 
 1. Navigate to your project's root directory.
 2. (Optional) Edit `.llm-context/config.json` to add custom ignore patterns.
-3. Run `lc-sel-full` to choose files for context.
-4. Run `lc-context` to generate the context.
+3. Run `lc-sel-full` to select files for full content inclusion.
+4. Run `lc-context` to generate and copy the context to your clipboard.
 5. Paste the generated context into your LLM chat, Claude Project, or GPT Knowledge Source.
-6. Inform the LLM about the presence and nature of the context you've provided, most likely via the System or Custom prompt.
+6. Inform the LLM about the presence and nature of the context you've provided, [typically via the System or Custom prompt](docs/usage.md#prompt-for-llm).
 
 ### Handling LLM File Requests
 
@@ -54,6 +37,10 @@ When the LLM requests specific files:
 1. Copy the LLM's file request (typically in a markdown block) to your clipboard.
 2. Run `lc-clipfiles` to generate the content of the requested files.
 3. Paste the generated file contents back into your chat with the LLM.
+
+For smaller repositories, it's often better to include full contents for all files rather than using outlines. The `lc-sel-outline` command is more useful for larger projects where including all file contents might exceed the LLM's context window.
+
+For more detailed instructions on customizing ignore patterns, manually editing the selected file list, and using outlines for larger projects, please refer to our [Usage Guide](docs/usage.md).
 
 ## Large Repositories and Outlining
 
