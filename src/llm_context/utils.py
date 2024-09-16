@@ -54,8 +54,6 @@ class PathConverter:
         return [self._make_relative(path) for path in absolute_paths]
 
     def _convert_single_path(self, path: str) -> str:
-        if not self.validate(path):
-            raise ValueError(f"Invalid path provided: {path}")
         return str(self.root / Path(path[len(self.root.name) + 2 :]))
 
     def _make_relative(self, path: str) -> str:
