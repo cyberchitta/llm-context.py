@@ -1,10 +1,12 @@
 import os
 import warnings
 from dataclasses import dataclass
+from pathlib import Path
 
 from pathspec import GitIgnoreSpec
 
 from llm_context.project_settings import ProjectSettings
+from llm_context.utils import PathConverter
 
 
 @dataclass(frozen=True)
@@ -58,14 +60,19 @@ class GitIgnorer:
 class FileSelector:
     root_path: str
     ignorer: GitIgnorer
+    path_converter: PathConverter
 
     @staticmethod
-    def create(root_path: str, pathspecs: list[str]) -> "FileSelector":
+    def create(root_path: Path, pathspecs: list[str]) -> "FileSelector":
         ignorer = GitIgnorer.from_git_root(root_path, pathspecs)
-        return FileSelector(root_path, ignorer)
+        path_converter = PathConverter.create(root_path)
+        return FileSelector(str(root_path), ignorer, path_converter)
 
     def get_files(self) -> list[str]:
         return self.traverse(self.root_path)
+
+    def get_relative_files(self) -> list[str]:
+        return self.path_converter.to_relative(self.get_files())
 
     def traverse(self, current_dir: str) -> list[str]:
         entries = os.listdir(current_dir)
@@ -106,7 +113,7 @@ class ContextSelector:
         return ContextSelector(settings, full_selector, outline_selector)
 
     def select_full_files(self) -> list[str]:
-        full_files = self.full_selector.get_files()
+        full_files = self.full_selector.get_relative_files()
         stored_context = self.settings.context_storage.get_stored_context()
         outline_files = stored_context.get("outline", [])
         updated_outline_files = [f for f in outline_files if f not in set(full_files)]
@@ -124,7 +131,7 @@ class ContextSelector:
             warnings.warn(
                 "No full files have been selected. Consider running full file selection first."
             )
-        all_outline_files = self.outline_selector.get_files()
+        all_outline_files = self.outline_selector.get_relative_files()
         outline_files = [f for f in all_outline_files if f not in set(full_files)]
         self.update_selected(full_files, outline_files)
         return outline_files

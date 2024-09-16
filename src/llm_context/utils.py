@@ -1,7 +1,6 @@
-from typing import Union, Callable
-from pathlib import Path
 from dataclasses import dataclass
-
+from pathlib import Path
+from typing import Callable, Union
 
 import pyperclip  # type: ignore
 
@@ -30,9 +29,14 @@ def create_entry_point(func: Callable[..., str]) -> Callable[[], None]:
 
     return entry_point
 
+
 @dataclass(frozen=True)
 class PathConverter:
     root: Path
+
+    @staticmethod
+    def create(root: Path) -> "PathConverter":
+        return PathConverter(root)
 
     def validate(self, paths: Union[str, list[str]]) -> bool:
         if isinstance(paths, str):
@@ -52,7 +56,7 @@ class PathConverter:
     def _convert_single_path(self, path: str) -> str:
         if not self.validate(path):
             raise ValueError(f"Invalid path provided: {path}")
-        return str(self.root / Path(path[len(self.root.name) + 2:]))
+        return str(self.root / Path(path[len(self.root.name) + 2 :]))
 
     def _make_relative(self, path: str) -> str:
         return f"/{self.root.name}/{Path(path).relative_to(self.root)}"

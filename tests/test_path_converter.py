@@ -6,7 +6,7 @@ from llm_context.utils import PathConverter
 
 class TestPathConverter(unittest.TestCase):
     def setUp(self):
-        self.path_converter = PathConverter(Path("/home/user/project"))
+        self.path_converter = PathConverter.create(Path("/home/user/project"))
 
     def test_init(self):
         self.assertEqual(self.path_converter.root, Path("/home/user/project"))
@@ -45,6 +45,19 @@ class TestPathConverter(unittest.TestCase):
             "/home/user/project/README.md",
         ]
         self.assertEqual(self.path_converter.to_absolute(relative_paths), expected_absolute_paths)
+
+    def test_to_relative_conversion(self):
+        absolute_paths = [
+            "/home/user/project/src/main.py",
+            "/home/user/project/tests/test_main.py",
+            "/home/user/project/README.md",
+        ]
+        expected_relative_paths = [
+            "/project/src/main.py",
+            "/project/tests/test_main.py",
+            "/project/README.md",
+        ]
+        self.assertEqual(self.path_converter.to_relative(absolute_paths), expected_relative_paths)
 
     def test_to_absolute_with_invalid_paths(self):
         invalid_paths = ["/otherproject/src/main.py", "project/tests/test_main.py", "/project"]

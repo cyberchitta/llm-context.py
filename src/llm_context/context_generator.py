@@ -10,7 +10,7 @@ from llm_context.highlighter.language_mapping import to_language
 from llm_context.highlighter.outliner import generate_outlines
 from llm_context.highlighter.parser import Source
 from llm_context.project_settings import ProjectSettings
-from llm_context.utils import create_entry_point, PathConverter
+from llm_context.utils import PathConverter, create_entry_point
 
 
 @dataclass(frozen=True)
@@ -38,21 +38,19 @@ class ContextGenerator:
         return ContextGenerator(ProjectSettings.create())
 
     def _files(self, rel_paths: list[str]) -> list[dict[str, str]]:
-        root_name = os.path.basename(self.settings.project_root_path)
+        abs_paths = PathConverter.create(self.settings.project_root_path).to_absolute(rel_paths)
         return [
-            {
-                "path": f"/{root_name}/{Path(path).relative_to(self.settings.project_root_path)}",
-                "content": Path(path).read_text(),
-            }
-            for path in rel_paths
+            {"path": rel_path, "content": Path(abs_path).read_text()}
+            for rel_path, abs_path in zip(rel_paths, abs_paths)
         ]
 
     def _outlines(self, rel_paths: list[str]) -> list[dict[str, str]]:
-        source_set = [Source(path, Path(path).read_text()) for path in rel_paths]
+        abs_paths = PathConverter.create(self.settings.project_root_path).to_absolute(rel_paths)
+        source_set = [Source(rel, Path(abs).read_text()) for rel, abs in zip(rel_paths, abs_paths)]
         return generate_outlines(source_set)
 
     def files(self, rel_paths: list[str]) -> str:
-        path_converter = PathConverter(self.settings.project_root_path)
+        path_converter = PathConverter.create(self.settings.project_root_path)
         if rel_paths and not path_converter.validate(rel_paths):
             print("Invalid file paths")
             return ""
@@ -66,14 +64,17 @@ class ContextGenerator:
 
     def context(self) -> str:
         project_root = self.settings.project_root_path
-        selected_files = self.settings.context_storage.get_stored_context()
-        full_files = selected_files.get("full", [])
-        outline_files = [file for file in selected_files.get("outline", []) if to_language(file)]
+        path_converter = PathConverter.create(project_root)
+        sel_files = self.settings.context_storage.get_stored_context()
+        full_abs = path_converter.to_absolute(full_rel := sel_files.get("full", []))
+        outline_abs = path_converter.to_absolute(
+            outline_rel := [f for f in sel_files.get("outline", []) if to_language(f)]
+        )
         context = {
-            "folder_structure_diagram": get_annotated_fsd(project_root, full_files, outline_files),
+            "folder_structure_diagram": get_annotated_fsd(project_root, full_abs, outline_abs),
             "summary": self.settings.get_summary(),
-            "files": self._files(full_files),
-            "highlights": self._outlines(outline_files),
+            "files": self._files(full_rel),
+            "highlights": self._outlines(outline_rel),
         }
         return self._render("context", context)
 
