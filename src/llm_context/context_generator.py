@@ -37,26 +37,26 @@ class ContextGenerator:
     def create() -> "ContextGenerator":
         return ContextGenerator(ProjectSettings.create())
 
-    def _files(self, file_paths: list[str]) -> list[dict[str, str]]:
+    def _files(self, rel_paths: list[str]) -> list[dict[str, str]]:
         root_name = os.path.basename(self.settings.project_root_path)
         return [
             {
                 "path": f"/{root_name}/{Path(path).relative_to(self.settings.project_root_path)}",
                 "content": Path(path).read_text(),
             }
-            for path in file_paths
+            for path in rel_paths
         ]
 
-    def _outlines(self, file_paths: list[str]) -> list[dict[str, str]]:
-        source_set = [Source(path, Path(path).read_text()) for path in file_paths]
+    def _outlines(self, rel_paths: list[str]) -> list[dict[str, str]]:
+        source_set = [Source(path, Path(path).read_text()) for path in rel_paths]
         return generate_outlines(source_set)
 
-    def files(self, file_paths: list[str]) -> str:
+    def files(self, rel_paths: list[str]) -> str:
         path_converter = PathConverter(self.settings.project_root_path)
-        if file_paths and not path_converter.validate(file_paths):
+        if rel_paths and not path_converter.validate(rel_paths):
             print("Invalid file paths")
             return ""
-        valid_paths = path_converter.to_absolute(file_paths)
+        valid_paths = path_converter.to_absolute(rel_paths)
         paths = (
             valid_paths
             if valid_paths

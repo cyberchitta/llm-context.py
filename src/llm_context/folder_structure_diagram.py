@@ -27,8 +27,8 @@ class FolderStructureDiagram:
     ) -> "FolderStructureDiagram":
         return FolderStructureDiagram(root_dir, full_files, outline_files)
 
-    def generate_tree(self, file_paths: list[str]) -> str:
-        sorted_paths = sorted(self._make_relative(path) for path in file_paths)
+    def generate_tree(self, abs_paths: list[str]) -> str:
+        sorted_paths = sorted(self._make_relative(path) for path in abs_paths)
         tree_dict = self._build_tree_structure(sorted_paths)
         diagram = self._format_tree({os.path.basename(self.root_dir): tree_dict})
         if self.is_enhanced:
@@ -76,17 +76,17 @@ class FolderStructureDiagram:
 
 
 def get_annotated_fsd(project_root, full_files, outline_files) -> str:
-    file_paths = FileSelector.create(project_root, [".git"]).get_files()
+    abs_paths = FileSelector.create(project_root, [".git"]).get_files()
     diagram = FolderStructureDiagram.create_enhanced(project_root, full_files, outline_files)
-    return diagram.generate_tree(file_paths)
+    return diagram.generate_tree(abs_paths)
 
 
 def _get_fsd() -> str:
     settings = ProjectSettings.create()
     project_root = settings.project_root
-    file_paths = FileSelector.create(project_root, [".git"]).get_files()
+    abs_paths = FileSelector.create(project_root, [".git"]).get_files()
     diagram = FolderStructureDiagram.create_simple(project_root)
-    return diagram.generate_tree(file_paths)
+    return diagram.generate_tree(abs_paths)
 
 
 get_fs_diagram = create_entry_point(_get_fsd)
