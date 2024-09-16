@@ -87,9 +87,6 @@ class FileSelector:
         subdir_files = [file for d in dirs for file in self.traverse(d)]
         return files + subdir_files
 
-    def get_all(self) -> list[str]:
-        return self.traverse(self.root_path)
-
 
 @dataclass(frozen=True)
 class ContextSelector:
