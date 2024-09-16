@@ -10,7 +10,7 @@ from llm_context.highlighter.language_mapping import to_language
 from llm_context.highlighter.outliner import generate_outlines
 from llm_context.highlighter.parser import Source
 from llm_context.project_settings import ProjectSettings
-from llm_context.utils import create_entry_point
+from llm_context.utils import create_entry_point, PathConverter
 
 
 @dataclass(frozen=True)
@@ -27,19 +27,6 @@ class Template:
     def render(self) -> str:
         template = self.env.get_template(self.name)
         return template.render(**self.context)
-
-
-@dataclass(frozen=True)
-class PathConverter:
-    root: Path
-
-    def validate(self, paths: list[str]) -> bool:
-        return all(path.startswith(f"/{self.root.name}/") for path in paths)
-
-    def to_absolute(self, relative_paths: list[str]) -> list[str]:
-        if not self.validate(relative_paths):
-            raise ValueError("Invalid paths provided")
-        return [str(self.root / Path(path[len(self.root.name) + 2 :])) for path in relative_paths]
 
 
 @dataclass(frozen=True)

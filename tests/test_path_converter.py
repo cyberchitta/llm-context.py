@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from llm_context.context_generator import PathConverter
+from llm_context.utils import PathConverter
 
 
 class TestPathConverter(unittest.TestCase):
