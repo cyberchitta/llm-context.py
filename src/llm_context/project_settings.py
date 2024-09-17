@@ -12,7 +12,25 @@ PROJECT_INFO: str = (
     "https://github.com/cyberchitta/llm-context.py or "
     "https://pypi.org/project/llm-context/"
 )
-GIT_IGNORE_DEFAULT: list[str] = [".git", ".gitignore", ".llm-context/"]
+GIT_IGNORE_DEFAULT: list[str] = [
+    ".git",
+    ".gitignore",
+    ".llm-context/",
+    "*.lock",
+    "CHANGELOG.md",
+    "*.log",
+    "*.svg",
+    "*.png",
+    "*.jpg",
+    "*.jpeg",
+    "*.gif",
+    "*.ico",
+    "*.woff",
+    "*.woff2",
+    "*.eot",
+    "*.ttf",
+    "*.map",
+]
 
 
 @dataclass(frozen=True)
