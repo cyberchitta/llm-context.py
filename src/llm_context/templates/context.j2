@@ -2,23 +2,32 @@
 
 This context presents a comprehensive view of the _/{{ project_name }}_ repository.
 
-## Repository Structure
-
-```
-{{ folder_structure_diagram }}
-```
-
 {% if sample_requested_files %}
-## Requesting Additional Files
+## 📂 How to Request Missing Files 📂
 
-If you need to see the contents of files that are not fully available (marked with "✗" or "○" in the repository structure), please request them as a list of root-relative paths in a markdown fenced code block, e.g.:
+If you need to see the contents of files that are not fully available (marked with "✗" or "○" in the repository structure below), please follow these steps:
+
+1. Immediately halt your current response.
+2. Start a new response with a markdown code block (```) on a new line.
+3. List the root-relative paths of the missing files you need, one per line.
+4. Close the markdown code block with another ```.
+5. End your response.
+
+Example file request:
 
 ```
 {%- for file in sample_requested_files %}
 {{ file }}
 {%- endfor %}
 ```
+
+The human will then provide the requested file contents in the next message.
 {% endif %}
+## Repository Structure
+
+```
+{{ folder_structure_diagram }}
+```
 
 {% if summary %}
 ## Project Summary
