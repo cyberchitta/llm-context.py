@@ -36,7 +36,7 @@ class GitIgnorer:
         return GitIgnorer(ignorer_data)
 
     @staticmethod
-    def _collect_gitignores(top) -> list[tuple[str, list[str]]]:
+    def _collect_gitignores(top: str) -> list[tuple[str, list[str]]]:
         gitignores = []
         for root, _, files in os.walk(top):
             if ".gitignore" in files:
@@ -64,7 +64,7 @@ class FileSelector:
 
     @staticmethod
     def create(root_path: Path, pathspecs: list[str]) -> "FileSelector":
-        ignorer = GitIgnorer.from_git_root(root_path, pathspecs)
+        ignorer = GitIgnorer.from_git_root(str(root_path), pathspecs)
         path_converter = PathConverter.create(root_path)
         return FileSelector(str(root_path), ignorer, path_converter)
 
