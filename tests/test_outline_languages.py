@@ -1,10 +1,16 @@
 import pytest
+
 from llm_context.highlighter.outliner import generate_outlines
 from llm_context.highlighter.parser import Source
 
-@pytest.mark.parametrize("language,extension,code,expected_highlights", [
-    ("python", "py", 
-     """
+
+@pytest.mark.parametrize(
+    "language,extension,code,expected_highlights",
+    [
+        (
+            "python",
+            "py",
+            """
 def factorial(n: int) -> int:
     if n == 0 or n == 1:
         return 1
@@ -27,7 +33,7 @@ if __name__ == "__main__":
     print(f"Square of 4: {MathOperations.square(4)}")
     print(f"Cube of 3: {math_op.cube()}")
 """,
-     """⋮...
+            """⋮...
 █def factorial(n: int) -> int:
 ⋮...
 █class MathOperations:
@@ -38,10 +44,12 @@ if __name__ == "__main__":
 ⋮...
 █    def cube(self) -> float:
 ⋮...
-""".strip()
-    ),
-    ("javascript", "js", 
-     """
+""".strip(),
+        ),
+        (
+            "javascript",
+            "js",
+            """
 function factorial(n) {
     if (n === 0 || n === 1) return 1;
     return n * factorial(n - 1);
@@ -66,7 +74,7 @@ console.log(`Factorial of 5: ${factorial(5)}`);
 console.log(`Square of 4: ${MathOperations.square(4)}`);
 console.log(`Cube of 3: ${mathOp.cube()}`);
 """,
-     """⋮...
+            """⋮...
 █function factorial(n) {
 ⋮...
 █class MathOperations {
@@ -74,10 +82,12 @@ console.log(`Cube of 3: ${mathOp.cube()}`);
 ⋮...
 █    cube() {
 ⋮...
-""".strip()
-    ),
-    ("typescript", "ts", 
-     """
+""".strip(),
+        ),
+        (
+            "typescript",
+            "ts",
+            """
 function factorial(n: number): number {
     if (n === 0 || n === 1) return 1;
     return n * factorial(n - 1);
@@ -104,7 +114,7 @@ console.log(`Factorial of 5: ${factorial(5)}`);
 console.log(`Square of 4: ${MathOperations.square(4)}`);
 console.log(`Cube of 3: ${mathOp.cube()}`);
 """,
-     """⋮...
+            """⋮...
 █function factorial(n: number): number {
 ⋮...
 █interface IMathOperations {
@@ -117,10 +127,12 @@ console.log(`Cube of 3: ${mathOp.cube()}`);
 ⋮...
 █    cube(): number {
 ⋮...
-""".strip()
-    ),
-    ("java", "java", 
-     """
+""".strip(),
+        ),
+        (
+            "java",
+            "java",
+            """
 public class MathOperations {
     public static int factorial(int n) {
         if (n == 0 || n == 1) return 1;
@@ -149,7 +161,7 @@ public class MathOperations {
     }
 }
 """,
-     """⋮...
+            """⋮...
 █public class MathOperations {
 █    public static int factorial(int n) {
 ⋮...
@@ -159,10 +171,12 @@ public class MathOperations {
 ⋮...
 █    public static void main(String[] args) {
 ⋮...
-""".strip()
-    ),
-    ("c", "c", 
-     """
+""".strip(),
+        ),
+        (
+            "c",
+            "c",
+            """
 #include <stdio.h>
 #include <math.h>
 
@@ -196,7 +210,7 @@ int main() {
     return 0;
 }
 """,
-     """⋮...
+            """⋮...
 █int factorial(int n) {
 ⋮...
 █double square(double x) {
@@ -209,10 +223,12 @@ int main() {
 ⋮...
 █int main() {
 ⋮...
-""".strip()
-    ),
-    ("cpp", "cpp", 
-     """
+""".strip(),
+        ),
+        (
+            "cpp",
+            "cpp",
+            """
 #include <iostream>
 #include <cmath>
 
@@ -245,7 +261,7 @@ int main() {
     return 0;
 }
 """,
-     """⋮...
+            """⋮...
 █int factorial(int n) {
 ⋮...
 █class MathOperations {
@@ -258,10 +274,12 @@ int main() {
 ⋮...
 █int main() {
 ⋮...
-""".strip()
-    ),
-    ("csharp", "cs", 
-     """
+""".strip(),
+        ),
+        (
+            "csharp",
+            "cs",
+            """
 using System;
 
 public class MathOperations
@@ -292,7 +310,7 @@ public class MathOperations
     }
 }
 """,
-     """⋮...
+            """⋮...
 █public class MathOperations
 ⋮...
 █    public static int Factorial(int n)
@@ -303,10 +321,12 @@ public class MathOperations
 ⋮...
 █    public static void Main(string[] args)
 ⋮...
-""".strip()
-    ),
-    ("ruby", "rb", 
-     """
+""".strip(),
+        ),
+        (
+            "ruby",
+            "rb",
+            """
 def factorial(n)
   return 1 if n == 0 || n == 1
   n * factorial(n - 1)
@@ -331,7 +351,7 @@ puts "Factorial of 5: #{factorial(5)}"
 puts "Square of 4: #{MathOperations.square(4)}"
 puts "Cube of 3: #{math_op.cube}"
 """,
-     """⋮...
+            """⋮...
 █def factorial(n)
 ⋮...
 █class MathOperations
@@ -341,10 +361,12 @@ puts "Cube of 3: #{math_op.cube}"
 ⋮...
 █  def cube
 ⋮...
-""".strip()
-    ),
-("go", "go", 
-     """
+""".strip(),
+        ),
+        (
+            "go",
+            "go",
+            """
 package main
 
 import (
@@ -378,7 +400,7 @@ func main() {
     fmt.Printf("Cube of 3: %.2f\\n", mathOp.Cube())
 }
 """,
-     """⋮...
+            """⋮...
 █func factorial(n int) int {
 ⋮...
 █type MathOperations struct {
@@ -389,10 +411,12 @@ func main() {
 ⋮...
 █func main() {
 ⋮...
-""".strip()
-    ),
-    ("rust", "rs", 
-     """
+""".strip(),
+        ),
+        (
+            "rust",
+            "rs",
+            """
 struct MathOperations {
     value: f64,
 }
@@ -425,7 +449,7 @@ fn main() {
     println!("Cube of 3: {}", math_op.cube());
 }
 """,
-     """⋮...
+            """⋮...
 █struct MathOperations {
 ⋮...
 █    fn new(value: f64) -> Self {
@@ -438,10 +462,12 @@ fn main() {
 ⋮...
 █fn main() {
 ⋮...
-""".strip()
-    ),
-    ("php", "php", 
-     """
+""".strip(),
+        ),
+        (
+            "php",
+            "php",
+            """
 <?php
 
 function factorial($n) {
@@ -470,7 +496,7 @@ echo "Factorial of 5: " . factorial(5) . "\\n";
 echo "Square of 4: " . MathOperations::square(4) . "\\n";
 echo "Cube of 3: " . $mathOp->cube() . "\\n";
 """,
-     """⋮...
+            """⋮...
 █function factorial($n) {
 ⋮...
 █class MathOperations {
@@ -481,10 +507,12 @@ echo "Cube of 3: " . $mathOp->cube() . "\\n";
 ⋮...
 █    public function cube() {
 ⋮...
-""".strip()
-    ),
-    ("ocaml", "ml", 
-     """
+""".strip(),
+        ),
+        (
+            "ocaml",
+            "ml",
+            """
 let rec factorial n =
   match n with
   | 0 | 1 -> 1
@@ -506,7 +534,7 @@ let () =
   Printf.printf "Square of 4: %f\\n" (MathOperations.square 4.0);
   Printf.printf "Cube of 3: %f\\n" (MathOperations.cube math_op)
 """,
-     """⋮...
+            """⋮...
 █let rec factorial n =
 ⋮...
 █module MathOperations = struct
@@ -516,10 +544,12 @@ let () =
 ⋮...
 █  let cube t = t.value ** 3.0
 ⋮...
-""".strip()
-    ),
-    ("elm", "elm", 
-     """
+""".strip(),
+        ),
+        (
+            "elm",
+            "elm",
+            """
 module MathOperations exposing (factorial, square, cube)
 
 factorial : Int -> Int
@@ -552,7 +582,7 @@ main =
         |> String.join "\\n"
         |> Debug.log "Results"
 """,
-     """⋮...
+            """⋮...
 █module MathOperations exposing (factorial, square, cube)
 ⋮...
 █factorial n =
@@ -568,10 +598,12 @@ main =
 ⋮...
 █        mathOp =
 ⋮...
-""".strip()
-    ),
-    ("elixir", "ex", 
-     """
+""".strip(),
+        ),
+        (
+            "elixir",
+            "ex",
+            """
 defmodule MathOperations do
   def factorial(0), do: 1
   def factorial(1), do: 1
@@ -592,7 +624,7 @@ IO.puts "Factorial of 5: #{MathOperations.factorial(5)}"
 IO.puts "Square of 4: #{MathOperations.square(4)}"
 IO.puts "Cube of 3: #{MathOperations.cube(math_op)}"
 """,
-     """⋮...
+            """⋮...
 █defmodule MathOperations do
 █  def factorial(0), do: 1
 █  def factorial(1), do: 1
@@ -604,10 +636,12 @@ IO.puts "Cube of 3: #{MathOperations.cube(math_op)}"
 ⋮...
 █  def cube(%__MODULE__{value: value}), do: :math.pow(value, 3)
 ⋮...
-""".strip()
-    ),
-("elisp", "el", 
-     """
+""".strip(),
+        ),
+        (
+            "elisp",
+            "el",
+            """
 (defun factorial (n)
   (if (<= n 1)
       1
@@ -630,7 +664,7 @@ IO.puts "Cube of 3: #{MathOperations.cube(math_op)}"
   (message "Square of 4: %f" (square 4))
   (message "Cube of 3: %f" (cube math-op)))
 """,
-     """⋮...
+            """⋮...
 █(defun factorial (n)
 ⋮...
 █(defun square (x)
@@ -639,10 +673,12 @@ IO.puts "Cube of 3: #{MathOperations.cube(math_op)}"
 ⋮...
 █(defun cube (math-op)
 ⋮...
-""".strip()
-    ),
-    ("ql", "ql", 
-     """
+""".strip(),
+        ),
+        (
+            "ql",
+            "ql",
+            """
 import javascript
 
 int factorial(int n) {
@@ -669,7 +705,7 @@ where
   mo.getAMethod().getName() = "cube"
 select f.getName(), mo.getAMethod().getName()
 """,
-     """⋮...
+            """⋮...
 █int factorial(int n) {
 ⋮...
 █float square(float x) {
@@ -678,17 +714,19 @@ select f.getName(), mo.getAMethod().getName()
 ⋮...
 █  float cube() { result = Math::pow(this.value, 3); }
 ⋮...
-""".strip()
-    ),
-])
-
+""".strip(),
+        ),
+    ],
+)
 def test_outline_generation(language, extension, code, expected_highlights):
     source = Source(f"test_file.{extension}", code)
     outlines = generate_outlines([source])
-    
+
     assert len(outlines) == 1
     assert outlines[0]["rel_path"] == f"test_file.{extension}"
     assert "highlights" in outlines[0]
-    
+
     actual_highlights = outlines[0]["highlights"].strip()
-    assert actual_highlights == expected_highlights, f"Mismatch in {language} highlights:\nExpected:\n{expected_highlights}\n\nActual:\n{actual_highlights}"
+    assert (
+        actual_highlights == expected_highlights
+    ), f"Mismatch in {language} highlights:\nExpected:\n{expected_highlights}\n\nActual:\n{actual_highlights}"
