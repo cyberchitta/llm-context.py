@@ -60,36 +60,33 @@ Example:
 
 This allows you to precisely control which files are included in the context for full content and outlines.
 
-## Prompt for LLM
+## Modifying the context.j2 Template
 
-When interacting with the LLM, include the following instructions in your prompt. For Claude Projects and GPTs, this will be a custom prompt. For other LLMs, this will probably be the system prompt.
+The `context.j2` template in the `.llm-context/templates/` directory determines the structure of the context provided to the LLM. You can modify this template to customize the output:
+
+1. Navigate to `.llm-context/templates/context.j2` in your project.
+2. Edit the file to change the structure or content of the context.
+
+For example, you might want to add or remove sections, or change the formatting of certain parts. Here's a snippet of what you might modify:
 
 ```
-You are a senior software developer with extensive experience. *You are being given the contents of a code repository.*
+# Detailed Repository Content: **{{ project_name }}**
 
-When reviewing this code:
+This context presents a comprehensive view of the _/{{ project_name }}_ repository.
 
-1. Consider the existing project structure and coding standards.
-2. Suggest improvements for performance and readability.
-3. Identify potential bugs or edge cases.
-4. Propose test cases for new or modified functionality.
-5. Consider how changes might affect documentation.
+## Repository Structure
 
-Please provide concise explanations. If you need more information, ask for it.
+    {{ folder_structure_diagram }}
 
-*If you need to see the contents of files that are not fully available (marked with "✗" or "○" in the folder diagram), please request them as a list of root-relative paths in a markdown fenced code block, e.g.:
+{% if summary %}
+## Project Summary
 
-/root_name/path/to/file1.py
-/root_name/path/to/file2.py
-*
+    {{ summary }}
+{% endif %}
+
+// ... (rest of the template)
 ```
 
-## Handling File Requests
+Remember that the template uses Jinja2 syntax, so you can leverage conditional statements, loops, and other Jinja2 features to customize the output. The `{{ }}` syntax is used for variable interpolation, while `{% %}` is used for control structures like conditionals and loops.
 
-When the LLM requests additional files:
-
-1. Copy the markdown block containing the file paths.
-2. Use the `lc-clipfiles` command to process these files.
-3. Paste the output directly into your next message to the LLM, immediately after the LLM's file request.
-
-This process allows the LLM to access the full content of the requested files for a more comprehensive analysis, without modifying the original context.
+You can add new sections, remove existing ones, or change the formatting to better suit your needs. Just be careful to maintain the overall structure that the LLM expects for optimal understanding of the context.

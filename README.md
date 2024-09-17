@@ -30,7 +30,7 @@ pipx install llm-context
 4. (Optional) Edit the selected file list. See the [Usage Guide](docs/usage.md#manually-editing-selected-files) for instructions.
 5. Run `lc-context` to generate and copy the context to your clipboard.
 6. Paste the generated context into your LLM chat, Claude Project, or GPT Knowledge Source.
-7. Inform the LLM about the presence and nature of the context you've provided, [typically via the System or Custom prompt](docs/usage.md#prompt-for-llm).
+7. Start your conversation with the LLM about your project.
 
 ### Handling LLM File Requests
 
@@ -39,6 +39,10 @@ When the LLM requests specific files:
 1. Copy the LLM's file request (typically in a markdown block) to your clipboard.
 2. Run `lc-clipfiles` to generate the content of the requested files.
 3. Paste the generated file contents back into your chat with the LLM.
+
+This process allows the LLM to access the full content of the requested files for a more comprehensive analysis, without modifying the original context.
+
+For more detailed usage instructions, please refer to our [Usage Guide](docs/usage.md).
 
 ## Current Usage Patterns
 
@@ -70,7 +74,7 @@ If you encounter any issues, have suggestions for improvements, or want to share
 
 ## Advanced Usage
 
-For more detailed information on customizing ignore patterns, manually editing the selected file list, crafting prompts for LLMs, and handling file requests, please refer to our [Usage Guide](docs/usage.md).
+For more detailed information on customizing ignore patterns, manually editing the selected file list, modifying the context template, please refer to our [Usage Guide](docs/usage.md).
 
 ## Acknowledgments
 
