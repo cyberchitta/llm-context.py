@@ -8,7 +8,6 @@ LLM Context is a tool designed to help developers efficiently copy and paste rel
 
 - **Intelligent File Selection**: Respects `.gitignore` rules and additional custom ignore patterns to exclude irrelevant files.
 - **Clipboard Integration**: Automatically copies the generated context to your clipboard for easy pasting into LLM chats.
-- **Code Structure Visualization**: Generates outlines of selected files to provide a quick overview of code structure.
 - **Customizable Ignore Patterns**: Allows additional ignore patterns to be specified, giving you fine-grained control over what's included in the context.
 - **Versatile Content Support**: Works with both code repositories and collections of text-based documents.
 
@@ -29,7 +28,7 @@ pipx install llm-context
 3. Run `lc-sel-full` to select files for full content inclusion.
 4. (Optional) Edit the selected file list. See the [Usage Guide](docs/usage.md#manually-editing-selected-files) for instructions.
 5. Run `lc-context` to generate and copy the context to your clipboard.
-6. Paste the generated context into your LLM chat, Claude Project, or GPT Knowledge Source.
+6. Paste the generated context into your Claude Project Knowledge or GPT Knowledge.
 7. Start your conversation with the LLM about your project.
 
 ### Handling LLM File Requests
@@ -54,19 +53,23 @@ For more detailed usage instructions, please refer to our [Usage Guide](docs/usa
 
 We welcome feedback on how to improve the workflow for larger projects and other use cases.
 
-## Large Repositories and Outlining
+## Experimental: Handling Larger Repositories
 
-For larger repositories, LLM Context can use a combination of full file content and file outlines to provide a comprehensive yet manageable context:
+For larger repositories, we're exploring a workflow that combines full file content and file outlines to provide a more comprehensive yet manageable context:
 
-- Full content is included for key files that require detailed analysis.
-- Outlines are provided for less critical files or those that are too large for full inclusion.
+- Full content would be included for key files that require detailed analysis.
+- Outlines could be provided for less critical files or those that are too large for full inclusion.
 
-This approach allows you to provide context for more files without exceeding the LLM's context window limit. For these larger projects, you can use the `lc-sel-outline` command after `lc-sel-full` to select files for outline inclusion.
+This approach might allow you to provide context for more files without exceeding the LLM's context window limit.
+
+If you wish to experiment with this approach, you can use the `lc-sel-outline` command after `lc-sel-full` to select files for outline inclusion.
+
+When using this feature, if the AI requests to see the full content of an outlined file, you should use the `lc-clipfiles` command in conjunction with the outline. This allows you to provide the complete file content when needed, while still benefiting from the more compact outline in the initial context.
 
 **Note:** The outlining feature currently supports the following programming languages:
-C, C++, C#, Elisp, Elixir, Elm, Go, Java, JavaScript, OCaml, PHP, Python, QL, Ruby, Rust, and TypeScript.
+C, C++, C#, Elisp, Elixir, Elm, Go, Java, JavaScript, OCaml, PHP, Python, QL, Ruby, Rust, and TypeScript. Files in unsupported languages will not be outlined and will be excluded from the outline selection.
 
-Files in unsupported languages will not be outlined and will be excluded from the outline selection.
+We welcome feedback on this experimental feature and how it might be improved to better handle larger projects.
 
 ### Feedback and Contributions
 
