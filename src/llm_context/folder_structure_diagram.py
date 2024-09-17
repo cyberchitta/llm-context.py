@@ -82,8 +82,7 @@ def get_annotated_fsd(project_root, full_files, outline_files) -> str:
 
 
 def _get_fsd() -> str:
-    settings = ProjectSettings.create()
-    project_root = settings.project_root
+    project_root = ProjectSettings.create().project_root
     abs_paths = FileSelector.create(project_root, [".git"]).get_files()
     diagram = FolderStructureDiagram.create_simple(project_root)
     return diagram.generate_tree(abs_paths)
