@@ -60,10 +60,9 @@ class ContextGenerator:
         if rel_paths and not path_converter.validate(rel_paths):
             print("Invalid file paths")
             return ""
-        valid_paths = path_converter.to_absolute(rel_paths)
         paths = (
-            valid_paths
-            if valid_paths
+            rel_paths
+            if rel_paths
             else self.settings.context_storage.get_stored_context().get("full", [])
         )
         return self._render("files", {"files": self._files(paths)})
@@ -82,7 +81,7 @@ class ContextGenerator:
             "summary": self.settings.get_summary(),
             "files": self._files(full_rel),
             "highlights": self._outlines(outline_rel),
-            "sample_requested_files": path_converter.to_relative(self._sample_file_abs(full_abs)),
+            "sample_requested_files": path_converter.to_relative(self._sample_file_abs(set(full_abs))),
         }
         return self._render("context", context)
 

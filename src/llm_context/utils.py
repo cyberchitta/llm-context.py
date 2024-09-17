@@ -43,14 +43,10 @@ class PathConverter:
             return paths.startswith(f"/{self.root.name}/")
         return all(path.startswith(f"/{self.root.name}/") for path in paths)
 
-    def to_absolute(self, relative_paths: Union[str, list[str]]) -> Union[str, list[str]]:
-        if isinstance(relative_paths, str):
-            return self._convert_single_path(relative_paths)
+    def to_absolute(self, relative_paths: list[str]) -> list[str]:
         return [self._convert_single_path(path) for path in relative_paths]
 
-    def to_relative(self, absolute_paths: Union[str, list[str]]) -> Union[str, list[str]]:
-        if isinstance(absolute_paths, str):
-            return self._make_relative(absolute_paths)
+    def to_relative(self, absolute_paths: list[str]) -> list[str]:
         return [self._make_relative(path) for path in absolute_paths]
 
     def _convert_single_path(self, path: str) -> str:
