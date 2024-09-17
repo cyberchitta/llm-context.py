@@ -11,6 +11,16 @@ LLM Context is a tool designed to help developers efficiently copy and paste rel
 - **Customizable Ignore Patterns**: Allows additional ignore patterns to be specified, giving you fine-grained control over what's included in the context.
 - **Versatile Content Support**: Works with both code repositories and collections of text-based documents.
 
+## Current Usage Patterns
+
+1. **LLM Integration**: LLM Context has been primarily used to provide Project Knowledge in Claude and GPT Knowledge in OpenAI. It can also be used with vanilla chat interfaces, though this use case has been less explored.
+
+2. **Project Types**: The tool has been successfully used with both code repositories and collections of text/markdown documents, making it versatile for various types of projects.
+
+3. **Project Size**: LLM Context has been mainly used for projects where all files can be comfortably loaded into the LLM's context. Its usage for larger projects, where not all files would fit within the LLM's context window, has been limited and the workflow for such cases is less optimized.
+
+We welcome feedback on how to improve the workflow for larger projects and other use cases.
+
 ## Installation
 
 Use [pipx](https://pypa.github.io/pipx/) to install LLM Context:
@@ -42,16 +52,6 @@ When the LLM requests specific files:
 This process allows the LLM to access the full content of the requested files for a more comprehensive analysis, without modifying the original context.
 
 For more detailed usage instructions, please refer to our [Usage Guide](docs/usage.md).
-
-## Current Usage Patterns
-
-1. **LLM Integration**: LLM Context has been primarily used to provide Project Knowledge in Claude and GPT Knowledge in OpenAI. It can also be used with vanilla chat interfaces, though this use case has been less explored.
-
-2. **Project Types**: The tool has been successfully used with both code repositories and collections of text/markdown documents, making it versatile for various types of projects.
-
-3. **Project Size**: LLM Context has been mainly used for projects where all files can be comfortably loaded into the LLM's context. Its usage for larger projects, where not all files would fit within the LLM's context window, has been limited and the workflow for such cases is less optimized.
-
-We welcome feedback on how to improve the workflow for larger projects and other use cases.
 
 ## Experimental: Handling Larger Repositories
 
