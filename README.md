@@ -9,7 +9,6 @@ LLM Context is a tool designed to help developers efficiently copy and paste rel
 - **Intelligent File Selection**: Respects `.gitignore` rules and additional custom ignore patterns to exclude irrelevant files.
 - **Clipboard Integration**: Automatically copies the generated context to your clipboard for easy pasting into LLM chats.
 - **Customizable Ignore Patterns**: Allows additional ignore patterns to be specified, giving you fine-grained control over what's included in the context.
-- **Versatile Content Support**: Works with both code repositories and collections of text-based documents.
 
 ## Current Usage Patterns
 
@@ -43,7 +42,7 @@ pipx install llm-context
 
 ### Handling LLM File Requests
 
-When the LLM requests specific files:
+When the LLM encounters references to files that weren't included in the initial context, it may request to see their contents. To handle such requests:
 
 1. Copy the LLM's file request (typically in a markdown block) to your clipboard.
 2. Run `lc-clipfiles` to generate the content of the requested files.
@@ -51,18 +50,16 @@ When the LLM requests specific files:
 
 This process allows the LLM to access the full content of the requested files for a more comprehensive analysis, without modifying the original context.
 
-For more detailed usage instructions, please refer to our [Usage Guide](docs/usage.md).
-
 ### Configuration
 
 #### Customizing Ignore Patterns
 
-You can add custom ignore patterns to exclude specific files or directories from being processed by LLM Context. This is particularly useful for ignoring files that are typically large, frequently changing, or not directly relevant to the code logic, but are still version controlled.
+You can add custom ignore patterns to additionally exclude specific files or directories from being processed by LLM Context.
 
 1. Create a `.llm-context/config.json` file in your project root if it doesn't exist.
 2. Add or modify the `gitignores` key in the JSON file.
 
-The custom ignore patterns should focus on files that are not already ignored by your project's top-level .gitignore but may not be useful for code context, such as large generated files, detailed changelogs, or environment-specific configuration files.
+The custom ignore patterns should focus on files that are not already ignored by your project's top-level .gitignore but may not be useful for code context, such as media files, large generated files, detailed changelogs, or environment-specific configuration files.
 
 Example:
 
