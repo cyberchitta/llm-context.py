@@ -74,16 +74,6 @@ For example, you might want to add or remove sections, or change the formatting 
 
 This context presents a comprehensive view of the _/{{ project_name }}_ repository.
 
-## Repository Structure
-
-    {{ folder_structure_diagram }}
-
-{% if summary %}
-## Project Summary
-
-    {{ summary }}
-{% endif %}
-
 // ... (rest of the template)
 ```
 
