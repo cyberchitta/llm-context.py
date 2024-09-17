@@ -34,9 +34,9 @@ pipx install llm-context
 ### Quick Start and Typical Workflow
 
 1. Navigate to your project's root directory.
-2. (Optional) Edit `.llm-context/config.json` to [add custom ignore patterns](docs/usage.md#customizing-ignore-patterns).
+2. (Optional) Edit `.llm-context/config.json` to [add custom ignore patterns](#customizing-ignore-patterns).
 3. Run `lc-sel-full` to select files for full content inclusion.
-4. (Optional) Edit the selected file list. See the [Usage Guide](docs/usage.md#manually-editing-selected-files) for instructions.
+4. (Optional) Edit the selected file list. See the [Usage Guide](#reviewing-and-editing-selected-files) for instructions.
 5. Run `lc-context` to generate and copy the context to your clipboard.
 6. Paste the generated context into your Claude Project Knowledge or GPT Knowledge.
 7. Start your conversation with the LLM about your project.
@@ -52,6 +52,48 @@ When the LLM requests specific files:
 This process allows the LLM to access the full content of the requested files for a more comprehensive analysis, without modifying the original context.
 
 For more detailed usage instructions, please refer to our [Usage Guide](docs/usage.md).
+
+### Configuration
+
+#### Customizing Ignore Patterns
+
+You can add custom ignore patterns to exclude specific files or directories from being processed by LLM Context. This is particularly useful for ignoring files that are typically large, frequently changing, or not directly relevant to the code logic, but are still version controlled.
+
+1. Create a `.llm-context/config.json` file in your project root if it doesn't exist.
+2. Add or modify the `gitignores` key in the JSON file.
+
+The custom ignore patterns should focus on files that are not already ignored by your project's top-level .gitignore but may not be useful for code context, such as large generated files, detailed changelogs, or environment-specific configuration files.
+
+Example:
+
+```json
+{
+  "gitignores": {
+    "full_files": [
+      ".git",
+      ".gitignore",
+      ".llm-context/",
+      "*.lock",
+      "CHANGELOG.md",
+      "*.log",
+      "*.svg",
+      "*.png",
+      "*.jpg",
+      "*.jpeg",
+      "*.gif",
+      "*.ico",
+      "*.woff",
+      "*.woff2",
+      "*.eot",
+      "*.ttf",
+      "*.map"
+    ]
+  }
+}
+
+#### Reviewing and Editing Selected Files
+
+You can review and manually edit the list of selected files to fine-tune the context provided to the LLM. The `.llm-context/curr_ctx.json` file in your project root contains the current selection. This can be useful for checking what's included in the context or for debugging context overflow issues.
 
 ## Experimental: Handling Larger Repositories
 
@@ -74,10 +116,6 @@ We welcome feedback on this experimental feature and how it might be improved to
 ### Feedback and Contributions
 
 If you encounter any issues, have suggestions for improvements, or want to share your experience using the tool, please open an issue on our GitHub repository or submit a pull request with proposed changes.
-
-## Advanced Usage
-
-For more detailed information on customizing ignore patterns, manually editing the selected file list, modifying the context template, please refer to our [Usage Guide](docs/usage.md).
 
 ## Acknowledgments
 
