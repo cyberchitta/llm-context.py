@@ -9,7 +9,7 @@ LLM Context is a tool designed to help developers efficiently copy and paste rel
 - **Intelligent File Selection**: Respects `.gitignore` rules and additional custom ignore patterns to exclude irrelevant files.
 - **Clipboard Integration**: Automatically copies the generated context to your clipboard for easy pasting into LLM chats.
 - **Code Structure Visualization**: Generates outlines of selected files to provide a quick overview of code structure.
-- **Customizable Ignore Patterns**: Allows [additional ignore patterns to be specified](docs/usage.md#customizing-ignore-patterns), giving you fine-grained control over what's included in the context.
+- **Customizable Ignore Patterns**: Allows additional ignore patterns to be specified, giving you fine-grained control over what's included in the context.
 - **Versatile Content Support**: Works with both code repositories and collections of text-based documents.
 
 ## Installation
