@@ -1,23 +1,39 @@
-# Folder Diagram
+# Detailed Repository Content: **{{ project_name }}**
+
+This context presents a comprehensive view of the _/{{ project_name }}_ repository.
+
+## Repository Structure
 
 ```
 {{ folder_structure_diagram }}
 ```
 
+{% if sample_requested_file_paths %}
+## Requesting Additional Files
+
+If you need to see the contents of files that are not fully available (marked with "✗" or "○" in the repository structure), please request them as a list of root-relative paths in a markdown fenced code block, e.g.:
+
+```
+{% for file in sample_requested_file_paths %}
+/{{ file }}
+{% endfor %}
+```
+{% endif %}
+
 {% if summary %}
-# Summary
+## Project Summary
 
 {{ summary }}
 {% endif %}
 
 {% if files %}
-# Full File Contents
+## Complete File Contents
 
 {% include 'files.j2' %}
 {% endif %}
 
 {% if highlights %}
-# Files in Outline
+## File Outlines
 
 {% include 'highlights.j2' %}
 {% endif %}

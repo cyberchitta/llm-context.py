@@ -1,10 +1,11 @@
-import os
+import random
 from dataclasses import dataclass
 from pathlib import Path
 
 import pyperclip  # type: ignore
 from jinja2 import Environment, FileSystemLoader
 
+from llm_context.file_selector import FileSelector
 from llm_context.folder_structure_diagram import get_annotated_fsd
 from llm_context.highlighter.language_mapping import to_language
 from llm_context.highlighter.outliner import generate_outlines
@@ -36,6 +37,11 @@ class ContextGenerator:
     @staticmethod
     def create() -> "ContextGenerator":
         return ContextGenerator(ProjectSettings.create())
+
+    def _sample_file_abs(self, full_abs: set[str]) -> list[str]:
+        all_abs = set(FileSelector.create(self.settings.project_root_path, [".git"]).get_files())
+        incomplete_files = sorted(list(all_abs - set(full_abs)))
+        return random.sample(incomplete_files, min(2, len(incomplete_files)))
 
     def _files(self, rel_paths: list[str]) -> list[dict[str, str]]:
         abs_paths = PathConverter.create(self.settings.project_root_path).to_absolute(rel_paths)
@@ -71,10 +77,12 @@ class ContextGenerator:
             outline_rel := [f for f in sel_files.get("outline", []) if to_language(f)]
         )
         context = {
+            "project_name": project_root.name,
             "folder_structure_diagram": get_annotated_fsd(project_root, full_abs, outline_abs),
             "summary": self.settings.get_summary(),
             "files": self._files(full_rel),
             "highlights": self._outlines(outline_rel),
+            "sample_requested_files": path_converter.to_relative(self._sample_file_abs(full_abs)),
         }
         return self._render("context", context)
 
