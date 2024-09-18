@@ -5,6 +5,9 @@ from importlib import resources
 from pathlib import Path
 from typing import Any, Optional
 
+import toml
+from packaging import version
+
 from llm_context import templates
 
 PROJECT_INFO: str = (
@@ -16,6 +19,7 @@ GIT_IGNORE_DEFAULT: list[str] = [
     ".git",
     ".gitignore",
     ".llm-context/",
+    "*.scm",
     "*.lock",
     "package-lock.json",
     "yarn.lock",
@@ -50,11 +54,11 @@ class ProjectLayout:
 
     @property
     def config_path(self) -> Path:
-        return self.root_path / ".llm-context" / "config.json"
+        return self.root_path / ".llm-context" / "config.toml"
 
     @property
     def context_storage_path(self) -> Path:
-        return self.root_path / ".llm-context" / "curr_ctx.json"
+        return self.root_path / ".llm-context" / "curr_ctx.toml"
 
     @property
     def templates_path(self) -> Path:
@@ -74,56 +78,89 @@ class SettingsInitializer:
 
     def initialize(self):
         self._create_directory_structure()
-        self._create_config_file()
+        self._create_or_update_config_file()
         self._create_curr_ctx_file()
-        self._copy_default_templates()
+        self._copy_or_update_templates()
 
     def _create_directory_structure(self):
         self.project_layout.templates_path.mkdir(parents=True, exist_ok=True)
 
-    def _create_config_file(self):
-        if not self.project_layout.config_path.exists():
-            default_config = {
-                "__info__": PROJECT_INFO,
-                "gitignores": {
-                    "full_files": GIT_IGNORE_DEFAULT,
-                    "outline_files": GIT_IGNORE_DEFAULT,
+    def _create_or_update_config_file(self):
+        config_path = self.project_layout.config_path
+        if config_path.exists():
+            self._update_config_file(config_path)
+        else:
+            self._create_config_file(config_path)
+
+    def _create_config_file(self, config_path: Path):
+        default_config = {
+            "__info__": PROJECT_INFO,
+            "config_version": "1",
+            "templates": {
+                "versions": {
+                    "context": "1",
+                    "files": "1",
+                    "highlights": "1",
                 },
-                "summary_file": None,
-                "templates": {
-                    "context": "context.j2",
-                    "files": "files.j2",
-                    "highlights": "highlights.j2",
-                },
-            }
-            ConfigLoader.save(self.project_layout.config_path, default_config)
+                "context": "context.j2",
+                "files": "files.j2",
+                "highlights": "highlights.j2",
+            },
+            "gitignores": {
+                "full_files": GIT_IGNORE_DEFAULT,
+                "outline_files": GIT_IGNORE_DEFAULT,
+            },
+            "summary_file": None,
+        }
+        ConfigLoader.save(config_path, default_config)
+
+    def _update_config_file(self, config_path: Path):
+        current_config = ConfigLoader.load(config_path)
+        print(version.parse(current_config.get("config_version", "0")))
+        
+        if version.parse(current_config.get("config_version", "0")) < version.parse("1"):
+            # Perform any necessary migrations
+            current_config["config_version"] = "1"
+            # Add any new configuration options here
+            ConfigLoader.save(config_path, current_config)
+
+    def _copy_or_update_templates(self):
+        config = ConfigLoader.load(self.project_layout.config_path)
+        template_versions = config["templates"]["versions"]
+        changes_made = False
+        for template_name, current_version in template_versions.items():
+            template_path = self.project_layout.get_template_path(f"{template_name}.j2")
+            if not template_path.exists() or self._should_update_template(current_version):
+                self._copy_template(template_name, template_path)
+                template_versions[template_name] = "1"
+                changes_made = True
+        if changes_made:
+            config["templates"]["versions"] = template_versions
+            ConfigLoader.save(self.project_layout.config_path, config)
+
+    def _should_update_template(self, current_version: str) -> bool:
+        return current_version < "1"  # Compare with the current template version
+
+    def _copy_template(self, template_name: str, dest_path: Path):
+        template_content = resources.read_text(templates, f"{template_name}.j2")
+        dest_path.write_text(template_content)
+        print(f"Updated template {template_name} to {dest_path}")
 
     def _create_curr_ctx_file(self):
         if not self.project_layout.context_storage_path.exists():
             ConfigLoader.save(self.project_layout.context_storage_path, {"context": {}})
-
-    def _copy_default_templates(self):
-        if not self.project_layout.templates_path.exists():
-            self.project_layout.templates_path.mkdir(parents=True, exist_ok=True)
-            template_files = [r for r in resources.contents(templates) if r.endswith(".j2")]
-            for template_file in template_files:
-                template_content = resources.read_text(templates, template_file)
-                dest_file = self.project_layout.get_template_path(template_file)
-                dest_file.write_text(template_content)
-                print(f"Copied template {template_file} to {dest_file}")
-
 
 @dataclass(frozen=True)
 class ConfigLoader:
     @staticmethod
     def load(file_path: Path) -> dict[str, Any]:
         with open(file_path, "r") as f:
-            return json.load(f)
+            return toml.load(f)
 
     @staticmethod
     def save(file_path: Path, data: dict[str, Any]):
         with open(file_path, "w") as f:
-            json.dump(data, f, indent=2)
+            toml.dump(data, f)
 
 
 @dataclass(frozen=True)
@@ -150,8 +187,7 @@ class ContextConfig:
         return ContextConfig(config, project_layout)
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
-        gi = self.config.get("gitignores", {})
-        return gi.get(f"{context_type}_files", [])
+        return self.config.get("gitignores", {}).get(f"{context_type}_files", [])
 
     def get_summary(self) -> Optional[str]:
         summary_file = self.config.get("summary_file")

@@ -9,25 +9,28 @@ include = ["src/llm_context/templates/*.j2"]
 repository = "https://github.com/cyberchitta/llm-context.py"
 license = "Apache-2.0"
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "Programming Language :: Python :: 3.12",
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3.12",
 ]
 
 [tool.poetry.dependencies]
 python = "^3.8"
 jinja2 = "^3.1.4"
+packaging = "^24.1"
 pathspec = "^0.12.1"
 pyperclip = "^1.9.0"
+toml = "^0.10.2"
 tree-sitter = "0.21.3"
 tree-sitter-languages = "^1.10.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"
-isort = "^5.13.2"
-pytest = "^8.3.2"
-mypy = "^1.11.2"
 git-cliff = "^2.5.0"
+isort = "^5.13.2"
+mypy = "^1.11.2"
+pytest = "^8.3.2"
+taplo = "^0.9.3"
 
 [tool.poetry.scripts]
 lc-clipfiles = "llm_context.context_generator:files_from_clip"
