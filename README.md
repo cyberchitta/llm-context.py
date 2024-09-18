@@ -1,8 +1,30 @@
 # LLM Context
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![PyPI version](https://badge.fury.io/py/llm-context.svg)](https://badge.fury.io/py/llm-context)
+
 LLM Context is a tool designed to help developers efficiently copy and paste relevant context from code repositories or text-based document collections into Large Language Model (LLM) chats. It leverages `.gitignore` patterns for smart file selection and uses the clipboard for seamless integration with LLM interfaces.
 
 > **Note on AI Assistance**: This project was developed in collaboration with Claude-3.5-Sonnet. LLM Context itself was used during development to share code context with Claude in project mode. All of the code that makes it into the repo is human curated (by me 😇, @restlessronin).
+
+## Table of Contents
+
+- [LLM Context](#llm-context)
+  - [Table of Contents](#table-of-contents)
+  - [Key Features](#key-features)
+  - [Current Usage Patterns](#current-usage-patterns)
+  - [Installation](#installation)
+  - [Usage](#usage)
+    - [Quick Start and Typical Workflow](#quick-start-and-typical-workflow)
+    - [Handling LLM File Requests](#handling-llm-file-requests)
+    - [Configuration](#configuration)
+      - [Customizing Ignore Patterns](#customizing-ignore-patterns)
+      - [Reviewing and Editing Selected Files](#reviewing-and-editing-selected-files)
+  - [Experimental: Handling Larger Repositories](#experimental-handling-larger-repositories)
+    - [Feedback and Contributions](#feedback-and-contributions)
+  - [Acknowledgments](#acknowledgments)
+  - [Contributing](#contributing)
+  - [License](#license)
 
 ## Key Features
 
@@ -122,7 +144,7 @@ LLM Context has evolved from several projects and influences:
 - LLM Code Highlighter was inspired by [Aider Chat](https://github.com/paul-gauthier/aider), particularly its [RepoMap](https://aider.chat/docs/repomap.html) functionality.
 - The original concept grew out of a project for [RubberDuck](https://github.com/rubberduck-ai/rubberduck-vscode) and was later used for [Continue](https://github.com/continuedev/continuedev).
 - LLM Code Highlighter included functionality for ranking and highlighting tags, based on a translation of Aider Chat's Python code to TypeScript (with the help of Chat-GPT-4). This functionality is not yet implemented in LLM Context.
-- The outlining functionality, independently developed in LLM Code Highlighter, has been moved to this project.
+- The outlining functionality, independently developed in LLM Code Highlighter, has been reimplemented in this project.
 - Parts of the code in LLM Context were translated from TypeScript to Python with Claude-3.5-Sonnet's help, bringing the project full circle (Python -> TypeScript -> Python).
 - This project currently uses the tree-sitter [tag query files](src/llm_context/highlighter/tag-qry/) from Aider Chat.
 
