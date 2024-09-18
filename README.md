@@ -84,35 +84,54 @@ The custom ignore patterns should focus on files that are not already ignored by
 
 Example:
 
-```json
-{
-  "gitignores": {
-    "full_files": [
-      ".git",
-      ".gitignore",
-      ".llm-context/",
-      "*.lock",
-      "CHANGELOG.md",
-      "*.log",
-      "*.svg",
-      "*.png",
-      "*.jpg",
-      "*.jpeg",
-      "*.gif",
-      "*.ico",
-      "*.woff",
-      "*.woff2",
-      "*.eot",
-      "*.ttf",
-      "*.map"
-    ]
-  }
-}
+```toml
+# /.llm-context/config.toml
+[gitignores]
+full_files = [
+  ".git",
+  ".gitignore",
+  ".llm-context/",
+  "*.lock",
+  "*.scm",
+  "package-lock.json",
+  "yarn.lock",
+  "pnpm-lock.yaml",
+  "go.sum",
+  "elm-stuff",
+  "LICENSE",
+  "CHANGELOG.md",
+  "README.md",
+  ".env",
+  ".dockerignore",
+  "Dockerfile",
+  "docker-compose.yml",
+  "*.log",
+  "*.svg",
+  "*.png",
+  "*.jpg",
+  "*.jpeg",
+  "*.gif",
+  "*.ico",
+  "*.woff",
+  "*.woff2",
+  "*.eot",
+  "*.ttf",
+  "*.map",
+]
 ```
 
 #### Reviewing and Editing Selected Files
 
 You can review and manually edit the list of selected files to fine-tune the context provided to the LLM. The `.llm-context/curr_ctx.toml` file in your project root contains the current selection. This can be useful for checking what's included in the context or for debugging context overflow issues.
+
+```toml
+# /.llm-context/curr_ctx.toml
+[context]
+full = [
+  "/llm-context.py/pyproject.toml",
+  # more files ...
+]
+```
 
 ## Experimental: Handling Larger Repositories
 
