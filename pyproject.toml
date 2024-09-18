@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "llm-context"
-version = "0.1.0"
+version = "0.0.11"
 description = "A tool for copying code context to clipboard for use in LLM chats"
 authors = ["restlessronin <88921269+restlessronin@users.noreply.github.com>"]
 readme = "README.md"
@@ -27,6 +27,7 @@ black = "^24.8.0"
 isort = "^5.13.2"
 pytest = "^8.3.2"
 mypy = "^1.11.2"
+git-cliff = "^2.5.0"
 
 [tool.poetry.scripts]
 lc-clipfiles = "llm_context.context_generator:files_from_clip"
