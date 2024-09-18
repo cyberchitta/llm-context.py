@@ -14,6 +14,8 @@
       "elm-stuff",
       "LICENSE",
       "CHANGELOG.md",
+      "README.md",
+      "*.toml",
       ".env",
       ".dockerignore",
       "Dockerfile",
