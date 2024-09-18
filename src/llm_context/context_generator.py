@@ -56,8 +56,8 @@ class ContextGenerator:
         return generate_outlines(source_set)
 
     def files(self, rel_paths: list[str]) -> str:
-        path_converter = PathConverter.create(self.settings.project_root_path)
-        if rel_paths and not path_converter.validate(rel_paths):
+        converter = PathConverter.create(self.settings.project_root_path)
+        if rel_paths and not converter.validate(rel_paths):
             print("Invalid file paths")
             return ""
         paths = (
@@ -69,10 +69,10 @@ class ContextGenerator:
 
     def context(self) -> str:
         project_root = self.settings.project_root_path
-        path_converter = PathConverter.create(project_root)
+        converter = PathConverter.create(project_root)
         sel_files = self.settings.context_storage.get_stored_context()
-        full_abs = path_converter.to_absolute(full_rel := sel_files.get("full", []))
-        outline_abs = path_converter.to_absolute(
+        full_abs = converter.to_absolute(full_rel := sel_files.get("full", []))
+        outline_abs = converter.to_absolute(
             outline_rel := [f for f in sel_files.get("outline", []) if to_language(f)]
         )
         context = {
@@ -81,7 +81,7 @@ class ContextGenerator:
             "summary": self.settings.get_summary(),
             "files": self._files(full_rel),
             "highlights": self._outlines(outline_rel),
-            "sample_requested_files": path_converter.to_relative(self._sample_file_abs(set(full_abs))),
+            "sample_requested_files": converter.to_relative(self._sample_file_abs(set(full_abs))),
         }
         return self._render("context", context)
 

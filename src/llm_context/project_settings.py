@@ -117,7 +117,7 @@ class SettingsInitializer:
     def _update_config_file(self, config_path: Path):
         current_config = ConfigLoader.load(config_path)
         print(version.parse(current_config.get("config_version", "0")))
-        
+
         if version.parse(current_config.get("config_version", "0")) < version.parse("1"):
             # Perform any necessary migrations
             current_config["config_version"] = "1"
@@ -149,6 +149,7 @@ class SettingsInitializer:
     def _create_curr_ctx_file(self):
         if not self.project_layout.context_storage_path.exists():
             ConfigLoader.save(self.project_layout.context_storage_path, {"context": {}})
+
 
 @dataclass(frozen=True)
 class ConfigLoader:

@@ -60,19 +60,19 @@ class GitIgnorer:
 class FileSelector:
     root_path: str
     ignorer: GitIgnorer
-    path_converter: PathConverter
+    converter: PathConverter
 
     @staticmethod
     def create(root_path: Path, pathspecs: list[str]) -> "FileSelector":
         ignorer = GitIgnorer.from_git_root(str(root_path), pathspecs)
-        path_converter = PathConverter.create(root_path)
-        return FileSelector(str(root_path), ignorer, path_converter)
+        converter = PathConverter.create(root_path)
+        return FileSelector(str(root_path), ignorer, converter)
 
     def get_files(self) -> list[str]:
         return self.traverse(self.root_path)
 
     def get_relative_files(self) -> list[str]:
-        return self.path_converter.to_relative(self.get_files())
+        return self.converter.to_relative(self.get_files())
 
     def traverse(self, current_dir: str) -> list[str]:
         entries = os.listdir(current_dir)

@@ -6,15 +6,15 @@ from llm_context.utils import PathConverter
 
 class TestPathConverter(unittest.TestCase):
     def setUp(self):
-        self.path_converter = PathConverter.create(Path("/home/user/project"))
+        self.converter = PathConverter.create(Path("/home/user/project"))
 
     def test_init(self):
-        self.assertEqual(self.path_converter.root, Path("/home/user/project"))
-        self.assertEqual(self.path_converter.root.name, "project")
+        self.assertEqual(self.converter.root, Path("/home/user/project"))
+        self.assertEqual(self.converter.root.name, "project")
 
     def test_validate_valid_paths(self):
         valid_paths = ["/project/src/main.py", "/project/tests/test_main.py", "/project/README.md"]
-        self.assertTrue(self.path_converter.validate(valid_paths))
+        self.assertTrue(self.converter.validate(valid_paths))
 
     def test_validate_invalid_paths(self):
         invalid_paths = [
@@ -23,7 +23,7 @@ class TestPathConverter(unittest.TestCase):
             "/project",  # No path after root name
             "/otherproject/README.md",  # Wrong project name
         ]
-        self.assertFalse(self.path_converter.validate(invalid_paths))
+        self.assertFalse(self.converter.validate(invalid_paths))
 
     def test_validate_mixed_paths(self):
         mixed_paths = [
@@ -31,7 +31,7 @@ class TestPathConverter(unittest.TestCase):
             "/otherproject/README.md",
             "/project/tests/test_main.py",
         ]
-        self.assertFalse(self.path_converter.validate(mixed_paths))
+        self.assertFalse(self.converter.validate(mixed_paths))
 
     def test_to_absolute_conversion(self):
         relative_paths = [
@@ -44,7 +44,7 @@ class TestPathConverter(unittest.TestCase):
             "/home/user/project/tests/test_main.py",
             "/home/user/project/README.md",
         ]
-        self.assertEqual(self.path_converter.to_absolute(relative_paths), expected_absolute_paths)
+        self.assertEqual(self.converter.to_absolute(relative_paths), expected_absolute_paths)
 
     def test_to_relative_conversion(self):
         absolute_paths = [
@@ -57,13 +57,13 @@ class TestPathConverter(unittest.TestCase):
             "/project/tests/test_main.py",
             "/project/README.md",
         ]
-        self.assertEqual(self.path_converter.to_relative(absolute_paths), expected_relative_paths)
+        self.assertEqual(self.converter.to_relative(absolute_paths), expected_relative_paths)
 
     def test_to_absolute_empty_list(self):
-        self.assertEqual(self.path_converter.to_absolute([]), [])
+        self.assertEqual(self.converter.to_absolute([]), [])
 
     def test_validate_empty_list(self):
-        self.assertTrue(self.path_converter.validate([]))
+        self.assertTrue(self.converter.validate([]))
 
 
 if __name__ == "__main__":
