@@ -6,17 +6,16 @@ LLM Context is a tool designed to help developers efficiently copy and paste rel
 
 ## Key Features
 
-- **Intelligent File Selection**: Respects `.gitignore` rules and additional custom ignore patterns to exclude irrelevant files.
+- **Smart File Selection**: Respects `.gitignore` rules and allows custom ignore patterns for fine-grained control over context inclusion.
 - **Clipboard Integration**: Automatically copies the generated context to your clipboard for easy pasting into LLM chats.
-- **Customizable Ignore Patterns**: Allows additional ignore patterns to be specified, giving you fine-grained control over what's included in the context.
 
 ## Current Usage Patterns
 
-1. **LLM Integration**: LLM Context has been primarily used to provide Project Knowledge in Claude and GPT Knowledge in OpenAI. It can also be used with vanilla chat interfaces, though this use case has been less explored.
+1. **LLM Integration**: LLM Context has been primarily used to provide Project Knowledge in Claude and GPT Knowledge in OpenAI. It can also be used with vanilla chat interfaces, and there's potential to optimize the tool for this use case in future updates.
 
-2. **Project Types**: The tool has been successfully used with both code repositories and collections of text/markdown documents, making it versatile for various types of projects.
+2. **Project Types**: The tool has been successfully used with both code repositories and collections of text / markdown / html documents.
 
-3. **Project Size**: LLM Context has been mainly used for projects where all files can be comfortably loaded into the LLM's context. Its usage for larger projects, where not all files would fit within the LLM's context window, has been limited and the workflow for such cases is less optimized.
+3. **Project Size**: LLM Context has been mainly used for projects where all files can be comfortably loaded into the LLM's context. Its usage for larger projects, where not all files would fit within the LLM's context window, has been limited and the workflow for such cases is not yet developed.
 
 We welcome feedback on how to improve the workflow for larger projects and other use cases.
 
