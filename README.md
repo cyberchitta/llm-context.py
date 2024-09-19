@@ -28,7 +28,7 @@ pipx install llm-context
 1. Navigate to your project's root directory.
 2. (Optional) Edit `.llm-context/config.toml` to [add custom ignore patterns](#customizing-ignore-patterns).
 3. Run `lc-sel-files` to select files for full content inclusion.
-4. (Optional) [Review the selected file](#reviewing-and-editing-selected-files) list in `.llm-context/curr_ctx.toml`.
+4. (Optional) [Review the selected file](#reviewing-selected-files) list in `.llm-context/curr_ctx.toml`.
 5. Run `lc-context` to generate and copy the context to your clipboard.
 6. Paste the generated context into your Claude Project Knowledge or GPT Knowledge.
 7. Start your conversation with the LLM about your project.
