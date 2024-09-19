@@ -8,10 +8,17 @@ packages = [{ include = "llm_context", from = "src" }]
 include = ["src/llm_context/templates/*.j2"]
 repository = "https://github.com/cyberchitta/llm-context.py"
 license = "Apache-2.0"
+keywords = ["llm", "ai", "context", "code", "clipboard", "chat"]
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
   "Intended Audience :: Developers",
-  "Programming Language :: Python :: 3.12",
+  "Intended Audience :: Information Technology",
+  "Intended Audience :: Science/Research",
+  "Topic :: Software Development :: Code Generators",
+  "Topic :: Utilities",
+  "Topic :: Communications :: Chat",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 
 [tool.poetry.dependencies]
@@ -46,7 +53,7 @@ filterwarnings = ["ignore::FutureWarning"]
 
 [tool.black]
 line-length = 100
-target-version = ['py312']
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
 
 [build-system]
 requires = ["poetry-core"]
