@@ -1,8 +1,7 @@
 # LLM Context
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![PyPI version](https://badge.fury.io/py/llm-context.svg)](https://badge.fury.io/py/llm-context)
-
+[![PyPI version](https://img.shields.io/pypi/v/llm-context.svg)](https://pypi.org/project/llm-context/)
 LLM Context is a command-line tool designed to help developers efficiently copy and paste relevant context from code / text repositories into Large Language Model (LLM) chats. It leverages `.gitignore` patterns for smart file selection and uses the clipboard for seamless integration with LLM interfaces.
 
 > **Note**: This project was developed in collaboration with Claude-3.5-Sonnet, using LLM Context itself to share code context during development. All code in the repository is human-curated (by me 😇, @restlessronin).
@@ -79,7 +78,7 @@ full = [
 - `lc-sel-files`: Select files for full content inclusion
 - `lc-sel-outlines`: Select files for outline inclusion (experimental)
 - `lc-context`: Generate and copy context to clipboard
-- `lc-read-cliplist`: Generate content for LLM-requested files
+- `lc-read-cliplist`: Read contents for LLM-requested files, and copy to clipboard
 
 ## Experimental: Handling Larger Repositories
 
