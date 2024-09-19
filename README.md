@@ -94,17 +94,15 @@ We welcome feedback, issue reports, and pull requests on our [GitHub repository]
 
 ## Acknowledgments
 
-LLM Context has evolved from several projects and influences:
+LLM Context evolves from a lineage of AI-assisted development tools:
 
-- This project is a successor to [LLM Code Highlighter](https://github.com/restlessronin/llm-code-highlighter), a TypeScript library developed for use in IDEs like VS Code.
-- LLM Code Highlighter was inspired by [Aider Chat](https://github.com/paul-gauthier/aider), particularly its [RepoMap](https://aider.chat/docs/repomap.html) functionality.
-- The original concept grew out of a project for [RubberDuck](https://github.com/rubberduck-ai/rubberduck-vscode) and was later used for [Continue](https://github.com/continuedev/continuedev).
-- LLM Code Highlighter included functionality for ranking and highlighting tags, based on a translation of Aider Chat's Python code to TypeScript (with the help of Chat-GPT-4). This functionality is not yet implemented in LLM Context.
-- The outlining functionality, independently developed in LLM Code Highlighter, has been reimplemented in this project.
-- Parts of the code in LLM Context were translated from TypeScript to Python with Claude-3.5-Sonnet's help, bringing the project full circle (Python -> TypeScript -> Python).
-- This project currently uses the tree-sitter [tag query files](src/llm_context/highlighter/tag-qry/) from Aider Chat.
+- This project succeeds [LLM Code Highlighter](https://github.com/restlessronin/llm-code-highlighter), a TypeScript library I developed for IDE integration.
+- The concept originated from my work on [RubberDuck](https://github.com/rubberduck-ai/rubberduck-vscode) and continued with later contributions to [Continue](https://github.com/continuedev/continuedev).
+- LLM Code Highlighter was heavily inspired by [Aider Chat](https://github.com/paul-gauthier/aider). I used GPT-4 to translate several Aider Chat Python modules into TypeScript, maintaining functionality while restructuring the code.
+- This project uses tree-sitter [tag query files](src/llm_context/highlighter/tag-qry/) from Aider Chat.
+- LLM Context exemplifies the power of AI-assisted development, transitioning from Python to TypeScript and back to Python with the help of GPT-4 and Claude-3.5-Sonnet.
 
-We are grateful for the open-source community and the innovations that have influenced this project's development.
+We're grateful for the open-source community's innovations and the AI assistance that have shaped this project's development.
 
 I am grateful for the help of Claude-3.5-Sonnet in the development of this project.
 
