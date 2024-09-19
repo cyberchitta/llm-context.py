@@ -116,7 +116,6 @@ class SettingsInitializer:
 
     def _update_config_file(self, config_path: Path):
         current_config = ConfigLoader.load(config_path)
-        print(version.parse(current_config.get("config_version", "0")))
 
         if version.parse(current_config.get("config_version", "0")) < version.parse("1"):
             # Perform any necessary migrations
