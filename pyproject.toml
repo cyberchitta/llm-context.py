@@ -33,12 +33,11 @@ pytest = "^8.3.2"
 taplo = "^0.9.3"
 
 [tool.poetry.scripts]
-lc-clipfiles = "llm_context.context_generator:files_from_clip"
 lc-context = "llm_context.context_generator:context"
-lc-dirtree = "llm_context.folder_structure_diagram:main"
-lc-files = "llm_context.context_generator:files_from_scratch"
-lc-sel-full = "llm_context.file_selector:select_full_files"
-lc-sel-outline = "llm_context.file_selector:select_outline_files"
+# lc-dirtree = "llm_context.folder_structure_diagram:main"
+lc-read-cliplist = "llm_context.context_generator:files_from_clip"
+lc-sel-files = "llm_context.file_selector:select_full_files"
+lc-sel-outlines = "llm_context.file_selector:select_outline_files"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

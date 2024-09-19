@@ -27,7 +27,7 @@ pipx install llm-context
 
 1. Navigate to your project's root directory.
 2. (Optional) Edit `.llm-context/config.toml` to [add custom ignore patterns](#customizing-ignore-patterns).
-3. Run `lc-sel-full` to select files for full content inclusion.
+3. Run `lc-sel-files` to select files for full content inclusion.
 4. (Optional) [Review the selected file](#reviewing-and-editing-selected-files) list in `.llm-context/curr_ctx.toml`.
 5. Run `lc-context` to generate and copy the context to your clipboard.
 6. Paste the generated context into your Claude Project Knowledge or GPT Knowledge.
@@ -38,7 +38,7 @@ pipx install llm-context
 When the LLM asks for a file that isn't in the current context:
 
 1. Copy the LLM's file request (typically in a markdown block) to your clipboard.
-2. Run `lc-clipfiles` to generate the content of the requested files.
+2. Run `lc-read-cliplist` to generate the content of the requested files.
 3. Paste the generated file contents back into your chat with the LLM.
 
 ### Configuration
@@ -76,14 +76,14 @@ full = [
 
 ## Command Reference
 
-- `lc-sel-full`: Select files for full content inclusion
-- `lc-sel-outline`: Select files for outline inclusion (experimental)
+- `lc-sel-files`: Select files for full content inclusion
+- `lc-sel-outlines`: Select files for outline inclusion (experimental)
 - `lc-context`: Generate and copy context to clipboard
-- `lc-clipfiles`: Generate content for LLM-requested files
+- `lc-read-cliplist`: Generate content for LLM-requested files
 
 ## Experimental: Handling Larger Repositories
 
-For larger projects, we're exploring a combined approach of full file content and file outlines. Use `lc-sel-outline` after `lc-sel-full` to experiment with this feature.
+For larger projects, we're exploring a combined approach of full file content and file outlines. Use `lc-sel-outlines` after `lc-sel-files` to experiment with this feature.
 
 **Note:** The outlining feature currently supports the following programming languages:
 C, C++, C#, Elisp, Elixir, Elm, Go, Java, JavaScript, OCaml, PHP, Python, QL, Ruby, Rust, and TypeScript. Files in unsupported languages will not be outlined and will be excluded from the outline selection.
@@ -98,11 +98,11 @@ LLM Context evolves from a lineage of AI-assisted development tools:
 
 - This project succeeds [LLM Code Highlighter](https://github.com/restlessronin/llm-code-highlighter), a TypeScript library I developed for IDE integration.
 - The concept originated from my work on [RubberDuck](https://github.com/rubberduck-ai/rubberduck-vscode) and continued with later contributions to [Continue](https://github.com/continuedev/continuedev).
-- LLM Code Highlighter was heavily inspired by [Aider Chat](https://github.com/paul-gauthier/aider). I used GPT-4 to translate several Aider Chat Python modules into TypeScript, maintaining functionality while restructuring the code.
+- LLM Code Highlighter was heavily inspired by [Aider Chat](https://github.com/paul-gauthier/aider). I worked with GPT-4 to translate several Aider Chat Python modules into TypeScript, maintaining functionality while restructuring the code.
 - This project uses tree-sitter [tag query files](src/llm_context/highlighter/tag-qry/) from Aider Chat.
 - LLM Context exemplifies the power of AI-assisted development, transitioning from Python to TypeScript and back to Python with the help of GPT-4 and Claude-3.5-Sonnet.
 
-We're grateful for the open-source community's innovations and the AI assistance that have shaped this project's development.
+I am grateful for the open-source community's innovations and the AI assistance that have shaped this project's evolution.
 
 I am grateful for the help of Claude-3.5-Sonnet in the development of this project.
 
