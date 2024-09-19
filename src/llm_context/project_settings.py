@@ -3,7 +3,7 @@ import os
 from dataclasses import dataclass
 from importlib import resources
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 import toml
 from packaging import version
@@ -168,7 +168,8 @@ class ContextStorage:
     storage_path: Path
 
     def get_stored_context(self) -> dict[str, list[str]]:
-        return ConfigLoader.load(self.storage_path).get("context", {})
+        context = ConfigLoader.load(self.storage_path).get("context", {})
+        return cast(dict[str, list[str]], context)
 
     def store_context(self, context: dict[str, list[str]]):
         storage_data = ConfigLoader.load(self.storage_path)
@@ -187,7 +188,8 @@ class ContextConfig:
         return ContextConfig(config, project_layout)
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
-        return self.config.get("gitignores", {}).get(f"{context_type}_files", [])
+        pattern = self.config.get("gitignores", {}).get(f"{context_type}_files", [])
+        return cast(list[str], pattern)
 
     def get_summary(self) -> Optional[str]:
         summary_file = self.config.get("summary_file")

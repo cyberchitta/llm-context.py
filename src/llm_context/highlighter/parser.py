@@ -2,12 +2,12 @@ import warnings
 from dataclasses import dataclass
 from typing import NamedTuple
 
-warnings.filterwarnings("ignore", category=FutureWarning, module="tree_sitter")
-
 from tree_sitter import Language, Parser, Tree
 from tree_sitter_languages import get_language, get_parser
 
 from llm_context.highlighter.language_mapping import TagQuery, to_language
+
+warnings.filterwarnings("ignore", category=FutureWarning, module="tree_sitter")
 
 
 class Source(NamedTuple):
@@ -24,10 +24,9 @@ class AST:
     rel_path: str
 
     @staticmethod
-    def create_from_code(source: Source):
+    def create_from_code(source: Source) -> "AST":
         language_name = to_language(source.rel_path)
-        if not language_name:
-            return None
+        assert language_name, f"Unsupported language: {source.rel_path}"
         language = get_language(language_name)
         parser = get_parser(language_name)
         tree = parser.parse(bytes(source.code, "utf-8"))

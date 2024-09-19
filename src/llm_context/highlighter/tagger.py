@@ -31,7 +31,7 @@ class Tagger:
     query_scm: str
 
     @staticmethod
-    def create(ast: AST):
+    def create(ast: AST) -> "Tagger":
         return Tagger(ast, ast.get_tag_query())
 
     @staticmethod

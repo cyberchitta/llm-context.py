@@ -1,6 +1,6 @@
 import os
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, cast
 
 from llm_context.file_selector import FileSelector
 from llm_context.project_settings import ProjectSettings
@@ -53,9 +53,9 @@ class FolderStructureDiagram:
         if not self.is_enhanced:
             return ""
         full_path = os.path.join(self.root_dir, path)
-        if full_path in self.full_files:
+        if full_path in cast(set[str], self.full_files):
             return "✓"
-        elif full_path in self.outline_files:
+        elif full_path in cast(set[str], self.outline_files):
             return "○"
         else:
             return "✗"

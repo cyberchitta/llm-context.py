@@ -22,7 +22,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 jinja2 = "^3.1.4"
 packaging = "^24.1"
 pathspec = "^0.12.1"
@@ -37,6 +37,7 @@ git-cliff = "^2.5.0"
 isort = "^5.13.2"
 mypy = "^1.11.2"
 pytest = "^8.3.2"
+ruff = "^0.6.5"
 taplo = "^0.9.3"
 
 [tool.poetry.scripts]
@@ -51,9 +52,23 @@ testpaths = ["tests"]
 pythonpath = ["src"]
 filterwarnings = ["ignore::FutureWarning"]
 
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E203", "E266", "E501", "F403", "F401"]
+
 [tool.black]
 line-length = 100
-target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+target-version = ['py39', 'py310', 'py311', 'py312']
 
 [build-system]
 requires = ["poetry-core"]
