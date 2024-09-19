@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "llm-context"
 version = "0.0.12"
-description = "A tool for copying code context to clipboard for use in LLM chats"
+description = "A command-line tool for copying code context to clipboard for use in LLM chats"
 authors = ["restlessronin <88921269+restlessronin@users.noreply.github.com>"]
 readme = "README.md"
 packages = [{ include = "llm_context", from = "src" }]
