@@ -108,10 +108,6 @@ We are grateful for the open-source community and the innovations that have infl
 
 I am grateful for the help of Claude-3.5-Sonnet in the development of this project.
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 ## License
 
 This project is licensed under the Apache License, Version 2.0. See the [LICENSE](LICENSE) file for details.
