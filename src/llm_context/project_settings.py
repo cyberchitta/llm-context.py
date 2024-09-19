@@ -9,6 +9,7 @@ import toml
 from packaging import version
 
 from llm_context import templates
+from llm_context.utils import safe_read_file
 
 PROJECT_INFO: str = (
     "This project uses llm-context. For more information, visit: "
@@ -195,7 +196,7 @@ class ContextConfig:
         summary_file = self.config.get("summary_file")
         if summary_file:
             summary_path = self.project_layout.root_path / summary_file
-            return summary_path.read_text() if summary_path.exists() else None
+            return safe_read_file(str(summary_path))
         return None
 
 

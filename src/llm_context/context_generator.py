@@ -11,7 +11,7 @@ from llm_context.highlighter.language_mapping import to_language
 from llm_context.highlighter.outliner import generate_outlines
 from llm_context.highlighter.parser import Source
 from llm_context.project_settings import ProjectSettings
-from llm_context.utils import PathConverter, create_entry_point
+from llm_context.utils import PathConverter, create_entry_point, safe_read_file
 
 
 @dataclass(frozen=True)
@@ -46,13 +46,18 @@ class ContextGenerator:
     def _files(self, rel_paths: list[str]) -> list[dict[str, str]]:
         abs_paths = PathConverter.create(self.settings.project_root_path).to_absolute(rel_paths)
         return [
-            {"path": rel_path, "content": Path(abs_path).read_text()}
+            {"path": rel_path, "content": content}
             for rel_path, abs_path in zip(rel_paths, abs_paths)
+            if (content := safe_read_file(abs_path)) is not None
         ]
 
     def _outlines(self, rel_paths: list[str]) -> list[dict[str, str]]:
         abs_paths = PathConverter.create(self.settings.project_root_path).to_absolute(rel_paths)
-        source_set = [Source(rel, Path(abs).read_text()) for rel, abs in zip(rel_paths, abs_paths)]
+        source_set = [
+            Source(rel, content)
+            for rel, abs_path in zip(rel_paths, abs_paths)
+            if (content := safe_read_file(abs_path)) is not None
+        ]
         return generate_outlines(source_set)
 
     def files(self, rel_paths: list[str]) -> str:

@@ -6,7 +6,7 @@ from pathlib import Path
 from pathspec import GitIgnoreSpec
 
 from llm_context.project_settings import ProjectSettings
-from llm_context.utils import PathConverter
+from llm_context.utils import PathConverter, safe_read_file
 
 
 @dataclass(frozen=True)
@@ -40,11 +40,12 @@ class GitIgnorer:
         gitignores = []
         for root, _, files in os.walk(top):
             if ".gitignore" in files:
-                with open(os.path.join(root, ".gitignore"), "r") as file:
-                    patterns = file.read().splitlines()
-                relpath = os.path.relpath(root, top)
-                fixpath = "/" if relpath == "." else f"/{os.path.relpath(root, top)}"
-                gitignores.append((fixpath, patterns))
+                content = safe_read_file(os.path.join(root, ".gitignore"))
+                if content:
+                    patterns = content.splitlines()
+                    relpath = os.path.relpath(root, top)
+                    fixpath = "/" if relpath == "." else f"/{relpath}"
+                    gitignores.append((fixpath, patterns))
         return gitignores
 
     def ignore(self, path: str) -> bool:

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Union
+from typing import Callable, Optional, Union
 
 import pyperclip  # type: ignore
 
@@ -28,6 +28,23 @@ def create_entry_point(func: Callable[..., str]) -> Callable[[], None]:
         size_feedback(text)
 
     return entry_point
+
+
+def safe_read_file(path: str) -> Optional[str]:
+    file_path = Path(path)
+    if not file_path.exists():
+        print(f"File not found: {file_path}")
+        return None
+    if not file_path.is_file():
+        print(f"Not a file: {file_path}")
+        return None
+    try:
+        return file_path.read_text()
+    except PermissionError:
+        print(f"Permission denied: {file_path}")
+    except Exception as e:
+        print(f"Error reading file {file_path}: {str(e)}")
+    return None
 
 
 @dataclass(frozen=True)
