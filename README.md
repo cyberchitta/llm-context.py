@@ -9,7 +9,7 @@ LLM Context is a command-line tool designed to help developers efficiently copy 
 
 ## Current Usage Patterns
 
-- **LLM Integration**: Primarily used with Claude (Project Knowledge) and GPT (Knowledge), but adaptable to various chat interfaces.
+- **LLM Integration**: Primarily used with Claude (Project Knowledge) and GPT (Knowledge), but supports all LLM chat interfaces.
 - **Project Types**: Suitable for code repositories and collections of text/markdown/html documents.
 - **Project Size**: Optimized for projects that fit within an LLM's context window. Large project support is in development.
 
@@ -23,26 +23,30 @@ pipx install llm-context
 
 ## Usage
 
+LLM Context enables rapid project context updates for each AI chat.
+
 ### Quick Start and Typical Workflow
 
 1. [Install LLM Context](#installation) if you haven't already.
 2. Navigate to your project's root directory.
 3. Run `lc-init` to set up LLM Context for your project (only needed once per repository).
-4. Ensure you have a custom prompt set up in your AI assistant (e.g., ChatGPT, Claude).
-   - A starter prompt for code projects can be found in the `.llm-context/developer-prompt.md` file in this repository.
+4. For chat interfaces with built-in context storage (e.g., Claude Pro Projects, ChatGPT Plus GPTs):
+   - Set up your custom prompt manually in the chat interface.
+   - A default prompt is available in `.llm-context/templates/lc-prompt.md`.
 5. (Optional) Edit `.llm-context/config.toml` to [add custom ignore patterns](#customizing-ignore-patterns).
 6. Run `lc-sel-files` to select files for full content inclusion.
 7. (Optional) [Review the selected file](#reviewing-selected-files) list in `.llm-context/curr_ctx.toml`.
-8. Run `lc-context` to generate and copy the context to your clipboard.
-9. Paste the generated context into your Claude Project Knowledge or GPT Knowledge.
+8. Generate and copy the context:
+   - For chat interfaces with built-in storage: Run `lc-context`
+   - For other interfaces (including free plans): Run `lc-context --with-prompt` to include the default prompt
+9. Paste the generated context:
+   - For interfaces with built-in storage: Into the Project Knowledge (Claude Pro) or GPT Knowledge (ChatGPT Plus) section
+   - For other interfaces: Into the system message or the first chat message, as appropriate
 10. Start your conversation with the LLM about your project.
 
-To keep your AI assistant's project context up-to-date:
-
-- When significant changes occur in your project, repeat steps 6-9.
-- The custom prompt remains constant and doesn't need updating.
-
-Remember: Regularly updating the project context ensures the AI assistant has the most current information about your project structure and contents.
+To maintain up-to-date AI assistance:
+- Repeat steps 6-9 at the start of each new chat session. This process takes only seconds.
+- For interfaces with built-in storage, update your custom prompt separately if needed.
 
 ### Handling LLM File Requests
 
@@ -91,6 +95,7 @@ full = [
 - `lc-sel-files`: Select files for full content inclusion
 - `lc-sel-outlines`: Select files for outline inclusion (experimental)
 - `lc-context`: Generate and copy context to clipboard
+  - Use `--with-prompt` flag to include the prompt for LLMs without built-in storage
 - `lc-read-cliplist`: Read contents for LLM-requested files, and copy to clipboard
 
 ## Experimental: Handling Larger Repositories
