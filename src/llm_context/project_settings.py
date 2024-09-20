@@ -128,23 +128,24 @@ class SettingsInitializer:
 
     def _copy_or_update_templates(self):
         config = ConfigLoader.load(self.project_layout.config_path)
-        template_versions = config["templates"]["versions"]
+        template_versions = (templates := config["templates"])["versions"]
         changes_made = False
-        for template_name, current_version in template_versions.items():
-            template_path = self.project_layout.get_template_path(f"{template_name}.j2")
+        for template_key, current_version in template_versions.items():
+            template_name = templates[template_key]
+            template_path = self.project_layout.get_template_path(f"{template_name}")
             if not template_path.exists() or self._should_update_template(current_version):
                 self._copy_template(template_name, template_path)
-                template_versions[template_name] = "1"
+                template_versions[template_key] = "1"
                 changes_made = True
         if changes_made:
-            config["templates"]["versions"] = template_versions
+            templates["versions"] = template_versions
             ConfigLoader.save(self.project_layout.config_path, config)
 
     def _should_update_template(self, current_version: str) -> bool:
         return current_version < "1"  # Compare with the current template version
 
     def _copy_template(self, template_name: str, dest_path: Path):
-        template_content = resources.read_text(templates, f"{template_name}.j2")
+        template_content = resources.read_text(templates, f"{template_name}")
         dest_path.write_text(template_content)
         print(f"Updated template {template_name} to {dest_path}")
 
