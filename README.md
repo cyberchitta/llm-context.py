@@ -6,7 +6,7 @@
 LLM Context is a command-line tool designed to help developers efficiently copy and paste relevant context from code / text repositories into Large Language Model (LLM) chats. It leverages `.gitignore` patterns for smart file selection and uses the clipboard for seamless integration with LLM interfaces.
 
 > **Note**: This project was developed in collaboration with Claude-3.5-Sonnet, using LLM Context itself to share code context during development. All code in the repository is human-curated (by me 😇, @restlessronin).
-  
+
 ## Current Usage Patterns
 
 - **LLM Integration**: Primarily used with Claude (Project Knowledge) and GPT (Knowledge), but adaptable to various chat interfaces.
@@ -27,7 +27,7 @@ pipx install llm-context
 
 1. [Install LLM Context](#installation) if you haven't already.
 2. Navigate to your project's root directory.
-3. Run `lc-init` to set up LLM Context for your project.
+3. Run `lc-init` to set up LLM Context for your project (only needed once per repository).
 4. Ensure you have a custom prompt set up in your AI assistant (e.g., ChatGPT, Claude).
    - A starter prompt for code projects can be found in the `.llm-context/developer-prompt.md` file in this repository.
 5. (Optional) Edit `.llm-context/config.toml` to [add custom ignore patterns](#customizing-ignore-patterns).
@@ -38,7 +38,8 @@ pipx install llm-context
 10. Start your conversation with the LLM about your project.
 
 To keep your AI assistant's project context up-to-date:
-- When significant changes occur in your project, repeat steps 5-8.
+
+- When significant changes occur in your project, repeat steps 6-9.
 - The custom prompt remains constant and doesn't need updating.
 
 Remember: Regularly updating the project context ensures the AI assistant has the most current information about your project structure and contents.
@@ -86,6 +87,7 @@ full = [
 
 ## Command Reference
 
+- `lc-init`: Initialize LLM Context for your project (only needed once per repository)
 - `lc-sel-files`: Select files for full content inclusion
 - `lc-sel-outlines`: Select files for outline inclusion (experimental)
 - `lc-context`: Generate and copy context to clipboard
