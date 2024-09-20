@@ -105,9 +105,9 @@ class SettingsInitializer:
                     "files": "1",
                     "highlights": "1",
                 },
-                "context": "context.j2",
-                "files": "files.j2",
-                "highlights": "highlights.j2",
+                "context": "lc-context.j2",
+                "files": "lc-files.j2",
+                "highlights": "lc-highlights.j2",
             },
             "gitignores": {
                 "full_files": GIT_IGNORE_DEFAULT,
