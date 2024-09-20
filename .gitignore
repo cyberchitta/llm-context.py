@@ -12,6 +12,7 @@ venv.bak/
 .python-version
 .pytest_cache/
 .mypy_cache/
+.ruff_cache/
 
 # Distribution / packaging
 dist/
