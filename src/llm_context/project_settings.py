@@ -11,6 +11,7 @@ from packaging import version
 from llm_context import templates
 from llm_context.exceptions import LLMContextError
 from llm_context.utils import safe_read_file
+from llm_context.exceptions import LLMContextError
 
 PROJECT_INFO: str = (
     "This project uses llm-context. For more information, visit: "
@@ -251,3 +252,9 @@ class ProjectSettings:
     @property
     def project_root(self):
         return str(self.project_root_path)
+
+@LLMContextError.handle
+def init_project():
+    settings = ProjectSettings.create()
+    print(f"LLM Context initialized for project: {settings.project_root}")
+    print("You can now edit .llm-context/config.toml to customize ignore patterns.")

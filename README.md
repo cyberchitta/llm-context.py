@@ -27,14 +27,15 @@ pipx install llm-context
 
 1. [Install LLM Context](#installation) if you haven't already.
 2. Navigate to your project's root directory.
-3. Ensure you have a custom prompt set up in your AI assistant (e.g., ChatGPT, Claude).
+3. Run `lc-init` to set up LLM Context for your project.
+4. Ensure you have a custom prompt set up in your AI assistant (e.g., ChatGPT, Claude).
    - A starter prompt for code projects can be found in the `.llm-context/developer-prompt.md` file in this repository.
-4. (Optional) Edit `.llm-context/config.toml` to [add custom ignore patterns](#customizing-ignore-patterns).
-5. Run `lc-sel-files` to select files for full content inclusion.
-6. (Optional) [Review the selected file](#reviewing-selected-files) list in `.llm-context/curr_ctx.toml`.
-7. Run `lc-context` to generate and copy the context to your clipboard.
-8. Paste the generated context into your Claude Project Knowledge or GPT Knowledge.
-9. Start your conversation with the LLM about your project.
+5. (Optional) Edit `.llm-context/config.toml` to [add custom ignore patterns](#customizing-ignore-patterns).
+6. Run `lc-sel-files` to select files for full content inclusion.
+7. (Optional) [Review the selected file](#reviewing-selected-files) list in `.llm-context/curr_ctx.toml`.
+8. Run `lc-context` to generate and copy the context to your clipboard.
+9. Paste the generated context into your Claude Project Knowledge or GPT Knowledge.
+10. Start your conversation with the LLM about your project.
 
 To keep your AI assistant's project context up-to-date:
 - When significant changes occur in your project, repeat steps 5-8.

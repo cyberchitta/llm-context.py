@@ -43,6 +43,7 @@ taplo = "^0.9.3"
 [tool.poetry.scripts]
 lc-context = "llm_context.context_generator:context"
 # lc-dirtree = "llm_context.folder_structure_diagram:main"
+lc-init = "llm_context.project_settings:init_project"
 lc-read-cliplist = "llm_context.context_generator:files_from_clip"
 lc-sel-files = "llm_context.file_selector:select_full_files"
 lc-sel-outlines = "llm_context.file_selector:select_outline_files"
