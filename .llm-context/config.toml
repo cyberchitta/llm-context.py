@@ -2,9 +2,10 @@ __info__ = "This project uses llm-context. For more information, visit: https://
 config_version = "1"
 
 [templates]
-context = "context.j2"
-files = "files.j2"
-highlights = "highlights.j2"
+prompt = "lc-prompt.md"
+context = "lc-context.j2"
+files = "lc-files.j2"
+highlights = "lc-highlights.j2"
 
 [gitignores]
 full_files = [
@@ -13,14 +14,13 @@ full_files = [
   ".llm-context/",
   "*.lock",
   "*.scm",
+  "cliff.toml",
   "package-lock.json",
   "yarn.lock",
   "pnpm-lock.yaml",
   "go.sum",
   "elm-stuff",
   "LICENSE",
-  "CHANGELOG.md",
-  "README.md",
   ".env",
   ".dockerignore",
   "Dockerfile",
@@ -70,6 +70,7 @@ outline_files = [
 ]
 
 [templates.versions]
+prompt = "1"
 context = "1"
 files = "1"
 highlights = "1"

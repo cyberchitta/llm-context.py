@@ -11,7 +11,6 @@ from packaging import version
 from llm_context import templates
 from llm_context.exceptions import LLMContextError
 from llm_context.utils import safe_read_file
-from llm_context.exceptions import LLMContextError
 
 PROJECT_INFO: str = (
     "This project uses llm-context. For more information, visit: "
@@ -101,10 +100,12 @@ class SettingsInitializer:
             "config_version": "1",
             "templates": {
                 "versions": {
+                    "prompt": "1",
                     "context": "1",
                     "files": "1",
                     "highlights": "1",
                 },
+                "prompt": "lc-prompt.md",
                 "context": "lc-context.j2",
                 "files": "lc-files.j2",
                 "highlights": "lc-highlights.j2",
@@ -195,6 +196,13 @@ class ContextConfig:
         pattern = self.config.get("gitignores", {}).get(f"{context_type}_files", [])
         return cast(list[str], pattern)
 
+    def get_prompt(self) -> Optional[str]:
+        prompt_file = self.config["templates"]["prompt"]
+        if prompt_file:
+            prompt_path = self.project_layout.get_template_path(prompt_file)
+            return safe_read_file(str(prompt_path))
+        return None
+
     def get_summary(self) -> Optional[str]:
         summary_file = self.config.get("summary_file")
         if summary_file:
@@ -233,6 +241,9 @@ class ProjectSettings:
     def get_summary(self) -> Optional[str]:
         return self.context_config.get_summary()
 
+    def get_prompt(self) -> Optional[str]:
+        return self.context_config.get_prompt()
+
     def get_stored_context(self) -> dict[str, list[str]]:
         return self.context_storage.get_stored_context()
 
@@ -253,6 +264,7 @@ class ProjectSettings:
     @property
     def project_root(self):
         return str(self.project_root_path)
+
 
 @LLMContextError.handle
 def init_project():

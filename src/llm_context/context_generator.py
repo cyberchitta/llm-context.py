@@ -1,6 +1,8 @@
+import argparse
 import random
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 import pyperclip  # type: ignore
 from jinja2 import Environment, FileSystemLoader
@@ -72,7 +74,7 @@ class ContextGenerator:
         )
         return self._render("files", {"files": self._files(paths)})
 
-    def context(self) -> str:
+    def context(self, with_prompt: bool, prompt: Optional[str] = None) -> str:
         project_root = self.settings.project_root_path
         converter = PathConverter.create(project_root)
         sel_files = self.settings.context_storage.get_stored_context()
@@ -87,6 +89,7 @@ class ContextGenerator:
             "files": self._files(full_rel),
             "highlights": self._outlines(outline_rel),
             "sample_requested_files": converter.to_relative(self._sample_file_abs(set(full_abs))),
+            "prompt": (prompt if prompt else self.settings.get_prompt()) if with_prompt else None,
         }
         return self._render("context", context)
 
@@ -102,13 +105,31 @@ def _files(in_files: list[str] = []) -> str:
     return ContextGenerator.create().files(in_files)
 
 
-def _context() -> str:
-    return ContextGenerator.create().context()
+def _context(with_prompt: bool, prompt: Optional[str]) -> str:
+    return ContextGenerator.create().context(with_prompt, prompt)
+
+
+def context_with_args():
+    parser = argparse.ArgumentParser(description="Generate context for LLM")
+    parser.add_argument(
+        "--with-prompt",
+        nargs="?",
+        const=True,
+        default=False,
+        help="Include prompt in context. Optionally specify a file path.",
+    )
+    args = parser.parse_args()
+    prompt_file = None
+    if args.with_prompt:
+        if isinstance(args.with_prompt, str):
+            prompt_file = args.with_prompt
+    prompt = safe_read_file(prompt_file) if prompt_file else None
+    return _context(args.with_prompt, prompt)
 
 
 files_from_scratch = create_entry_point(lambda: _files())
 files_from_clip = create_entry_point(lambda: _files(pyperclip.paste().strip().split("\n")))
-context = create_entry_point(_context)
+context = create_entry_point(context_with_args)
 
 
 def main():
