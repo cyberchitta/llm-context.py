@@ -5,6 +5,7 @@ from pathlib import Path
 
 from pathspec import GitIgnoreSpec
 
+from llm_context.exceptions import LLMContextError
 from llm_context.project_settings import ProjectSettings
 from llm_context.utils import PathConverter, safe_read_file
 
@@ -141,11 +142,13 @@ class ContextSelector:
         self.settings.context_storage.store_context({"full": full_files, "outline": outline_files})
 
 
+@LLMContextError.handle
 def select_full_files():
     full_files = ContextSelector.create().select_full_files()
     print(f"Selected {len(full_files)} full files.")
 
 
+@LLMContextError.handle
 def select_outline_files():
     outline_files = ContextSelector.create().select_outline_files()
     print(f"Selected {len(outline_files)} outline files.")

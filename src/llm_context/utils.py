@@ -4,6 +4,8 @@ from typing import Callable, Optional, Union
 
 import pyperclip  # type: ignore
 
+from llm_context.exceptions import LLMContextError
+
 
 def _format_size(size_bytes):
     for unit in ["B", "KB", "MB", "GB"]:
@@ -22,12 +24,13 @@ def size_feedback(content: str) -> None:
 
 
 def create_entry_point(func: Callable[..., str]) -> Callable[[], None]:
-    def entry_point():
+    @LLMContextError.handle
+    def clip_entry_point():
         text = func()
         pyperclip.copy(text)
         size_feedback(text)
 
-    return entry_point
+    return clip_entry_point
 
 
 def safe_read_file(path: str) -> Optional[str]:

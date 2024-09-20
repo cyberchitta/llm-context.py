@@ -9,6 +9,7 @@ import toml
 from packaging import version
 
 from llm_context import templates
+from llm_context.exceptions import LLMContextError
 from llm_context.utils import safe_read_file
 
 PROJECT_INFO: str = (
@@ -208,12 +209,21 @@ class ProjectSettings:
 
     @staticmethod
     def create(project_root: Path = Path.cwd()) -> "ProjectSettings":
+        ProjectSettings.ensure_gitignore_exists(project_root)
         project_layout = ProjectLayout(project_root)
         initializer = SettingsInitializer.create(project_layout)
         initializer.initialize()
         context_config = ContextConfig.create(project_layout)
         context_storage = ContextStorage(project_layout.context_storage_path)
         return ProjectSettings(project_layout, context_config, context_storage)
+
+    @staticmethod
+    def ensure_gitignore_exists(root_path: Path) -> None:
+        if not (root_path / ".gitignore").exists():
+            raise LLMContextError(
+                "A .gitignore file is essential for this tool to function correctly. Please create one before proceeding.",
+                "GITIGNORE_NOT_FOUND",
+            )
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
         return self.context_config.get_ignore_patterns(context_type)
