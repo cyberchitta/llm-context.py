@@ -25,13 +25,22 @@ pipx install llm-context
 
 ### Quick Start and Typical Workflow
 
-1. Navigate to your project's root directory.
-2. (Optional) Edit `.llm-context/config.toml` to [add custom ignore patterns](#customizing-ignore-patterns).
-3. Run `lc-sel-files` to select files for full content inclusion.
-4. (Optional) [Review the selected file](#reviewing-selected-files) list in `.llm-context/curr_ctx.toml`.
-5. Run `lc-context` to generate and copy the context to your clipboard.
-6. Paste the generated context into your Claude Project Knowledge or GPT Knowledge.
-7. Start your conversation with the LLM about your project.
+1. [Install LLM Context](#installation) if you haven't already.
+2. Navigate to your project's root directory.
+3. Ensure you have a custom prompt set up in your AI assistant (e.g., ChatGPT, Claude).
+   - A starter prompt for code projects can be found in the `.llm-context/developer-prompt.md` file in this repository.
+4. (Optional) Edit `.llm-context/config.toml` to [add custom ignore patterns](#customizing-ignore-patterns).
+5. Run `lc-sel-files` to select files for full content inclusion.
+6. (Optional) [Review the selected file](#reviewing-selected-files) list in `.llm-context/curr_ctx.toml`.
+7. Run `lc-context` to generate and copy the context to your clipboard.
+8. Paste the generated context into your Claude Project Knowledge or GPT Knowledge.
+9. Start your conversation with the LLM about your project.
+
+To keep your AI assistant's project context up-to-date:
+- When significant changes occur in your project, repeat steps 5-8.
+- The custom prompt remains constant and doesn't need updating.
+
+Remember: Regularly updating the project context ensures the AI assistant has the most current information about your project structure and contents.
 
 ### Handling LLM File Requests
 
