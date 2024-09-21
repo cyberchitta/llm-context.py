@@ -37,16 +37,16 @@ LLM Context enables rapid project context updates for each AI chat.
 6. Run `lc-sel-files` to select files for full content inclusion.
 7. (Optional) [Review the selected file](#reviewing-selected-files) list in `.llm-context/curr_ctx.toml`.
 8. Generate and copy the context:
-   - For chat interfaces with built-in storage: Run `lc-context`
+   - For chat interfaces with persistent context: Run `lc-context`
    - For other interfaces (including free plans): Run `lc-context --with-prompt` to include the default prompt
 9. Paste the generated context:
-   - For interfaces with built-in storage: Into the Project Knowledge (Claude Pro) or GPT Knowledge (ChatGPT Plus) section
+   - For interfaces with persistent context: Into the Project Knowledge (Claude Pro) or GPT Knowledge (ChatGPT Plus) section
    - For other interfaces: Into the system message or the first chat message, as appropriate
 10. Start your conversation with the LLM about your project.
 
 To maintain up-to-date AI assistance:
 - Repeat steps 6-9 at the start of each new chat session. This process takes only seconds.
-- For interfaces with built-in storage, update your custom prompt separately if needed.
+- For interfaces with persistent context, update your custom prompt separately if needed.
 
 ### Handling LLM File Requests
 
@@ -95,7 +95,7 @@ full = [
 - `lc-sel-files`: Select files for full content inclusion
 - `lc-sel-outlines`: Select files for outline inclusion (experimental)
 - `lc-context`: Generate and copy context to clipboard
-  - Use `--with-prompt` flag to include the prompt for LLMs without built-in storage
+  - Use `--with-prompt` flag to include the prompt for chat interfaces without persistent context
 - `lc-read-cliplist`: Read contents for LLM-requested files, and copy to clipboard
 
 ## Experimental: Handling Larger Repositories
