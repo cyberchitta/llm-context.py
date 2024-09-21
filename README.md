@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![PyPI version](https://img.shields.io/pypi/v/llm-context.svg)](https://pypi.org/project/llm-context/)
 
-LLM Context is a command-line tool that helps developers quickly paste relevant content from code / text projects into the web-chat interface of Large Language Models. It leverages `.gitignore` patterns for smart file selection and uses the clipboard for seamless integration with LLM interfaces.
+LLM Context is a command-line tool that helps developers quickly paste relevant content from code / text projects into the web-chat interface of Large Language Models. It leverages `.gitignore` patterns for smart file selection and systematically uses the clipboard for seamless integration with AI chats.
 
 > **Note**: This project was developed in collaboration with Claude-3.5-Sonnet, using LLM Context itself to share code context during development. All code in the repository is human-curated (by me 😇, @restlessronin).
 
