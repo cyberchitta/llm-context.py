@@ -7,6 +7,10 @@ LLM Context is a command-line tool that helps developers quickly paste relevant 
 
 > **Note**: This project was developed in collaboration with Claude-3.5-Sonnet, using LLM Context itself to share code context during development. All code in the repository is human-curated (by me 😇, @restlessronin).
 
+## Why LLM Context?
+
+For an in-depth exploration of the reasoning behind LLM Context and its approach to AI-assisted development, check out our article: [LLM Context: Harnessing Existing AI Chat Platforms for Development](https://www.cyberchitta.cc/articles/llm-ctx-why.html)
+
 ## Current Usage Patterns
 
 - **LLM Integration**: Primarily used with Claude (Project Knowledge) and GPT (Knowledge), but supports all LLM chat interfaces.
