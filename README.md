@@ -9,7 +9,7 @@ LLM Context is a command-line tool that helps developers quickly paste relevant 
 
 ## Why LLM Context?
 
-For an in-depth exploration of the reasoning behind LLM Context and its approach to AI-assisted development, check out our article: [LLM Context: Harnessing Existing AI Chat Platforms for Development](https://www.cyberchitta.cc/articles/llm-ctx-why.html)
+For an in-depth exploration of the reasoning behind LLM Context and its approach to AI-assisted development, check out our article: [LLM Context: Harnessing Vanilla AI Chats for Development](https://www.cyberchitta.cc/articles/llm-ctx-why.html)
 
 ## Current Usage Patterns
 
