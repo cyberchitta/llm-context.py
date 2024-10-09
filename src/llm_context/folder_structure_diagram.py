@@ -12,6 +12,43 @@ class FolderStructureDiagram:
     root_dir: str
     full_files: Optional[set[str]] = None
     outline_files: Optional[set[str]] = None
+    no_media: bool = False
+
+    EXCLUDED_EXTENSIONS: set[str] = field(
+        default_factory=lambda: {
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".gif",
+            ".bmp",
+            ".svg",
+            ".mp4",
+            ".mkv",
+            ".avi",
+            ".mov",
+            ".wmv",
+            ".mp3",
+            ".wav",
+            ".flac",
+            ".ttf",
+            ".otf",
+            ".woff",
+            ".woff2",
+            ".eot",
+            ".ico",
+            ".pdf",
+            ".zip",
+            ".rar",
+            ".7z",
+            ".tar",
+            ".exe",
+            ".dll",
+            ".so",
+            ".dylib",
+        },
+        init=False,
+        repr=False,
+    )
 
     @property
     def is_enhanced(self) -> bool:
@@ -23,18 +60,32 @@ class FolderStructureDiagram:
 
     @staticmethod
     def create_enhanced(
-        root_dir: str, full_files: set[str], outline_files: set[str]
+        root_dir: str, full_files: set[str], outline_files: set[str], no_media
     ) -> "FolderStructureDiagram":
-        return FolderStructureDiagram(root_dir, full_files, outline_files)
+        return FolderStructureDiagram(root_dir, full_files, outline_files, no_media)
 
-    def generate_tree(self, abs_paths: list[str]) -> str:
+    def generate_tree(self, in_abs_paths: list[str]) -> str:
+        abs_paths = (
+            [path for path in in_abs_paths if not self.is_excluded_file(path)]
+            if self.no_media
+            else in_abs_paths
+        )
         sorted_paths = sorted(self._make_relative(path) for path in abs_paths)
         tree_dict = self._build_tree_structure(sorted_paths)
         diagram = self._format_tree({os.path.basename(self.root_dir): tree_dict})
-        if self.is_enhanced:
-            key = "Key: ✓ Full content, ○ Outline only, ✗ Excluded\n\n"
-            return key + diagram
-        return diagram
+        with_key = (
+            "Key: ✓ Full content, ○ Outline only, ✗ Excluded\n\n" + diagram
+            if self.is_enhanced
+            else diagram
+        )
+        return (
+            with_key + "\n\n*Non-text files have been excluded from this diagram.*"
+            if self.no_media
+            else with_key
+        )
+
+    def is_excluded_file(self, path: str) -> bool:
+        return os.path.splitext(path)[1].lower() in self.EXCLUDED_EXTENSIONS
 
     def _make_relative(self, path: str) -> str:
         return os.path.relpath(path, self.root_dir)
@@ -75,9 +126,11 @@ class FolderStructureDiagram:
         return "\n".join(lines)
 
 
-def get_annotated_fsd(project_root, full_files, outline_files) -> str:
+def get_annotated_fsd(project_root, full_files, outline_files, no_media) -> str:
     abs_paths = FileSelector.create(project_root, [".git"]).get_files()
-    diagram = FolderStructureDiagram.create_enhanced(project_root, full_files, outline_files)
+    diagram = FolderStructureDiagram.create_enhanced(
+        project_root, full_files, outline_files, no_media
+    )
     return diagram.generate_tree(abs_paths)
 
 

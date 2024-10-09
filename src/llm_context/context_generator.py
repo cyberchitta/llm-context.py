@@ -74,7 +74,7 @@ class ContextGenerator:
         )
         return self._render("files", {"files": self._files(paths)})
 
-    def context(self, with_prompt: bool, prompt: Optional[str] = None) -> str:
+    def context(self, with_prompt: bool, prompt: Optional[str], no_media: bool) -> str:
         project_root = self.settings.project_root_path
         converter = PathConverter.create(project_root)
         sel_files = self.settings.context_storage.get_stored_context()
@@ -84,7 +84,9 @@ class ContextGenerator:
         )
         context = {
             "project_name": project_root.name,
-            "folder_structure_diagram": get_annotated_fsd(project_root, full_abs, outline_abs),
+            "folder_structure_diagram": get_annotated_fsd(
+                project_root, full_abs, outline_abs, no_media
+            ),
             "summary": self.settings.get_summary(),
             "files": self._files(full_rel),
             "highlights": self._outlines(outline_rel),
@@ -105,8 +107,8 @@ def _files(in_files: list[str] = []) -> str:
     return ContextGenerator.create().files(in_files)
 
 
-def _context(with_prompt: bool, prompt: Optional[str]) -> str:
-    return ContextGenerator.create().context(with_prompt, prompt)
+def _context(with_prompt: bool, prompt: Optional[str], no_media: bool) -> str:
+    return ContextGenerator.create().context(with_prompt, prompt, no_media)
 
 
 def context_with_args():
@@ -118,13 +120,18 @@ def context_with_args():
         default=False,
         help="Include prompt in context. Optionally specify a file path.",
     )
+    parser.add_argument(
+        "--no-media",
+        action="store_true",
+        help="Exclude media files (images, movies, fonts, etc.) from the diagram",
+    )
     args = parser.parse_args()
     prompt_file = None
     if args.with_prompt:
         if isinstance(args.with_prompt, str):
             prompt_file = args.with_prompt
     prompt = safe_read_file(prompt_file) if prompt_file else None
-    return _context(args.with_prompt, prompt)
+    return _context(args.with_prompt, prompt, args.no_media)
 
 
 files_from_scratch = create_entry_point(lambda: _files())
