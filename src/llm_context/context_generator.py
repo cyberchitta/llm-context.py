@@ -33,19 +33,19 @@ class Template:
 
 
 @dataclass(frozen=True)
-class ContextGenerator:
+class ContextCollector:
     settings: ProjectSettings
 
     @staticmethod
-    def create() -> "ContextGenerator":
-        return ContextGenerator(ProjectSettings.create())
+    def create(settings: "ProjectSettings") -> "ContextCollector":
+        return ContextCollector(settings)
 
-    def _sample_file_abs(self, full_abs: set[str]) -> list[str]:
+    def sample_file_abs(self, full_abs: list[str]) -> list[str]:
         all_abs = set(FileSelector.create(self.settings.project_root_path, [".git"]).get_files())
         incomplete_files = sorted(list(all_abs - set(full_abs)))
         return random.sample(incomplete_files, min(2, len(incomplete_files)))
 
-    def _files(self, rel_paths: list[str]) -> list[dict[str, str]]:
+    def files(self, rel_paths: list[str]) -> list[dict[str, str]]:
         abs_paths = PathConverter.create(self.settings.project_root_path).to_absolute(rel_paths)
         return [
             {"path": rel_path, "content": content}
@@ -53,7 +53,7 @@ class ContextGenerator:
             if (content := safe_read_file(abs_path)) is not None
         ]
 
-    def _outlines(self, rel_paths: list[str]) -> list[dict[str, str]]:
+    def outlines(self, rel_paths: list[str]) -> list[dict[str, str]]:
         abs_paths = PathConverter.create(self.settings.project_root_path).to_absolute(rel_paths)
         source_set = [
             Source(rel, content)
@@ -62,35 +62,62 @@ class ContextGenerator:
         ]
         return generate_outlines(source_set)
 
-    def files(self, rel_paths: list[str]) -> str:
-        converter = PathConverter.create(self.settings.project_root_path)
-        if rel_paths and not converter.validate(rel_paths):
-            print("Invalid file paths")
-            return ""
-        paths = (
-            rel_paths
-            if rel_paths
-            else self.settings.context_storage.get_stored_context().get("full", [])
+    def folder_structure_diagram(
+        self, full_abs: list[str], outline_abs: list[str], no_media: bool
+    ) -> str:
+        return get_annotated_fsd(self.settings.project_root_path, full_abs, outline_abs, no_media)
+
+
+@dataclass(frozen=True)
+class ContextGenerator:
+    collector: ContextCollector
+    settings: ProjectSettings
+    project_root: Path
+    converter: PathConverter
+    full_rel: list[str]
+    full_abs: list[str]
+    outline_rel: list[str]
+    outline_abs: list[str]
+
+    @staticmethod
+    def create() -> "ContextGenerator":
+        settings = ProjectSettings.create()
+        collector = ContextCollector.create(settings)
+        project_root = settings.project_root_path
+        converter = PathConverter.create(project_root)
+        sel_files = settings.context_storage.get_stored_context()
+        full_rel = sel_files.get("full", [])
+        full_abs = converter.to_absolute(full_rel)
+        outline_rel = [f for f in sel_files.get("outline", []) if to_language(f)]
+        outline_abs = converter.to_absolute(outline_rel)
+
+        return ContextGenerator(
+            collector,
+            settings,
+            project_root,
+            converter,
+            full_rel,
+            full_abs,
+            outline_rel,
+            outline_abs,
         )
-        return self._render("files", {"files": self._files(paths)})
+
+    def files(self, in_files: list[str] = []) -> str:
+        rel_paths = in_files if in_files else self.full_rel
+        return self._render("files", {"files": self.collector.files(rel_paths)})
 
     def context(self, with_prompt: bool, prompt: Optional[str], no_media: bool) -> str:
-        project_root = self.settings.project_root_path
-        converter = PathConverter.create(project_root)
-        sel_files = self.settings.context_storage.get_stored_context()
-        full_abs = converter.to_absolute(full_rel := sel_files.get("full", []))
-        outline_abs = converter.to_absolute(
-            outline_rel := [f for f in sel_files.get("outline", []) if to_language(f)]
-        )
         context = {
-            "project_name": project_root.name,
-            "folder_structure_diagram": get_annotated_fsd(
-                project_root, full_abs, outline_abs, no_media
+            "project_name": self.project_root.name,
+            "folder_structure_diagram": self.collector.folder_structure_diagram(
+                self.full_abs, self.outline_abs, no_media
             ),
             "summary": self.settings.get_summary(),
-            "files": self._files(full_rel),
-            "highlights": self._outlines(outline_rel),
-            "sample_requested_files": converter.to_relative(self._sample_file_abs(set(full_abs))),
+            "files": self.collector.files(self.full_rel),
+            "highlights": self.collector.outlines(self.outline_rel),
+            "sample_requested_files": self.converter.to_relative(
+                self.collector.sample_file_abs(self.full_abs)
+            ),
             "prompt": (prompt if prompt else self.settings.get_prompt()) if with_prompt else None,
         }
         return self._render("context", context)
