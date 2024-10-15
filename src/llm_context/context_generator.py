@@ -12,7 +12,7 @@ from llm_context.folder_structure_diagram import get_annotated_fsd
 from llm_context.highlighter.language_mapping import to_language
 from llm_context.highlighter.outliner import generate_outlines
 from llm_context.highlighter.parser import Source
-from llm_context.project_settings import ProjectSettings
+from llm_context.project_settings import ProjectSettings, profile_feedback
 from llm_context.utils import PathConverter, create_entry_point, safe_read_file
 
 
@@ -106,7 +106,9 @@ class ContextGenerator:
         rel_paths = in_files if in_files else self.full_rel
         return self._render("files", {"files": self.collector.files(rel_paths)})
 
-    def context(self, with_prompt: bool, prompt: Optional[str], no_media: bool) -> str:
+    def context(self) -> str:
+        ctx_settings = self.settings.context_config.get_settings()
+        (no_media, with_prompt) = (ctx_settings["no_media"], ctx_settings["with_prompt"])
         context = {
             "project_name": self.project_root.name,
             "folder_structure_diagram": self.collector.folder_structure_diagram(
@@ -118,7 +120,7 @@ class ContextGenerator:
             "sample_requested_files": self.converter.to_relative(
                 self.collector.sample_file_abs(self.full_abs)
             ),
-            "prompt": (prompt if prompt else self.settings.get_prompt()) if with_prompt else None,
+            "prompt": self.settings.get_prompt() if with_prompt else None,
         }
         return self._render("context", context)
 
@@ -131,39 +133,19 @@ class ContextGenerator:
 
 
 def _files(in_files: list[str] = []) -> str:
+    if not in_files:
+        profile_feedback()
     return ContextGenerator.create().files(in_files)
 
 
-def _context(with_prompt: bool, prompt: Optional[str], no_media: bool) -> str:
-    return ContextGenerator.create().context(with_prompt, prompt, no_media)
-
-
-def context_with_args():
-    parser = argparse.ArgumentParser(description="Generate context for LLM")
-    parser.add_argument(
-        "--with-prompt",
-        nargs="?",
-        const=True,
-        default=False,
-        help="Include prompt in context. Optionally specify a file path.",
-    )
-    parser.add_argument(
-        "--no-media",
-        action="store_true",
-        help="Exclude media files (images, movies, fonts, etc.) from the diagram",
-    )
-    args = parser.parse_args()
-    prompt_file = None
-    if args.with_prompt:
-        if isinstance(args.with_prompt, str):
-            prompt_file = args.with_prompt
-    prompt = safe_read_file(prompt_file) if prompt_file else None
-    return _context(args.with_prompt, prompt, args.no_media)
+def _context() -> str:
+    profile_feedback()
+    return ContextGenerator.create().context()
 
 
 files_from_scratch = create_entry_point(lambda: _files())
 files_from_clip = create_entry_point(lambda: _files(pyperclip.paste().strip().split("\n")))
-context = create_entry_point(context_with_args)
+context = create_entry_point(_context)
 
 
 def main():

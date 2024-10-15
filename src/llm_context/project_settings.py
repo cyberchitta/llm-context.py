@@ -1,5 +1,4 @@
-import json
-import os
+import argparse
 from dataclasses import dataclass
 from importlib import resources
 from pathlib import Path
@@ -74,6 +73,26 @@ class SettingsInitializer:
     project_layout: ProjectLayout
 
     @staticmethod
+    def _create_default_profile() -> dict[str, Any]:
+        return SettingsInitializer._create_profile(GIT_IGNORE_DEFAULT, GIT_IGNORE_DEFAULT)
+
+    @staticmethod
+    def _create_profile(full_files: list[str], outline_files: list[str]) -> dict[str, Any]:
+        return {
+            "gitignores": {
+                "full_files": full_files,
+                "outline_files": outline_files,
+            },
+            "templates": {
+                "prompt": "lc-prompt.md",
+            },
+            "settings": {
+                "with_prompt": False,
+                "no_media": False,
+            },
+        }
+
+    @staticmethod
     def create(project_layout: ProjectLayout) -> "SettingsInitializer":
         return SettingsInitializer(project_layout)
 
@@ -96,22 +115,15 @@ class SettingsInitializer:
     def _create_config_file(self, config_path: Path):
         default_config = {
             "__info__": PROJECT_INFO,
-            "config_version": "1",
+            "config_version": "2",
             "templates": {
-                "versions": {
-                    "prompt": "1",
-                    "context": "1",
-                    "files": "1",
-                    "highlights": "1",
-                },
-                "prompt": "lc-prompt.md",
                 "context": "lc-context.j2",
                 "files": "lc-files.j2",
                 "highlights": "lc-highlights.j2",
             },
-            "gitignores": {
-                "full_files": GIT_IGNORE_DEFAULT,
-                "outline_files": GIT_IGNORE_DEFAULT,
+            "profiles": {
+                "default": SettingsInitializer._create_default_profile(),
+                "code": SettingsInitializer._create_default_profile(),
             },
             "summary_file": None,
         }
@@ -151,7 +163,9 @@ class SettingsInitializer:
 
     def _create_curr_ctx_file(self):
         if not self.project_layout.context_storage_path.exists():
-            ConfigLoader.save(self.project_layout.context_storage_path, {"context": {}})
+            ConfigLoader.save(
+                self.project_layout.context_storage_path, {"profile": "code", "context": {}}
+            )
 
 
 @dataclass(frozen=True)
@@ -171,8 +185,19 @@ class ConfigLoader:
 class ContextStorage:
     storage_path: Path
 
+    def load(self) -> dict[str, Any]:
+        return ConfigLoader.load(self.storage_path)
+
+    def get_profile(self) -> str:
+        return cast(str, self.load().get("profile", "code"))
+
+    def store_profile(self, profile: str):
+        storage_data = ConfigLoader.load(self.storage_path)
+        storage_data["profile"] = profile
+        ConfigLoader.save(self.storage_path, storage_data)
+
     def get_stored_context(self) -> dict[str, list[str]]:
-        context = ConfigLoader.load(self.storage_path).get("context", {})
+        context = self.load().get("context", {})
         return cast(dict[str, list[str]], context)
 
     def store_context(self, context: dict[str, list[str]]):
@@ -185,18 +210,26 @@ class ContextStorage:
 class ContextConfig:
     config: dict[str, Any]
     project_layout: ProjectLayout
+    profile: str
 
     @staticmethod
-    def create(project_layout: ProjectLayout) -> "ContextConfig":
+    def create(project_layout: ProjectLayout, profile: str) -> "ContextConfig":
         config = ConfigLoader.load(project_layout.config_path)
-        return ContextConfig(config, project_layout)
+        return ContextConfig(config, project_layout, profile)
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
-        pattern = self.config.get("gitignores", {}).get(f"{context_type}_files", [])
+        pattern = (
+            self.config["profiles"][self.profile]
+            .get("gitignores", {})
+            .get(f"{context_type}_files", [])
+        )
         return cast(list[str], pattern)
 
+    def get_settings(self) -> dict[str, Any]:
+        return cast(dict[str, Any], self.config["profiles"][self.profile]["settings"])
+
     def get_prompt(self) -> Optional[str]:
-        prompt_file = self.config["templates"]["prompt"]
+        prompt_file = self.config["profiles"][self.profile]["templates"]["prompt"]
         if prompt_file:
             prompt_path = self.project_layout.get_template_path(prompt_file)
             return safe_read_file(str(prompt_path))
@@ -222,8 +255,9 @@ class ProjectSettings:
         project_layout = ProjectLayout(project_root)
         initializer = SettingsInitializer.create(project_layout)
         initializer.initialize()
-        context_config = ContextConfig.create(project_layout)
         context_storage = ContextStorage(project_layout.context_storage_path)
+        profile = context_storage.get_profile()
+        context_config = ContextConfig.create(project_layout, profile)
         return ProjectSettings(project_layout, context_config, context_storage)
 
     @staticmethod
@@ -238,7 +272,7 @@ class ProjectSettings:
         return self.context_config.get_ignore_patterns(context_type)
 
     def get_summary(self) -> Optional[str]:
-        return self.context_config.get_summary()
+        return cast(Optional[str], self.context_config.get_summary())
 
     def get_prompt(self) -> Optional[str]:
         return self.context_config.get_prompt()
@@ -265,8 +299,33 @@ class ProjectSettings:
         return str(self.project_root_path)
 
 
+def profile_feedback():
+    profile = ProjectSettings.create().context_storage.get_profile()
+    print(f"Active profile: {profile}")
+
+
 @LLMContextError.handle
 def init_project():
     settings = ProjectSettings.create()
     print(f"LLM Context initialized for project: {settings.project_root}")
     print("You can now edit .llm-context/config.toml to customize ignore patterns.")
+
+
+def set_profile(profile: str):
+    settings = ProjectSettings.create()
+    if profile not in settings.context_config.config["profiles"]:
+        raise ValueError(f"Profile '{profile}' does not exist.")
+    settings.context_storage.store_profile(profile)
+    print(f"Active profile set to '{profile}'.")
+
+
+@LLMContextError.handle
+def set_profile_with_args():
+    parser = argparse.ArgumentParser(description="Set active profile for LLM context")
+    parser.add_argument(
+        "profile",
+        type=str,
+        help="Profile to set as active",
+    )
+    args = parser.parse_args()
+    set_profile(args.profile)

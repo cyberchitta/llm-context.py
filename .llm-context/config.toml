@@ -2,12 +2,17 @@ __info__ = "This project uses llm-context. For more information, visit: https://
 config_version = "1"
 
 [templates]
-prompt = "lc-prompt.md"
 context = "lc-context.j2"
 files = "lc-files.j2"
 highlights = "lc-highlights.j2"
 
-[gitignores]
+[templates.versions]
+context = "1"
+files = "1"
+highlights = "1"
+
+[profiles.code]
+[profiles.code.gitignores]
 full_files = [
   ".git",
   ".gitignore",
@@ -69,8 +74,9 @@ outline_files = [
   "*.map",
 ]
 
-[templates.versions]
-prompt = "1"
-context = "1"
-files = "1"
-highlights = "1"
+[profiles.code.templates]
+prompt = "lc-prompt.md"
+
+[profiles.code.settings]
+with_prompt = true
+no_media = false
