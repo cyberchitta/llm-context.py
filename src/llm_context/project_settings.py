@@ -117,6 +117,11 @@ class SettingsInitializer:
             "__info__": PROJECT_INFO,
             "config_version": "2",
             "templates": {
+                "versions": {
+                    "context": "1",
+                    "files": "1",
+                    "highlights": "1",
+                },
                 "context": "lc-context.j2",
                 "files": "lc-files.j2",
                 "highlights": "lc-highlights.j2",
