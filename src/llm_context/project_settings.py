@@ -134,7 +134,7 @@ class SettingsInitializer:
     def _update_config_file(self, config_path: Path):
         current_config = ConfigLoader.load(config_path)
         if version.parse(current_config.get("config_version", "0")) < CURRENT_CONFIG_VERSION:
-            self._create_config_file()
+            self._create_config_file(config_path)
 
     def _copy_or_update_templates(self):
         config = ConfigLoader.load(self.project_layout.config_path)
