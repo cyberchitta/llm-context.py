@@ -46,6 +46,7 @@ GIT_IGNORE_DEFAULT: list[str] = [
     "*.ttf",
     "*.map",
 ]
+CURRENT_CONFIG_VERSION = version.parse("2")
 
 
 @dataclass(frozen=True)
@@ -115,16 +116,12 @@ class SettingsInitializer:
     def _create_config_file(self, config_path: Path):
         default_config = {
             "__info__": PROJECT_INFO,
-            "config_version": "2",
+            "config_version": f"{str(CURRENT_CONFIG_VERSION)}",
             "templates": {
-                "versions": {
-                    "context": "1",
-                    "files": "1",
-                    "highlights": "1",
-                },
                 "context": "lc-context.j2",
                 "files": "lc-files.j2",
                 "highlights": "lc-highlights.j2",
+                "prompt": "lc-prompt.md",
             },
             "profiles": {
                 "default": SettingsInitializer._create_default_profile(),
@@ -136,30 +133,17 @@ class SettingsInitializer:
 
     def _update_config_file(self, config_path: Path):
         current_config = ConfigLoader.load(config_path)
-
-        if version.parse(current_config.get("config_version", "0")) < version.parse("1"):
-            # Perform any necessary migrations
-            current_config["config_version"] = "1"
-            # Add any new configuration options here
-            ConfigLoader.save(config_path, current_config)
+        if version.parse(current_config.get("config_version", "0")) < CURRENT_CONFIG_VERSION:
+            self._create_config_file()
 
     def _copy_or_update_templates(self):
         config = ConfigLoader.load(self.project_layout.config_path)
-        template_versions = (templates := config["templates"])["versions"]
-        changes_made = False
-        for template_key, current_version in template_versions.items():
-            template_name = templates[template_key]
-            template_path = self.project_layout.get_template_path(f"{template_name}")
-            if not template_path.exists() or self._should_update_template(current_version):
-                self._copy_template(template_name, template_path)
-                template_versions[template_key] = "1"
-                changes_made = True
-        if changes_made:
-            templates["versions"] = template_versions
-            ConfigLoader.save(self.project_layout.config_path, config)
-
-    def _should_update_template(self, current_version: str) -> bool:
-        return current_version < "1"  # Compare with the current template version
+        cfg_version = version.parse(config["config_version"])
+        if cfg_version == CURRENT_CONFIG_VERSION:
+            return
+        for _, template_name in config["templates"].items():
+            template_path = self.project_layout.get_template_path(template_name)
+            self._copy_template(template_name, template_path)
 
     def _copy_template(self, template_name: str, dest_path: Path):
         template_content = resources.read_text(templates, f"{template_name}")
