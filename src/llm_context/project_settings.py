@@ -50,12 +50,59 @@ CURRENT_CONFIG_VERSION = version.parse("2")
 
 
 @dataclass(frozen=True)
+class ProfileTemplate:
+    @staticmethod
+    def create_default_gitignores() -> list[str]:
+        return GIT_IGNORE_DEFAULT
+
+    @staticmethod
+    def create_default() -> dict[str, Any]:
+        return {
+            "gitignores": {
+                "full_files": ProfileTemplate.create_default_gitignores(),
+                "outline_files": ProfileTemplate.create_default_gitignores(),
+            },
+            "templates": {
+                "prompt": "lc-prompt.md",
+            },
+            "settings": {
+                "with_prompt": False,
+                "no_media": False,
+            },
+        }
+
+    @staticmethod
+    def create_code() -> dict[str, Any]:
+        return ProfileTemplate.create_default()
+
+
+@dataclass(frozen=True)
+class SystemState:
+    config_version: str
+    default_profile: dict[str, Any]
+
+    @staticmethod
+    def create_default() -> "SystemState":
+        return SystemState(
+            config_version=str(CURRENT_CONFIG_VERSION),
+            default_profile=ProfileTemplate.create_default(),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"config_version": self.config_version, "default_profile": self.default_profile}
+
+
+@dataclass(frozen=True)
 class ProjectLayout:
     root_path: Path
 
     @property
     def config_path(self) -> Path:
         return self.root_path / ".llm-context" / "config.toml"
+
+    @property
+    def state_path(self) -> Path:
+        return self.root_path / ".llm-context" / "lc-state.toml"
 
     @property
     def context_storage_path(self) -> Path:
@@ -67,6 +114,81 @@ class ProjectLayout:
 
     def get_template_path(self, template_name: str) -> Path:
         return self.templates_path / template_name
+
+
+@dataclass(frozen=True)
+class ConfigLoader:
+    @staticmethod
+    def load(file_path: Path) -> dict[str, Any]:
+        with open(file_path, "r") as f:
+            return toml.load(f)
+
+    @staticmethod
+    def save(file_path: Path, data: dict[str, Any]):
+        with open(file_path, "w") as f:
+            toml.dump(data, f)
+
+
+@dataclass(frozen=True)
+class ContextStorage:
+    storage_path: Path
+
+    def load(self) -> dict[str, Any]:
+        return ConfigLoader.load(self.storage_path)
+
+    def get_profile(self) -> str:
+        return cast(str, self.load().get("profile", "code"))
+
+    def store_profile(self, profile: str):
+        storage_data = ConfigLoader.load(self.storage_path)
+        storage_data["profile"] = profile
+        ConfigLoader.save(self.storage_path, storage_data)
+
+    def get_stored_context(self) -> dict[str, list[str]]:
+        context = self.load().get("context", {})
+        return cast(dict[str, list[str]], context)
+
+    def store_context(self, context: dict[str, list[str]]):
+        storage_data = ConfigLoader.load(self.storage_path)
+        storage_data["context"] = context
+        ConfigLoader.save(self.storage_path, storage_data)
+
+
+@dataclass(frozen=True)
+class ContextConfig:
+    config: dict[str, Any]
+    project_layout: ProjectLayout
+    profile: str
+
+    @staticmethod
+    def create(project_layout: ProjectLayout, profile: str) -> "ContextConfig":
+        config = ConfigLoader.load(project_layout.config_path)
+        return ContextConfig(config, project_layout, profile)
+
+    def get_ignore_patterns(self, context_type: str) -> list[str]:
+        pattern = (
+            self.config["profiles"][self.profile]
+            .get("gitignores", {})
+            .get(f"{context_type}_files", [])
+        )
+        return cast(list[str], pattern)
+
+    def get_settings(self) -> dict[str, Any]:
+        return cast(dict[str, Any], self.config["profiles"][self.profile]["settings"])
+
+    def get_prompt(self) -> Optional[str]:
+        prompt_file = self.config["profiles"][self.profile]["templates"]["prompt"]
+        if prompt_file:
+            prompt_path = self.project_layout.get_template_path(prompt_file)
+            return safe_read_file(str(prompt_path))
+        return None
+
+    def get_summary(self) -> Optional[str]:
+        summary_file = self.config.get("summary_file")
+        if summary_file:
+            summary_path = self.project_layout.root_path / summary_file
+            return safe_read_file(str(summary_path))
+        return None
 
 
 @dataclass(frozen=True)
@@ -155,81 +277,6 @@ class SettingsInitializer:
             ConfigLoader.save(
                 self.project_layout.context_storage_path, {"profile": "code", "context": {}}
             )
-
-
-@dataclass(frozen=True)
-class ConfigLoader:
-    @staticmethod
-    def load(file_path: Path) -> dict[str, Any]:
-        with open(file_path, "r") as f:
-            return toml.load(f)
-
-    @staticmethod
-    def save(file_path: Path, data: dict[str, Any]):
-        with open(file_path, "w") as f:
-            toml.dump(data, f)
-
-
-@dataclass(frozen=True)
-class ContextStorage:
-    storage_path: Path
-
-    def load(self) -> dict[str, Any]:
-        return ConfigLoader.load(self.storage_path)
-
-    def get_profile(self) -> str:
-        return cast(str, self.load().get("profile", "code"))
-
-    def store_profile(self, profile: str):
-        storage_data = ConfigLoader.load(self.storage_path)
-        storage_data["profile"] = profile
-        ConfigLoader.save(self.storage_path, storage_data)
-
-    def get_stored_context(self) -> dict[str, list[str]]:
-        context = self.load().get("context", {})
-        return cast(dict[str, list[str]], context)
-
-    def store_context(self, context: dict[str, list[str]]):
-        storage_data = ConfigLoader.load(self.storage_path)
-        storage_data["context"] = context
-        ConfigLoader.save(self.storage_path, storage_data)
-
-
-@dataclass(frozen=True)
-class ContextConfig:
-    config: dict[str, Any]
-    project_layout: ProjectLayout
-    profile: str
-
-    @staticmethod
-    def create(project_layout: ProjectLayout, profile: str) -> "ContextConfig":
-        config = ConfigLoader.load(project_layout.config_path)
-        return ContextConfig(config, project_layout, profile)
-
-    def get_ignore_patterns(self, context_type: str) -> list[str]:
-        pattern = (
-            self.config["profiles"][self.profile]
-            .get("gitignores", {})
-            .get(f"{context_type}_files", [])
-        )
-        return cast(list[str], pattern)
-
-    def get_settings(self) -> dict[str, Any]:
-        return cast(dict[str, Any], self.config["profiles"][self.profile]["settings"])
-
-    def get_prompt(self) -> Optional[str]:
-        prompt_file = self.config["profiles"][self.profile]["templates"]["prompt"]
-        if prompt_file:
-            prompt_path = self.project_layout.get_template_path(prompt_file)
-            return safe_read_file(str(prompt_path))
-        return None
-
-    def get_summary(self) -> Optional[str]:
-        summary_file = self.config.get("summary_file")
-        if summary_file:
-            summary_path = self.project_layout.root_path / summary_file
-            return safe_read_file(str(summary_path))
-        return None
 
 
 @dataclass(frozen=True)
