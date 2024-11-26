@@ -50,49 +50,6 @@ CURRENT_CONFIG_VERSION = version.parse("2")
 
 
 @dataclass(frozen=True)
-class ProfileTemplate:
-    @staticmethod
-    def create_default_gitignores() -> list[str]:
-        return GIT_IGNORE_DEFAULT
-
-    @staticmethod
-    def create_default() -> dict[str, Any]:
-        return {
-            "gitignores": {
-                "full_files": ProfileTemplate.create_default_gitignores(),
-                "outline_files": ProfileTemplate.create_default_gitignores(),
-            },
-            "templates": {
-                "prompt": "lc-prompt.md",
-            },
-            "settings": {
-                "with_prompt": False,
-                "no_media": False,
-            },
-        }
-
-    @staticmethod
-    def create_code() -> dict[str, Any]:
-        return ProfileTemplate.create_default()
-
-
-@dataclass(frozen=True)
-class SystemState:
-    config_version: str
-    default_profile: dict[str, Any]
-
-    @staticmethod
-    def create_default() -> "SystemState":
-        return SystemState(
-            config_version=str(CURRENT_CONFIG_VERSION),
-            default_profile=ProfileTemplate.create_default(),
-        )
-
-    def to_dict(self) -> dict[str, Any]:
-        return {"config_version": self.config_version, "default_profile": self.default_profile}
-
-
-@dataclass(frozen=True)
 class ProjectLayout:
     root_path: Path
 
@@ -127,6 +84,98 @@ class ConfigLoader:
     def save(file_path: Path, data: dict[str, Any]):
         with open(file_path, "w") as f:
             toml.dump(data, f)
+
+
+@dataclass(frozen=True)
+class ProfileTemplate:
+    @staticmethod
+    def create_default_gitignores() -> list[str]:
+        return GIT_IGNORE_DEFAULT
+
+    @staticmethod
+    def create_default() -> dict[str, Any]:
+        return {
+            "gitignores": {
+                "full_files": ProfileTemplate.create_default_gitignores(),
+                "outline_files": ProfileTemplate.create_default_gitignores(),
+            },
+            "templates": {
+                "prompt": "lc-prompt.md",
+            },
+            "settings": {
+                "with_prompt": False,
+                "no_media": False,
+            },
+        }
+
+    @staticmethod
+    def create_code() -> dict[str, Any]:
+        return ProfileTemplate.create_default()
+
+
+@dataclass(frozen=True)
+class SystemState:
+    config_version: str
+    default_profile: dict[str, Any]
+
+    @staticmethod
+    def create_new() -> "SystemState":
+        return SystemState.create_default(str(CURRENT_CONFIG_VERSION))
+
+    @staticmethod
+    def create_null() -> "SystemState":
+        return SystemState.create_default("0")
+
+    @staticmethod
+    def create_default(version: str) -> "SystemState":
+        return SystemState.create(version, ProfileTemplate.create_default())
+
+    @staticmethod
+    def create(config_version: str, default_profile: dict[str, Any]) -> "SystemState":
+        return SystemState(config_version, default_profile)
+
+    @property
+    def needs_update(self) -> bool:
+        return version.parse(self.config_version) < CURRENT_CONFIG_VERSION
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "__warning__": "This file is managed by llm-context. Manual edits will be overwritten.",
+            "config_version": self.config_version,
+            "default_profile": self.default_profile,
+        }
+
+
+@dataclass(frozen=True)
+class Config:
+    templates: dict[str, str]
+    profiles: dict[str, dict[str, Any]]
+    summary_file: Optional[str]
+    __info__: str = PROJECT_INFO
+
+    @staticmethod
+    def create_default() -> "Config":
+        return Config(
+            templates={
+                "context": "lc-context.j2",
+                "files": "lc-files.j2",
+                "highlights": "lc-highlights.j2",
+                "prompt": "lc-prompt.md",
+            },
+            profiles={
+                "default": ProfileTemplate.create_default(),
+                "code": ProfileTemplate.create_code(),
+            },
+            summary_file=None,
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "__info__": self.__info__,
+            "templates": self.templates,
+            "profiles": self.profiles,
+            "summary_file": self.summary_file,
+        }
 
 
 @dataclass(frozen=True)
@@ -194,89 +243,51 @@ class ContextConfig:
 @dataclass(frozen=True)
 class SettingsInitializer:
     project_layout: ProjectLayout
-
-    @staticmethod
-    def _create_default_profile() -> dict[str, Any]:
-        return SettingsInitializer._create_profile(GIT_IGNORE_DEFAULT, GIT_IGNORE_DEFAULT)
-
-    @staticmethod
-    def _create_profile(full_files: list[str], outline_files: list[str]) -> dict[str, Any]:
-        return {
-            "gitignores": {
-                "full_files": full_files,
-                "outline_files": outline_files,
-            },
-            "templates": {
-                "prompt": "lc-prompt.md",
-            },
-            "settings": {
-                "with_prompt": False,
-                "no_media": False,
-            },
-        }
+    state: SystemState
 
     @staticmethod
     def create(project_layout: ProjectLayout) -> "SettingsInitializer":
-        return SettingsInitializer(project_layout)
+        project_layout.templates_path.mkdir(parents=True, exist_ok=True)
+        start_state = (
+            SystemState.create_null()
+            if not project_layout.state_path.exists()
+            else SystemState(**ConfigLoader.load(project_layout.state_path))
+        )
+        return SettingsInitializer(project_layout, start_state)
 
     def initialize(self):
-        self._create_directory_structure()
         self._create_or_update_config_file()
         self._create_curr_ctx_file()
-        self._copy_or_update_templates()
-
-    def _create_directory_structure(self):
-        self.project_layout.templates_path.mkdir(parents=True, exist_ok=True)
+        self._update_templates_if_needed()
+        self.create_state_file()
 
     def _create_or_update_config_file(self):
-        config_path = self.project_layout.config_path
-        if config_path.exists():
-            self._update_config_file(config_path)
-        else:
-            self._create_config_file(config_path)
+        if not self.project_layout.config_path.exists() or self.state.needs_update:
+            self._create_config_file()
 
-    def _create_config_file(self, config_path: Path):
-        default_config = {
-            "__info__": PROJECT_INFO,
-            "config_version": f"{str(CURRENT_CONFIG_VERSION)}",
-            "templates": {
-                "context": "lc-context.j2",
-                "files": "lc-files.j2",
-                "highlights": "lc-highlights.j2",
-                "prompt": "lc-prompt.md",
-            },
-            "profiles": {
-                "default": SettingsInitializer._create_default_profile(),
-                "code": SettingsInitializer._create_default_profile(),
-            },
-            "summary_file": None,
-        }
-        ConfigLoader.save(config_path, default_config)
+    def _update_templates_if_needed(self):
+        if self.state.needs_update:
+            config = ConfigLoader.load(self.project_layout.config_path)
+            for _, template_name in config["templates"].items():
+                template_path = self.project_layout.get_template_path(template_name)
+                self._copy_template(template_name, template_path)
 
-    def _update_config_file(self, config_path: Path):
-        current_config = ConfigLoader.load(config_path)
-        if version.parse(current_config.get("config_version", "0")) < CURRENT_CONFIG_VERSION:
-            self._create_config_file(config_path)
+    def create_state_file(self):
+        ConfigLoader.save(self.project_layout.state_path, SystemState.create_new().to_dict())
 
-    def _copy_or_update_templates(self):
-        config = ConfigLoader.load(self.project_layout.config_path)
-        cfg_version = version.parse(config["config_version"])
-        if cfg_version == CURRENT_CONFIG_VERSION:
-            return
-        for _, template_name in config["templates"].items():
-            template_path = self.project_layout.get_template_path(template_name)
-            self._copy_template(template_name, template_path)
-
-    def _copy_template(self, template_name: str, dest_path: Path):
-        template_content = resources.read_text(templates, f"{template_name}")
-        dest_path.write_text(template_content)
-        print(f"Updated template {template_name} to {dest_path}")
+    def _create_config_file(self):
+        ConfigLoader.save(self.project_layout.config_path, Config.create_default().to_dict())
 
     def _create_curr_ctx_file(self):
         if not self.project_layout.context_storage_path.exists():
             ConfigLoader.save(
                 self.project_layout.context_storage_path, {"profile": "code", "context": {}}
             )
+
+    def _copy_template(self, template_name: str, dest_path: Path):
+        template_content = resources.read_text(templates, template_name)
+        dest_path.write_text(template_content)
+        print(f"Updated template {template_name} to {dest_path}")
 
 
 @dataclass(frozen=True)
@@ -289,8 +300,7 @@ class ProjectSettings:
     def create(project_root: Path = Path.cwd()) -> "ProjectSettings":
         ProjectSettings.ensure_gitignore_exists(project_root)
         project_layout = ProjectLayout(project_root)
-        initializer = SettingsInitializer.create(project_layout)
-        initializer.initialize()
+        SettingsInitializer.create(project_layout).initialize()
         context_storage = ContextStorage(project_layout.context_storage_path)
         profile = context_storage.get_profile()
         context_config = ContextConfig.create(project_layout, profile)
