@@ -215,9 +215,39 @@ class ContextConfig:
     profile: str
 
     @staticmethod
+    def _resolve_profile(config: dict[str, Any], profile_name: str) -> dict[str, Any]:
+        try:
+            profile_config = config["profiles"][profile_name]
+        except KeyError:
+            raise LLMContextError(
+                f"Profile '{profile_name}' not found in config", "PROFILE_NOT_FOUND"
+            )
+        if "base" not in profile_config:
+            return profile_config
+        base_name = profile_config["base"]
+        try:
+            base_profile = ContextConfig._resolve_profile(config, base_name)
+        except KeyError:
+            raise LLMContextError(
+                f"Base profile '{base_name}' referenced by '{profile_name}' not found in config",
+                "BASE_PROFILE_NOT_FOUND",
+            )
+        merged = base_profile.copy()
+        for key, value in profile_config.items():
+            if key == "base":
+                continue
+            if isinstance(value, dict) and key in merged and isinstance(merged[key], dict):
+                merged[key] = {**merged[key], **value}
+            else:
+                merged[key] = value
+        return merged
+
+    @staticmethod
     def create(project_layout: ProjectLayout, profile: str) -> "ContextConfig":
-        config = ConfigLoader.load(project_layout.config_path)
-        return ContextConfig(config, project_layout, profile)
+        raw_config = ConfigLoader.load(project_layout.config_path)
+        resolved_config = raw_config.copy()
+        resolved_config["profiles"][profile] = ContextConfig._resolve_profile(raw_config, profile)
+        return ContextConfig(resolved_config, project_layout, profile)
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
         pattern = (

@@ -1,82 +1,22 @@
 __info__ = "This project uses llm-context. For more information, visit: https://github.com/cyberchitta/llm-context.py or https://pypi.org/project/llm-context/"
-config_version = "1"
 
 [templates]
 context = "lc-context.j2"
 files = "lc-files.j2"
 highlights = "lc-highlights.j2"
+prompt = "lc-prompt.md"
 
-[templates.versions]
-context = "1"
-files = "1"
-highlights = "1"
-
-[profiles.code]
 [profiles.code.gitignores]
-full_files = [
-  ".git",
-  ".gitignore",
-  ".llm-context/",
-  "*.lock",
-  "*.scm",
-  "cliff.toml",
-  "package-lock.json",
-  "yarn.lock",
-  "pnpm-lock.yaml",
-  "go.sum",
-  "elm-stuff",
-  "LICENSE",
-  ".env",
-  ".dockerignore",
-  "Dockerfile",
-  "docker-compose.yml",
-  "*.log",
-  "*.svg",
-  "*.png",
-  "*.jpg",
-  "*.jpeg",
-  "*.gif",
-  "*.ico",
-  "*.woff",
-  "*.woff2",
-  "*.eot",
-  "*.ttf",
-  "*.map",
-]
-outline_files = [
-  ".git",
-  ".gitignore",
-  ".llm-context/",
-  "*.lock",
-  "package-lock.json",
-  "yarn.lock",
-  "pnpm-lock.yaml",
-  "go.sum",
-  "elm-stuff",
-  "LICENSE",
-  "CHANGELOG.md",
-  "README.md",
-  ".env",
-  ".dockerignore",
-  "Dockerfile",
-  "docker-compose.yml",
-  "*.log",
-  "*.svg",
-  "*.png",
-  "*.jpg",
-  "*.jpeg",
-  "*.gif",
-  "*.ico",
-  "*.woff",
-  "*.woff2",
-  "*.eot",
-  "*.ttf",
-  "*.map",
-]
+full_files = ["tests/", "*.toml", "*.scm", ".git", ".gitignore", ".llm-context/", "*.lock", "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "go.sum", "elm-stuff", "LICENSE", "CHANGELOG.md", "README.md", ".env", ".dockerignore", "Dockerfile", "docker-compose.yml", "*.log", "*.svg", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.ico", "*.woff", "*.woff2", "*.eot", "*.ttf", "*.map",]
+outline_files = [ ".git", ".gitignore", ".llm-context/", "*.lock", "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "go.sum", "elm-stuff", "LICENSE", "CHANGELOG.md", "README.md", ".env", ".dockerignore", "Dockerfile", "docker-compose.yml", "*.log", "*.svg", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.ico", "*.woff", "*.woff2", "*.eot", "*.ttf", "*.map",]
 
 [profiles.code.templates]
 prompt = "lc-prompt.md"
 
 [profiles.code.settings]
-with_prompt = true
+with_prompt = false
 no_media = false
+
+[profiles.code_with_prompt]
+base = "code"
+settings = { with_prompt = true }
