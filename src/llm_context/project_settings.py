@@ -115,6 +115,7 @@ class ProfileTemplate:
 
 @dataclass(frozen=True)
 class SystemState:
+    __warning__: str
     config_version: str
     default_profile: dict[str, Any]
 
@@ -132,7 +133,11 @@ class SystemState:
 
     @staticmethod
     def create(config_version: str, default_profile: dict[str, Any]) -> "SystemState":
-        return SystemState(config_version, default_profile)
+        return SystemState(
+            "This file is managed by llm-context. Manual edits will be overwritten.",
+            config_version,
+            default_profile,
+        )
 
     @property
     def needs_update(self) -> bool:
@@ -140,7 +145,7 @@ class SystemState:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "__warning__": "This file is managed by llm-context. Manual edits will be overwritten.",
+            "__warning__": self.__warning__,
             "config_version": self.config_version,
             "default_profile": self.default_profile,
         }
