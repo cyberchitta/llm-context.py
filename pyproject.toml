@@ -1,9 +1,10 @@
-[tool.poetry]
+[project]
 name = "llm-context"
-version = "0.1.0"
+version = "0.1.1"
 description = "A command-line tool for copying code context to clipboard for use in LLM chats"
-authors = ["restlessronin <88921269+restlessronin@users.noreply.github.com>"]
+authors = [{name = "restlessronin", email = "88921269+restlessronin@users.noreply.github.com"}]
 readme = "README.md"
+requires-python = ">=3.10,<3.14"
 packages = [{ include = "llm_context", from = "src" }]
 include = ["src/llm_context/templates/*.j2"]
 repository = "https://github.com/cyberchitta/llm-context.py"
@@ -21,33 +22,35 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-jinja2 = "^3.1.4"
-packaging = "^24.1"
-pathspec = "^0.12.1"
-pyperclip = "^1.9.0"
-toml = "^0.10.2"
-tree-sitter = "0.21.3"
-tree-sitter-languages = "^1.10.2"
+dependencies = [
+  "jinja2>=3.1.4, <4.0",
+  "packaging>=24.1, <25.0",
+  "pathspec>=0.12.1, <0.13.0",
+  "pyperclip>=1.9.0, <2.0.0",
+  "toml>=0.10.2, <0.11.0",
+  "tree-sitter==0.21.3",
+  "tree-sitter-languages==1.10.2"
+]
 
-[tool.poetry.group.dev.dependencies]
-black = "^24.8.0"
-git-cliff = "^2.5.0"
-isort = "^5.13.2"
-mypy = "^1.11.2"
-pytest = "^8.3.2"
-ruff = "^0.6.5"
-taplo = "^0.9.3"
+[project.optional-dependencies]
+dev = [
+  "black>=24.10.0, <25.0",
+  "git-cliff>=2.6.1, <3.0",
+  "isort>=5.13.2, <6.0",
+  "mypy>=1.11.2, <2.0",
+  "pytest>=8.3.3, <9.0",
+  "ruff>=0.6.9, <1.0",
+  "taplo>=0.9.3, <1.0"
+]
 
-[tool.poetry.scripts]
+[project.scripts]
 lc-context = "llm_context.context_generator:context"
 # lc-dirtree = "llm_context.folder_structure_diagram:main"
 lc-init = "llm_context.project_settings:init_project"
 lc-read-cliplist = "llm_context.context_generator:files_from_clip"
 lc-sel-files = "llm_context.file_selector:select_full_files"
 lc-sel-outlines = "llm_context.file_selector:select_outline_files"
-lc-set-profile= "llm_context.project_settings:set_profile_with_args"
+lc-set-profile = "llm_context.project_settings:set_profile_with_args"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -73,5 +76,5 @@ line-length = 100
 target-version = ['py39', 'py310', 'py311', 'py312']
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
