@@ -219,18 +219,15 @@ class ContextConfig:
         try:
             profile_config = config["profiles"][profile_name]
         except KeyError:
-            raise LLMContextError(
-                f"Profile '{profile_name}' not found in config", "PROFILE_NOT_FOUND"
-            )
+            raise ValueError(f"Profile '{profile_name}' not found in config")
         if "base" not in profile_config:
             return profile_config
         base_name = profile_config["base"]
         try:
             base_profile = ContextConfig._resolve_profile(config, base_name)
         except KeyError:
-            raise LLMContextError(
+            raise ValueError(
                 f"Base profile '{base_name}' referenced by '{profile_name}' not found in config",
-                "BASE_PROFILE_NOT_FOUND",
             )
         merged = base_profile.copy()
         for key, value in profile_config.items():
