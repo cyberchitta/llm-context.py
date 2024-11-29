@@ -19,10 +19,10 @@ For an in-depth exploration of the reasoning behind LLM Context and its approach
 
 ## Installation
 
-Use [uv](https://docs.astral.sh/uv/getting-started/installation/) to install LLM Context:
+Use [pipx](https://pypa.github.io/pipx/) to install LLM Context:
 
 ```bash
-uv tool install llm-context
+pipx install llm-context
 ```
 
 ## Usage
