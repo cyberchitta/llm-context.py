@@ -1,6 +1,7 @@
 import argparse
 from dataclasses import dataclass
 from importlib import resources
+from importlib.metadata import version as pkg_ver
 from pathlib import Path
 from typing import Any, Optional, cast
 
@@ -407,3 +408,8 @@ def set_profile_with_args():
     )
     args = parser.parse_args()
     set_profile(args.profile)
+
+
+@LLMContextError.handle
+def show_version():
+    print(f"llm-context version {pkg_ver('llm-context')}")

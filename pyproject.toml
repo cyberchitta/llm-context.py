@@ -51,6 +51,12 @@ lc-read-cliplist = "llm_context.context_generator:files_from_clip"
 lc-sel-files = "llm_context.file_selector:select_full_files"
 lc-sel-outlines = "llm_context.file_selector:select_outline_files"
 lc-set-profile = "llm_context.project_settings:set_profile_with_args"
+lc-version = "llm_context.project_settings:show_version"
+
+[tool.uv]
+override-dependencies = [
+  "tree-sitter-languages==1.10.2"
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
