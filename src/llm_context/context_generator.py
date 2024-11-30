@@ -107,7 +107,7 @@ class ContextGenerator:
         return self._render("files", {"files": self.collector.files(rel_paths)})
 
     def context(self) -> str:
-        ctx_settings = self.settings.context_config.get_settings()
+        ctx_settings = self.settings.filter_descriptor.get_settings()
         (no_media, with_prompt) = (ctx_settings["no_media"], ctx_settings["with_prompt"])
         context = {
             "project_name": self.project_root.name,
@@ -124,7 +124,7 @@ class ContextGenerator:
         return self._render("context", context)
 
     def _render(self, template_id: str, context: dict) -> str:
-        template_name = self.settings.context_config.config["templates"][template_id]
+        template_name = self.settings.filter_descriptor.config["templates"][template_id]
         template = Template.create(
             template_name, context, self.settings.project_layout.templates_path
         )

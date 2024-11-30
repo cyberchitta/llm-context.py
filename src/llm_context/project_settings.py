@@ -207,7 +207,7 @@ class ContextStorage:
 
 
 @dataclass(frozen=True)
-class ContextConfig:
+class FilterDescriptor:
     config: dict[str, Any]
     project_layout: ProjectLayout
     profile: str
@@ -222,7 +222,7 @@ class ContextConfig:
             return profile_config
         base_name = profile_config["base"]
         try:
-            base_profile = ContextConfig._resolve_profile(config, base_name)
+            base_profile = FilterDescriptor._resolve_profile(config, base_name)
         except KeyError:
             raise ValueError(
                 f"Base profile '{base_name}' referenced by '{profile_name}' not found in config",
@@ -238,11 +238,11 @@ class ContextConfig:
         return merged
 
     @staticmethod
-    def create(project_layout: ProjectLayout, profile: str) -> "ContextConfig":
+    def create(project_layout: ProjectLayout, profile: str) -> "FilterDescriptor":
         raw_config = ConfigLoader.load(project_layout.config_path)
         resolved_config = raw_config.copy()
-        resolved_config["profiles"][profile] = ContextConfig._resolve_profile(raw_config, profile)
-        return ContextConfig(resolved_config, project_layout, profile)
+        resolved_config["profiles"][profile] = FilterDescriptor._resolve_profile(raw_config, profile)
+        return FilterDescriptor(resolved_config, project_layout, profile)
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
         pattern = (
@@ -316,7 +316,7 @@ class SettingsInitializer:
 @dataclass(frozen=True)
 class ProjectSettings:
     project_layout: ProjectLayout
-    context_config: ContextConfig
+    filter_descriptor: FilterDescriptor
     context_storage: ContextStorage
 
     @staticmethod
@@ -326,8 +326,8 @@ class ProjectSettings:
         SettingsInitializer.create(project_layout).initialize()
         context_storage = ContextStorage(project_layout.context_storage_path)
         profile = context_storage.get_profile()
-        context_config = ContextConfig.create(project_layout, profile)
-        return ProjectSettings(project_layout, context_config, context_storage)
+        filter_descriptor = FilterDescriptor.create(project_layout, profile)
+        return ProjectSettings(project_layout, filter_descriptor, context_storage)
 
     @staticmethod
     def ensure_gitignore_exists(root_path: Path) -> None:
@@ -338,10 +338,10 @@ class ProjectSettings:
             )
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
-        return self.context_config.get_ignore_patterns(context_type)
+        return self.filter_descriptor.get_ignore_patterns(context_type)
 
     def get_prompt(self) -> Optional[str]:
-        return self.context_config.get_prompt()
+        return self.filter_descriptor.get_prompt()
 
     def get_stored_context(self) -> dict[str, list[str]]:
         return self.context_storage.get_stored_context()
@@ -379,7 +379,7 @@ def init_project():
 
 def set_profile(profile: str):
     settings = ProjectSettings.create(Path.cwd())
-    if profile not in settings.context_config.config["profiles"]:
+    if profile not in settings.filter_descriptor.config["profiles"]:
         raise ValueError(f"Profile '{profile}' does not exist.")
     settings.context_storage.store_profile(profile)
     print(f"Active profile set to '{profile}'.")
