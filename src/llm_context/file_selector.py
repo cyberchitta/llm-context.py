@@ -6,7 +6,7 @@ from pathlib import Path
 from pathspec import GitIgnoreSpec
 
 from llm_context.exceptions import LLMContextError
-from llm_context.project_settings import ProjectSettings, profile_feedback
+from llm_context.project_settings import FileSelection, ProjectSettings, profile_feedback
 from llm_context.utils import PathConverter, safe_read_file
 
 
@@ -114,55 +114,52 @@ class ContextSelector:
         outline_selector = FileSelector.create(root_path, outline_pathspecs)
         return ContextSelector(settings, full_selector, outline_selector)
 
-    def select_full_files(self) -> list[str]:
+    def select_full_files(self, file_selection: FileSelection) -> "FileSelection":
         full_files = self.full_selector.get_relative_files()
-        stored_context = self.settings.context_storage.get_stored_context()
-        outline_files = stored_context.get("outline", [])
+        outline_files = file_selection.outline_files
         updated_outline_files = [f for f in outline_files if f not in set(full_files)]
         if len(outline_files) != len(updated_outline_files):
             warnings.warn(
                 "Some files previously in outline selection have been moved to full selection."
             )
-        self.update_selected(full_files, updated_outline_files)
-        return full_files
+        return FileSelection.create(file_selection.profile, full_files, updated_outline_files)
 
-    def select_outline_files(self) -> list[str]:
-        stored_context = self.settings.context_storage.get_stored_context()
-        full_files = stored_context.get("full", [])
+    def select_outline_files(self, file_selection: FileSelection) -> "FileSelection":
+        full_files = file_selection.full_files
         if not full_files:
             warnings.warn(
                 "No full files have been selected. Consider running full file selection first."
             )
         all_outline_files = self.outline_selector.get_relative_files()
         outline_files = [f for f in all_outline_files if f not in set(full_files)]
-        self.update_selected(full_files, outline_files)
-        return outline_files
-
-    def update_selected(self, full_files: list[str], outline_files: list[str]):
-        self.settings.context_storage.store_context({"full": full_files, "outline": outline_files})
+        return FileSelection.create(file_selection.profile, full_files, outline_files)
 
 
 @LLMContextError.handle
 def select_full_files():
     profile_feedback(Path.cwd())
-    full_files = ContextSelector.create(Path.cwd()).select_full_files()
-    print(f"Selected {len(full_files)} full files.")
+    selector = ContextSelector.create(Path.cwd())
+    file_selection = selector.select_full_files(selector.settings.file_selection)
+    selector.settings.state_store.save(file_selection)
+    print(f"Selected {len(file_selection.full_files)} full files.")
 
 
 @LLMContextError.handle
 def select_outline_files():
     profile_feedback(Path.cwd())
-    outline_files = ContextSelector.create(Path.cwd()).select_outline_files()
-    print(f"Selected {len(outline_files)} outline files.")
-    profile_feedback(Path.cwd())
+    selector = ContextSelector.create(Path.cwd())
+    file_selection = selector.select_outline_files(selector.settings.file_selection)
+    selector.settings.state_store.save(file_selection)
+    print(f"Selected {len(file_selection.outline_files)} outline files.")
 
 
 def main():
+    profile_feedback(Path.cwd())
     selector = ContextSelector.create(Path.cwd())
-    full_files = selector.select_full_files()
-    outline_files = selector.select_outline_files()
-    selector.update_selected(full_files, outline_files)
+    file_sel_full = selector.select_full_files(selector.settings.file_selection)
+    file_sel_out = selector.select_outline_files(file_sel_full)
+    selector.settings.state_store.save(file_sel_out)
 
 
 if __name__ == "__main__":
-    main()
+    select_full_files()

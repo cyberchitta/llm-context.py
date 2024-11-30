@@ -63,7 +63,7 @@ class ProjectLayout:
         return self.root_path / ".llm-context" / "lc-state.toml"
 
     @property
-    def context_storage_path(self) -> Path:
+    def state_store_path(self) -> Path:
         return self.root_path / ".llm-context" / "curr_ctx.toml"
 
     @property
@@ -75,7 +75,7 @@ class ProjectLayout:
 
 
 @dataclass(frozen=True)
-class ConfigLoader:
+class Toml:
     @staticmethod
     def load(file_path: Path) -> dict[str, Any]:
         with open(file_path, "r") as f:
@@ -88,30 +88,59 @@ class ConfigLoader:
 
 
 @dataclass(frozen=True)
-class ProfileTemplate:
-    @staticmethod
-    def create_default_gitignores() -> list[str]:
-        return GIT_IGNORE_DEFAULT
+class Profile:
+    name: str
+    gitignores: dict[str, list[str]]
+    templates: dict[str, str]
+    settings: dict[str, Any]
 
     @staticmethod
-    def create_default() -> dict[str, Any]:
+    def create_default() -> "Profile":
+        return Profile.create(
+            "default",
+            {"full_files": GIT_IGNORE_DEFAULT, "outline_files": GIT_IGNORE_DEFAULT},
+            {"prompt": "lc-prompt.md"},
+            {"with_prompt": False, "no_media": False},
+        )
+
+    @staticmethod
+    def create_code() -> "Profile":
+        return Profile.create_default().with_name("code")
+
+    @staticmethod
+    def from_config(name, config: dict[str, Any]) -> "Profile":
+        return Profile.create(name, config["gitignores"], config["templates"], config["settings"])
+
+    @staticmethod
+    def create(name, gitignores, templates, settings):
+        return Profile(name, gitignores, templates, settings)
+
+    def get_ignore_patterns(self, context_type: str) -> list[str]:
+        return self.gitignores.get(f"{context_type}_files", [])
+
+    def get_settings(self) -> dict[str, Any]:
+        return self.settings
+
+    def get_template(self, template_id: str) -> str:
+        return self.templates[template_id]
+
+    def get_prompt(self) -> Optional[str]:
+        prompt_file = self.get_template("prompt")
+        if prompt_file:
+            prompt_path = self.project_layout.get_template_path(prompt_file)
+            return safe_read_file(str(prompt_path))
+        return None
+
+    def with_name(self, name: str) -> "Profile":
+        return Profile.create(name, self.gitignores, self.templates, self.settings)
+
+    def to_dict(self) -> dict[str, Any]:
         return {
-            "gitignores": {
-                "full_files": ProfileTemplate.create_default_gitignores(),
-                "outline_files": ProfileTemplate.create_default_gitignores(),
-            },
-            "templates": {
-                "prompt": "lc-prompt.md",
-            },
-            "settings": {
-                "with_prompt": False,
-                "no_media": False,
-            },
+            "name": self.name,
+            "gitignores": self.gitignores,
+            "templates": self.templates,
+            "settings": self.settings,
         }
-
-    @staticmethod
-    def create_code() -> dict[str, Any]:
-        return ProfileTemplate.create_default()
 
 
 @dataclass(frozen=True)
@@ -130,7 +159,7 @@ class SystemState:
 
     @staticmethod
     def create_default(version: str) -> "SystemState":
-        return SystemState.create(version, ProfileTemplate.create_default())
+        return SystemState.create(version, Profile.create_default().to_dict())
 
     @staticmethod
     def create(config_version: str, default_profile: dict[str, Any]) -> "SystemState":
@@ -168,8 +197,8 @@ class Config:
                 "prompt": "lc-prompt.md",
             },
             profiles={
-                "default": ProfileTemplate.create_default(),
-                "code": ProfileTemplate.create_code(),
+                "default": Profile.create_default().to_dict(),
+                "code": Profile.create_code().to_dict(),
             },
         )
 
@@ -182,50 +211,68 @@ class Config:
 
 
 @dataclass(frozen=True)
-class ContextStorage:
-    storage_path: Path
+class FileSelection:
+    profile: str
+    full_files: list[str]
+    outline_files: list[str]
 
-    def load(self) -> dict[str, Any]:
-        return ConfigLoader.load(self.storage_path)
+    @staticmethod
+    def create_default():
+        return FileSelection.create("code", None, None)
 
-    def get_profile(self) -> str:
-        return cast(str, self.load().get("profile", "code"))
+    @staticmethod
+    def create(profile: str, full_files: list[str], outline_files: list[str]):
+        return FileSelection(profile, full_files, outline_files)
 
-    def store_profile(self, profile: str):
-        storage_data = ConfigLoader.load(self.storage_path)
-        storage_data["profile"] = profile
-        ConfigLoader.save(self.storage_path, storage_data)
-
-    def get_stored_context(self) -> dict[str, list[str]]:
-        context = self.load().get("context", {})
-        return cast(dict[str, list[str]], context)
-
-    def store_context(self, context: dict[str, list[str]]):
-        storage_data = ConfigLoader.load(self.storage_path)
-        storage_data["context"] = context
-        ConfigLoader.save(self.storage_path, storage_data)
+    def with_profile(self, profile: str):
+        FileSelection.create(profile, self.full_files, self.outline_files)
 
 
 @dataclass(frozen=True)
-class FilterDescriptor:
+class StateStore:
+    storage_path: Path
+
+    def load(self) -> FileSelection:
+        data = Toml.load(self.storage_path)
+        return FileSelection.create(
+            data.get("profile", "code"),
+            data.get("file_lists", {}).get("full", []),
+            data.get("file_lists", {}).get("outline", []),
+        )
+
+    def save(self, state: FileSelection):
+        data = {
+            "profile": state.profile,
+            "file_lists": {"full": state.full_files, "outline": state.outline_files},
+        }
+        Toml.save(self.storage_path, data)
+
+
+@dataclass(frozen=True)
+class ProfileResolver:
     config: dict[str, Any]
-    project_layout: ProjectLayout
-    profile: str
 
     @staticmethod
-    def _resolve_profile(config: dict[str, Any], profile_name: str) -> dict[str, Any]:
+    def create(config: dict[str, Any]) -> "ProfileResolver":
+        return ProfileResolver(config)
+
+    def get_profile(self, profile_name: str) -> Profile:
+        resolved_config = self.resolve_profile(profile_name)
+        return Profile.from_config(profile_name, resolved_config)
+
+    def resolve_profile(self, profile_name: str) -> dict[str, Any]:
         try:
-            profile_config = config["profiles"][profile_name]
+            profile_config = self.config["profiles"][profile_name]
         except KeyError:
             raise ValueError(f"Profile '{profile_name}' not found in config")
         if "base" not in profile_config:
             return profile_config
         base_name = profile_config["base"]
         try:
-            base_profile = FilterDescriptor._resolve_profile(config, base_name)
+            base_profile = self.resolve_profile(base_name)
         except KeyError:
             raise ValueError(
-                f"Base profile '{base_name}' referenced by '{profile_name}' not found in config",
+                f"Base profile '{base_name}' referenced by '{profile_name}' not found in config"
             )
         merged = base_profile.copy()
         for key, value in profile_config.items():
@@ -236,31 +283,6 @@ class FilterDescriptor:
             else:
                 merged[key] = value
         return merged
-
-    @staticmethod
-    def create(project_layout: ProjectLayout, profile: str) -> "FilterDescriptor":
-        raw_config = ConfigLoader.load(project_layout.config_path)
-        resolved_config = raw_config.copy()
-        resolved_config["profiles"][profile] = FilterDescriptor._resolve_profile(raw_config, profile)
-        return FilterDescriptor(resolved_config, project_layout, profile)
-
-    def get_ignore_patterns(self, context_type: str) -> list[str]:
-        pattern = (
-            self.config["profiles"][self.profile]
-            .get("gitignores", {})
-            .get(f"{context_type}_files", [])
-        )
-        return cast(list[str], pattern)
-
-    def get_settings(self) -> dict[str, Any]:
-        return cast(dict[str, Any], self.config["profiles"][self.profile]["settings"])
-
-    def get_prompt(self) -> Optional[str]:
-        prompt_file = self.config["profiles"][self.profile]["templates"]["prompt"]
-        if prompt_file:
-            prompt_path = self.project_layout.get_template_path(prompt_file)
-            return safe_read_file(str(prompt_path))
-        return None
 
 
 @dataclass(frozen=True)
@@ -274,7 +296,7 @@ class SettingsInitializer:
         start_state = (
             SystemState.create_null()
             if not project_layout.state_path.exists()
-            else SystemState(**ConfigLoader.load(project_layout.state_path))
+            else SystemState(**Toml.load(project_layout.state_path))
         )
         return SettingsInitializer(project_layout, start_state)
 
@@ -290,22 +312,20 @@ class SettingsInitializer:
 
     def _update_templates_if_needed(self):
         if self.state.needs_update:
-            config = ConfigLoader.load(self.project_layout.config_path)
+            config = Toml.load(self.project_layout.config_path)
             for _, template_name in config["templates"].items():
                 template_path = self.project_layout.get_template_path(template_name)
                 self._copy_template(template_name, template_path)
 
     def create_state_file(self):
-        ConfigLoader.save(self.project_layout.state_path, SystemState.create_new().to_dict())
+        Toml.save(self.project_layout.state_path, SystemState.create_new().to_dict())
 
     def _create_config_file(self):
-        ConfigLoader.save(self.project_layout.config_path, Config.create_default().to_dict())
+        Toml.save(self.project_layout.config_path, Config.create_default().to_dict())
 
     def _create_curr_ctx_file(self):
-        if not self.project_layout.context_storage_path.exists():
-            ConfigLoader.save(
-                self.project_layout.context_storage_path, {"profile": "code", "context": {}}
-            )
+        if not self.project_layout.state_store_path.exists():
+            Toml.save(self.project_layout.state_store_path, Profile.create_default().to_dict())
 
     def _copy_template(self, template_name: str, dest_path: Path):
         template_content = resources.read_text(templates, template_name)
@@ -316,18 +336,22 @@ class SettingsInitializer:
 @dataclass(frozen=True)
 class ProjectSettings:
     project_layout: ProjectLayout
-    filter_descriptor: FilterDescriptor
-    context_storage: ContextStorage
+    templates: dict[str, str]
+    filter_descriptor: Profile
+    file_selection: FileSelection
 
     @staticmethod
     def create(project_root: Path) -> "ProjectSettings":
         ProjectSettings.ensure_gitignore_exists(project_root)
         project_layout = ProjectLayout(project_root)
         SettingsInitializer.create(project_layout).initialize()
-        context_storage = ContextStorage(project_layout.context_storage_path)
-        profile = context_storage.get_profile()
-        filter_descriptor = FilterDescriptor.create(project_layout, profile)
-        return ProjectSettings(project_layout, filter_descriptor, context_storage)
+        file_selection = StateStore(project_layout.state_store_path).load()
+        profile_name = file_selection.profile
+        raw_config = Toml.load(project_layout.config_path)
+        templates = raw_config["templates"]
+        resolver = ProfileResolver.create(raw_config)
+        filter_descriptor = resolver.get_profile(profile_name)
+        return ProjectSettings(project_layout, templates, filter_descriptor, file_selection)
 
     @staticmethod
     def ensure_gitignore_exists(root_path: Path) -> None:
@@ -337,24 +361,9 @@ class ProjectSettings:
                 "GITIGNORE_NOT_FOUND",
             )
 
-    def get_ignore_patterns(self, context_type: str) -> list[str]:
-        return self.filter_descriptor.get_ignore_patterns(context_type)
-
-    def get_prompt(self) -> Optional[str]:
-        return self.filter_descriptor.get_prompt()
-
-    def get_stored_context(self) -> dict[str, list[str]]:
-        return self.context_storage.get_stored_context()
-
-    def store_context(self, context: dict[str, list[str]]):
-        self.context_storage.store_context(context)
-
-    def get_template_path(self, template_name: str) -> Path:
-        return self.project_layout.get_template_path(template_name)
-
-    def file_list(self, content_type: str, in_files: list[str] = []) -> list[str]:
-        files = self.context_storage.get_stored_context()[content_type]
-        return files if not in_files else in_files
+    @property
+    def state_store(self):
+        return StateStore(self.project_layout.state_store_path)
 
     @property
     def project_root_path(self):
@@ -366,7 +375,7 @@ class ProjectSettings:
 
 
 def profile_feedback(project_root: Path):
-    profile = ProjectSettings.create(project_root).context_storage.get_profile()
+    profile = ProjectSettings.create(project_root).file_selection.profile
     print(f"Active profile: {profile}")
 
 
@@ -381,7 +390,8 @@ def set_profile(profile: str):
     settings = ProjectSettings.create(Path.cwd())
     if profile not in settings.filter_descriptor.config["profiles"]:
         raise ValueError(f"Profile '{profile}' does not exist.")
-    settings.context_storage.store_profile(profile)
+    file_selection = settings.file_selection.with_profile(profile)
+    settings.state_store.save(file_selection)
     print(f"Active profile set to '{profile}'.")
 
 

@@ -85,10 +85,10 @@ class ContextGenerator:
         collector = ContextCollector.create(settings)
         project_root = settings.project_root_path
         converter = PathConverter.create(project_root)
-        sel_files = settings.context_storage.get_stored_context()
-        full_rel = sel_files.get("full", [])
+        sel_files = settings.file_selection
+        full_rel = sel_files.full_files
         full_abs = converter.to_absolute(full_rel)
-        outline_rel = [f for f in sel_files.get("outline", []) if to_language(f)]
+        outline_rel = [f for f in sel_files.outline_files if to_language(f)]
         outline_abs = converter.to_absolute(outline_rel)
 
         return ContextGenerator(
@@ -119,12 +119,12 @@ class ContextGenerator:
             "sample_requested_files": self.converter.to_relative(
                 self.collector.sample_file_abs(self.full_abs)
             ),
-            "prompt": self.settings.get_prompt() if with_prompt else None,
+            "prompt": self.settings.filter_descriptor.get_prompt() if with_prompt else None,
         }
         return self._render("context", context)
 
     def _render(self, template_id: str, context: dict) -> str:
-        template_name = self.settings.filter_descriptor.config["templates"][template_id]
+        template_name = self.settings.templates[template_id]
         template = Template.create(
             template_name, context, self.settings.project_layout.templates_path
         )
