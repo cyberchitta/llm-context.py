@@ -156,7 +156,6 @@ class SystemState:
 class Config:
     templates: dict[str, str]
     profiles: dict[str, dict[str, Any]]
-    summary_file: Optional[str]
     __info__: str = PROJECT_INFO
 
     @staticmethod
@@ -172,7 +171,6 @@ class Config:
                 "default": ProfileTemplate.create_default(),
                 "code": ProfileTemplate.create_code(),
             },
-            summary_file=None,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -180,7 +178,6 @@ class Config:
             "__info__": self.__info__,
             "templates": self.templates,
             "profiles": self.profiles,
-            "summary_file": self.summary_file,
         }
 
 
@@ -265,13 +262,6 @@ class ContextConfig:
             return safe_read_file(str(prompt_path))
         return None
 
-    def get_summary(self) -> Optional[str]:
-        summary_file = self.config.get("summary_file")
-        if summary_file:
-            summary_path = self.project_layout.root_path / summary_file
-            return safe_read_file(str(summary_path))
-        return None
-
 
 @dataclass(frozen=True)
 class SettingsInitializer:
@@ -349,9 +339,6 @@ class ProjectSettings:
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
         return self.context_config.get_ignore_patterns(context_type)
-
-    def get_summary(self) -> Optional[str]:
-        return cast(Optional[str], self.context_config.get_summary())
 
     def get_prompt(self) -> Optional[str]:
         return self.context_config.get_prompt()

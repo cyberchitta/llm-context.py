@@ -114,7 +114,6 @@ class ContextGenerator:
             "folder_structure_diagram": self.collector.folder_structure_diagram(
                 self.full_abs, self.outline_abs, no_media
             ),
-            "summary": self.settings.get_summary(),
             "files": self.collector.files(self.full_rel),
             "highlights": self.collector.outlines(self.outline_rel),
             "sample_requested_files": self.converter.to_relative(
