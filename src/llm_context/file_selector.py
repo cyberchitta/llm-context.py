@@ -104,8 +104,8 @@ class ContextSelector:
     outline_selector: FileSelector
 
     @staticmethod
-    def create() -> "ContextSelector":
-        settings = ProjectSettings.create()
+    def create(project_root: Path) -> "ContextSelector":
+        settings = ProjectSettings.create(project_root)
         root_path = settings.project_root_path
         context_config = settings.context_config
         full_pathspecs = context_config.get_ignore_patterns("full")
@@ -144,21 +144,21 @@ class ContextSelector:
 
 @LLMContextError.handle
 def select_full_files():
-    profile_feedback()
-    full_files = ContextSelector.create().select_full_files()
+    profile_feedback(Path.cwd())
+    full_files = ContextSelector.create(Path.cwd()).select_full_files()
     print(f"Selected {len(full_files)} full files.")
 
 
 @LLMContextError.handle
 def select_outline_files():
-    profile_feedback()
-    outline_files = ContextSelector.create().select_outline_files()
+    profile_feedback(Path.cwd())
+    outline_files = ContextSelector.create(Path.cwd()).select_outline_files()
     print(f"Selected {len(outline_files)} outline files.")
-    profile_feedback()
+    profile_feedback(Path.cwd())
 
 
 def main():
-    selector = ContextSelector.create()
+    selector = ContextSelector.create(Path.cwd())
     full_files = selector.select_full_files()
     outline_files = selector.select_outline_files()
     selector.update_selected(full_files, outline_files)

@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 import pyperclip  # type: ignore
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader  # type: ignore
 
 from llm_context.file_selector import FileSelector
 from llm_context.folder_structure_diagram import get_annotated_fsd
@@ -80,8 +80,8 @@ class ContextGenerator:
     outline_abs: list[str]
 
     @staticmethod
-    def create() -> "ContextGenerator":
-        settings = ProjectSettings.create()
+    def create(project_root: Path) -> "ContextGenerator":
+        settings = ProjectSettings.create(project_root)
         collector = ContextCollector.create(settings)
         project_root = settings.project_root_path
         converter = PathConverter.create(project_root)
@@ -132,20 +132,22 @@ class ContextGenerator:
         return template.render()
 
 
-def _files(in_files: list[str] = []) -> str:
+def _files(project_root: Path, in_files: list[str] = []) -> str:
     if not in_files:
-        profile_feedback()
-    return ContextGenerator.create().files(in_files)
+        profile_feedback(project_root)
+    return ContextGenerator.create(project_root).files(in_files)
 
 
-def _context() -> str:
-    profile_feedback()
-    return ContextGenerator.create().context()
+def _context(project_root: Path) -> str:
+    profile_feedback(project_root)
+    return ContextGenerator.create(project_root).context()
 
 
-files_from_scratch = create_entry_point(lambda: _files())
-files_from_clip = create_entry_point(lambda: _files(pyperclip.paste().strip().split("\n")))
-context = create_entry_point(_context)
+files_from_scratch = create_entry_point(lambda: _files(Path.cwd()))
+files_from_clip = create_entry_point(
+    lambda: _files(Path.cwd(), pyperclip.paste().strip().split("\n"))
+)
+context = create_entry_point(lambda: _context(Path.cwd()))
 
 
 def main():

@@ -330,7 +330,7 @@ class ProjectSettings:
     context_storage: ContextStorage
 
     @staticmethod
-    def create(project_root: Path = Path.cwd()) -> "ProjectSettings":
+    def create(project_root: Path) -> "ProjectSettings":
         ProjectSettings.ensure_gitignore_exists(project_root)
         project_layout = ProjectLayout(project_root)
         SettingsInitializer.create(project_layout).initialize()
@@ -378,20 +378,20 @@ class ProjectSettings:
         return str(self.project_root_path)
 
 
-def profile_feedback():
-    profile = ProjectSettings.create().context_storage.get_profile()
+def profile_feedback(project_root: Path):
+    profile = ProjectSettings.create(project_root).context_storage.get_profile()
     print(f"Active profile: {profile}")
 
 
 @LLMContextError.handle
 def init_project():
-    settings = ProjectSettings.create()
+    settings = ProjectSettings.create(Path.cwd())
     print(f"LLM Context initialized for project: {settings.project_root}")
     print("You can now edit .llm-context/config.toml to customize ignore patterns.")
 
 
 def set_profile(profile: str):
-    settings = ProjectSettings.create()
+    settings = ProjectSettings.create(Path.cwd())
     if profile not in settings.context_config.config["profiles"]:
         raise ValueError(f"Profile '{profile}' does not exist.")
     settings.context_storage.store_profile(profile)
