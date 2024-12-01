@@ -107,7 +107,7 @@ class ContextGenerator:
         return self._render("files", {"files": self.collector.files(rel_paths)})
 
     def context(self) -> str:
-        ctx_settings = self.settings.filter_descriptor.get_settings()
+        ctx_settings = self.settings.context_descriptor.get_settings()
         (no_media, with_prompt) = (ctx_settings["no_media"], ctx_settings["with_prompt"])
         context = {
             "project_name": self.project_root.name,
@@ -119,7 +119,7 @@ class ContextGenerator:
             "sample_requested_files": self.converter.to_relative(
                 self.collector.sample_file_abs(self.full_abs)
             ),
-            "prompt": self.settings.filter_descriptor.get_prompt() if with_prompt else None,
+            "prompt": self.settings.context_descriptor.get_prompt() if with_prompt else None,
         }
         return self._render("context", context)
 

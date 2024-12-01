@@ -107,9 +107,9 @@ class ContextSelector:
     def create(project_root: Path) -> "ContextSelector":
         settings = ProjectSettings.create(project_root)
         root_path = settings.project_root_path
-        filter_descriptor = settings.filter_descriptor
-        full_pathspecs = filter_descriptor.get_ignore_patterns("full")
-        outline_pathspecs = filter_descriptor.get_ignore_patterns("outline")
+        context_descriptor = settings.context_descriptor
+        full_pathspecs = context_descriptor.get_ignore_patterns("full")
+        outline_pathspecs = context_descriptor.get_ignore_patterns("outline")
         full_selector = FileSelector.create(root_path, full_pathspecs)
         outline_selector = FileSelector.create(root_path, outline_pathspecs)
         return ContextSelector(settings, full_selector, outline_selector)

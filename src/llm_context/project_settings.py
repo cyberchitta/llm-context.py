@@ -337,7 +337,7 @@ class SettingsInitializer:
 class ProjectSettings:
     project_layout: ProjectLayout
     templates: dict[str, str]
-    filter_descriptor: Profile
+    context_descriptor: Profile
     file_selection: FileSelection
 
     @staticmethod
@@ -350,8 +350,8 @@ class ProjectSettings:
         raw_config = Toml.load(project_layout.config_path)
         templates = raw_config["templates"]
         resolver = ProfileResolver.create(raw_config)
-        filter_descriptor = resolver.get_profile(profile_name)
-        return ProjectSettings(project_layout, templates, filter_descriptor, file_selection)
+        context_descriptor = resolver.get_profile(profile_name)
+        return ProjectSettings(project_layout, templates, context_descriptor, file_selection)
 
     @staticmethod
     def ensure_gitignore_exists(root_path: Path) -> None:
@@ -388,7 +388,7 @@ def init_project():
 
 def set_profile(profile: str):
     settings = ProjectSettings.create(Path.cwd())
-    if profile not in settings.filter_descriptor.config["profiles"]:
+    if profile not in settings.context_descriptor.config["profiles"]:
         raise ValueError(f"Profile '{profile}' does not exist.")
     file_selection = settings.file_selection.with_profile(profile)
     settings.state_store.save(file_selection)
