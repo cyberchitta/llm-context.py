@@ -1,5 +1,6 @@
 import random
 from dataclasses import dataclass
+from logging import ERROR
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader  # type: ignore
@@ -9,7 +10,7 @@ from llm_context.file_selector import FileSelector
 from llm_context.folder_structure_diagram import get_annotated_fsd
 from llm_context.highlighter.language_mapping import to_language
 from llm_context.state import FileSelection
-from llm_context.utils import PathConverter, safe_read_file
+from llm_context.utils import PathConverter, log, safe_read_file
 
 
 @dataclass(frozen=True)
@@ -39,8 +40,9 @@ class ContextCollector:
 
             return generate_outlines
         except ImportError as e:
-            ExecutionEnvironment.current().logger.error(
-                f"Outline dependencies not installed. Install with [outline] extra. Error: {e}"
+            log(
+                ERROR,
+                f"Outline dependencies not installed. Install with [outline] extra. Error: {e}",
             )
             return None
 

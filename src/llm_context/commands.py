@@ -1,5 +1,6 @@
 import argparse
 from importlib.metadata import version as pkg_ver
+from logging import INFO
 
 import pyperclip  # type: ignore
 
@@ -8,25 +9,26 @@ from llm_context.context_generator import ContextGenerator
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
 from llm_context.folder_structure_diagram import get_fsd
+from llm_context.utils import log
 
 
 def profile_feedback(env: ExecutionEnvironment):
-    env.logger.info(f"Active profile: {env.state.file_selection.profile}")
+    log(INFO, f"Active profile: {env.state.file_selection.profile}")
 
 
 @create_command
 def init_project(env: ExecutionEnvironment):
-    env.logger.info(f"LLM Context initialized for project: {env.config.project_root}")
-    env.logger.info("You can now edit .llm-context/config.toml to customize ignore patterns.")
+    log(INFO, f"LLM Context initialized for project: {env.config.project_root}")
+    log(INFO, "You can now edit .llm-context/config.toml to customize ignore patterns.")
     return ExecutionResult(None, env)
 
 
 def set_profile(profile: str, env: ExecutionEnvironment) -> ExecutionResult:
     if not env.config.has_profile(profile):
         raise ValueError(f"Profile '{profile}' does not exist.")
-    file_selection = env.state.file_selection.with_profile(profile)
-    nxt_env = env.with_state(env.state.with_selection(file_selection))
-    env.logger.info(f"Active profile set to '{profile}'.")
+    nxt_env = env.with_profile(profile)
+    nxt_env.state.store()
+    log(INFO, f"Active profile set to '{profile}'.")
     return ExecutionResult(None, nxt_env)
 
 
@@ -46,7 +48,7 @@ def set_profile_with_args(env: ExecutionEnvironment) -> ExecutionResult:
 
 @create_command
 def show_version(*, env: ExecutionEnvironment) -> ExecutionResult:
-    env.logger.info(f"llm-context version {pkg_ver('llm-context')}")
+    log(INFO, f"llm-context version {pkg_ver('llm-context')}")
     return ExecutionResult(None, env)
 
 
@@ -61,8 +63,8 @@ def select_full_files(env: ExecutionEnvironment):
     selector = ContextSelector.create(env.config)
     file_selection = selector.select_full_files(env.state.file_selection)
     nxt_env = env.with_state(env.state.with_selection(file_selection))
-    nxt_env.logger.info(f"Selected {len(file_selection.full_files)} full files.")
     nxt_env.state.store()
+    log(INFO, f"Selected {len(file_selection.full_files)} full files.")
     return ExecutionResult(None, nxt_env)
 
 
@@ -72,8 +74,8 @@ def select_outline_files(env: ExecutionEnvironment) -> ExecutionResult:
     selector = ContextSelector.create(env.config)
     file_selection = selector.select_outline_files(env.state.file_selection)
     nxt_env = env.with_state(env.state.with_selection(file_selection))
-    nxt_env.logger.info(f"Selected {len(file_selection.outline_files)} outline files.")
     nxt_env.state.store()
+    log(INFO, f"Selected {len(file_selection.outline_files)} outline files.")
     return ExecutionResult(None, nxt_env)
 
 

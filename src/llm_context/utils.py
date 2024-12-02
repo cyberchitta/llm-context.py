@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional, Union
@@ -75,3 +76,19 @@ class PathConverter:
 
     def _make_relative(self, path: str) -> str:
         return f"/{self.root.name}/{Path(path).relative_to(self.root)}"
+
+
+def log(level: int, msg: str) -> None:
+    from llm_context.exec_env import ExecutionEnvironment
+
+    logger = ExecutionEnvironment.current().logger
+    if level == logging.ERROR:
+        logger.error(msg)
+    elif level == logging.WARNING:
+        logger.warning(msg)
+    elif level == logging.INFO:
+        logger.info(msg)
+    elif level == logging.DEBUG:
+        logger.debug(msg)
+    elif level == logging.CRITICAL:
+        logger.critical(msg)

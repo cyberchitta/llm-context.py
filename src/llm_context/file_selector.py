@@ -1,12 +1,13 @@
 import os
 from dataclasses import dataclass
+from logging import ERROR, WARNING
 from pathlib import Path
 
 from pathspec import GitIgnoreSpec  # type: ignore
 
-from llm_context.exec_env import ExecutionEnvironment, ProjectConfig
+from llm_context.project import ProjectConfig
 from llm_context.state import FileSelection
-from llm_context.utils import PathConverter, safe_read_file
+from llm_context.utils import PathConverter, log, safe_read_file
 
 
 @dataclass(frozen=True)
@@ -108,8 +109,9 @@ class ContextSelector:
 
             return True
         except ImportError as e:
-            ExecutionEnvironment.current().logger.error(
-                f"Outline dependencies not installed. Install with [outline] extra. Error: {e}"
+            log(
+                ERROR,
+                f"Outline dependencies not installed. Install with [outline] extra. Error: {e}",
             )
             return False
 
@@ -128,16 +130,18 @@ class ContextSelector:
         outline_files = file_selection.outline_files
         updated_outline_files = [f for f in outline_files if f not in set(full_files)]
         if len(outline_files) != len(updated_outline_files):
-            ExecutionEnvironment.current().logger.warning(
-                "Some files previously in outline selection have been moved to full selection."
+            log(
+                WARNING,
+                "Some files previously in outline selection have been moved to full selection.",
             )
         return FileSelection.create(file_selection.profile, full_files, updated_outline_files)
 
     def select_outline_files(self, file_selection: FileSelection) -> "FileSelection":
         full_files = file_selection.full_files
         if not full_files:
-            ExecutionEnvironment.current().logger.warning(
-                "No full files have been selected. Consider running full file selection first."
+            log(
+                WARNING,
+                "No full files have been selected. Consider running full file selection first.",
             )
         if not ContextSelector.has_outliner():
             return FileSelection.create(file_selection.profile, full_files, [])
