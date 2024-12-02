@@ -1,0 +1,16 @@
+__warning__ = "This file is managed by llm-context. Manual edits will be overwritten."
+config_version = "2"
+
+[default_profile]
+name = "default"
+
+[default_profile.gitignores]
+full_files = [ ".git", ".gitignore", ".llm-context/", "*.lock", "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "go.sum", "elm-stuff", "LICENSE", "CHANGELOG.md", "README.md", ".env", ".dockerignore", "Dockerfile", "docker-compose.yml", "*.log", "*.svg", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.ico", "*.woff", "*.woff2", "*.eot", "*.ttf", "*.map",]
+outline_files = [ ".git", ".gitignore", ".llm-context/", "*.lock", "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "go.sum", "elm-stuff", "LICENSE", "CHANGELOG.md", "README.md", ".env", ".dockerignore", "Dockerfile", "docker-compose.yml", "*.log", "*.svg", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.ico", "*.woff", "*.woff2", "*.eot", "*.ttf", "*.map",]
+
+[default_profile.templates]
+prompt = "lc-prompt.md"
+
+[default_profile.settings]
+with_prompt = false
+no_media = false
