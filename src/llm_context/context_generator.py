@@ -4,12 +4,10 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader  # type: ignore
 
-from llm_context.exec_env import ProjectConfig
+from llm_context.exec_env import ExecutionEnvironment, ProjectConfig
 from llm_context.file_selector import FileSelector
 from llm_context.folder_structure_diagram import get_annotated_fsd
 from llm_context.highlighter.language_mapping import to_language
-from llm_context.highlighter.outliner import generate_outlines
-from llm_context.highlighter.parser import Source
 from llm_context.state import FileSelection
 from llm_context.utils import PathConverter, safe_read_file
 
@@ -35,6 +33,18 @@ class ContextCollector:
     root_path: Path
 
     @staticmethod
+    def get_outliner():
+        try:
+            from llm_context.highlighter.outliner import generate_outlines
+
+            return generate_outlines
+        except ImportError as e:
+            ExecutionEnvironment.current().logger.error(
+                f"Outline dependencies not installed. Install with [outline] extra. Error: {e}"
+            )
+            return None
+
+    @staticmethod
     def create(root_path: Path) -> "ContextCollector":
         return ContextCollector(root_path)
 
@@ -53,12 +63,17 @@ class ContextCollector:
 
     def outlines(self, rel_paths: list[str]) -> list[dict[str, str]]:
         abs_paths = PathConverter.create(self.root_path).to_absolute(rel_paths)
-        source_set = [
-            Source(rel, content)
-            for rel, abs_path in zip(rel_paths, abs_paths)
-            if (content := safe_read_file(abs_path)) is not None
-        ]
-        return generate_outlines(source_set)
+        if rel_paths and (outliner := ContextCollector.get_outliner()):
+            from llm_context.highlighter.parser import Source
+
+            source_set = [
+                Source(rel, content)
+                for rel, abs_path in zip(rel_paths, abs_paths)
+                if (content := safe_read_file(abs_path)) is not None
+            ]
+            return outliner(source_set)
+        else:
+            return []
 
     def folder_structure_diagram(
         self, full_abs: list[str], outline_abs: list[str], no_media: bool

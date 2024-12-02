@@ -5,7 +5,7 @@
 
 LLM Context is a command-line tool that helps developers quickly paste relevant content from code / text projects into the web-chat interface of Large Language Models. It leverages `.gitignore` patterns for smart file selection and systematically uses the clipboard for seamless integration with AI chats.
 
-> **Note**: This project was developed in collaboration with Claude-3.5-Sonnet, using LLM Context itself to share code context during development. All code in the repository is human-curated (by me 😇, @restlessronin).
+> **Note**: This project was developed in collaboration with Claude-3.5-Sonnet, using LLM Context itself to share code during development. All code in the repository is human-curated (by me 😇, @restlessronin).
 
 ## Why LLM Context?
 
