@@ -2,9 +2,11 @@
 name = "llm-context"
 version = "0.1.1"
 description = "A command-line tool for copying code context to clipboard for use in LLM chats"
-authors = [{name = "restlessronin", email = "88921269+restlessronin@users.noreply.github.com"}]
+authors = [
+  { name = "restlessronin", email = "88921269+restlessronin@users.noreply.github.com" },
+]
 readme = "README.md"
-requires-python = ">=3.10,<3.14"
+requires-python = ">=3.10,<3.13"
 packages = [{ include = "llm_context", from = "src" }]
 include = ["src/llm_context/templates/*.j2"]
 repository = "https://github.com/cyberchitta/llm-context.py"
@@ -29,7 +31,7 @@ dependencies = [
   "pyperclip>=1.9.0, <2.0.0",
   "toml>=0.10.2, <0.11.0",
   "tree-sitter==0.21.3",
-  "tree-sitter-languages==1.10.2"
+  "tree-sitter-languages==1.10.2",
 ]
 
 [project.optional-dependencies]
@@ -40,7 +42,7 @@ dev = [
   "mypy>=1.11.2, <2.0",
   "pytest>=8.3.3, <9.0",
   "ruff>=0.6.9, <1.0",
-  "taplo>=0.9.3, <1.0"
+  "taplo>=0.9.3, <1.0",
 ]
 
 [project.scripts]
@@ -55,9 +57,7 @@ lc-set-profile = "llm_context.commands:set_profile_with_args"
 lc-version = "llm_context.commands:show_version"
 
 [tool.uv]
-override-dependencies = [
-  "tree-sitter-languages==1.10.2"
-]
+override-dependencies = ["tree-sitter-languages==1.10.2"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
