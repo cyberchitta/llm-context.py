@@ -112,6 +112,10 @@ class ExecutionEnvironment:
             raise RuntimeError("No active execution environment")
         return env
 
+    @staticmethod
+    def has_current() -> bool:
+        return ExecutionEnvironment._current.get() is not None
+
     @contextmanager
     def activate(self):
         token = self._current.set(self)

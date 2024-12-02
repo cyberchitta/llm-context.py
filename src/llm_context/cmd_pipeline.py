@@ -48,7 +48,7 @@ def with_clipboard(func: Callable[..., ExecutionResult]) -> Callable[..., Execut
         if result.content:
             pyperclip.copy(result.content)
             size_bytes = len(result.content.encode("utf-8"))
-            log(INFO, f"Copied {_format_size(size_bytes)} to clipboard")
+            result.env.logger.info(f"Copied {_format_size(size_bytes)} to clipboard")
         return result
 
     return wrapper

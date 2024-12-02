@@ -81,7 +81,11 @@ class PathConverter:
 def log(level: int, msg: str) -> None:
     from llm_context.exec_env import ExecutionEnvironment
 
-    logger = ExecutionEnvironment.current().logger
+    logger = (
+        ExecutionEnvironment.current().logger
+        if ExecutionEnvironment.has_current()
+        else logging.getLogger("llm-context-fallback")
+    )
     if level == logging.ERROR:
         logger.error(msg)
     elif level == logging.WARNING:
