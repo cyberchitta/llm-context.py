@@ -1,11 +1,10 @@
 import os
-import warnings
 from dataclasses import dataclass
 from pathlib import Path
 
 from pathspec import GitIgnoreSpec  # type: ignore
 
-from llm_context.exec_env import ProjectConfig
+from llm_context.exec_env import ExecutionEnvironment, ProjectConfig
 from llm_context.state import FileSelection
 from llm_context.utils import PathConverter, safe_read_file
 
@@ -117,7 +116,7 @@ class ContextSelector:
         outline_files = file_selection.outline_files
         updated_outline_files = [f for f in outline_files if f not in set(full_files)]
         if len(outline_files) != len(updated_outline_files):
-            warnings.warn(
+            ExecutionEnvironment.current().logger.warning(
                 "Some files previously in outline selection have been moved to full selection."
             )
         return FileSelection.create(file_selection.profile, full_files, updated_outline_files)
@@ -125,7 +124,7 @@ class ContextSelector:
     def select_outline_files(self, file_selection: FileSelection) -> "FileSelection":
         full_files = file_selection.full_files
         if not full_files:
-            warnings.warn(
+            ExecutionEnvironment.current().logger.warning(
                 "No full files have been selected. Consider running full file selection first."
             )
         all_outline_files = self.outline_selector.get_relative_files()
