@@ -1,9 +1,7 @@
 from dataclasses import dataclass
 from typing import NamedTuple, Optional, Protocol
 
-from llm_context.highlighter.language_mapping import TagQuery, to_language
 from llm_context.highlighter.parser import AST, Source
-from llm_context.project_settings import ProjectSettings
 
 
 class Position(NamedTuple):

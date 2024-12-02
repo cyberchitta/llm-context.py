@@ -1,10 +1,9 @@
 import os
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Optional, cast
 
 from llm_context.file_selector import FileSelector
-from llm_context.project_settings import ProjectSettings
-from llm_context.utils import create_entry_point
 
 
 @dataclass(frozen=True)
@@ -126,27 +125,18 @@ class FolderStructureDiagram:
         return "\n".join(lines)
 
 
-def get_annotated_fsd(project_root, full_files, outline_files, no_media) -> str:
+def get_annotated_fsd(
+    project_root: Path, full_files: list[str], outline_files: list[str], no_media: bool
+) -> str:
     abs_paths = FileSelector.create(project_root, [".git"]).get_files()
     diagram = FolderStructureDiagram.create_enhanced(
-        project_root, full_files, outline_files, no_media
+        str(project_root), set(full_files), set(outline_files), no_media
     )
     return diagram.generate_tree(abs_paths)
 
 
-def _get_fsd() -> str:
-    project_root = ProjectSettings.create().project_root
+def get_fsd() -> str:
+    project_root = Path.cwd()
     abs_paths = FileSelector.create(project_root, [".git"]).get_files()
-    diagram = FolderStructureDiagram.create_simple(project_root)
+    diagram = FolderStructureDiagram.create_simple(str(project_root))
     return diagram.generate_tree(abs_paths)
-
-
-get_fs_diagram = create_entry_point(_get_fsd)
-
-
-def main():
-    get_fs_diagram()
-
-
-if __name__ == "__main__":
-    main()

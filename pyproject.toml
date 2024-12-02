@@ -44,14 +44,15 @@ dev = [
 ]
 
 [project.scripts]
-lc-context = "llm_context.context_generator:context"
-# lc-dirtree = "llm_context.folder_structure_diagram:main"
-lc-init = "llm_context.project_settings:init_project"
-lc-read-cliplist = "llm_context.context_generator:files_from_clip"
-lc-sel-files = "llm_context.file_selector:select_full_files"
-lc-sel-outlines = "llm_context.file_selector:select_outline_files"
-lc-set-profile = "llm_context.project_settings:set_profile_with_args"
-lc-version = "llm_context.project_settings:show_version"
+lc-context = "llm_context.commands:context"
+lc-dirtree = "llm_context.commands:get_fs_diagram"
+lc-init = "llm_context.commands:init_project"
+lc-read-cliplist = "llm_context.commands:files_from_clip"
+lc-mcp = "llm_context.mcp:run_server"
+lc-sel-files = "llm_context.commands:select_full_files"
+lc-sel-outlines = "llm_context.commands:select_outline_files"
+lc-set-profile = "llm_context.commands:set_profile_with_args"
+lc-version = "llm_context.commands:show_version"
 
 [tool.uv]
 override-dependencies = [
@@ -64,7 +65,7 @@ pythonpath = ["src"]
 filterwarnings = ["ignore::FutureWarning"]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true

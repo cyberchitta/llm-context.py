@@ -3,7 +3,6 @@ from typing import Optional
 
 from llm_context.highlighter.parser import Source
 from llm_context.highlighter.tagger import ASTBasedTagger, DefRef, Tag
-from llm_context.project_settings import ProjectSettings
 
 
 @dataclass(frozen=True)

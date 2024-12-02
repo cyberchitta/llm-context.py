@@ -1,10 +1,21 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Optional, Union
+from typing import Any, Optional, Union
 
-import pyperclip  # type: ignore
+import toml
 
-from llm_context.exceptions import LLMContextError
+
+@dataclass(frozen=True)
+class Toml:
+    @staticmethod
+    def load(file_path: Path) -> dict[str, Any]:
+        with open(file_path, "r") as f:
+            return toml.load(f)
+
+    @staticmethod
+    def save(file_path: Path, data: dict[str, Any]):
+        with open(file_path, "w") as f:
+            toml.dump(data, f)
 
 
 def _format_size(size_bytes):
@@ -21,16 +32,6 @@ def size_feedback(content: str) -> None:
     else:
         bytes_copied = len(content.encode("utf-8"))
         print(f"Copied {_format_size(bytes_copied)} to clipboard")
-
-
-def create_entry_point(func: Callable[..., str]) -> Callable[[], None]:
-    @LLMContextError.handle
-    def clip_entry_point():
-        text = func()
-        pyperclip.copy(text)
-        size_feedback(text)
-
-    return clip_entry_point
 
 
 def safe_read_file(path: str) -> Optional[str]:
