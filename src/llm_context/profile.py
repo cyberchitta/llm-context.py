@@ -1,16 +1,8 @@
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any, Optional, cast
 
-from packaging import version
+from llm_context.utils import ProjectLayout, safe_read_file
 
-from llm_context.utils import safe_read_file
-
-PROJECT_INFO: str = (
-    "This project uses llm-context. For more information, visit: "
-    "https://github.com/cyberchitta/llm-context.py or "
-    "https://pypi.org/project/llm-context/"
-)
 GIT_IGNORE_DEFAULT: list[str] = [
     ".git",
     ".gitignore",
@@ -41,31 +33,6 @@ GIT_IGNORE_DEFAULT: list[str] = [
     "*.ttf",
     "*.map",
 ]
-CURRENT_CONFIG_VERSION = version.parse("2")
-
-
-@dataclass(frozen=True)
-class ProjectLayout:
-    root_path: Path
-
-    @property
-    def config_path(self) -> Path:
-        return self.root_path / ".llm-context" / "config.toml"
-
-    @property
-    def state_path(self) -> Path:
-        return self.root_path / ".llm-context" / "lc-state.toml"
-
-    @property
-    def state_store_path(self) -> Path:
-        return self.root_path / ".llm-context" / "curr_ctx.toml"
-
-    @property
-    def templates_path(self) -> Path:
-        return self.root_path / ".llm-context" / "templates"
-
-    def get_template_path(self, template_name: str) -> Path:
-        return self.templates_path / template_name
 
 
 @dataclass(frozen=True)
@@ -121,73 +88,6 @@ class Profile:
             "gitignores": self.gitignores,
             "templates": self.templates,
             "settings": self.settings,
-        }
-
-
-@dataclass(frozen=True)
-class SystemState:
-    __warning__: str
-    config_version: str
-    default_profile: dict[str, Any]
-
-    @staticmethod
-    def create_new() -> "SystemState":
-        return SystemState.create_default(str(CURRENT_CONFIG_VERSION))
-
-    @staticmethod
-    def create_null() -> "SystemState":
-        return SystemState.create_default("0")
-
-    @staticmethod
-    def create_default(version: str) -> "SystemState":
-        return SystemState.create(version, Profile.create_default().to_dict())
-
-    @staticmethod
-    def create(config_version: str, default_profile: dict[str, Any]) -> "SystemState":
-        return SystemState(
-            "This file is managed by llm-context. Manual edits will be overwritten.",
-            config_version,
-            default_profile,
-        )
-
-    @property
-    def needs_update(self) -> bool:
-        return version.parse(self.config_version) < CURRENT_CONFIG_VERSION
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "__warning__": self.__warning__,
-            "config_version": self.config_version,
-            "default_profile": self.default_profile,
-        }
-
-
-@dataclass(frozen=True)
-class Config:
-    templates: dict[str, str]
-    profiles: dict[str, dict[str, Any]]
-    __info__: str = PROJECT_INFO
-
-    @staticmethod
-    def create_default() -> "Config":
-        return Config(
-            templates={
-                "context": "lc-context.j2",
-                "files": "lc-files.j2",
-                "highlights": "lc-highlights.j2",
-                "prompt": "lc-prompt.md",
-            },
-            profiles={
-                "default": Profile.create_default().to_dict(),
-                "code": Profile.create_code().to_dict(),
-            },
-        )
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "__info__": self.__info__,
-            "templates": self.templates,
-            "profiles": self.profiles,
         }
 
 

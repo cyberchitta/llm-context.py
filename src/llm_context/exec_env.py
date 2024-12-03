@@ -5,10 +5,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import ClassVar, Optional
 
-from llm_context.config import ProjectLayout
 from llm_context.context_generator import ContextSpec
 from llm_context.file_selector import ContextSelector
 from llm_context.state import FileSelection, StateStore
+from llm_context.utils import ProjectLayout
 
 
 class MessageCollector(logging.Handler):

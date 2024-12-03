@@ -2,10 +2,87 @@ from dataclasses import dataclass
 from importlib import resources
 from logging import INFO
 from pathlib import Path
+from typing import Any
+
+from packaging import version
 
 from llm_context import templates
-from llm_context.config import Config, Profile, ProjectLayout, SystemState
+from llm_context.profile import Profile, ProjectLayout
 from llm_context.utils import Toml, log
+
+CURRENT_CONFIG_VERSION = version.parse("2")
+PROJECT_INFO: str = (
+    "This project uses llm-context. For more information, visit: "
+    "https://github.com/cyberchitta/llm-context.py or "
+    "https://pypi.org/project/llm-context/"
+)
+
+
+@dataclass(frozen=True)
+class SystemState:
+    __warning__: str
+    config_version: str
+    default_profile: dict[str, Any]
+
+    @staticmethod
+    def create_new() -> "SystemState":
+        return SystemState.create_default(str(CURRENT_CONFIG_VERSION))
+
+    @staticmethod
+    def create_null() -> "SystemState":
+        return SystemState.create_default("0")
+
+    @staticmethod
+    def create_default(version: str) -> "SystemState":
+        return SystemState.create(version, Profile.create_default().to_dict())
+
+    @staticmethod
+    def create(config_version: str, default_profile: dict[str, Any]) -> "SystemState":
+        return SystemState(
+            "This file is managed by llm-context. Manual edits will be overwritten.",
+            config_version,
+            default_profile,
+        )
+
+    @property
+    def needs_update(self) -> bool:
+        return version.parse(self.config_version) < CURRENT_CONFIG_VERSION
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "__warning__": self.__warning__,
+            "config_version": self.config_version,
+            "default_profile": self.default_profile,
+        }
+
+
+@dataclass(frozen=True)
+class Config:
+    templates: dict[str, str]
+    profiles: dict[str, dict[str, Any]]
+    __info__: str = PROJECT_INFO
+
+    @staticmethod
+    def create_default() -> "Config":
+        return Config(
+            templates={
+                "context": "lc-context.j2",
+                "files": "lc-files.j2",
+                "highlights": "lc-highlights.j2",
+                "prompt": "lc-prompt.md",
+            },
+            profiles={
+                "default": Profile.create_default().to_dict(),
+                "code": Profile.create_code().to_dict(),
+            },
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "__info__": self.__info__,
+            "templates": self.templates,
+            "profiles": self.profiles,
+        }
 
 
 @dataclass(frozen=True)

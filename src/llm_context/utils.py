@@ -19,6 +19,30 @@ class Toml:
             toml.dump(data, f)
 
 
+@dataclass(frozen=True)
+class ProjectLayout:
+    root_path: Path
+
+    @property
+    def config_path(self) -> Path:
+        return self.root_path / ".llm-context" / "config.toml"
+
+    @property
+    def state_path(self) -> Path:
+        return self.root_path / ".llm-context" / "lc-state.toml"
+
+    @property
+    def state_store_path(self) -> Path:
+        return self.root_path / ".llm-context" / "curr_ctx.toml"
+
+    @property
+    def templates_path(self) -> Path:
+        return self.root_path / ".llm-context" / "templates"
+
+    def get_template_path(self, template_name: str) -> Path:
+        return self.templates_path / template_name
+
+
 def _format_size(size_bytes):
     for unit in ["B", "KB", "MB", "GB"]:
         if size_bytes < 1024.0:

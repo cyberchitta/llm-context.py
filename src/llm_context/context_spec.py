@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from llm_context.config import Profile, ProfileResolver, ProjectLayout
 from llm_context.exceptions import LLMContextError
+from llm_context.profile import Profile, ProfileResolver
 from llm_context.project_setup import ProjectSetup
 from llm_context.state import StateStore
-from llm_context.utils import Toml
+from llm_context.utils import ProjectLayout, Toml
 
 
 @dataclass(frozen=True)
