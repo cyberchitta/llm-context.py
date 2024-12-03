@@ -72,7 +72,7 @@ async def serve() -> None:
             ),
             Tool(
                 name="get_files",
-                description=("Retrieves complete contents of specified files from the project."),
+                description=("Retrieves complete contents of specified files from the project. The assistant tracks all previously retrieved file contents and checks this history before making new requests."),
                 inputSchema=FilesRequest.model_json_schema(),
             ),
         ]
