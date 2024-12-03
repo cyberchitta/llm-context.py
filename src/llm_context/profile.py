@@ -1,7 +1,12 @@
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Optional, cast
 
-from llm_context.utils import ProjectLayout, safe_read_file
+from packaging import version
+
+from llm_context.utils import ProjectLayout, Toml, safe_read_file
+
+CURRENT_CONFIG_VERSION = version.parse("2")
 
 GIT_IGNORE_DEFAULT: list[str] = [
     ".git",
@@ -108,12 +113,58 @@ class Profile:
 
 
 @dataclass(frozen=True)
-class ProfileResolver:
-    config: dict[str, Any]
+class ToolConstants:
+    __warning__: str
+    config_version: str
+    default_profile: dict[str, Any]
 
     @staticmethod
-    def create(config: dict[str, Any]) -> "ProfileResolver":
-        return ProfileResolver(config)
+    def load(path: Path) -> "ToolConstants":
+        try:
+            return ToolConstants(**Toml.load(path))
+        except Exception:
+            return ToolConstants.create_null()
+
+    @staticmethod
+    def create_new() -> "ToolConstants":
+        return ToolConstants.create_default(str(CURRENT_CONFIG_VERSION))
+
+    @staticmethod
+    def create_null() -> "ToolConstants":
+        return ToolConstants.create_default("0")
+
+    @staticmethod
+    def create_default(version: str) -> "ToolConstants":
+        return ToolConstants.create(version, Profile.create_default().to_dict())
+
+    @staticmethod
+    def create(config_version: str, default_profile: dict[str, Any]) -> "ToolConstants":
+        return ToolConstants(
+            "This file is managed by llm-context. DO NOT EDIT.",
+            config_version,
+            default_profile,
+        )
+
+    @property
+    def needs_update(self) -> bool:
+        return version.parse(self.config_version) < CURRENT_CONFIG_VERSION
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "__warning__": self.__warning__,
+            "config_version": self.config_version,
+            "default_profile": self.default_profile,
+        }
+
+
+@dataclass(frozen=True)
+class ProfileResolver:
+    config: dict[str, Any]
+    system_state: ToolConstants
+
+    @staticmethod
+    def create(config: dict[str, Any], system_state: ToolConstants) -> "ProfileResolver":
+        return ProfileResolver(config, system_state)
 
     def has_profile(self, profile_name: str) -> bool:
         if profile_name == "default":

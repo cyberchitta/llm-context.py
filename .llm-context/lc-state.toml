@@ -1,4 +1,4 @@
-__warning__ = "This file is managed by llm-context. Manual edits will be overwritten."
+__warning__ = "This file is managed by llm-context. DO NOT EDIT."
 config_version = "2"
 
 [default_profile]

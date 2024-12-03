@@ -23,20 +23,43 @@ class FileSelection:
 
 
 @dataclass(frozen=True)
+class AllSelections:
+    selections: dict[str, FileSelection]
+
+    @staticmethod
+    def create_empty() -> "AllSelections":
+        return AllSelections({})
+
+    def get_selection(self, profile: str) -> FileSelection:
+        return self.selections.get(profile, FileSelection.create(profile, [], []))
+
+    def with_selection(self, selection: FileSelection) -> "AllSelections":
+        new_selections = dict(self.selections)
+        new_selections[selection.profile] = selection
+        return AllSelections(new_selections)
+
+
+@dataclass(frozen=True)
 class StateStore:
     storage_path: Path
 
-    def load(self) -> FileSelection:
-        data = Toml.load(self.storage_path)
-        return FileSelection.create(
-            data.get("profile", "code"),
-            data.get("file_lists", {}).get("full", []),
-            data.get("file_lists", {}).get("outline", []),
-        )
+    def load(self) -> AllSelections:
+        try:
+            data = Toml.load(self.storage_path)
+            selections = {}
+            for profile, sel_data in data.get("selections", {}).items():
+                selections[profile] = FileSelection.create(
+                    profile, sel_data.get("full_files", []), sel_data.get("outline_files", [])
+                )
+            return AllSelections(selections)
+        except Exception:
+            return AllSelections.create_empty()
 
-    def save(self, state: FileSelection):
+    def save(self, store: AllSelections):
         data = {
-            "profile": state.profile,
-            "file_lists": {"full": state.full_files, "outline": state.outline_files},
+            "selections": {
+                profile: {"full_files": sel.full_files, "outline_files": sel.outline_files}
+                for profile, sel in store.selections.items()
+            }
         }
         Toml.save(self.storage_path, data)

@@ -5,9 +5,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import ClassVar, Optional
 
-from llm_context.context_generator import ContextSpec
+from llm_context.context_spec import ContextSpec
 from llm_context.file_selector import ContextSelector
-from llm_context.state import FileSelection, StateStore
+from llm_context.profile import ToolConstants
+from llm_context.state import AllSelections, FileSelection, StateStore
 from llm_context.utils import ProjectLayout
 
 
@@ -49,23 +50,32 @@ class RuntimeContext:
 @dataclass(frozen=True)
 class ExecutionState:
     project_layout: ProjectLayout
-    file_selection: FileSelection
+    selections: AllSelections
+    profile: str
 
     @staticmethod
     def load(project_layout: ProjectLayout) -> "ExecutionState":
         return ExecutionState.create(
-            project_layout, StateStore(project_layout.state_store_path).load()
+            project_layout, StateStore(project_layout.state_store_path).load(), "code"
         )
 
     @staticmethod
-    def create(project_layout: ProjectLayout, file_selection: FileSelection) -> "ExecutionState":
-        return ExecutionState(project_layout, file_selection)
+    def create(
+        project_layout: ProjectLayout, selections: AllSelections, profile: str
+    ) -> "ExecutionState":
+        return ExecutionState(project_layout, selections, profile)
+
+    @property
+    def file_selection(self) -> FileSelection:
+        return self.selections.get_selection(self.profile)
 
     def store(self):
-        StateStore(self.project_layout.state_store_path).save(self.file_selection)
+        StateStore(self.project_layout.state_store_path).save(self.selections)
 
     def with_selection(self, file_selection: FileSelection) -> "ExecutionState":
-        return ExecutionState.create(self.project_layout, file_selection)
+        new_selections = self.selections.with_selection(file_selection)
+        StateStore(self.project_layout.state_store_path).save(new_selections)
+        return ExecutionState(self.project_layout, new_selections, self.profile)
 
     def with_profile(self, profile_name: str) -> "ExecutionState":
         return self.with_selection(self.file_selection.with_profile(profile_name))
@@ -79,22 +89,24 @@ class ExecutionEnvironment:
     config: ContextSpec
     runtime: RuntimeContext
     state: ExecutionState
+    constants: ToolConstants
 
     @staticmethod
     def create(project_root: Path) -> "ExecutionEnvironment":
         runtime = RuntimeContext.create()
         project_layout = ProjectLayout(project_root)
         state = ExecutionState.load(project_layout)
-        config = ContextSpec.create(project_root, state.file_selection.profile)
-        return ExecutionEnvironment(config, runtime, state)
+        constants = ToolConstants.load(project_layout.state_path)
+        config = ContextSpec.create(project_root, state.file_selection.profile, constants)
+        return ExecutionEnvironment(config, runtime, state, constants)
 
     def with_state(self, new_state: ExecutionState) -> "ExecutionEnvironment":
-        return ExecutionEnvironment(self.config, self.runtime, new_state)
+        return ExecutionEnvironment(self.config, self.runtime, new_state, self.constants)
 
     def with_profile(self, profile: str) -> "ExecutionEnvironment":
         if profile == self.state.file_selection.profile:
             return self
-        config = ContextSpec.create(self.config.project_root_path, profile)
+        config = ContextSpec.create(self.config.project_root_path, profile, self.constants)
         selector = ContextSelector.create(config)
         file_selection = selector.select_full_files(self.state.file_selection)
         outline_selection = selector.select_outline_files(file_selection)
