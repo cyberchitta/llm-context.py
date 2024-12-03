@@ -8,7 +8,7 @@ from llm_context.cmd_pipeline import ExecutionResult, create_clipboard_cmd, crea
 from llm_context.context_generator import ContextGenerator
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
-from llm_context.folder_structure_diagram import get_fsd
+from llm_context.folder_diagram import get_fsd
 from llm_context.utils import log
 
 

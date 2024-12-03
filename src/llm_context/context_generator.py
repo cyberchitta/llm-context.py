@@ -8,7 +8,7 @@ from jinja2 import Environment, FileSystemLoader  # type: ignore
 
 from llm_context.context_spec import ContextSpec
 from llm_context.file_selector import FileSelector
-from llm_context.folder_structure_diagram import get_annotated_fsd
+from llm_context.folder_diagram import get_annotated_fsd
 from llm_context.highlighter.language_mapping import to_language
 from llm_context.profile import IGNORE_NOTHING, INCLUDE_ALL
 from llm_context.state import FileSelection
