@@ -1,4 +1,5 @@
 import asyncio
+from importlib.metadata import version as pkg_ver
 from pathlib import Path
 
 from mcp.server import NotificationOptions, Server  # type: ignore
@@ -53,6 +54,7 @@ async def get_files(arguments: dict) -> list[TextContent]:
 
 async def serve() -> None:
     server = Server("llm-context")
+    version = pkg_ver("llm-context")
 
     @server.list_tools()
     async def handle_list_tools() -> list[Tool]:
@@ -90,7 +92,7 @@ async def serve() -> None:
 
     options = InitializationOptions(
         server_name="llm-context",
-        server_version="0.1.1",
+        server_version=version,
         capabilities=server.get_capabilities(
             notification_options=NotificationOptions(),
             experimental_capabilities={},
