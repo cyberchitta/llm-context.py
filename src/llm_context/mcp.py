@@ -62,9 +62,11 @@ async def serve() -> None:
             Tool(
                 name="project_context",
                 description=(
-                    "Generates a detailed overview of a (usually source code) project, including folder structure, "
-                    "complete contents of some files, and outlines of others. "
-                    "The profile determines which files are present in full, in outline or excluded entirely."
+                    "Generates a structured repository overview including: "
+                    "1) Directory tree with file status (✓ full, ○ outline, ✗ excluded) "
+                    "2) Complete contents of key files "
+                    "3) Smart outlines highlighting important definitions in supported languages. "
+                    "The output is customizable via profiles that control file inclusion rules and presentation format."
                 ),
                 inputSchema=ContextRequest.model_json_schema(),
             ),
