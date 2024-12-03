@@ -27,7 +27,7 @@ class ContextRequest(BaseModel):
 async def get_context(arguments: dict) -> list[TextContent]:
     request = ContextRequest(**arguments)
     env = ExecutionEnvironment.create(Path(request.root_path))
-    cur_env = env.with_profile(request.profile)
+    cur_env = env.with_profile(request.profile_name)
     with cur_env.activate():
         context = ContextGenerator.create(cur_env.config, cur_env.state.file_selection).context()
         return [TextContent(type="text", text=context)]
@@ -39,7 +39,7 @@ class FilesRequest(BaseModel):
     )
     paths: list[str] = Field(
         ...,
-        description="File paths relative to root (e.g. ['/myproject/src/main.py'])",
+        description="File paths relative to root_path, starting with a forward slash and including the root directory name. For example, if root_path is '/home/user/projects/myproject', then a valid path would be '/myproject/src/main.py",
         min_items=1,
     )
 
@@ -72,10 +72,7 @@ async def serve() -> None:
             ),
             Tool(
                 name="get_files",
-                description=(
-                    "Retrieves complete contents of specified files from the project. Files must be "
-                    "specified using root-relative paths (e.g. '/project_name/src/file.py')."
-                ),
+                description=("Retrieves complete contents of specified files from the project."),
                 inputSchema=FilesRequest.model_json_schema(),
             ),
         ]
