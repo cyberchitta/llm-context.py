@@ -10,6 +10,7 @@ from llm_context.context_spec import ContextSpec
 from llm_context.file_selector import FileSelector
 from llm_context.folder_structure_diagram import get_annotated_fsd
 from llm_context.highlighter.language_mapping import to_language
+from llm_context.profile import INCLUDE_ALL
 from llm_context.state import FileSelection
 from llm_context.utils import PathConverter, log, safe_read_file
 
@@ -52,7 +53,7 @@ class ContextCollector:
         return ContextCollector(root_path)
 
     def sample_file_abs(self, full_abs: list[str]) -> list[str]:
-        all_abs = set(FileSelector.create(self.root_path, [".git"]).get_files())
+        all_abs = set(FileSelector.create(self.root_path, [".git"], INCLUDE_ALL).get_files())
         incomplete_files = sorted(list(all_abs - set(full_abs)))
         return random.sample(incomplete_files, min(2, len(incomplete_files)))
 

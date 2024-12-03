@@ -59,16 +59,32 @@ class GitIgnorer:
 
 
 @dataclass(frozen=True)
+class IncludeFilter:
+    pathspec: GitIgnoreSpec
+
+    @staticmethod
+    def create(include_patterns: list[str]) -> "IncludeFilter":
+        pathspec = GitIgnoreSpec.from_lines(include_patterns)
+        return IncludeFilter(pathspec)
+
+    def include(self, path: str) -> bool:
+        assert path not in ("/", ""), "Root directory cannot be an input for include method"
+        return self.pathspec.match_file(path)
+
+
+@dataclass(frozen=True)
 class FileSelector:
     root_path: str
     ignorer: GitIgnorer
     converter: PathConverter
+    include_filter: IncludeFilter
 
     @staticmethod
-    def create(root_path: Path, pathspecs: list[str]) -> "FileSelector":
+    def create(root_path: Path, pathspecs: list[str], includspecs: list[str]) -> "FileSelector":
         ignorer = GitIgnorer.from_git_root(str(root_path), pathspecs)
         converter = PathConverter.create(root_path)
-        return FileSelector(str(root_path), ignorer, converter)
+        include_filter = IncludeFilter.create(includspecs)
+        return FileSelector(str(root_path), ignorer, converter, include_filter)
 
     def get_files(self) -> list[str]:
         return self.traverse(self.root_path)
@@ -92,6 +108,7 @@ class FileSelector:
             if (e_path := os.path.join(current_dir, e))
             and not os.path.isdir(e_path)
             and not self.ignorer.ignore(f"/{os.path.join(relative_current_dir, e)}")
+            and self.include_filter.include(f"/{os.path.join(relative_current_dir, e)}")
         ]
         subdir_files = [file for d in dirs for file in self.traverse(d)]
         return files + subdir_files
@@ -121,8 +138,10 @@ class ContextSelector:
         context_descriptor = settings.context_descriptor
         full_pathspecs = context_descriptor.get_ignore_patterns("full")
         outline_pathspecs = context_descriptor.get_ignore_patterns("outline")
-        full_selector = FileSelector.create(root_path, full_pathspecs)
-        outline_selector = FileSelector.create(root_path, outline_pathspecs)
+        full_includes = context_descriptor.get_only_includes("full")
+        outline_includes = context_descriptor.get_only_includes("outline")
+        full_selector = FileSelector.create(root_path, full_pathspecs, full_includes)
+        outline_selector = FileSelector.create(root_path, outline_pathspecs, outline_includes)
         return ContextSelector(full_selector, outline_selector)
 
     def select_full_files(self, file_selection: FileSelection) -> "FileSelection":

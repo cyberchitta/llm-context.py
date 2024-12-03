@@ -33,6 +33,7 @@ GIT_IGNORE_DEFAULT: list[str] = [
     "*.ttf",
     "*.map",
 ]
+INCLUDE_ALL = ["**/*"]
 
 
 @dataclass(frozen=True)
@@ -41,6 +42,7 @@ class Profile:
     gitignores: dict[str, list[str]]
     templates: dict[str, str]
     settings: dict[str, Any]
+    only_includes: dict[str, list[str]]
 
     @staticmethod
     def create_default() -> "Profile":
@@ -49,6 +51,7 @@ class Profile:
             {"full_files": GIT_IGNORE_DEFAULT, "outline_files": GIT_IGNORE_DEFAULT},
             {"prompt": "lc-prompt.md"},
             {"with_prompt": False, "no_media": False},
+            {"full_files": INCLUDE_ALL, "outline_files": INCLUDE_ALL},
         )
 
     @staticmethod
@@ -57,17 +60,26 @@ class Profile:
 
     @staticmethod
     def from_config(name, config: dict[str, Any]) -> "Profile":
-        return Profile.create(name, config["gitignores"], config["templates"], config["settings"])
+        return Profile.create(
+            name,
+            config["gitignores"],
+            config["templates"],
+            config["settings"],
+            config["only-include"],
+        )
 
     @staticmethod
-    def create(name, gitignores, templates, settings) -> "Profile":
-        return Profile(name, gitignores, templates, settings)
+    def create(name, gitignores, templates, settings, only_include) -> "Profile":
+        return Profile(name, gitignores, templates, settings, only_include)
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
-        return self.gitignores.get(f"{context_type}_files", [])
+        return self.gitignores[f"{context_type}_files"]
 
     def get_settings(self) -> dict[str, Any]:
         return self.settings
+
+    def get_only_includes(self, context_type: str) -> list[str]:
+        return self.only_includes[f"{context_type}_files"]
 
     def get_template(self, template_id: str) -> str:
         return self.templates[template_id]
@@ -80,7 +92,9 @@ class Profile:
         return None
 
     def with_name(self, name: str) -> "Profile":
-        return Profile.create(name, self.gitignores, self.templates, self.settings)
+        return Profile.create(
+            name, self.gitignores, self.templates, self.settings, self.only_includes
+        )
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -88,6 +102,7 @@ class Profile:
             "gitignores": self.gitignores,
             "templates": self.templates,
             "settings": self.settings,
+            "only-include": self.only_includes,
         }
 
 
