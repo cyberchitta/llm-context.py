@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional, Union
 
-import toml
+import toml  # type: ignore
 
 
 @dataclass(frozen=True)

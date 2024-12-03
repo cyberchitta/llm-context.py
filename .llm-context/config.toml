@@ -6,9 +6,149 @@ files = "lc-files.j2"
 highlights = "lc-highlights.j2"
 prompt = "lc-prompt.md"
 
+[profiles.default]
+name = "default"
+
+[profiles.code]
+name = "code"
+
+[profiles.default.gitignores]
+full_files = [
+    ".git",
+    ".gitignore",
+    ".llm-context/",
+    "*.lock",
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "go.sum",
+    "elm-stuff",
+    "LICENSE",
+    "CHANGELOG.md",
+    "README.md",
+    ".env",
+    ".dockerignore",
+    "Dockerfile",
+    "docker-compose.yml",
+    "*.log",
+    "*.svg",
+    "*.png",
+    "*.jpg",
+    "*.jpeg",
+    "*.gif",
+    "*.ico",
+    "*.woff",
+    "*.woff2",
+    "*.eot",
+    "*.ttf",
+    "*.map",
+]
+outline_files = [
+    ".git",
+    ".gitignore",
+    ".llm-context/",
+    "*.lock",
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "go.sum",
+    "elm-stuff",
+    "LICENSE",
+    "CHANGELOG.md",
+    "README.md",
+    ".env",
+    ".dockerignore",
+    "Dockerfile",
+    "docker-compose.yml",
+    "*.log",
+    "*.svg",
+    "*.png",
+    "*.jpg",
+    "*.jpeg",
+    "*.gif",
+    "*.ico",
+    "*.woff",
+    "*.woff2",
+    "*.eot",
+    "*.ttf",
+    "*.map",
+]
+
+[profiles.default.templates]
+prompt = "lc-prompt.md"
+
+[profiles.default.settings]
+with_prompt = false
+no_media = false
+
+[profiles.default.only-include]
+full_files = ["**/*"]
+outline_files = ["**/*"]
+
 [profiles.code.gitignores]
-full_files = [ "tests/", "*.toml", "*.scm", ".git", ".gitignore", ".llm-context/", "*.lock", "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "go.sum", "elm-stuff", "LICENSE", "CHANGELOG.md", "README.md", ".env", ".dockerignore", "Dockerfile", "docker-compose.yml", "*.log", "*.svg", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.ico", "*.woff", "*.woff2", "*.eot", "*.ttf", "*.map",]
-outline_files = [ ".git", ".gitignore", ".llm-context/", "*.lock", "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "go.sum", "elm-stuff", "LICENSE", "CHANGELOG.md", "README.md", ".env", ".dockerignore", "Dockerfile", "docker-compose.yml", "*.log", "*.svg", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.ico", "*.woff", "*.woff2", "*.eot", "*.ttf", "*.map",]
+full_files = [
+    "tests/",
+    "*.scm",
+    "*.toml",
+    ".git",
+    ".gitignore",
+    ".llm-context/",
+    "*.lock",
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "go.sum",
+    "elm-stuff",
+    "LICENSE",
+    "CHANGELOG.md",
+    "README.md",
+    ".env",
+    ".dockerignore",
+    "Dockerfile",
+    "docker-compose.yml",
+    "*.log",
+    "*.svg",
+    "*.png",
+    "*.jpg",
+    "*.jpeg",
+    "*.gif",
+    "*.ico",
+    "*.woff",
+    "*.woff2",
+    "*.eot",
+    "*.ttf",
+    "*.map",
+]
+outline_files = [
+    ".git",
+    ".gitignore",
+    ".llm-context/",
+    "*.lock",
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "go.sum",
+    "elm-stuff",
+    "LICENSE",
+    "CHANGELOG.md",
+    "README.md",
+    ".env",
+    ".dockerignore",
+    "Dockerfile",
+    "docker-compose.yml",
+    "*.log",
+    "*.svg",
+    "*.png",
+    "*.jpg",
+    "*.jpeg",
+    "*.gif",
+    "*.ico",
+    "*.woff",
+    "*.woff2",
+    "*.eot",
+    "*.ttf",
+    "*.map",
+]
 
 [profiles.code.templates]
 prompt = "lc-prompt.md"
@@ -16,3 +156,7 @@ prompt = "lc-prompt.md"
 [profiles.code.settings]
 with_prompt = false
 no_media = false
+
+[profiles.code.only-include]
+full_files = ["**/*"]
+outline_files = ["**/*"]

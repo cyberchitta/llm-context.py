@@ -14,3 +14,7 @@ prompt = "lc-prompt.md"
 [default_profile.settings]
 with_prompt = false
 no_media = false
+
+[default_profile.only-include]
+full_files = [ "**/*",]
+outline_files = [ "**/*",]
