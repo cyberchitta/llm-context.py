@@ -33,6 +33,7 @@ GIT_IGNORE_DEFAULT: list[str] = [
     "*.ttf",
     "*.map",
 ]
+IGNORE_NOTHING = [".git"]
 INCLUDE_ALL = ["**/*"]
 
 

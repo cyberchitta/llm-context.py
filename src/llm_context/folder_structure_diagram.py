@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional, cast
 
 from llm_context.file_selector import FileSelector
-from llm_context.profile import INCLUDE_ALL
+from llm_context.profile import IGNORE_NOTHING, INCLUDE_ALL
 
 
 @dataclass(frozen=True)
@@ -129,7 +129,7 @@ class FolderStructureDiagram:
 def get_annotated_fsd(
     project_root: Path, full_files: list[str], outline_files: list[str], no_media: bool
 ) -> str:
-    abs_paths = FileSelector.create(project_root, [".git"], INCLUDE_ALL).get_files()
+    abs_paths = FileSelector.create(project_root, IGNORE_NOTHING, INCLUDE_ALL).get_files()
     diagram = FolderStructureDiagram.create_enhanced(
         str(project_root), set(full_files), set(outline_files), no_media
     )
@@ -138,6 +138,6 @@ def get_annotated_fsd(
 
 def get_fsd() -> str:
     project_root = Path.cwd()
-    abs_paths = FileSelector.create(project_root, [".git"], INCLUDE_ALL).get_files()
+    abs_paths = FileSelector.create(project_root, IGNORE_NOTHING, INCLUDE_ALL).get_files()
     diagram = FolderStructureDiagram.create_simple(str(project_root))
     return diagram.generate_tree(abs_paths)
