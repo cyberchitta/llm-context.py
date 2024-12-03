@@ -116,9 +116,13 @@ class ProfileResolver:
         return ProfileResolver(config)
 
     def has_profile(self, profile_name: str) -> bool:
+        if profile_name == "default":
+            return True
         return profile_name in self.config["profiles"]
 
     def get_profile(self, profile_name: str) -> Profile:
+        if profile_name == "default":
+            return Profile.from_config("default", self.system_state.default_profile)
         resolved_config = self.resolve_profile(profile_name)
         return Profile.from_config(profile_name, resolved_config)
 

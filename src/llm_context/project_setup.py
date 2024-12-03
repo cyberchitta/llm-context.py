@@ -72,7 +72,6 @@ class Config:
                 "prompt": "lc-prompt.md",
             },
             profiles={
-                "default": Profile.create_default().to_dict(),
                 "code": Profile.create_code().to_dict(),
             },
         )
