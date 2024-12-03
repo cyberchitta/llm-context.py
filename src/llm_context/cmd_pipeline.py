@@ -28,19 +28,6 @@ def with_env(func: Callable[..., ExecutionResult]) -> Callable[..., ExecutionRes
     return wrapper
 
 
-def with_logging(func: Callable[..., ExecutionResult]) -> Callable[..., ExecutionResult]:
-    @wraps(func)
-    def wrapper(*args, **kwargs) -> ExecutionResult:
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            env = ExecutionEnvironment.current()
-            log(ERROR, f"Error: {str(e)}")
-            return ExecutionResult(None, env)
-
-    return wrapper
-
-
 def with_clipboard(func: Callable[..., ExecutionResult]) -> Callable[..., ExecutionResult]:
     @wraps(func)
     def wrapper(*args, **kwargs) -> ExecutionResult:
@@ -80,8 +67,8 @@ def with_error(func: Callable[..., ExecutionResult]) -> Callable[..., None]:
 
 
 def create_clipboard_cmd(func: Callable[..., ExecutionResult]) -> Callable[..., None]:
-    return with_error(with_print(with_clipboard(with_logging(with_env(func)))))
+    return with_error(with_print(with_clipboard(with_env(func))))
 
 
 def create_command(func: Callable[..., ExecutionResult]) -> Callable[..., None]:
-    return with_error(with_print(with_logging(with_env(func))))
+    return with_error(with_print(with_env(func)))
