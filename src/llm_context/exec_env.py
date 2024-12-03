@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import ClassVar, Optional
 
 from llm_context.config import ProjectLayout
+from llm_context.context_generator import ContextSpec
 from llm_context.file_selector import ContextSelector
-from llm_context.project import ProjectConfig
 from llm_context.state import FileSelection, StateStore
 
 
@@ -76,7 +76,7 @@ class ExecutionEnvironment:
     _current: ClassVar[ContextVar[Optional["ExecutionEnvironment"]]] = ContextVar(
         "current_env", default=None
     )
-    config: ProjectConfig
+    config: ContextSpec
     runtime: RuntimeContext
     state: ExecutionState
 
@@ -85,7 +85,7 @@ class ExecutionEnvironment:
         runtime = RuntimeContext.create()
         project_layout = ProjectLayout(project_root)
         state = ExecutionState.load(project_layout)
-        config = ProjectConfig.create(project_root, state.file_selection.profile)
+        config = ContextSpec.create(project_root, state.file_selection.profile)
         return ExecutionEnvironment(config, runtime, state)
 
     def with_state(self, new_state: ExecutionState) -> "ExecutionEnvironment":
@@ -94,12 +94,11 @@ class ExecutionEnvironment:
     def with_profile(self, profile: str) -> "ExecutionEnvironment":
         if profile == self.state.file_selection.profile:
             return self
-
-        config = ProjectConfig.create(self.config.project_root_path, profile)
+        config = ContextSpec.create(self.config.project_root_path, profile)
         selector = ContextSelector.create(config)
         file_selection = selector.select_full_files(self.state.file_selection)
-        file_selection = selector.select_outline_files(file_selection)
-        return self.with_state(self.state.with_selection(file_selection))
+        outline_selection = selector.select_outline_files(file_selection)
+        return self.with_state(self.state.with_selection(outline_selection))
 
     @property
     def logger(self) -> logging.Logger:

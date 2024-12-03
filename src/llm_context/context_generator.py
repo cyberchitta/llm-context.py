@@ -2,10 +2,11 @@ import random
 from dataclasses import dataclass
 from logging import ERROR
 from pathlib import Path
+from typing import cast
 
 from jinja2 import Environment, FileSystemLoader  # type: ignore
 
-from llm_context.exec_env import ExecutionEnvironment, ProjectConfig
+from llm_context.context_spec import ContextSpec
 from llm_context.file_selector import FileSelector
 from llm_context.folder_structure_diagram import get_annotated_fsd
 from llm_context.highlighter.language_mapping import to_language
@@ -73,7 +74,7 @@ class ContextCollector:
                 for rel, abs_path in zip(rel_paths, abs_paths)
                 if (content := safe_read_file(abs_path)) is not None
             ]
-            return outliner(source_set)
+            return cast(list[dict[str, str]], outliner(source_set))
         else:
             return []
 
@@ -86,7 +87,7 @@ class ContextCollector:
 @dataclass(frozen=True)
 class ContextGenerator:
     collector: ContextCollector
-    settings: ProjectConfig
+    settings: ContextSpec
     project_root: Path
     converter: PathConverter
     full_rel: list[str]
@@ -95,7 +96,7 @@ class ContextGenerator:
     outline_abs: list[str]
 
     @staticmethod
-    def create(settings: ProjectConfig, file_selection: FileSelection) -> "ContextGenerator":
+    def create(settings: ContextSpec, file_selection: FileSelection) -> "ContextGenerator":
         project_root = settings.project_root_path
         collector = ContextCollector.create(project_root)
         converter = PathConverter.create(project_root)

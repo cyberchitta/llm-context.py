@@ -1,12 +1,12 @@
 import asyncio
 from pathlib import Path
 
-from mcp.server import NotificationOptions, Server
-from mcp.server.models import InitializationOptions
-from mcp.server.stdio import stdio_server
-from mcp.shared.exceptions import McpError
-from mcp.types import INVALID_PARAMS, TextContent, Tool
-from pydantic import BaseModel, Field
+from mcp.server import NotificationOptions, Server  # type: ignore
+from mcp.server.models import InitializationOptions  # type: ignore
+from mcp.server.stdio import stdio_server  # type: ignore
+from mcp.shared.exceptions import McpError  # type: ignore
+from mcp.types import INVALID_PARAMS, TextContent, Tool  # type: ignore
+from pydantic import BaseModel, Field  # type: ignore
 
 from llm_context.context_generator import ContextGenerator
 from llm_context.exec_env import ExecutionEnvironment

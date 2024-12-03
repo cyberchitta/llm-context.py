@@ -5,7 +5,7 @@ from pathlib import Path
 
 from pathspec import GitIgnoreSpec  # type: ignore
 
-from llm_context.project import ProjectConfig
+from llm_context.context_spec import ContextSpec
 from llm_context.state import FileSelection
 from llm_context.utils import PathConverter, log, safe_read_file
 
@@ -116,7 +116,7 @@ class ContextSelector:
             return False
 
     @staticmethod
-    def create(settings: ProjectConfig) -> "ContextSelector":
+    def create(settings: ContextSpec) -> "ContextSelector":
         root_path = settings.project_root_path
         context_descriptor = settings.context_descriptor
         full_pathspecs = context_descriptor.get_ignore_patterns("full")

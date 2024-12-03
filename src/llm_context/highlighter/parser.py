@@ -1,9 +1,9 @@
 import warnings
 from dataclasses import dataclass
-from typing import NamedTuple
+from typing import NamedTuple, cast
 
-from tree_sitter import Language, Parser, Tree
-from tree_sitter_languages import get_language, get_parser
+from tree_sitter import Language, Parser, Tree  # type: ignore
+from tree_sitter_languages import get_language, get_parser  # type: ignore
 
 from llm_context.highlighter.language_mapping import TagQuery, to_language
 
@@ -37,4 +37,4 @@ class AST:
 
     def captures(self, query_scm: str) -> list:
         query = self.language.query(query_scm)
-        return query.captures(self.tree.root_node)
+        return cast(list, query.captures(self.tree.root_node))
