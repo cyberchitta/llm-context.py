@@ -1,6 +1,6 @@
 [project]
 name = "llm-context"
-version = "0.1.5"
+version = "0.1.1"
 description = "A command-line tool for copying code context to clipboard for use in LLM chats"
 authors = [
   { name = "restlessronin", email = "88921269+restlessronin@users.noreply.github.com" },
@@ -29,6 +29,7 @@ dependencies = [
   "mcp>=1.0.0",
   "packaging>=24.1, <25.0",
   "pathspec>=0.12.1, <0.13.0",
+  "platformdirs>=4.3.6",
   "pyperclip>=1.9.0, <2.0.0",
   "toml>=0.10.2, <0.11.0",
 ]
