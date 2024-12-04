@@ -88,7 +88,7 @@ class ContextCollector:
 @dataclass(frozen=True)
 class ContextGenerator:
     collector: ContextCollector
-    settings: ContextSpec
+    spec: ContextSpec
     project_root: Path
     converter: PathConverter
     full_rel: list[str]
@@ -97,8 +97,8 @@ class ContextGenerator:
     outline_abs: list[str]
 
     @staticmethod
-    def create(settings: ContextSpec, file_selection: FileSelection) -> "ContextGenerator":
-        project_root = settings.project_root_path
+    def create(spec: ContextSpec, file_selection: FileSelection) -> "ContextGenerator":
+        project_root = spec.project_root_path
         collector = ContextCollector.create(project_root)
         converter = PathConverter.create(project_root)
         sel_files = file_selection
@@ -109,7 +109,7 @@ class ContextGenerator:
 
         return ContextGenerator(
             collector,
-            settings,
+            spec,
             project_root,
             converter,
             full_rel,
@@ -123,8 +123,8 @@ class ContextGenerator:
         return self._render("files", {"files": self.collector.files(rel_paths)})
 
     def context(self, template_id: str = "context") -> str:
-        descriptor = self.settings.context_descriptor
-        layout = self.settings.project_layout
+        descriptor = self.spec.context_descriptor
+        layout = self.spec.project_layout
         ctx_settings = descriptor.get_settings()
         no_media, with_notes, with_prompt = map(
             lambda x: bool(ctx_settings.get(x)), ("no_media", "with_notes", "with_prompt")
@@ -146,8 +146,6 @@ class ContextGenerator:
         return self._render(template_id, context)
 
     def _render(self, template_id: str, context: dict) -> str:
-        template_name = self.settings.templates[template_id]
-        template = Template.create(
-            template_name, context, self.settings.project_layout.templates_path
-        )
+        template_name = self.spec.templates[template_id]
+        template = Template.create(template_name, context, self.spec.project_layout.templates_path)
         return template.render()
