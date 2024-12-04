@@ -31,7 +31,8 @@ project_context_tool = (
             "1) Directory tree with file status (✓ full, ○ outline, ✗ excluded) "
             "2) Complete contents of key files "
             "3) Smart outlines highlighting important definitions in supported languages. "
-            "The output is customizable via profiles that control file inclusion rules and presentation format."
+            "The output is customizable via profiles that control file inclusion rules and presentation format. "
+            "The assistant tracks previously retrieved project context in the conversation and checks this history before making new requests."
         ),
         inputSchema=ContextRequest.model_json_schema(),
     ),
