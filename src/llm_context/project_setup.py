@@ -63,10 +63,15 @@ class ProjectSetup:
         self._create_curr_ctx_file()
         self._update_templates_if_needed()
         self.create_state_file()
+        self._create_notes_file()
 
     def _create_or_update_config_file(self):
         if not self.project_layout.config_path.exists() or self.constants.needs_update:
             self._create_config_file()
+
+    def _create_curr_ctx_file(self):
+        if not self.project_layout.state_store_path.exists():
+            Toml.save(self.project_layout.state_store_path, {"selections": {}})
 
     def _update_templates_if_needed(self):
         if self.constants.needs_update:
@@ -78,12 +83,18 @@ class ProjectSetup:
     def create_state_file(self):
         Toml.save(self.project_layout.state_path, ToolConstants.create_new().to_dict())
 
+    def _create_notes_file(self):
+        notes_path = self.project_layout.notes_path
+        if not notes_path.exists():
+            notes_path.parent.mkdir(parents=True, exist_ok=True)
+            notes_path.write_text(
+                "## Project Notes\n\n"
+                "Add any personal notes or reminders about this or other projects here.\n"
+                "This file is private and stored in your user config directory.\n"
+            )
+
     def _create_config_file(self):
         Toml.save(self.project_layout.config_path, Config.create_default().to_dict())
-
-    def _create_curr_ctx_file(self):
-        if not self.project_layout.state_store_path.exists():
-            Toml.save(self.project_layout.state_store_path, {"selections": {}})
 
     def _copy_template(self, template_name: str, dest_path: Path):
         template_content = resources.read_text(templates, template_name)

@@ -56,7 +56,7 @@ class Profile:
             "default",
             {"full_files": GIT_IGNORE_DEFAULT, "outline_files": GIT_IGNORE_DEFAULT},
             {"prompt": "lc-prompt.md"},
-            {"with_prompt": False, "no_media": False},
+            {"no_media": False, "with_notes": False, "with_prompt": False},
             {"full_files": INCLUDE_ALL, "outline_files": INCLUDE_ALL},
         )
 
@@ -96,6 +96,9 @@ class Profile:
             prompt_path = project_layout.get_template_path(prompt_file)
             return safe_read_file(str(prompt_path))
         return None
+
+    def get_notes(self, project_layout: ProjectLayout) -> Optional[str]:
+        return safe_read_file(str(project_layout.notes_path))
 
     def with_name(self, name: str) -> "Profile":
         return Profile.create(

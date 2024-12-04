@@ -1,10 +1,10 @@
-import logging
 from dataclasses import dataclass
 from logging import CRITICAL, DEBUG, ERROR, INFO, WARNING, getLogger
 from pathlib import Path
 from typing import Any, Optional, Union
 
 import toml  # type: ignore
+from platformdirs import user_config_dir  # type: ignore
 
 
 @dataclass(frozen=True)
@@ -23,6 +23,10 @@ class Toml:
 @dataclass(frozen=True)
 class ProjectLayout:
     root_path: Path
+
+    @property
+    def notes_path(self) -> Path:
+        return Path(user_config_dir("llm-context", appauthor=False)) / "lc-notes.md"
 
     @property
     def config_path(self) -> Path:
