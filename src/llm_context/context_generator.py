@@ -122,7 +122,7 @@ class ContextGenerator:
         rel_paths = in_files if in_files else self.full_rel
         return self._render("files", {"files": self.collector.files(rel_paths)})
 
-    def context(self) -> str:
+    def context(self, template_id: str = "context") -> str:
         descriptor = self.settings.context_descriptor
         layout = self.settings.project_layout
         ctx_settings = descriptor.get_settings()
@@ -142,7 +142,7 @@ class ContextGenerator:
             "prompt": descriptor.get_prompt(layout) if with_prompt else None,
             "notes": descriptor.get_notes(layout) if with_notes else None,
         }
-        return self._render("context", context)
+        return self._render(template_id, context)
 
     def _render(self, template_id: str, context: dict) -> str:
         template_name = self.settings.templates[template_id]

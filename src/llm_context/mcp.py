@@ -43,7 +43,9 @@ async def project_context(arguments: dict) -> list[TextContent]:
     env = ExecutionEnvironment.create(Path(request.root_path))
     cur_env = env.with_profile(request.profile_name)
     with cur_env.activate():
-        context = ContextGenerator.create(cur_env.config, cur_env.state.file_selection).context()
+        context = ContextGenerator.create(cur_env.config, cur_env.state.file_selection).context(
+            "context-mcp"
+        )
         return [TextContent(type="text", text=context)]
 
 
