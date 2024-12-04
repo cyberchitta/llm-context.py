@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 import toml  # type: ignore
-from platformdirs import user_config_dir  # type: ignore
 
 
 @dataclass(frozen=True)
@@ -30,7 +29,7 @@ class ProjectLayout:
 
     @property
     def user_notes_path(self) -> Path:
-        return Path(user_config_dir("llm-context", appauthor=False)) / "lc-user-notes.md"
+        return Path.home() / ".llm-context" / "lc-user-notes.md"
 
     @property
     def config_path(self) -> Path:
