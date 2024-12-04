@@ -1,8 +1,7 @@
 import asyncio
 from pathlib import Path
 
-from mcp.server import NotificationOptions, Server  # type: ignore
-from mcp.server.models import InitializationOptions  # type: ignore
+from mcp.server import Server  # type: ignore
 from mcp.server.stdio import stdio_server  # type: ignore
 from mcp.shared.exceptions import McpError  # type: ignore
 from mcp.types import INTERNAL_ERROR, INVALID_PARAMS, TextContent, Tool  # type: ignore
