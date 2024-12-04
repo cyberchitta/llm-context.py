@@ -126,7 +126,9 @@ class ContextGenerator:
         descriptor = self.settings.context_descriptor
         layout = self.settings.project_layout
         ctx_settings = descriptor.get_settings()
-        no_media, with_notes, with_prompt = map(ctx_settings.get, ("no_media", "with_notes", "with_prompt"))
+        no_media, with_notes, with_prompt = map(
+            ctx_settings.get, ("no_media", "with_notes", "with_prompt")
+        )
         context = {
             "project_name": self.project_root.name,
             "folder_structure_diagram": self.collector.folder_structure_diagram(
