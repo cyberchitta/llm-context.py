@@ -22,19 +22,17 @@ class ContextRequest(BaseModel):
     )
 
 
-project_context_tool = (
-    Tool(
-        name="project_context",
-        description=(
-            "Generates a structured repository overview including: "
-            "1) Directory tree with file status (✓ full, ○ outline, ✗ excluded) "
-            "2) Complete contents of key files "
-            "3) Smart outlines highlighting important definitions in supported languages. "
-            "The output is customizable via profiles that control file inclusion rules and presentation format. "
-            "The assistant tracks previously retrieved project context in the conversation and checks this history before making new requests."
-        ),
-        inputSchema=ContextRequest.model_json_schema(),
+project_context_tool = Tool(
+    name="project_context",
+    description=(
+        "Generates a structured repository overview including: "
+        "1) Directory tree with file status (✓ full, ○ outline, ✗ excluded) "
+        "2) Complete contents of key files "
+        "3) Smart outlines highlighting important definitions in supported languages. "
+        "The output is customizable via profiles that control file inclusion rules and presentation format. "
+        "The assistant tracks previously retrieved project context in the conversation and checks this history before making new requests."
     ),
+    inputSchema=ContextRequest.model_json_schema(),
 )
 
 
@@ -56,18 +54,15 @@ class FilesRequest(BaseModel):
     paths: list[str] = Field(
         ...,
         description="File paths relative to root_path, starting with a forward slash and including the root directory name. For example, if root_path is '/home/user/projects/myproject', then a valid path would be '/myproject/src/main.py",
-        min_items=1,
     )
 
 
-get_files_tool = (
-    Tool(
-        name="get_files",
-        description=(
-            "Retrieves complete contents of specified files from the project. The assistant tracks all previously retrieved file contents and checks this history before making new requests."
-        ),
-        inputSchema=FilesRequest.model_json_schema(),
+get_files_tool = Tool(
+    name="get_files",
+    description=(
+        "Retrieves complete contents of specified files from the project. The assistant tracks all previously retrieved file contents and checks this history before making new requests."
     ),
+    inputSchema=FilesRequest.model_json_schema(),
 )
 
 

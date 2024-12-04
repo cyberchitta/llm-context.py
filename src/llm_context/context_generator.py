@@ -127,7 +127,7 @@ class ContextGenerator:
         layout = self.settings.project_layout
         ctx_settings = descriptor.get_settings()
         no_media, with_notes, with_prompt = map(
-            ctx_settings.get, ("no_media", "with_notes", "with_prompt")
+            lambda x: bool(ctx_settings.get(x)), ("no_media", "with_notes", "with_prompt")
         )
         context = {
             "project_name": self.project_root.name,
