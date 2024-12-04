@@ -140,7 +140,8 @@ class ContextGenerator:
                 self.collector.sample_file_abs(self.full_abs)
             ),
             "prompt": descriptor.get_prompt(layout) if with_prompt else None,
-            "notes": descriptor.get_notes(layout) if with_notes else None,
+            "project_notes": descriptor.get_project_notes(layout),
+            "user_notes": descriptor.get_user_notes(layout) if with_notes else None,
         }
         return self._render(template_id, context)
 

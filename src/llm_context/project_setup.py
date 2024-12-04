@@ -64,7 +64,8 @@ class ProjectSetup:
         self._create_curr_ctx_file()
         self._update_templates_if_needed()
         self.create_state_file()
-        self._create_notes_file()
+        self._create_project_notes_file()
+        self._create_user_notes_file()
 
     def _create_or_update_config_file(self):
         if not self.project_layout.config_path.exists() or self.constants.needs_update:
@@ -84,12 +85,21 @@ class ProjectSetup:
     def create_state_file(self):
         Toml.save(self.project_layout.state_path, ToolConstants.create_new().to_dict())
 
-    def _create_notes_file(self):
-        notes_path = self.project_layout.notes_path
+    def _create_project_notes_file(self):
+        notes_path = self.project_layout.project_notes_path
+        if not notes_path.exists():
+            notes_path.write_text(
+                "## Project Notes\n\n"
+                "Add project-specific notes, documentation and guidelines here.\n"
+                "This file is stored in the project repository.\n"
+            )
+
+    def _create_user_notes_file(self):
+        notes_path = self.project_layout.user_notes_path
         if not notes_path.exists():
             notes_path.parent.mkdir(parents=True, exist_ok=True)
             notes_path.write_text(
-                "## Project Notes\n\n"
+                "## User Notes\n\n"
                 "Add any personal notes or reminders about this or other projects here.\n"
                 "This file is private and stored in your user config directory.\n"
             )

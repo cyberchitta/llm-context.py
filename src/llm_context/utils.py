@@ -25,8 +25,12 @@ class ProjectLayout:
     root_path: Path
 
     @property
-    def notes_path(self) -> Path:
-        return Path(user_config_dir("llm-context", appauthor=False)) / "lc-notes.md"
+    def project_notes_path(self) -> Path:
+        return self.root_path / ".llm-context" / "lc-project-notes.md"
+
+    @property
+    def user_notes_path(self) -> Path:
+        return Path(user_config_dir("llm-context", appauthor=False)) / "lc-user-notes.md"
 
     @property
     def config_path(self) -> Path:

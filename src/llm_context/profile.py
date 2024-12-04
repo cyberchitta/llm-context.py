@@ -97,8 +97,11 @@ class Profile:
             return safe_read_file(str(prompt_path))
         return None
 
-    def get_notes(self, project_layout: ProjectLayout) -> Optional[str]:
-        return safe_read_file(str(project_layout.notes_path))
+    def get_project_notes(self, project_layout: ProjectLayout) -> Optional[str]:
+        return safe_read_file(str(project_layout.project_notes_path))
+
+    def get_user_notes(self, project_layout: ProjectLayout) -> Optional[str]:
+        return safe_read_file(str(project_layout.user_notes_path))
 
     def with_name(self, name: str) -> "Profile":
         return Profile.create(
