@@ -1,5 +1,6 @@
 import logging
 from dataclasses import dataclass
+from logging import CRITICAL, DEBUG, ERROR, INFO, WARNING, getLogger
 from pathlib import Path
 from typing import Any, Optional, Union
 
@@ -53,26 +54,26 @@ def _format_size(size_bytes):
 
 def size_feedback(content: str) -> None:
     if content is None:
-        print("No content to copy")
+        log(WARNING, "No content to copy")
     else:
         bytes_copied = len(content.encode("utf-8"))
-        print(f"Copied {_format_size(bytes_copied)} to clipboard")
+        log(INFO, f"Copied {_format_size(bytes_copied)} to clipboard")
 
 
 def safe_read_file(path: str) -> Optional[str]:
     file_path = Path(path)
     if not file_path.exists():
-        print(f"File not found: {file_path}")
+        log(ERROR, f"File not found: {file_path}")
         return None
     if not file_path.is_file():
-        print(f"Not a file: {file_path}")
+        log(ERROR, f"Not a file: {file_path}")
         return None
     try:
         return file_path.read_text()
     except PermissionError:
-        print(f"Permission denied: {file_path}")
+        log(ERROR, f"Permission denied: {file_path}")
     except Exception as e:
-        print(f"Error reading file {file_path}: {str(e)}")
+        log(ERROR, f"Error reading file {file_path}: {str(e)}")
     return None
 
 
@@ -108,15 +109,15 @@ def log(level: int, msg: str) -> None:
     logger = (
         ExecutionEnvironment.current().logger
         if ExecutionEnvironment.has_current()
-        else logging.getLogger("llm-context-fallback")
+        else getLogger("llm-context-fallback")
     )
-    if level == logging.ERROR:
+    if level == ERROR:
         logger.error(msg)
-    elif level == logging.WARNING:
+    elif level == WARNING:
         logger.warning(msg)
-    elif level == logging.INFO:
+    elif level == INFO:
         logger.info(msg)
-    elif level == logging.DEBUG:
+    elif level == DEBUG:
         logger.debug(msg)
-    elif level == logging.CRITICAL:
+    elif level == CRITICAL:
         logger.critical(msg)
