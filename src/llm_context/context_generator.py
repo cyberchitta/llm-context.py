@@ -126,8 +126,8 @@ class ContextGenerator:
         descriptor = self.spec.context_descriptor
         layout = self.spec.project_layout
         ctx_settings = descriptor.get_settings()
-        no_media, with_notes, with_prompt = map(
-            lambda x: bool(ctx_settings.get(x)), ("no_media", "with_notes", "with_prompt")
+        no_media, with_user_notes, with_prompt = map(
+            lambda x: bool(ctx_settings.get(x)), ("no_media", "with_user_notes", "with_prompt")
         )
         context = {
             "project_name": self.project_root.name,
@@ -141,7 +141,7 @@ class ContextGenerator:
             ),
             "prompt": descriptor.get_prompt(layout) if with_prompt else None,
             "project_notes": descriptor.get_project_notes(layout),
-            "user_notes": descriptor.get_user_notes(layout) if with_notes else None,
+            "user_notes": descriptor.get_user_notes(layout) if with_user_notes else None,
         }
         return self._render(template_id, context)
 
