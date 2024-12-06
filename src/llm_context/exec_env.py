@@ -1,3 +1,4 @@
+from hmac import new
 import logging
 from contextlib import contextmanager
 from contextvars import ContextVar
@@ -55,9 +56,9 @@ class ExecutionState:
 
     @staticmethod
     def load(project_layout: ProjectLayout) -> "ExecutionState":
-        return ExecutionState.create(
-            project_layout, StateStore(project_layout.state_store_path).load(), "code"
-        )
+        store = StateStore(project_layout.state_store_path)
+        selections, current_profile = store.load()
+        return ExecutionState(project_layout, selections, current_profile)
 
     @staticmethod
     def create(
@@ -70,15 +71,12 @@ class ExecutionState:
         return self.selections.get_selection(self.profile)
 
     def store(self):
-        StateStore(self.project_layout.state_store_path).save(self.selections)
+        StateStore(self.project_layout.state_store_path).save(self.selections, self.profile)
 
     def with_selection(self, file_selection: FileSelection) -> "ExecutionState":
         new_selections = self.selections.with_selection(file_selection)
-        StateStore(self.project_layout.state_store_path).save(new_selections)
+        StateStore(self.project_layout.state_store_path).save(new_selections, self.profile)
         return ExecutionState(self.project_layout, new_selections, self.profile)
-
-    def with_profile(self, profile_name: str) -> "ExecutionState":
-        return self.with_selection(self.file_selection.with_profile(profile_name))
 
 
 @dataclass(frozen=True)
@@ -109,7 +107,11 @@ class ExecutionEnvironment:
         config = ContextSpec.create(self.config.project_root_path, profile, self.constants)
         selector = ContextSelector.create(config)
         file_selection = selector.select_full_files(self.state.file_selection)
-        outline_selection = selector.select_outline_files(file_selection)
+        outline_selection = (
+            selector.select_outline_files(file_selection)
+            if selector.has_outliner(False)
+            else file_selection
+        )
         return self.with_state(self.state.with_selection(outline_selection))
 
     @property

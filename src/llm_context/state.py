@@ -43,7 +43,7 @@ class AllSelections:
 class StateStore:
     storage_path: Path
 
-    def load(self) -> AllSelections:
+    def load(self) -> tuple[AllSelections, str]:
         try:
             data = Toml.load(self.storage_path)
             selections = {}
@@ -51,15 +51,16 @@ class StateStore:
                 selections[profile] = FileSelection.create(
                     profile, sel_data.get("full_files", []), sel_data.get("outline_files", [])
                 )
-            return AllSelections(selections)
+            return AllSelections(selections), data.get("current_profile", "code")
         except Exception:
-            return AllSelections.create_empty()
+            return AllSelections.create_empty(), "code"
 
-    def save(self, store: AllSelections):
+    def save(self, store: AllSelections, current_profile: str):
         data = {
+            "current_profile": current_profile,
             "selections": {
                 profile: {"full_files": sel.full_files, "outline_files": sel.outline_files}
                 for profile, sel in store.selections.items()
-            }
+            },
         }
         Toml.save(self.storage_path, data)
