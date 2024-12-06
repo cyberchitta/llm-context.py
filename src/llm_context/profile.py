@@ -112,8 +112,8 @@ class Profile:
         non_optional = {
             "name": self.name,
             "gitignores": self.gitignores,
-            "settings": self.settings,
             "only-include": self.only_includes,
+            "settings": self.settings,
         }
         return {**non_optional, "templates": self.templates} if self.templates else non_optional
 
