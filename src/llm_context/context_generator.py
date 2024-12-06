@@ -123,7 +123,7 @@ class ContextGenerator:
         return self._render("files", {"files": self.collector.files(rel_paths)})
 
     def context(self, template_id: str = "context") -> str:
-        descriptor = self.spec.context_descriptor
+        descriptor = self.spec.profile
         layout = self.spec.project_layout
         ctx_settings = descriptor.get_settings()
         no_media, with_user_notes = map(

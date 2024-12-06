@@ -12,7 +12,7 @@ from llm_context.utils import ProjectLayout, Toml
 class ContextSpec:
     project_layout: ProjectLayout
     templates: dict[str, str]
-    context_descriptor: Profile
+    profile: Profile
     state: ToolConstants
 
     @staticmethod

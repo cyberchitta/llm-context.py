@@ -117,6 +117,7 @@ class Profile:
         }
         return {**non_optional, "templates": self.templates} if self.templates else non_optional
 
+
 @dataclass(frozen=True)
 class ToolConstants:
     __warning__: str

@@ -134,13 +134,13 @@ class ContextSelector:
             return False
 
     @staticmethod
-    def create(settings: ContextSpec) -> "ContextSelector":
-        root_path = settings.project_root_path
-        context_descriptor = settings.context_descriptor
-        full_pathspecs = context_descriptor.get_ignore_patterns("full")
-        outline_pathspecs = context_descriptor.get_ignore_patterns("outline")
-        full_includes = context_descriptor.get_only_includes("full")
-        outline_includes = context_descriptor.get_only_includes("outline")
+    def create(spec: ContextSpec) -> "ContextSelector":
+        root_path = spec.project_root_path
+        profile = spec.profile
+        full_pathspecs = profile.get_ignore_patterns("full")
+        outline_pathspecs = profile.get_ignore_patterns("outline")
+        full_includes = profile.get_only_includes("full")
+        outline_includes = profile.get_only_includes("outline")
         full_selector = FileSelector.create(root_path, full_pathspecs, full_includes)
         outline_selector = FileSelector.create(root_path, outline_pathspecs, outline_includes)
         return ContextSelector(full_selector, outline_selector)

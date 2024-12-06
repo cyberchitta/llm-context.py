@@ -18,6 +18,7 @@ class Toml:
         with open(file_path, "w") as f:
             f.write(tomlkit.dumps(data))
 
+
 @dataclass(frozen=True)
 class ProjectLayout:
     root_path: Path
