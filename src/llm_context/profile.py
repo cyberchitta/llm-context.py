@@ -87,8 +87,8 @@ class Profile:
     def get_only_includes(self, context_type: str) -> list[str]:
         return self.only_includes[f"{context_type}_files"]
 
-    def get_template(self, template_id: str) -> str:
-        return self.templates[template_id]
+    def get_template(self, template_id: str) -> Optional[str]:
+        return self.templates.get(template_id)
 
     def get_prompt(self, project_layout: ProjectLayout) -> Optional[str]:
         prompt_file = self.get_template("prompt")
