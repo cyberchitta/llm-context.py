@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![PyPI version](https://img.shields.io/pypi/v/llm-context.svg)](https://pypi.org/project/llm-context/)
 
-LLM Context is a command-line tool that helps developers quickly paste relevant content from code / text projects into the web-chat interface of Large Language Models. It leverages `.gitignore` patterns for smart file selection and systematically uses the clipboard for seamless integration with AI chats.
+LLM Context is a command-line tool that helps developers quickly inject relevant content from code/text projects into Large Language Model chat interfaces. It leverages `.gitignore` patterns for smart file selection and provides both a streamlined clipboard workflow and direct LLM integration through the Model Context Protocol (MCP).
 
 > **Note**: This project was developed in collaboration with Claude-3.5-Sonnet, using LLM Context itself to share code during development. All code in the repository is human-curated (by me 😇, @restlessronin).
 
@@ -13,105 +13,76 @@ For an in-depth exploration of the reasoning behind LLM Context and its approach
 
 ## Current Usage Patterns
 
-- **LLM Integration**: Primarily used with Claude (Project Knowledge) and GPT (Knowledge), but supports all LLM chat interfaces.
-- **Project Types**: Suitable for code repositories and collections of text/markdown/html documents.
-- **Project Size**: Optimized for projects that fit within an LLM's context window. Large project support is in development.
+- **Direct LLM Integration**: Native integration with Claude Desktop via MCP protocol
+- **Chat Interface Support**: Works with any LLM chat interface via CLI/clipboard
+  - Optimized for interfaces with persistent context like Claude Projects and Custom GPTs
+  - Works equally well with standard chat interfaces
+- **Project Types**: Suitable for code repositories and collections of text/markdown/html documents
+- **Project Size**: Optimized for projects that fit within an LLM's context window. Large project support is in development
 
 ## Installation
 
-Use [pipx](https://pypa.github.io/pipx/) to install LLM Context:
+Install LLM Context using [uv](https://github.com/astral-sh/uv):
 
 ```bash
-pipx install llm-context
+uv tool install llm-context
 ```
 
-## Usage
+> **Warning**: LLM Context is under active development. Updates may overwrite configuration files prefixed with `lc-`. We recommend backing up any customized files before updating.
 
-LLM Context enables rapid project context updates for each AI chat.
+## Quickstart
 
-### Quick Start and Typical Workflow
+### MCP with Claude Desktop
 
-1. [Install LLM Context](#installation) if you haven't already.
-2. Navigate to your project's root directory.
-3. Run `lc-init` to set up LLM Context for your project (only needed once per repository).
-4. For chat interfaces with built-in context storage (e.g., Claude Pro Projects, ChatGPT Plus GPTs):
-   - Set up your custom prompt manually in the chat interface.
-   - A default prompt is available in `.llm-context/templates/lc-prompt.md`.
-5. (Optional) Edit `.llm-context/config.toml` to [add custom ignore patterns](#customizing-ignore-patterns).
-6. Run `lc-sel-files` to select files for full content inclusion.
-7. (Optional) [Review the selected file](#reviewing-selected-files) list in `.llm-context/curr_ctx.toml`.
-8. Generate and copy the context:
-   - For chat interfaces with persistent context: Run `lc-context`
-   - For other interfaces (including free plans): Run `lc-context --with-prompt` to include the default prompt
-9. Paste the generated context:
-   - For interfaces with persistent context: Into the Project Knowledge (Claude Pro) or GPT Knowledge (ChatGPT Plus) section
-   - For other interfaces: Into the system message or the first chat message, as appropriate
-10. Start your conversation with the LLM about your project.
+Add to 'claude_desktop_config.json':
 
-To maintain up-to-date AI assistance:
-- Repeat steps 6-9 at the start of each new chat session. This process takes only seconds.
-- For interfaces with persistent context, update your custom prompt separately if needed.
-
-### Handling LLM File Requests
-
-When the LLM asks for a file that isn't in the current context:
-
-1. Copy the LLM's file request (typically in a markdown block) to your clipboard.
-2. Run `lc-read-cliplist` to generate the content of the requested files.
-3. Paste the generated file contents back into your chat with the LLM.
-
-### Configuration
-
-#### Customizing Ignore Patterns
-
-Add custom ignore patterns in `.llm-context/config.toml` to exclude specific files or directories not covered by your project's `.gitignore`. This is useful for versioned files that don't contribute to code context, such as media files, large generated files, detailed changelogs, or environment-specific configurations.
-
-Example:
-
-```toml
-# /.llm-context/config.toml
-[gitignores]
-full_files = [
-  "*.svg",
-  "*.png",
-  "CHANGELOG.md",
-  ".env",
-  # Add more patterns here
-]
+```jsonc
+{
+  "mcpServers": {
+    "CyberChitta": {
+      "command": "uvx",
+      "args": ["--from", "llm-context", "lc-mcp"]
+    }
+  }
+}
 ```
 
-#### Reviewing Selected Files
+### CLI Quick Start and Typical Workflow
 
-Review the list of selected files in `.llm-context/curr_ctx.toml` to check what's included in the context. This is particularly useful when trying to minimize context size.
+1. Navigate to your project's root directory
+2. Initialize repository: `lc-init` (only needed once)
+3. (Optional) Edit `.llm-context/config.toml` to customize ignore patterns
+4. Select files: `lc-sel-files`
+5. (Optional) Review selected files in `.llm-context/curr_ctx.toml`
+6. Generate context: `lc-context`
+7. Use with your preferred interface:
+  - Project Knowledge (Claude Pro): Paste into knowledge section
+  - GPT Knowledge (Custom GPTs): Paste into knowledge section
+  - Regular chats: Use `lc-profile code-prompt` first to include instructions
 
-```toml
-# /.llm-context/curr_ctx.toml
-[context]
-full = [
-  "/llm-context.py/pyproject.toml",
-  # more files ...
-]
-```
+8. When the LLM requests additional files:
+   - Copy the file list from the LLM
+   - Run `lc-read-cliplist` 
+   - Paste the contents back to the LLM
 
-## Command Reference
+## Core Commands
 
-- `lc-init`: Initialize LLM Context for your project (only needed once per repository)
-- `lc-sel-files`: Select files for full content inclusion
-- `lc-sel-outlines`: Select files for outline inclusion (experimental)
-- `lc-context`: Generate and copy context to clipboard
-  - Use `--with-prompt` flag to include the prompt for chat interfaces without persistent context
-- `lc-read-cliplist`: Read contents for LLM-requested files, and copy to clipboard
+- `lc-init`: Initialize project configuration
+- `lc-profile <name>`: Switch profiles
+- `lc-sel-files`: Select files for inclusion
+- `lc-context`: Generate and copy context
+- `lc-read-cliplist`: Process LLM file requests
 
-## Experimental: Handling Larger Repositories
+## Features & Advanced Usage
 
-For larger projects, we're exploring a combined approach of full file content and file outlines. Use `lc-sel-outlines` after `lc-sel-files` to experiment with this feature.
+LLM Context provides advanced features for customizing how project content is captured and presented:
 
-**Note:** The outlining feature currently supports the following programming languages:
-C, C++, C#, Elisp, Elixir, Elm, Go, Java, JavaScript, OCaml, PHP, Python, QL, Ruby, Rust, and TypeScript. Files in unsupported languages will not be outlined and will be excluded from the outline selection.
+- Smart file selection using `.gitignore` patterns
+- Multiple profiles for different use cases
+- Code outline generation for supported languages
+- Customizable templates and prompts
 
-### Feedback and Contributions
-
-We welcome feedback, issue reports, and pull requests on our [GitHub repository](https://github.com/cyberchitta/llm-context.py).
+See our [User Guide](docs/user-guide.md) for detailed documentation of these features.
 
 ## Acknowledgments
 
