@@ -7,7 +7,7 @@ from typing import ClassVar, Optional
 
 from llm_context.context_spec import ContextSpec
 from llm_context.file_selector import ContextSelector
-from llm_context.profile import ToolConstants
+from llm_context.profile import Profile, ToolConstants
 from llm_context.state import AllSelections, FileSelection, StateStore
 from llm_context.utils import ProjectLayout
 
@@ -74,8 +74,10 @@ class ExecutionState:
 
     def with_selection(self, file_selection: FileSelection) -> "ExecutionState":
         new_selections = self.selections.with_selection(file_selection)
-        StateStore(self.project_layout.state_store_path).save(new_selections, self.profile)
         return ExecutionState(self.project_layout, new_selections, self.profile)
+
+    def with_profile(self, profile: Profile) -> "ExecutionState":
+        return ExecutionState(self.project_layout, self.selections, profile)
 
 
 @dataclass(frozen=True)
@@ -111,7 +113,7 @@ class ExecutionEnvironment:
             if selector.has_outliner(False)
             else file_selection
         )
-        return self.with_state(self.state.with_selection(outline_selection))
+        return self.with_state(self.state.with_selection(outline_selection).with_profile(profile))
 
     @property
     def logger(self) -> logging.Logger:
