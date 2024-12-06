@@ -46,18 +46,18 @@ INCLUDE_ALL = ["**/*"]
 class Profile:
     name: str
     gitignores: dict[str, list[str]]
-    templates: dict[str, str]
-    settings: dict[str, Any]
     only_includes: dict[str, list[str]]
+    settings: dict[str, Any]
+    prompt: str
 
     @staticmethod
     def create_default() -> "Profile":
         return Profile.create(
             "default",
             {"full_files": GIT_IGNORE_DEFAULT, "outline_files": GIT_IGNORE_DEFAULT},
-            {},
-            {"no_media": False, "with_user_notes": False},
             {"full_files": INCLUDE_ALL, "outline_files": INCLUDE_ALL},
+            {"no_media": False, "with_user_notes": False},
+            None,
         )
 
     @staticmethod
@@ -69,14 +69,14 @@ class Profile:
         return Profile.create(
             name,
             config["gitignores"],
-            config.get("templates", {}),
-            config["settings"],
             config["only-include"],
+            config["settings"],
+            config.get("prompt", {}),
         )
 
     @staticmethod
-    def create(name, gitignores, templates, settings, only_include) -> "Profile":
-        return Profile(name, gitignores, templates, settings, only_include)
+    def create(name, gitignores, only_include, settings, prompt) -> "Profile":
+        return Profile(name, gitignores, only_include, settings, prompt)
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
         return self.gitignores[f"{context_type}_files"]
@@ -87,13 +87,9 @@ class Profile:
     def get_only_includes(self, context_type: str) -> list[str]:
         return self.only_includes[f"{context_type}_files"]
 
-    def get_template(self, template_id: str) -> Optional[str]:
-        return self.templates.get(template_id)
-
     def get_prompt(self, project_layout: ProjectLayout) -> Optional[str]:
-        prompt_file = self.get_template("prompt")
-        if prompt_file:
-            prompt_path = project_layout.get_template_path(prompt_file)
+        if self.prompt:
+            prompt_path = project_layout.project_config_path / self.prompt
             return safe_read_file(str(prompt_path))
         return None
 
@@ -105,7 +101,7 @@ class Profile:
 
     def with_name(self, name: str) -> "Profile":
         return Profile.create(
-            name, self.gitignores, self.templates, self.settings, self.only_includes
+            name, self.gitignores, self.only_includes, self.settings, self.prompt
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -115,7 +111,7 @@ class Profile:
             "only-include": self.only_includes,
             "settings": self.settings,
         }
-        return {**non_optional, "templates": self.templates} if self.templates else non_optional
+        return {**non_optional, "prompt": self.prompt} if self.prompt else non_optional
 
 
 @dataclass(frozen=True)

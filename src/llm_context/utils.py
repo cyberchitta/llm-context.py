@@ -24,8 +24,12 @@ class ProjectLayout:
     root_path: Path
 
     @property
+    def project_config_path(self) -> Path:
+        return self.root_path / ".llm-context"
+
+    @property
     def project_notes_path(self) -> Path:
-        return self.root_path / ".llm-context" / "lc-project-notes.md"
+        return self.project_config_path / "lc-project-notes.md"
 
     @property
     def user_notes_path(self) -> Path:
@@ -33,19 +37,19 @@ class ProjectLayout:
 
     @property
     def config_path(self) -> Path:
-        return self.root_path / ".llm-context" / "config.toml"
+        return self.project_config_path / "config.toml"
 
     @property
     def state_path(self) -> Path:
-        return self.root_path / ".llm-context" / "lc-state.toml"
+        return self.project_config_path / "lc-state.toml"
 
     @property
     def state_store_path(self) -> Path:
-        return self.root_path / ".llm-context" / "curr_ctx.toml"
+        return self.project_config_path / "curr_ctx.toml"
 
     @property
     def templates_path(self) -> Path:
-        return self.root_path / ".llm-context" / "templates"
+        return self.project_config_path / "templates"
 
     def get_template_path(self, template_name: str) -> Path:
         return self.templates_path / template_name

@@ -4,7 +4,7 @@ from logging import INFO
 from pathlib import Path
 from typing import Any
 
-from llm_context import templates
+from llm_context import lc_resources
 from llm_context.profile import Profile, ProjectLayout, ToolConstants
 from llm_context.utils import Toml, log
 
@@ -29,7 +29,6 @@ class Config:
                 "context-mcp": "lc-context-mcp.j2",
                 "files": "lc-files.j2",
                 "highlights": "lc-highlights.j2",
-                "prompt": "lc-prompt.md",
             },
             profiles={
                 "code": Profile.create_code().to_dict(),
@@ -65,6 +64,7 @@ class ProjectSetup:
         self._create_curr_ctx_file()
         self._update_templates_if_needed()
         self.create_state_file()
+        self._copy_template("lc-prompt.md", self.project_layout.project_config_path / "lc-prompt.md")
         self._create_project_notes_file()
         self._create_user_notes_file()
 
@@ -109,6 +109,6 @@ class ProjectSetup:
         Toml.save(self.project_layout.config_path, Config.create_default().to_dict())
 
     def _copy_template(self, template_name: str, dest_path: Path):
-        template_content = resources.read_text(templates, template_name)
+        template_content = resources.read_text(lc_resources, template_name)
         dest_path.write_text(template_content)
         log(INFO, f"Updated template {template_name} to {dest_path}")
