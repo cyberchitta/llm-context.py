@@ -1,4 +1,3 @@
-from hmac import new
 import logging
 from contextlib import contextmanager
 from contextvars import ContextVar
