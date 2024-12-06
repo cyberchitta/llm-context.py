@@ -55,8 +55,8 @@ class Profile:
         return Profile.create(
             "default",
             {"full_files": GIT_IGNORE_DEFAULT, "outline_files": GIT_IGNORE_DEFAULT},
-            {"prompt": "lc-prompt.md"},
-            {"no_media": False, "with_user_notes": False, "with_prompt": False},
+            {},
+            {"no_media": False, "with_user_notes": False},
             {"full_files": INCLUDE_ALL, "outline_files": INCLUDE_ALL},
         )
 

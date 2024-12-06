@@ -126,8 +126,8 @@ class ContextGenerator:
         descriptor = self.spec.context_descriptor
         layout = self.spec.project_layout
         ctx_settings = descriptor.get_settings()
-        no_media, with_user_notes, with_prompt = map(
-            lambda x: bool(ctx_settings.get(x)), ("no_media", "with_user_notes", "with_prompt")
+        no_media, with_user_notes = map(
+            lambda x: bool(ctx_settings.get(x)), ("no_media", "with_user_notes")
         )
         context = {
             "project_name": self.project_root.name,
@@ -139,7 +139,7 @@ class ContextGenerator:
             "sample_requested_files": self.converter.to_relative(
                 self.collector.sample_file_abs(self.full_abs)
             ),
-            "prompt": descriptor.get_prompt(layout) if with_prompt else None,
+            "prompt": descriptor.get_prompt(layout),
             "project_notes": descriptor.get_project_notes(layout),
             "user_notes": descriptor.get_user_notes(layout) if with_user_notes else None,
         }
