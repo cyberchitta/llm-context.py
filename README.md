@@ -56,13 +56,14 @@ Add to 'claude_desktop_config.json':
 5. (Optional) Review selected files in `.llm-context/curr_ctx.toml`
 6. Generate context: `lc-context`
 7. Use with your preferred interface:
-  - Project Knowledge (Claude Pro): Paste into knowledge section
-  - GPT Knowledge (Custom GPTs): Paste into knowledge section
-  - Regular chats: Use `lc-profile code-prompt` first to include instructions
+
+- Project Knowledge (Claude Pro): Paste into knowledge section
+- GPT Knowledge (Custom GPTs): Paste into knowledge section
+- Regular chats: Use `lc-profile code-prompt` first to include instructions
 
 8. When the LLM requests additional files:
    - Copy the file list from the LLM
-   - Run `lc-read-cliplist` 
+   - Run `lc-read-cliplist`
    - Paste the contents back to the LLM
 
 ## Core Commands
