@@ -69,7 +69,7 @@ class Profile:
         return Profile.create(
             name,
             config["gitignores"],
-            config["templates"],
+            config.get("templates", {}),
             config["settings"],
             config["only-include"],
         )
@@ -109,14 +109,13 @@ class Profile:
         )
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        non_optional = {
             "name": self.name,
             "gitignores": self.gitignores,
-            "templates": self.templates,
             "settings": self.settings,
             "only-include": self.only_includes,
         }
-
+        return {**non_optional, "templates": self.templates} if self.templates else non_optional
 
 @dataclass(frozen=True)
 class ToolConstants:
