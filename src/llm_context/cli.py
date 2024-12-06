@@ -16,13 +16,6 @@ def profile_feedback(env: ExecutionEnvironment):
     log(INFO, f"Active profile: {env.state.file_selection.profile}")
 
 
-@create_command
-def init_project(env: ExecutionEnvironment):
-    log(INFO, f"LLM Context initialized for project: {env.config.project_root}")
-    log(INFO, "You can now edit .llm-context/config.toml to customize ignore patterns.")
-    return ExecutionResult(None, env)
-
-
 def set_profile(profile: str, env: ExecutionEnvironment) -> ExecutionResult:
     if not env.config.has_profile(profile):
         raise ValueError(f"Profile '{profile}' does not exist.")
@@ -30,6 +23,23 @@ def set_profile(profile: str, env: ExecutionEnvironment) -> ExecutionResult:
     nxt_env.state.store()
     log(INFO, f"Active profile set to '{profile}'.")
     return ExecutionResult(None, nxt_env)
+
+
+def select_all_files(env: ExecutionEnvironment) -> ExecutionResult:
+    profile_feedback(env)
+    selector = ContextSelector.create(env.config)
+    file_sel_full = selector.select_full_files(env.state.file_selection)
+    file_sel_out = selector.select_outline_files(file_sel_full)
+    nxt_env = env.with_state(env.state.with_selection(file_sel_out))
+    nxt_env.state.store()
+    return ExecutionResult(None, nxt_env)
+
+
+@create_command
+def init_project(env: ExecutionEnvironment):
+    log(INFO, f"LLM Context initialized for project: {env.config.project_root}")
+    log(INFO, "You can now edit .llm-context/config.toml to customize ignore patterns.")
+    return ExecutionResult(None, env)
 
 
 @create_command
@@ -76,16 +86,6 @@ def select_outline_files(env: ExecutionEnvironment) -> ExecutionResult:
     nxt_env = env.with_state(env.state.with_selection(file_selection))
     nxt_env.state.store()
     log(INFO, f"Selected {len(file_selection.outline_files)} outline files.")
-    return ExecutionResult(None, nxt_env)
-
-
-def select_all_files(env: ExecutionEnvironment) -> ExecutionResult:
-    profile_feedback(env)
-    selector = ContextSelector.create(env.config)
-    file_sel_full = selector.select_full_files(env.state.file_selection)
-    file_sel_out = selector.select_outline_files(file_sel_full)
-    nxt_env = env.with_state(env.state.with_selection(file_sel_out))
-    nxt_env.state.store()
     return ExecutionResult(None, nxt_env)
 
 
