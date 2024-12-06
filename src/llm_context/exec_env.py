@@ -51,7 +51,7 @@ class RuntimeContext:
 class ExecutionState:
     project_layout: ProjectLayout
     selections: AllSelections
-    profile: str
+    profile_name: str
 
     @staticmethod
     def load(project_layout: ProjectLayout) -> "ExecutionState":
@@ -61,23 +61,23 @@ class ExecutionState:
 
     @staticmethod
     def create(
-        project_layout: ProjectLayout, selections: AllSelections, profile: str
+        project_layout: ProjectLayout, selections: AllSelections, profile_name: str
     ) -> "ExecutionState":
-        return ExecutionState(project_layout, selections, profile)
+        return ExecutionState(project_layout, selections, profile_name)
 
     @property
     def file_selection(self) -> FileSelection:
-        return self.selections.get_selection(self.profile)
+        return self.selections.get_selection(self.profile_name)
 
     def store(self):
-        StateStore(self.project_layout.state_store_path).save(self.selections, self.profile)
+        StateStore(self.project_layout.state_store_path).save(self.selections, self.profile_name)
 
     def with_selection(self, file_selection: FileSelection) -> "ExecutionState":
         new_selections = self.selections.with_selection(file_selection)
-        return ExecutionState(self.project_layout, new_selections, self.profile)
+        return ExecutionState(self.project_layout, new_selections, self.profile_name)
 
     def with_profile(self, profile: Profile) -> "ExecutionState":
-        return ExecutionState(self.project_layout, self.selections, profile)
+        return ExecutionState(self.project_layout, self.selections, profile.name)
 
 
 @dataclass(frozen=True)
