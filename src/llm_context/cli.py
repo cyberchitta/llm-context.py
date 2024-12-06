@@ -13,7 +13,7 @@ from llm_context.utils import log
 
 
 def profile_feedback(env: ExecutionEnvironment):
-    log(INFO, f"Active profile: {env.state.file_selection.profile}")
+    log(INFO, f"Active profile: {env.state.file_selection.profile_name}")
 
 
 def set_profile(profile: str, env: ExecutionEnvironment) -> ExecutionResult:

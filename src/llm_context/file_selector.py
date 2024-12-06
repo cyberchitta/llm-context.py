@@ -154,7 +154,7 @@ class ContextSelector:
                 WARNING,
                 "Some files previously in outline selection have been moved to full selection.",
             )
-        return FileSelection.create(file_selection.profile, full_files, updated_outline_files)
+        return FileSelection.create(file_selection.profile_name, full_files, updated_outline_files)
 
     def select_outline_files(self, file_selection: FileSelection) -> "FileSelection":
         full_files = file_selection.full_files
@@ -164,7 +164,7 @@ class ContextSelector:
                 "No full files have been selected. Consider running full file selection first.",
             )
         if not ContextSelector.has_outliner(True):
-            return FileSelection.create(file_selection.profile, full_files, [])
+            return FileSelection.create(file_selection.profile_name, full_files, [])
         all_outline_files = self.outline_selector.get_relative_files()
         outline_files = [f for f in all_outline_files if f not in set(full_files)]
-        return FileSelection.create(file_selection.profile, full_files, outline_files)
+        return FileSelection.create(file_selection.profile_name, full_files, outline_files)

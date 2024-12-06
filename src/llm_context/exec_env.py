@@ -76,8 +76,8 @@ class ExecutionState:
         new_selections = self.selections.with_selection(file_selection)
         return ExecutionState(self.project_layout, new_selections, self.profile_name)
 
-    def with_profile(self, profile: Profile) -> "ExecutionState":
-        return ExecutionState(self.project_layout, self.selections, profile.name)
+    def with_profile(self, profile_name: str) -> "ExecutionState":
+        return ExecutionState(self.project_layout, self.selections, profile_name)
 
 
 @dataclass(frozen=True)
@@ -96,16 +96,16 @@ class ExecutionEnvironment:
         project_layout = ProjectLayout(project_root)
         state = ExecutionState.load(project_layout)
         constants = ToolConstants.load(project_layout.state_path)
-        config = ContextSpec.create(project_root, state.file_selection.profile, constants)
+        config = ContextSpec.create(project_root, state.file_selection.profile_name, constants)
         return ExecutionEnvironment(config, runtime, state, constants)
 
     def with_state(self, new_state: ExecutionState) -> "ExecutionEnvironment":
         return ExecutionEnvironment(self.config, self.runtime, new_state, self.constants)
 
-    def with_profile(self, profile: str) -> "ExecutionEnvironment":
-        if profile == self.state.file_selection.profile:
+    def with_profile(self, profile_name: str) -> "ExecutionEnvironment":
+        if profile_name == self.state.file_selection.profile_name:
             return self
-        config = ContextSpec.create(self.config.project_root_path, profile, self.constants)
+        config = ContextSpec.create(self.config.project_root_path, profile_name, self.constants)
         selector = ContextSelector.create(config)
         file_selection = selector.select_full_files(self.state.file_selection)
         outline_selection = (
@@ -113,7 +113,9 @@ class ExecutionEnvironment:
             if selector.has_outliner(False)
             else file_selection
         )
-        return self.with_state(self.state.with_selection(outline_selection).with_profile(profile))
+        return self.with_state(
+            self.state.with_selection(outline_selection).with_profile(profile_name)
+        )
 
     @property
     def logger(self) -> logging.Logger:
