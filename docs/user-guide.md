@@ -25,7 +25,7 @@
 4. [Command Reference](#command-reference)
 
    - [lc-init](#lc-init)
-   - [lc-profile](#lc-profile-name)
+   - [lc-set-profile](#lc-set-profile-name)
    - [lc-sel-files](#lc-sel-files)
    - [lc-sel-outlines](#lc-sel-outlines)
    - [lc-context](#lc-context)
@@ -99,7 +99,7 @@
 Core commands you'll use frequently:
 
 - `lc-init`: Set up LLM Context in your project
-- `lc-profile <name>`: Switch between different profile configurations
+- `lc-set-profile <name>`: Switch between different profile configurations
 - `lc-sel-files`: Select files for full content inclusion
 - `lc-sel-outlines`: Select files for structural outline generation
 - `lc-context`: Generate and copy context to clipboard
@@ -139,11 +139,12 @@ LLM Context uses a layered configuration approach:
 
    - `config.toml`: Main configuration file
    - `lc-project-notes.md`: Project-specific notes
+   - `lc-prompt.md`: Prompt
    - `templates/`: Template files
    - `curr_ctx.toml`: Current context state
 
 3. User Configuration
-   - `~/.llm-context/lc-user-notes.md`: Personal notes
+   - `~/.llm-context/lc-user-notes.md`: User specific notes
 
 ### Files and Directories
 
@@ -152,11 +153,11 @@ Standard project layout:
 ```
 your-project/
 ├── .llm-context/
-│   ├── config.toml           # Main configuration
-│   ├── lc-project-notes.md   # Project notes
+│   ├── config.toml          # Main configuration
+│   ├── lc-project-notes.md  # Project notes 
+│   ├── lc-prompt.md         # LLM Instructions
 │   ├── curr_ctx.toml        # Current state
 │   └── templates/           # Template files
-│       ├── lc-prompt.md
 │       ├── lc-context.j2
 │       ├── lc-files.j2
 │       └── lc-highlights.j2
@@ -171,7 +172,6 @@ LLM Context maintains state in `curr_ctx.toml`:
 - Tracks selected files per profile
 - Preserves selections between sessions
 - Updates automatically with commands
-- Can be version controlled if desired
 
 ### Profiles Overview
 
@@ -192,7 +192,6 @@ Profiles control how LLM Context handles your project:
 3. Built-in Profiles
    - `code`: Default for software projects
    - `code-prompt`: Adds LLM instructions
-   - `copy`: Optimized for documentation
 
 ## Configuration
 
@@ -205,7 +204,6 @@ Primary configuration file containing:
 ```toml
 # Template mappings
 [templates]
-prompt = "lc-prompt.md"
 context = "lc-context.j2"
 files = "lc-files.j2"
 highlights = "lc-highlights.j2"
@@ -244,7 +242,6 @@ only-include = {
 
 Contains Jinja2 templates controlling output format:
 
-- `lc-prompt.md`: LLM instructions
 - `lc-context.j2`: Main context format
 - `lc-files.j2`: File content format
 - `lc-highlights.j2`: Code outline format
@@ -284,7 +281,7 @@ only-include = {
 
 [profiles.code-prompt]  # Built-in profile that adds LLM instructions
 base = "code"  # Inherits from code profile
-settings = { with_prompt = true }  # Adds prompt template to output
+prompt = "lc-prompt.md"  # Adds prompt template to output
 ```
 
 #### Settings Reference
@@ -298,9 +295,6 @@ settings = {
 
     # Include user notes from ~/.llm-context/lc-user-notes.md
     with_user_notes = false,
-
-    # Include prompt template
-    with_prompt = false
 }
 ```
 
@@ -362,7 +356,6 @@ gitignores = {
 }
 settings = {
     no_media = true,
-    with_prompt = true  # Include LLM instructions
 }
 only-include = {
     full_files = [
@@ -371,6 +364,7 @@ only-include = {
         "pyproject.toml"         # Project configuration
     ]
 }
+prompt = "lc-prompt.md"
 ```
 
 #### Profile Inheritance
@@ -483,7 +477,7 @@ Initializes LLM Context in your project.
 - Requires `.gitignore` file in project root
 - Safe to run multiple times
 
-### lc-profile <name>
+### lc-set-profile <name>
 
 Switches the active profile.
 
@@ -654,7 +648,7 @@ only-include = {
 1. Standard Chat:
 
 ```bash
-lc-profile code-prompt  # Include instructions
+lc-set-profile code-prompt  # Include instructions
 lc-context             # Generate and copy
 # Paste into chat
 ```
@@ -671,7 +665,7 @@ lc-read-cliplist
 
 1. Claude Projects:
 
-   - Use `lc-profile code`
+   - Use `lc-set-profile code`
    - Generate context with `lc-context`
    - Paste into knowledge section
    - Update as project evolves
