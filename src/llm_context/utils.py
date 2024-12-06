@@ -3,7 +3,7 @@ from logging import CRITICAL, DEBUG, ERROR, INFO, WARNING, getLogger
 from pathlib import Path
 from typing import Any, Optional, Union
 
-import toml  # type: ignore
+import tomlkit
 
 
 @dataclass(frozen=True)
@@ -11,13 +11,12 @@ class Toml:
     @staticmethod
     def load(file_path: Path) -> dict[str, Any]:
         with open(file_path, "r") as f:
-            return toml.load(f)
+            return tomlkit.load(f)
 
     @staticmethod
     def save(file_path: Path, data: dict[str, Any]):
         with open(file_path, "w") as f:
-            toml.dump(data, f)
-
+            f.write(tomlkit.dumps(data))
 
 @dataclass(frozen=True)
 class ProjectLayout:
