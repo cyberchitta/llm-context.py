@@ -180,6 +180,8 @@ class ProfileResolver:
         return Profile.from_config(profile_name, resolved_config)
 
     def resolve_profile(self, profile_name: str) -> dict[str, Any]:
+        if profile_name == "default":
+            return self.system_state.default_profile
         try:
             profile_config = self.config["profiles"][profile_name]
         except KeyError:
