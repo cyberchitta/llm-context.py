@@ -88,3 +88,10 @@ base = "code"
 
 [profiles.code-prompt.templates]
 prompt = "lc-prompt.md"
+
+[profiles.copy]
+base = "default"
+
+[profiles.copy.only-include]
+full_files = ["*.md"]
+outline_files = ["**/*"]
