@@ -85,6 +85,10 @@ LLM Context provides advanced features for customizing how project content is ca
 
 See our [User Guide](docs/user-guide.md) for detailed documentation of these features.
 
+## Similar Tools
+
+Check out our [comprehensive list of alternatives](https://www.cyberchitta.cc/articles/lc-alternatives.html) - the sheer number of tools tackling this problem demonstrates its importance to the developer community.
+
 ## Acknowledgments
 
 LLM Context evolves from a lineage of AI-assisted development tools:
