@@ -59,7 +59,7 @@ Add to 'claude_desktop_config.json':
 
 - Project Knowledge (Claude Pro): Paste into knowledge section
 - GPT Knowledge (Custom GPTs): Paste into knowledge section
-- Regular chats: Use `lc-profile code-prompt` first to include instructions
+- Regular chats: Use `lc-set-profile code-prompt` first to include instructions
 
 8. When the LLM requests additional files:
    - Copy the file list from the LLM
