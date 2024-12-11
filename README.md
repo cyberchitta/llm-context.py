@@ -69,7 +69,7 @@ Add to 'claude_desktop_config.json':
 ## Core Commands
 
 - `lc-init`: Initialize project configuration
-- `lc-profile <name>`: Switch profiles
+- `lc-set-profile <name>`: Switch profiles
 - `lc-sel-files`: Select files for inclusion
 - `lc-context`: Generate and copy context
 - `lc-read-cliplist`: Process LLM file requests
