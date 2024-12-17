@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.1] - 2024-12-17
+
+### Bug Fixes
+- Remove templates key
+- Use system default profile in resolver
+
+### Features
+- Ensure file selection before context generation in MCP
+- Add "*.tmp" to ignored files
+- Add sample code-file profile
+- Add file output support via profile settings
+
 ## [0.2.0] - 2024-12-06
 
 ### Bug Fixes
