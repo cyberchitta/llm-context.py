@@ -290,11 +290,14 @@ Profile settings control behavior:
 
 ```toml
 settings = {
-    # Exclude binary/media files
+    # Exclude binary/media files from folder structure
     no_media = true,
 
     # Include user notes from ~/.llm-context/lc-user-notes.md
     with_user_notes = false,
+
+    # Write lc-context to file (relative to current directory) in addition to clipboard
+    context_file = "context.md.tmp"
 }
 ```
 
@@ -386,6 +389,14 @@ base = "base-docs"
 settings = {
     no_media = true,
     with_user_notes = true  # Add personal notes
+}
+
+[profiles.with-file]
+base = "code"
+settings = {
+    no_media = true,
+    with_user_notes = false,
+    context_file = "context.md.tmp" # Save to file as well as clipboard
 }
 ```
 

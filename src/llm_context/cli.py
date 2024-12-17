@@ -1,6 +1,7 @@
 import argparse
 from importlib.metadata import version as pkg_ver
 from logging import INFO
+from pathlib import Path
 
 import pyperclip  # type: ignore
 
@@ -110,6 +111,9 @@ def files_from_clip(in_files: list[str] = [], *, env: ExecutionEnvironment):
 @create_clipboard_cmd
 def context(env: ExecutionEnvironment) -> ExecutionResult:
     profile_feedback(env)
-    return ExecutionResult(
-        ContextGenerator.create(env.config, env.state.file_selection).context(), env
-    )
+    content = ContextGenerator.create(env.config, env.state.file_selection).context()
+    context_file = env.config.profile.get_settings().get("context_file")
+    if context_file:
+        Path(context_file).write_text(content)
+        log(INFO, f"Wrote context to {context_file}")
+    return ExecutionResult(content, env)
