@@ -12,6 +12,7 @@ GIT_IGNORE_DEFAULT: list[str] = [
     ".git",
     ".gitignore",
     ".llm-context/",
+    "*.tmp",
     "*.lock",
     "package-lock.json",
     "yarn.lock",
