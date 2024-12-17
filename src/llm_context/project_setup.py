@@ -32,7 +32,7 @@ class Config:
             },
             profiles={
                 "code": Profile.create_code().to_dict(),
-                "code-prompt": {"base": "code", "templates": {"prompt": "lc-prompt.md"}},
+                "code-prompt": {"base": "code", "prompt": "lc-prompt.md"},
                 "code-file": {"base": "code", "settings": {"context_file": "project-context.md.tmp"}},
             },
         )
