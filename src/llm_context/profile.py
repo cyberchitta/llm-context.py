@@ -44,7 +44,6 @@ INCLUDE_ALL = ["**/*"]
 
 @dataclass(frozen=True)
 class Profile:
-    name: str
     gitignores: dict[str, list[str]]
     only_includes: dict[str, list[str]]
     settings: dict[str, Any]
@@ -53,7 +52,6 @@ class Profile:
     @staticmethod
     def create_default() -> "Profile":
         return Profile.create(
-            "default",
             {"full_files": GIT_IGNORE_DEFAULT, "outline_files": GIT_IGNORE_DEFAULT},
             {"full_files": INCLUDE_ALL, "outline_files": INCLUDE_ALL},
             {"no_media": False, "with_user_notes": False},
@@ -62,12 +60,11 @@ class Profile:
 
     @staticmethod
     def create_code() -> "Profile":
-        return Profile.create_default().with_name("code")
+        return Profile.create_default()
 
     @staticmethod
-    def from_config(name, config: dict[str, Any]) -> "Profile":
+    def from_config(config: dict[str, Any]) -> "Profile":
         return Profile.create(
-            name,
             config["gitignores"],
             config["only-include"],
             config["settings"],
@@ -75,8 +72,8 @@ class Profile:
         )
 
     @staticmethod
-    def create(name, gitignores, only_include, settings, prompt) -> "Profile":
-        return Profile(name, gitignores, only_include, settings, prompt)
+    def create(gitignores, only_include, settings, prompt) -> "Profile":
+        return Profile(gitignores, only_include, settings, prompt)
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
         return self.gitignores[f"{context_type}_files"]
@@ -99,14 +96,8 @@ class Profile:
     def get_user_notes(self, project_layout: ProjectLayout) -> Optional[str]:
         return safe_read_file(str(project_layout.user_notes_path))
 
-    def with_name(self, name: str) -> "Profile":
-        return Profile.create(
-            name, self.gitignores, self.only_includes, self.settings, self.prompt
-        )
-
     def to_dict(self) -> dict[str, Any]:
         non_optional = {
-            "name": self.name,
             "gitignores": self.gitignores,
             "only-include": self.only_includes,
             "settings": self.settings,
@@ -175,9 +166,9 @@ class ProfileResolver:
 
     def get_profile(self, profile_name: str) -> Profile:
         if profile_name == "default":
-            return Profile.from_config("default", self.system_state.default_profile)
+            return Profile.from_config(self.system_state.default_profile)
         resolved_config = self.resolve_profile(profile_name)
-        return Profile.from_config(profile_name, resolved_config)
+        return Profile.from_config(resolved_config)
 
     def resolve_profile(self, profile_name: str) -> dict[str, Any]:
         if profile_name == "default":
