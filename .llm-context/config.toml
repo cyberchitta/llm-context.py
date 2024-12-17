@@ -6,9 +6,6 @@ context-mcp = "lc-context-mcp.j2"
 files = "lc-files.j2"
 highlights = "lc-highlights.j2"
 
-[profiles.code]
-name = "code"
-
 [profiles.code.gitignores]
 full_files = [
     "tests/",
@@ -18,6 +15,7 @@ full_files = [
     ".git",
     ".gitignore",
     ".llm-context/",
+    "*.tmp",
     "*.lock",
     "package-lock.json",
     "yarn.lock",
@@ -48,6 +46,7 @@ outline_files = [
     ".git",
     ".gitignore",
     ".llm-context/",
+    "*.tmp",
     "*.lock",
     "package-lock.json",
     "yarn.lock",
@@ -85,13 +84,10 @@ with_user_notes = false
 
 [profiles.code-prompt]
 base = "code"
-
-[profiles.code-prompt.templates]
 prompt = "lc-prompt.md"
 
-[profiles.copy]
-base = "default"
+[profiles.code-file]
+base = "code"
 
-[profiles.copy.only-include]
-full_files = ["*.md"]
-outline_files = ["**/*"]
+[profiles.code-file.settings]
+context_file = "project-context.md.tmp"
