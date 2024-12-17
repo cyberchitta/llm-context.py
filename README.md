@@ -7,6 +7,8 @@ LLM Context is a command-line tool that helps developers quickly inject relevant
 
 > **Note**: This project was developed in collaboration with Claude-3.5-Sonnet, using LLM Context itself to share code during development. All code in the repository is human-curated (by me 😇, @restlessronin).
 
+<a href="https://glama.ai/mcp/servers/n895hro51i"><img width="380" height="200" src="https://glama.ai/mcp/servers/n895hro51i/badge" alt="llm-context MCP server" /></a>
+
 ## Why LLM Context?
 
 For an in-depth exploration of the reasoning behind LLM Context and its approach to AI-assisted development, check out our article: [LLM Context: Harnessing Vanilla AI Chats for Development](https://www.cyberchitta.cc/articles/llm-ctx-why.html)
