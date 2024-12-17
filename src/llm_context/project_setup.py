@@ -33,6 +33,7 @@ class Config:
             profiles={
                 "code": Profile.create_code().to_dict(),
                 "code-prompt": {"base": "code", "templates": {"prompt": "lc-prompt.md"}},
+                "code-file": {"base": "code", "settings": {"context_file": "project-context.md"}},
             },
         )
 
@@ -64,7 +65,9 @@ class ProjectSetup:
         self._create_curr_ctx_file()
         self._update_templates_if_needed()
         self.create_state_file()
-        self._copy_template("lc-prompt.md", self.project_layout.project_config_path / "lc-prompt.md")
+        self._copy_template(
+            "lc-prompt.md", self.project_layout.project_config_path / "lc-prompt.md"
+        )
         self._create_project_notes_file()
         self._create_user_notes_file()
 
