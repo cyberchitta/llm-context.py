@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field, ValidationError  # type: ignore
 
 from llm_context.context_generator import ContextGenerator
 from llm_context.exec_env import ExecutionEnvironment
+from llm_context.file_selector import ContextSelector
 
 
 class ContextRequest(BaseModel):
@@ -41,6 +42,15 @@ async def project_context(arguments: dict) -> list[TextContent]:
     env = ExecutionEnvironment.create(Path(request.root_path))
     cur_env = env.with_profile(request.profile_name)
     with cur_env.activate():
+        selector = ContextSelector.create(cur_env.config)
+        file_sel_full = selector.select_full_files(cur_env.state.file_selection)
+        file_sel_out = (
+            selector.select_outline_files(file_sel_full)
+            if selector.has_outliner(False)
+            else file_sel_full
+        )
+        cur_env = cur_env.with_state(cur_env.state.with_selection(file_sel_out))
+        cur_env.state.store()
         context = ContextGenerator.create(cur_env.config, cur_env.state.file_selection).context(
             "context-mcp"
         )
