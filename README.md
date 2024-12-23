@@ -1,5 +1,6 @@
 # LLM Context
 
+[![smithery badge](https://smithery.ai/badge/llm-context)](https://smithery.ai/server/llm-context)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![PyPI version](https://img.shields.io/pypi/v/llm-context.svg)](https://pypi.org/project/llm-context/)
 
@@ -22,6 +23,15 @@ For an in-depth exploration of the reasoning behind LLM Context and its approach
 
 ## Installation
 
+### Installing via Smithery
+
+To install LLM Context for Claude Desktop automatically via [Smithery](https://smithery.ai/server/llm-context):
+
+```bash
+npx -y @smithery/cli install llm-context --client claude
+```
+
+### Installing Manually
 Install LLM Context using [uv](https://github.com/astral-sh/uv):
 
 ```bash
