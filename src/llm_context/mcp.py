@@ -70,7 +70,7 @@ class FilesRequest(BaseModel):
 get_files_tool = Tool(
     name="get_files",
     description=(
-        "Retrieves complete contents of specified files from the project. The assistant tracks all previously retrieved file contents and checks this history before making new requests."
+        "IMPORTANT: Check previously retrieved file contents before making new requests. Retrieves (read-only) complete contents of specified files from the project. The assistant cannot modify files with this tool - it only reads their contents."
     ),
     inputSchema=FilesRequest.model_json_schema(),
 )

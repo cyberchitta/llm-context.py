@@ -14,23 +14,29 @@ This context presents a comprehensive view of the _/{{ project_name }}_ reposito
 {% if sample_requested_files %}
 ## 📂 How to Request Missing Files 📂
 
-If you need to see the contents of files that are not fully available (marked with "✗" or "○" in the repository structure below), please follow these steps:
+Files marked with "✗" or "○" can be retrieved using either:
 
-1. Immediately halt your current response.
-2. Start a new response with a markdown code block (```) on a new line.
-3. List the root-relative paths of the missing files you need, one per line.
-4. Close the markdown code block with another ```.
-5. End your response.
+1. Using the get_files tool (available in Claude Desktop):
+```json
+{
+  "root_path": "{{ project_name }}",
+  "paths": [{% for file in sample_requested_files %}"{{ file }}"{% if not loop.last %},{% endif %}{% endfor %}]
+}
 
-Example file request:
+2. Or by following these steps
+    1. Immediately halt your current response.
+    2. Start a new response with a markdown code block (```) on a new line.
+    3. List the root-relative paths of the missing files you need, one per line.
+    4. Close the markdown code block with another ```.
+    5. End your response.
 
-```
-{%- for file in sample_requested_files %}
-{{ file }}
-{%- endfor %}
-```
-
-The human will then provide the requested file contents in the next message.
+    Example file request:
+    ```
+    {%- for file in sample_requested_files %}
+    {{ file }}
+    {%- endfor %}
+    ```
+    The human will then provide the requested file contents in the next message.
 {% endif %}
 ## Repository Structure
 
