@@ -28,6 +28,12 @@ Install LLM Context using [uv](https://github.com/astral-sh/uv):
 uv tool install llm-context
 ```
 
+To upgrade to the latest version:
+
+```bash
+uv tool upgrade llm-context
+```
+
 > **Warning**: LLM Context is under active development. Updates may overwrite configuration files prefixed with `lc-`. We recommend backing up any customized files before updating.
 
 ## Quickstart
