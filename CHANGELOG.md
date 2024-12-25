@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.2] - 2024-12-25
+
+### Features
+- Add absolute root path for get_files tool (for project / MCP interop)
+- Replace folder structure diagram with flat diagram
+
 ## [0.2.1] - 2024-12-17
 
 ### Bug Fixes
