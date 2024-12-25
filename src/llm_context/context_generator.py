@@ -131,6 +131,7 @@ class ContextGenerator:
         )
         context = {
             "project_name": self.project_root.name,
+            "abs_root_path": str(self.project_root),
             "folder_structure_diagram": self.collector.folder_structure_diagram(
                 self.full_abs, self.outline_abs, no_media
             ),

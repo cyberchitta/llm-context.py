@@ -19,7 +19,7 @@ Files marked with "✗" or "○" can be retrieved using either:
 1. Using the get_files tool (available in Claude Desktop):
 ```json
 {
-  "root_path": "{{ project_name }}",
+  "root_path": "{{ abs_root_path }}",
   "paths": [{% for file in sample_requested_files %}"{{ file }}"{% if not loop.last %},{% endif %}{% endfor %}]
 }
 
