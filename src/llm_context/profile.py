@@ -8,6 +8,39 @@ from llm_context.utils import ProjectLayout, Toml, safe_read_file
 
 CURRENT_CONFIG_VERSION = version.parse("2.2")
 
+MEDIA_EXTENSIONS: set[str] = {
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".bmp",
+    ".svg",
+    ".mp4",
+    ".mkv",
+    ".avi",
+    ".mov",
+    ".wmv",
+    ".mp3",
+    ".wav",
+    ".flac",
+    ".ttf",
+    ".otf",
+    ".woff",
+    ".woff2",
+    ".eot",
+    ".ico",
+    ".pdf",
+    ".zip",
+    ".rar",
+    ".7z",
+    ".tar",
+    ".exe",
+    ".dll",
+    ".so",
+    ".dylib",
+    ".map",
+}
+
 GIT_IGNORE_DEFAULT: list[str] = [
     ".git",
     ".gitignore",

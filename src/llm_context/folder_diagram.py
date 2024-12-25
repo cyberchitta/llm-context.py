@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional, cast
 
 from llm_context.file_selector import FileSelector
-from llm_context.profile import IGNORE_NOTHING, INCLUDE_ALL
+from llm_context.profile import IGNORE_NOTHING, INCLUDE_ALL, MEDIA_EXTENSIONS
 
 
 @dataclass(frozen=True)
@@ -13,42 +13,6 @@ class FolderStructureDiagram:
     full_files: Optional[set[str]] = None
     outline_files: Optional[set[str]] = None
     no_media: bool = False
-
-    EXCLUDED_EXTENSIONS: set[str] = field(
-        default_factory=lambda: {
-            ".jpg",
-            ".jpeg",
-            ".png",
-            ".gif",
-            ".bmp",
-            ".svg",
-            ".mp4",
-            ".mkv",
-            ".avi",
-            ".mov",
-            ".wmv",
-            ".mp3",
-            ".wav",
-            ".flac",
-            ".ttf",
-            ".otf",
-            ".woff",
-            ".woff2",
-            ".eot",
-            ".ico",
-            ".pdf",
-            ".zip",
-            ".rar",
-            ".7z",
-            ".tar",
-            ".exe",
-            ".dll",
-            ".so",
-            ".dylib",
-        },
-        init=False,
-        repr=False,
-    )
 
     @property
     def is_enhanced(self) -> bool:
@@ -85,7 +49,7 @@ class FolderStructureDiagram:
         )
 
     def is_excluded_file(self, path: str) -> bool:
-        return os.path.splitext(path)[1].lower() in self.EXCLUDED_EXTENSIONS
+        return os.path.splitext(path)[1].lower() in MEDIA_EXTENSIONS
 
     def _make_relative(self, path: str) -> str:
         return os.path.relpath(path, self.root_dir)

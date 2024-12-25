@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime as dt
 from logging import CRITICAL, DEBUG, ERROR, INFO, WARNING, getLogger
 from pathlib import Path
 from typing import Any, Optional, Union
@@ -61,6 +62,15 @@ def _format_size(size_bytes):
             return f"{size_bytes:.1f} {unit}"
         size_bytes /= 1024.0
     return f"{size_bytes:.1f} TB"
+
+
+def format_age(timestamp: float) -> str:
+    delta = dt.now().timestamp() - timestamp
+    if delta < 3600:
+        return f"{int(delta/60)}m ago"
+    if delta < 86400:
+        return f"{int(delta/3600)}h ago"
+    return f"{int(delta/86400)}d ago"
 
 
 def size_feedback(content: str) -> None:
