@@ -1,6 +1,6 @@
 [project]
 name = "llm-context"
-version = "0.2.2"
+version = "0.2.3"
 description = "Share code context with LLMs via MCP or clipboard. Profile-based customization enables easy switching between different tasks (like code review and documentation). Code outlining support is available as an experimental feature."
 authors = [
   { name = "restlessronin", email = "88921269+restlessronin@users.noreply.github.com" },
