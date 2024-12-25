@@ -649,7 +649,15 @@ only-include = {
 }
 ```
 
-2. Usage:
+2. Start working with your project in two simple ways:
+
+   - Say: "I would like to work with my project"
+      Claude will ask you for the project root path.
+   
+   - Or directly specify: "I would like to work with my project /path/to/your/project"
+      Claude will automatically load the project context.
+
+3. Usage:
    - Files requested via MCP are automatically processed
    - No manual clipboard operations needed
    - Maintains conversation context

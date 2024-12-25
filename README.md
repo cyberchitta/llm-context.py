@@ -47,6 +47,14 @@ Add to 'claude_desktop_config.json':
 }
 ```
 
+Once configured, you can start working with your project in two simple ways:
+
+1. Say: "I would like to work with my project"
+   Claude will ask you for the project root path.
+
+2. Or directly specify: "I would like to work with my project /path/to/your/project"
+   Claude will automatically load the project context.
+
 ### CLI Quick Start and Typical Workflow
 
 1. Navigate to your project's root directory
