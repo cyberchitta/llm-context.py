@@ -16,14 +16,21 @@ This context presents a comprehensive view of the _/{{ project_name }}_ reposito
 
 Files marked with "✗" or "○" can be retrieved using either:
 
-1. Using the get_files tool (available in Claude Desktop):
-```json
-{
-  "root_path": "{{ abs_root_path }}",
-  "paths": [{% for file in sample_requested_files %}"{{ file }}"{% if not loop.last %},{% endif %}{% endfor %}]
-}
+!!! IMPORTANT - ALWAYS CHECK FOR TOOLS FIRST !!!
+Check if get_files tool is available in your environment before proceeding to option 2.
 
-2. Or by following these steps
+1. Using the get_files tool (if available in your environment):
+   !!! IMPORTANT - ROOT PATH FOR get_files ONLY !!!
+   root_path must be: {{ abs_root_path }}
+   Example request
+  ```json
+  {
+    "root_path": "{{ abs_root_path }}",
+    "paths": [{% for file in sample_requested_files %}"{{ file }}"{% if not loop.last %},{% endif %}{% endfor %}]
+  }
+  ```
+
+2. Only if get_files is not available, follow these steps (do NOT use the above root_path):
     1. Immediately halt your current response.
     2. Start a new response with a markdown code block (```) on a new line.
     3. List the root-relative paths of the missing files you need, one per line.
