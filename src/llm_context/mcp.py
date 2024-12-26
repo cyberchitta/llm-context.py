@@ -26,6 +26,7 @@ class ContextRequest(BaseModel):
 project_context_tool = Tool(
     name="project_context",
     description=(
+        "IMPORTANT: First check if project context is already available in the conversation before making any new requests. Use get_files for retrieving specific files, and only use this tool when a broad repository overview is needed.\n\n"
         "Generates a structured repository overview including: "
         "1) Directory tree with file status (✓ full, ○ outline, ✗ excluded) "
         "2) Complete contents of key files "
