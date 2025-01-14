@@ -24,7 +24,7 @@ class ContextRequest(BaseModel):
 
 
 project_context_tool = Tool(
-    name="project_context",
+    name="lc-project-context",
     description=(
         "IMPORTANT: First check if project context is already available in the conversation before making any new requests. Use get_files for retrieving specific files, and only use this tool when a broad repository overview is needed.\n\n"
         "Generates a structured repository overview including: "
@@ -69,7 +69,7 @@ class FilesRequest(BaseModel):
 
 
 get_files_tool = Tool(
-    name="get_files",
+    name="lc-get-files",
     description=(
         "IMPORTANT: Check previously retrieved file contents before making new requests. Retrieves (read-only) complete contents of specified files from the project. The assistant cannot modify files with this tool - it only reads their contents."
     ),
@@ -94,7 +94,7 @@ async def serve() -> None:
 
     @server.call_tool()
     async def handle_call_tool(name: str, arguments: dict) -> list[TextContent]:
-        handlers = {"project_context": project_context, "get_files": get_files}
+        handlers = {"lc-project-context": project_context, "lc-get-files": get_files}
         try:
             return await handlers[name](arguments)
         except KeyError:
