@@ -172,6 +172,7 @@ LLM Context maintains state in `curr_ctx.toml`:
 - Tracks selected files per profile
 - Preserves selections between sessions
 - Updates automatically with commands
+- Records timestamp when context is generated to track file changes
 
 ### Profiles Overview
 
@@ -529,6 +530,15 @@ Processes file requests from clipboard.
 - Reads file paths from clipboard
 - Generates formatted content
 - Copies result to clipboard
+
+### lc-changed
+
+Lists files that have been modified since the context was generated:
+
+- Uses timestamp from when context was generated
+- Helps track changes during conversation
+- Useful for reviewing changes before updates
+- Respects current profile's file selection patterns
 
 ## Advanced Features
 
