@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.6] - 2025-01-15
+
+### Bug Fixes
+- Don't update timestamps on selection
+- Update list tools
+
+### Features
+- Add generation timestamp instructions in templates
+- Add file modification tracking
+- Prefix MCP tools with lc- for namespacing
+- Try to avoid redundant use of project_context
+
+### Refactor
+- Refine MCP related instructions
+
 ## [0.2.2] - 2024-12-25
 
 ### Features
