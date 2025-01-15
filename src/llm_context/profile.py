@@ -6,7 +6,7 @@ from packaging import version
 
 from llm_context.utils import ProjectLayout, Toml, safe_read_file
 
-CURRENT_CONFIG_VERSION = version.parse("2.3")
+CURRENT_CONFIG_VERSION = version.parse("2.4")
 
 MEDIA_EXTENSIONS: set[str] = {
     ".jpg",

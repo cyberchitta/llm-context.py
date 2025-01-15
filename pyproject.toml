@@ -1,14 +1,14 @@
 [project]
 name = "llm-context"
-version = "0.2.5"
-description = "Share code context with LLMs via MCP or clipboard. Profile-based customization enables easy switching between different tasks (like code review and documentation). Code outlining support is available as an experimental feature."
+version = "0.2.6"
+description = "Share code with LLMs via Model Context Protocol or clipboard. Profile-based customization enables easy switching between different tasks (like code review and documentation). Code outlining support is available as an experimental feature."
 authors = [
   { name = "restlessronin", email = "88921269+restlessronin@users.noreply.github.com" },
 ]
 readme = "README.md"
 requires-python = ">=3.10,<3.13"
 packages = [{ include = "llm_context", from = "src" }]
-include = ["src/llm_context/templates/*.j2"]
+include = ["src/llm_context/lc_resources/*.*"]
 license = "Apache-2.0"
 keywords = ["llm", "ai", "context", "code", "clipboard", "chat"]
 classifiers = [
@@ -50,6 +50,7 @@ dev = [
 
 [project.scripts]
 lc-context = "llm_context.cli:context"
+lc-changed = "llm_context.cli:changed_files"
 # lc-dirtree = "llm_context.cli:get_fs_diagram"
 lc-init = "llm_context.cli:init_project"
 lc-read-cliplist = "llm_context.cli:files_from_clip"

@@ -9,6 +9,8 @@
 {% endif %}
 # Detailed Repository Content: **{{ project_name }}**
 
+<!-- Context generated at: {{ context_timestamp }} -->
+
 This context presents a comprehensive view of the _/{{ project_name }}_ repository.
 
 {% if sample_requested_files %}
@@ -17,10 +19,10 @@ This context presents a comprehensive view of the _/{{ project_name }}_ reposito
 Files marked with "✗" or "○" can be retrieved using either:
 
 !!! IMPORTANT - ALWAYS CHECK FOR TOOLS FIRST !!!
-Check if get_files tool is available in your environment before proceeding to option 2.
+Check if lc-get-files tool is available in your environment before proceeding to option 2.
 
-1. Using the get_files tool (if available in your environment):
-   !!! IMPORTANT - ROOT PATH FOR get_files ONLY !!!
+1. Using the lc-get-files tool (if available in your environment):
+   !!! IMPORTANT - ROOT PATH FOR lc-get-files ONLY !!!
    root_path must be: {{ abs_root_path }}
    Example request
   ```json
@@ -30,7 +32,7 @@ Check if get_files tool is available in your environment before proceeding to op
   }
   ```
 
-2. Only if get_files is not available, follow these steps (do NOT use the above root_path):
+2. Only if lc-get-files is not available, follow these steps (do NOT use the above root_path):
     1. Immediately halt your current response.
     2. Start a new response with a markdown code block (```) on a new line.
     3. List the root-relative paths of the missing files you need, one per line.

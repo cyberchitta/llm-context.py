@@ -113,7 +113,22 @@ def context(env: ExecutionEnvironment) -> ExecutionResult:
     profile_feedback(env)
     content = ContextGenerator.create(env.config, env.state.file_selection).context()
     context_file = env.config.profile.get_settings().get("context_file")
+    nxt_env = env.with_state(env.state.with_selection(env.state.file_selection.with_now()))
+    nxt_env.state.store()
     if context_file:
         Path(context_file).write_text(content)
         log(INFO, f"Wrote context to {context_file}")
     return ExecutionResult(content, env)
+
+
+@create_clipboard_cmd
+def changed_files(env: ExecutionEnvironment) -> ExecutionResult:
+    timestamp = env.state.file_selection.timestamp
+    selector = ContextSelector.create(env.config, timestamp)
+    file_sel_full = selector.select_full_files(env.state.file_selection)
+    file_sel_out = (
+        selector.select_outline_files(file_sel_full)
+        if selector.has_outliner(False)
+        else file_sel_full
+    )
+    return ExecutionResult("\n".join(file_sel_out.files), env)

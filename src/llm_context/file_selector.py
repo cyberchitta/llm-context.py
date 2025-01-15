@@ -2,6 +2,7 @@ import os
 from dataclasses import dataclass
 from logging import ERROR, WARNING
 from pathlib import Path
+from typing import Optional
 
 from pathspec import GitIgnoreSpec  # type: ignore
 
@@ -78,16 +79,20 @@ class FileSelector:
     ignorer: GitIgnorer
     converter: PathConverter
     include_filter: IncludeFilter
+    since: Optional[float]
 
     @staticmethod
-    def create(root_path: Path, pathspecs: list[str], includspecs: list[str]) -> "FileSelector":
+    def create(
+        root_path: Path, pathspecs: list[str], includspecs: list[str], since: Optional[float] = None
+    ) -> "FileSelector":
         ignorer = GitIgnorer.from_git_root(str(root_path), pathspecs)
         converter = PathConverter.create(root_path)
         include_filter = IncludeFilter.create(includspecs)
-        return FileSelector(str(root_path), ignorer, converter, include_filter)
+        return FileSelector(str(root_path), ignorer, converter, include_filter, since)
 
     def get_files(self) -> list[str]:
-        return self.traverse(self.root_path)
+        files = self.traverse(self.root_path)
+        return [f for f in files if Path(f).stat().st_mtime > self.since] if self.since else files
 
     def get_relative_files(self) -> list[str]:
         return self.converter.to_relative(self.get_files())
@@ -134,15 +139,17 @@ class ContextSelector:
             return False
 
     @staticmethod
-    def create(spec: ContextSpec) -> "ContextSelector":
+    def create(spec: ContextSpec, since: Optional[float] = None) -> "ContextSelector":
         root_path = spec.project_root_path
         profile = spec.profile
         full_pathspecs = profile.get_ignore_patterns("full")
         outline_pathspecs = profile.get_ignore_patterns("outline")
         full_includes = profile.get_only_includes("full")
         outline_includes = profile.get_only_includes("outline")
-        full_selector = FileSelector.create(root_path, full_pathspecs, full_includes)
-        outline_selector = FileSelector.create(root_path, outline_pathspecs, outline_includes)
+        full_selector = FileSelector.create(root_path, full_pathspecs, full_includes, since)
+        outline_selector = FileSelector.create(
+            root_path, outline_pathspecs, outline_includes, since
+        )
         return ContextSelector(full_selector, outline_selector)
 
     def select_full_files(self, file_selection: FileSelection) -> "FileSelection":

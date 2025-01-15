@@ -1,5 +1,6 @@
 import random
 from dataclasses import dataclass
+from datetime import datetime
 from logging import ERROR
 from pathlib import Path
 from typing import cast
@@ -131,6 +132,7 @@ class ContextGenerator:
         )
         context = {
             "project_name": self.project_root.name,
+            "context_timestamp": datetime.now().timestamp(),
             "abs_root_path": str(self.project_root),
             "folder_structure_diagram": self.collector.folder_structure_diagram(
                 self.full_abs, self.outline_abs, no_media

@@ -201,7 +201,7 @@ wheels = [
 
 [[package]]
 name = "llm-context"
-version = "0.2.2"
+version = "0.2.6"
 source = { editable = "." }
 dependencies = [
     { name = "jinja2" },

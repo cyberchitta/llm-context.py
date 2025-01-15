@@ -26,7 +26,7 @@ class ContextRequest(BaseModel):
 project_context_tool = Tool(
     name="lc-project-context",
     description=(
-        "IMPORTANT: First check if project context is already available in the conversation before making any new requests. Use get_files for retrieving specific files, and only use this tool when a broad repository overview is needed.\n\n"
+        "IMPORTANT: First check if project context is already available in the conversation before making any new requests. Use lc-get-files for retrieving specific files, and only use this tool when a broad repository overview is needed.\n\n"
         "Generates a structured repository overview including: "
         "1) Directory tree with file status (✓ full, ○ outline, ✗ excluded) "
         "2) Complete contents of key files "
@@ -85,6 +85,45 @@ async def get_files(arguments: dict) -> list[TextContent]:
         return [TextContent(type="text", text=context)]
 
 
+class ListModifiedFilesRequest(BaseModel):
+    root_path: Path = Field(
+        ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
+    )
+    profile_name: str = Field(
+        "code",
+        description="Profile to use (e.g. 'code', 'copy', 'full') - defines file inclusion and presentation rules",
+        pattern="^[a-zA-Z0-9_-]+$",
+    )
+    timestamp: float = Field(..., description="Unix timestamp to check modifications since")
+
+
+list_modified_files_tool = Tool(
+    name="lc-list-modified-files",
+    description=(
+        "IMPORTANT: First get the timestamp from the project context. "
+        "Returns a list of paths to files that have been modified since a given timestamp. "
+        "This is typically used to track which files have changed during the conversation. "
+        "After getting the list, use lc-get-files to examine the contents of any modified files of interest."
+    ),
+    inputSchema=ListModifiedFilesRequest.model_json_schema(),
+)
+
+
+async def list_modified_files(arguments: dict) -> list[TextContent]:
+    request = ListModifiedFilesRequest(**arguments)
+    env = ExecutionEnvironment.create(Path(request.root_path))
+    cur_env = env.with_profile(request.profile_name)
+    with cur_env.activate():
+        selector = ContextSelector.create(cur_env.config, request.timestamp)
+        file_sel_full = selector.select_full_files(cur_env.state.file_selection)
+        file_sel_out = (
+            selector.select_outline_files(file_sel_full)
+            if selector.has_outliner(False)
+            else file_sel_full
+        )
+    return [TextContent(type="text", text="\n".join(file_sel_out.files))]
+
+
 async def serve() -> None:
     server = Server("llm-context")
 
@@ -94,7 +133,11 @@ async def serve() -> None:
 
     @server.call_tool()
     async def handle_call_tool(name: str, arguments: dict) -> list[TextContent]:
-        handlers = {"lc-project-context": project_context, "lc-get-files": get_files}
+        handlers = {
+            "lc-project-context": project_context,
+            "lc-get-files": get_files,
+            "lc-list-modified-files": list_modified_files,
+        }
         try:
             return await handlers[name](arguments)
         except KeyError:
