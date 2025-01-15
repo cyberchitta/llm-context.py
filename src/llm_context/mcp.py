@@ -129,7 +129,7 @@ async def serve() -> None:
 
     @server.list_tools()
     async def handle_list_tools() -> list[Tool]:
-        return [project_context_tool, get_files_tool]
+        return [project_context_tool, get_files_tool, list_modified_files_tool]
 
     @server.call_tool()
     async def handle_call_tool(name: str, arguments: dict) -> list[TextContent]:
