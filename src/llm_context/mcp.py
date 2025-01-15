@@ -100,7 +100,7 @@ class ListModifiedFilesRequest(BaseModel):
 list_modified_files_tool = Tool(
     name="lc-list-modified-files",
     description=(
-        "IMPORTANT: First get the timestamp from the project context. "
+        "IMPORTANT: First get the generation timestamp from the project context. "
         "Returns a list of paths to files that have been modified since a given timestamp. "
         "This is typically used to track which files have changed during the conversation. "
         "After getting the list, use lc-get-files to examine the contents of any modified files of interest."
