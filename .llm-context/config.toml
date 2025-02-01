@@ -5,7 +5,10 @@ context = "lc-context.j2"
 context-mcp = "lc-context-mcp.j2"
 files = "lc-files.j2"
 highlights = "lc-highlights.j2"
+prompt = "lc-prompt.j2"
 
+[profiles.code]
+prompt = "lc-prompt.md"
 [profiles.code.gitignores]
 full_files = [
     "tests/",
@@ -81,10 +84,13 @@ outline_files = ["**/*"]
 [profiles.code.settings]
 no_media = false
 with_user_notes = false
+with_prompt = false
 
 [profiles.code-prompt]
 base = "code"
-prompt = "lc-prompt.md"
+
+[profiles.code-prompt.settings]
+with_prompt = true
 
 [profiles.code-file]
 base = "code"
