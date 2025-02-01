@@ -123,12 +123,21 @@ class ContextGenerator:
         rel_paths = in_files if in_files else self.full_rel
         return self._render("files", {"files": self.collector.files(rel_paths)})
 
+    def prompt(self, template_id: str = "prompt") -> str:
+        descriptor = self.spec.profile
+        layout = self.spec.project_layout
+        context = {
+            "prompt": descriptor.get_prompt(layout, True),
+            "user_notes": descriptor.get_user_notes(layout),
+        }
+        return self._render(template_id, context)
+
     def context(self, template_id: str = "context") -> str:
         descriptor = self.spec.profile
         layout = self.spec.project_layout
         ctx_settings = descriptor.get_settings()
-        no_media, with_user_notes = map(
-            lambda x: bool(ctx_settings.get(x)), ("no_media", "with_user_notes")
+        no_media, with_user_notes, with_prompt = map(
+            lambda x: bool(ctx_settings.get(x)), ("no_media", "with_user_notes", "with_prompt")
         )
         context = {
             "project_name": self.project_root.name,
@@ -142,7 +151,7 @@ class ContextGenerator:
             "sample_requested_files": self.converter.to_relative(
                 self.collector.sample_file_abs(self.full_abs)
             ),
-            "prompt": descriptor.get_prompt(layout),
+            "prompt": descriptor.get_prompt(layout, with_prompt),
             "project_notes": descriptor.get_project_notes(layout),
             "user_notes": descriptor.get_user_notes(layout) if with_user_notes else None,
         }

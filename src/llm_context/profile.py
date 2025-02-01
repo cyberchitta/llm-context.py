@@ -6,7 +6,7 @@ from packaging import version
 
 from llm_context.utils import ProjectLayout, Toml, safe_read_file
 
-CURRENT_CONFIG_VERSION = version.parse("2.4")
+CURRENT_CONFIG_VERSION = version.parse("2.5")
 
 MEDIA_EXTENSIONS: set[str] = {
     ".jpg",
@@ -88,8 +88,8 @@ class Profile:
         return Profile.create(
             {"full_files": GIT_IGNORE_DEFAULT, "outline_files": GIT_IGNORE_DEFAULT},
             {"full_files": INCLUDE_ALL, "outline_files": INCLUDE_ALL},
-            {"no_media": False, "with_user_notes": False},
-            None,
+            {"no_media": False, "with_user_notes": False, "with_prompt": False},
+            "lc-prompt.md",
         )
 
     @staticmethod
@@ -118,11 +118,11 @@ class Profile:
     def get_only_includes(self, context_type: str) -> list[str]:
         return self.only_includes[f"{context_type}_files"]
 
-    def get_prompt(self, project_layout: ProjectLayout) -> Optional[str]:
-        if self.prompt:
-            prompt_path = project_layout.project_config_path / self.prompt
-            return safe_read_file(str(prompt_path))
-        return None
+    def get_prompt(self, project_layout: ProjectLayout, with_prompt: bool) -> Optional[str]:
+        if not with_prompt or self.prompt == "":
+            return None
+        prompt_path = project_layout.project_config_path / self.prompt
+        return safe_read_file(str(prompt_path))
 
     def get_project_notes(self, project_layout: ProjectLayout) -> Optional[str]:
         return safe_read_file(str(project_layout.project_notes_path))

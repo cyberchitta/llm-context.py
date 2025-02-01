@@ -29,12 +29,14 @@ class Config:
                 "context-mcp": "lc-context-mcp.j2",
                 "files": "lc-files.j2",
                 "highlights": "lc-highlights.j2",
+                "prompt": "lc-prompt.j2",
             },
             profiles={
                 "code": Profile.create_code().to_dict(),
                 "code-prompt": {"base": "code", "prompt": "lc-prompt.md"},
                 "code-file": {
                     "base": "code",
+                    "prompt": "lc-prompt.md",
                     "settings": {"context_file": "project-context.md.tmp"},
                 },
             },

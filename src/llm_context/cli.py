@@ -109,6 +109,15 @@ def files_from_clip(in_files: list[str] = [], *, env: ExecutionEnvironment):
 
 
 @create_clipboard_cmd
+def prompt(env: ExecutionEnvironment) -> ExecutionResult:
+    profile_feedback(env)
+    content = ContextGenerator.create(env.config, env.state.file_selection).prompt()
+    nxt_env = env.with_state(env.state.with_selection(env.state.file_selection.with_now()))
+    nxt_env.state.store()
+    return ExecutionResult(content, env)
+
+
+@create_clipboard_cmd
 def context(env: ExecutionEnvironment) -> ExecutionResult:
     profile_feedback(env)
     content = ContextGenerator.create(env.config, env.state.file_selection).context()

@@ -1,11 +1,6 @@
-{% if prompt %}
-{{ prompt }}
-{% endif %}
+{% include 'lc-prompt.j2' %}
 {% if project_notes %}
 {{ project_notes }}
-{% endif %}
-{% if user_notes %}
-{{ user_notes }}
 {% endif %}
 # Repository Content: **{{ project_name }}**
 
