@@ -22,6 +22,15 @@ For an in-depth exploration of the reasoning behind LLM Context and its approach
 
 ## Installation
 
+### Installing via Smithery
+
+To install LLM Context for Claude Desktop automatically via [Smithery](https://smithery.ai/server/llm-context):
+
+```bash
+npx -y @smithery/cli install llm-context --client claude
+```
+
+### Installing via uv
 Install LLM Context using [uv](https://github.com/astral-sh/uv):
 
 ```bash
