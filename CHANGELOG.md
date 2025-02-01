@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.7] - 2025-02-01
+
+### Features
+- Add lc-prompt command to generate standalone prompts
+
 ## [0.2.6] - 2025-01-15
 
 ### Bug Fixes
