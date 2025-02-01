@@ -29,8 +29,10 @@
    - [lc-sel-files](#lc-sel-files)
    - [lc-sel-outlines](#lc-sel-outlines)
    - [lc-context](#lc-context)
+   - [lc-prompt](#lc-prompt)
    - [lc-read-cliplist](#lc-read-cliplist)
-
+   - [lc-changed](#lc-changed)
+ 
 5. [Advanced Features](#advanced-features)
 
    - [Code Outlining](#code-outlining)
@@ -523,6 +525,18 @@ Generates context and copies to clipboard.
 - Applies active profile's templates
 - Includes file structure diagram
 
+### lc-prompt
+
+Generates project-specific instructions suitable for "System Prompts" or "Custom Instructions" sections in LLM chat interfaces.
+
+- Outputs formatted instructions from your profile's prompt template
+- Includes user notes if enabled in profile settings
+- Designed for:
+  - Claude Projects' "Project Instructions" section
+  - Custom GPT "System Prompts"
+  - Similar "Custom Instruction" sections in other LLM interfaces
+  - Setting up consistent project-specific LLM behavior
+  
 ### lc-read-cliplist
 
 Processes file requests from clipboard.

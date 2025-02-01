@@ -86,6 +86,7 @@ Once configured, you can start working with your project in two simple ways:
 - `lc-set-profile <name>`: Switch profiles
 - `lc-sel-files`: Select files for inclusion
 - `lc-context`: Generate and copy context
+- `lc-prompt`: Generate project instructions for LLMs
 - `lc-read-cliplist`: Process LLM file requests
 - `lc-changed`: List files modified since last context generation
 
