@@ -5,16 +5,16 @@
   .
   [
     (method
-      name: (_) @name.definition.method) @definition.method
+      name: (_) @name) @definition.method
     (singleton_method
-      name: (_) @name.definition.method) @definition.method
+      name: (_) @name) @definition.method
   ]
   (#strip! @doc "^#\\s*")
   (#select-adjacent! @doc @definition.method)
 )
 
 (alias
-  name: (_) @name.definition.method) @definition.method
+  name: (_) @name) @definition.method
 
 (setter
   (identifier) @ignore)
@@ -27,15 +27,15 @@
   [
     (class
       name: [
-        (constant) @name.definition.class
+        (constant) @name
         (scope_resolution
-          name: (_) @name.definition.class)
+          name: (_) @name)
       ]) @definition.class
     (singleton_class
       value: [
-        (constant) @name.definition.class
+        (constant) @name
         (scope_resolution
-          name: (_) @name.definition.class)
+          name: (_) @name)
       ]) @definition.class
   ]
   (#strip! @doc "^#\\s*")
@@ -47,18 +47,18 @@
 (
   (module
     name: [
-      (constant) @name.definition.module
+      (constant) @name
       (scope_resolution
-        name: (_) @name.definition.module)
+        name: (_) @name)
     ]) @definition.module
 )
 
 ; Calls
 
-(call method: (identifier) @name.reference.call) @reference.call
+(call method: (identifier) @name) @reference.call
 
 (
-  [(identifier) (constant)] @name.reference.call @reference.call
+  [(identifier) (constant)] @name @reference.call
   (#is-not? local)
-  (#not-match? @name.reference.call "^(lambda|load|require|require_relative|__FILE__|__LINE__)$")
+  (#not-match? @name "^(lambda|load|require|require_relative|__FILE__|__LINE__)$")
 )

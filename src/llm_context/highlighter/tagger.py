@@ -34,9 +34,9 @@ class Tagger:
 
     @staticmethod
     def _get_kind(tag: str) -> str:
-        if tag.startswith("name.definition."):
+        if tag.startswith("definition."):
             return "def"
-        elif tag.startswith("name.reference."):
+        elif tag.startswith("reference."):
             return "ref"
         return ""
 

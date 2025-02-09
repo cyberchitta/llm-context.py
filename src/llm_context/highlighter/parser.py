@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import NamedTuple, cast
 
 from tree_sitter import Language, Parser, Tree  # type: ignore
-from tree_sitter_languages import get_language, get_parser  # type: ignore
+from tree_sitter_language_pack import get_language, get_parser  # type: ignore
 
 from llm_context.highlighter.language_mapping import TagQuery, to_language
 
@@ -35,6 +35,12 @@ class AST:
     def get_tag_query(self) -> str:
         return TagQuery().get_query(self.language_name)
 
-    def captures(self, query_scm: str) -> list:
+    def captures(self, query_scm: str) -> list[tuple]:
         query = self.language.query(query_scm)
-        return cast(list, query.captures(self.tree.root_node))
+        matches = query.matches(self.tree.root_node)
+        captures = []
+        for _, capture_dict in matches:
+            for tag_name, nodes in capture_dict.items():
+                for node in nodes:
+                    captures.append((node, tag_name))
+        return captures

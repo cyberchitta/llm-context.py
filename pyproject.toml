@@ -1,6 +1,6 @@
 [project]
 name = "llm-context"
-version = "0.2.7"
+version = "0.2.8"
 description = "Share code with LLMs via Model Context Protocol or clipboard. Profile-based customization enables easy switching between different tasks (like code review and documentation). Code outlining support is available as an experimental feature."
 authors = [
   { name = "restlessronin", email = "88921269+restlessronin@users.noreply.github.com" },
@@ -37,7 +37,10 @@ Repository = "https://github.com/cyberchitta/llm-context.py"
 "User Guide" = "https://github.com/cyberchitta/llm-context.py/blob/main/docs/user-guide.md"
 
 [project.optional-dependencies]
-outline = ["tree-sitter==0.21.3", "tree-sitter-languages==1.10.2"]
+outline = [
+    "tree-sitter-language-pack>=0.4.0",
+    "tree-sitter>=0.22",
+]
 dev = [
   "black>=24.10.0, <25.0",
   "git-cliff>=2.6.1, <3.0",
@@ -60,9 +63,6 @@ lc-sel-files = "llm_context.cli:select_full_files"
 lc-sel-outlines = "llm_context.cli:select_outline_files"
 lc-set-profile = "llm_context.cli:set_profile_with_args"
 lc-version = "llm_context.cli:show_version"
-
-[tool.uv]
-override-dependencies = ["tree-sitter-languages==1.10.2"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
