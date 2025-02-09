@@ -590,15 +590,12 @@ Currently supported languages:
 - Elisp, Elixir, Elm
 - Go
 - Java, JavaScript
-- OCaml
 - PHP, Python
-- QL
 - Ruby, Rust
 - TypeScript
 
 #### Limitations
 
-- Python version restriction (≤ 3.12)
 - Language support is fixed
 - Unsupported files are excluded
 - May impact context size
