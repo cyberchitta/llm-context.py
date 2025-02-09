@@ -67,10 +67,10 @@ def _format_size(size_bytes):
 def format_age(timestamp: float) -> str:
     delta = dt.now().timestamp() - timestamp
     if delta < 3600:
-        return f"{int(delta/60)}m ago"
+        return f"{int(delta / 60)}m ago"
     if delta < 86400:
-        return f"{int(delta/3600)}h ago"
-    return f"{int(delta/86400)}d ago"
+        return f"{int(delta / 3600)}h ago"
+    return f"{int(delta / 86400)}d ago"
 
 
 def size_feedback(content: str) -> None:
