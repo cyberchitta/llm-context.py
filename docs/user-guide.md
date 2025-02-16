@@ -496,9 +496,9 @@ Initializes LLM Context in your project.
 Switches the active profile.
 
 ```bash
-lc-profile code        # Switch to default code profile
-lc-profile code-prompt # Switch to code profile with prompt
-lc-profile web        # Switch to web profile (if configured)
+lc-set-profile code        # Switch to default code profile
+lc-set-profile code-prompt # Switch to code profile with prompt
+lc-set-profile web        # Switch to web profile (if configured)
 ```
 
 ### lc-sel-files
