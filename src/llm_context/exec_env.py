@@ -106,16 +106,16 @@ class ExecutionEnvironment:
         if profile_name == self.state.file_selection.profile_name:
             return self
         config = ContextSpec.create(self.config.project_root_path, profile_name, self.constants)
+        empty_selection = FileSelection.create(profile_name, [], [])
         selector = ContextSelector.create(config)
-        file_selection = selector.select_full_files(self.state.file_selection)
+        file_selection = selector.select_full_files(empty_selection)
         outline_selection = (
             selector.select_outline_files(file_selection)
             if selector.has_outliner(False)
             else file_selection
         )
-        return self.with_state(
-            self.state.with_selection(outline_selection).with_profile(profile_name)
-        )
+        new_state = self.state.with_selection(outline_selection).with_profile(profile_name)
+        return ExecutionEnvironment(config, self.runtime, new_state, self.constants)
 
     @property
     def logger(self) -> logging.Logger:
