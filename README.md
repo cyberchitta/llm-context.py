@@ -29,14 +29,10 @@ For an in-depth exploration of the reasoning behind LLM Context and its approach
 Install LLM Context using [uv](https://github.com/astral-sh/uv):
 
 ```bash
-uv tool install llm-context
+uv tool install llm-context@latest
 ```
 
-To upgrade to the latest version:
-
-```bash
-uv tool upgrade llm-context
-```
+This should keep it automatically installed to the latest version:
 
 > **Warning**: LLM Context is under active development. Updates may overwrite configuration files prefixed with `lc-`. We recommend all configuration files be version controlled for this reason.
 
@@ -51,7 +47,7 @@ Add to 'claude_desktop_config.json':
   "mcpServers": {
     "CyberChitta": {
       "command": "uvx",
-      "args": ["--from", "llm-context", "lc-mcp"]
+      "args": ["--from", "llm-context@latest", "lc-mcp"]
     }
   }
 }
