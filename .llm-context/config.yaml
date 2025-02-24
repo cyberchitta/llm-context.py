@@ -1,0 +1,94 @@
+__info__: 'This project uses llm-context. For more information, visit: https://github.com/cyberchitta/llm-context.py
+  or https://pypi.org/project/llm-context/'
+profiles:
+  code:
+    gitignores:
+      full_files:
+      - "tests/"
+      - "*.md"
+      - "*.scm"
+      - "*.yaml"
+      - .git
+      - .gitignore
+      - .llm-context/
+      - '*.tmp'
+      - '*.lock'
+      - package-lock.json
+      - yarn.lock
+      - pnpm-lock.yaml
+      - go.sum
+      - elm-stuff
+      - LICENSE
+      - CHANGELOG.md
+      - README.md
+      - .env
+      - .dockerignore
+      - Dockerfile
+      - docker-compose.yml
+      - '*.log'
+      - '*.svg'
+      - '*.png'
+      - '*.jpg'
+      - '*.jpeg'
+      - '*.gif'
+      - '*.ico'
+      - '*.woff'
+      - '*.woff2'
+      - '*.eot'
+      - '*.ttf'
+      - '*.map'
+      outline_files:
+      - .git
+      - .gitignore
+      - .llm-context/
+      - '*.tmp'
+      - '*.lock'
+      - package-lock.json
+      - yarn.lock
+      - pnpm-lock.yaml
+      - go.sum
+      - elm-stuff
+      - LICENSE
+      - CHANGELOG.md
+      - README.md
+      - .env
+      - .dockerignore
+      - Dockerfile
+      - docker-compose.yml
+      - '*.log'
+      - '*.svg'
+      - '*.png'
+      - '*.jpg'
+      - '*.jpeg'
+      - '*.gif'
+      - '*.ico'
+      - '*.woff'
+      - '*.woff2'
+      - '*.eot'
+      - '*.ttf'
+      - '*.map'
+    only-include:
+      full_files:
+      - '**/*'
+      outline_files:
+      - '**/*'
+    prompt: lc-prompt.md
+    settings:
+      no_media: false
+      with_prompt: false
+      with_user_notes: false
+  code-file:
+    base: code
+    settings:
+      context_file: project-context.md.tmp
+  code-prompt:
+    base: code
+    settings:
+      with_prompt: true
+      with_user_notes: true
+templates:
+  context: lc-context.j2
+  context-mcp: lc-context-mcp.j2
+  files: lc-files.j2
+  highlights: lc-highlights.j2
+  prompt: lc-prompt.j2
