@@ -25,7 +25,7 @@
 4. [Command Reference](#command-reference)
 
    - [lc-init](#lc-init)
-   - [lc-set-profile](#lc-set-profile-name)
+   - [lc-set-profile](#lc-set-profile-profile-name)
    - [lc-sel-files](#lc-sel-files)
    - [lc-sel-outlines](#lc-sel-outlines)
    - [lc-context](#lc-context)
@@ -491,7 +491,7 @@ Initializes LLM Context in your project.
 - Requires `.gitignore` file in project root
 - Safe to run multiple times
 
-### lc-set-profile <name>
+### lc-set-profile profile-name
 
 Switches the active profile.
 
