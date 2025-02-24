@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from llm_context.utils import Toml
+from llm_context.utils import Yaml
 
 
 @dataclass(frozen=True)
@@ -64,7 +64,7 @@ class StateStore:
 
     def load(self) -> tuple[AllSelections, str]:
         try:
-            data = Toml.load(self.storage_path)
+            data = Yaml.load(self.storage_path)
             selections = {}
             for profile_name, sel_data in data.get("selections", {}).items():
                 selections[profile_name] = FileSelection._create(
@@ -89,4 +89,4 @@ class StateStore:
                 for profile_name, sel in store.selections.items()
             },
         }
-        Toml.save(self.storage_path, data)
+        Yaml.save(self.storage_path, data)

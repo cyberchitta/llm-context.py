@@ -68,7 +68,7 @@
 
    This creates the `.llm-context` directory with default configuration files.
 
-3. The default "code" profile is ready to use. For specialized needs, you can customize settings in `.llm-context/config.toml`.
+3. The default "code" profile is ready to use. For specialized needs, you can customize settings in `.llm-context/config.yaml`.
 
 ### Basic Workflow
 
@@ -139,11 +139,11 @@ LLM Context uses a layered configuration approach:
 
 2. Configuration Directory (`.llm-context/`)
 
-   - `config.toml`: Main configuration file
+   - `config.yaml`: Main configuration file
    - `lc-project-notes.md`: Project-specific notes
    - `lc-prompt.md`: Prompt
    - `templates/`: Template files
-   - `curr_ctx.toml`: Current context state
+   - `curr_ctx.yaml`: Current context state
 
 3. User Configuration
    - `~/.llm-context/lc-user-notes.md`: User specific notes
@@ -155,10 +155,10 @@ Standard project layout:
 ```
 your-project/
 ├── .llm-context/
-│   ├── config.toml          # Main configuration
+│   ├── config.yaml          # Main configuration
 │   ├── lc-project-notes.md  # Project notes 
 │   ├── lc-prompt.md         # LLM Instructions
-│   ├── curr_ctx.toml        # Current state
+│   ├── curr_ctx.yaml        # Current state
 │   └── templates/           # Template files
 │       ├── lc-context.j2
 │       ├── lc-files.j2
@@ -169,7 +169,7 @@ your-project/
 
 ### State Management
 
-LLM Context maintains state in `curr_ctx.toml`:
+LLM Context maintains state in `curr_ctx.yaml`:
 
 - Tracks selected files per profile
 - Preserves selections between sessions
@@ -200,31 +200,39 @@ Profiles control how LLM Context handles your project:
 
 ### Configuration Files
 
-#### config.toml
+#### config.yaml
 
 Primary configuration file containing:
 
-```toml
+```yaml
 # Template mappings
-[templates]
-context = "lc-context.j2"
-files = "lc-files.j2"
-highlights = "lc-highlights.j2"
+templates:
+  context: "lc-context.j2"
+  files: "lc-files.j2"
+  highlights: "lc-highlights.j2"
 
 # Profile definitions
-[profiles.code]
-gitignores = {
-    full_files = [".git", ".gitignore", ".llm-context/", "*.lock"],
-    outline_files = [".git", ".gitignore", ".llm-context/", "*.lock"]
-}
-settings = {
-    no_media = true,
-    with_user_notes = false
-}
-only-include = {
-    full_files = ["**/*"],
-    outline_files = ["**/*"]
-}
+profiles:
+  code:
+    gitignores:
+      full_files:
+        - ".git"
+        - ".gitignore"
+        - ".llm-context/"
+        - "*.lock"
+      outline_files:
+        - ".git"
+        - ".gitignore"
+        - ".llm-context/"
+        - "*.lock"
+    settings:
+      no_media: true
+      with_user_notes: false
+    only-include:
+      full_files:
+        - "**/*"
+      outline_files:
+        - "**/*"
 ```
 
 #### Notes Files
@@ -252,7 +260,7 @@ Contains Jinja2 templates controlling output format:
 Warning: Files prefixed with `lc-` may be overwritten during updates. For customization:
 
 1. Create new files with different prefixes
-2. Update references in `config.toml`
+2. Update references in `config.yaml`
 3. Keep original files as reference
 
 ### Profile Configuration
@@ -267,41 +275,45 @@ Important: The `.git` directory should always be included in your profile's giti
 
 Here's a complete example:
 
-```toml
-[profiles.code]  # Default profile included with LLM Context
-gitignores = {
-    full_files = [".git", ".gitignore", ".llm-context/", "*.lock"],
-    outline_files = [".git", ".gitignore", ".llm-context/", "*.lock"]
-}
-settings = {
-    no_media = true,
-    with_user_notes = false
-}
-only-include = {
-    full_files = ["**/*"],
-    outline_files = ["**/*"]
-}
-
-[profiles.code-prompt]  # Built-in profile that adds LLM instructions
-base = "code"  # Inherits from code profile
-prompt = "lc-prompt.md"  # Adds prompt template to output
+```yaml
+profiles:
+  code:  # Default profile included with LLM Context
+    gitignores:
+      full_files:
+        - ".git"
+        - ".gitignore"
+        - ".llm-context/"
+        - "*.lock"
+      outline_files:
+        - ".git"
+        - ".gitignore"
+        - ".llm-context/"
+        - "*.lock"
+    settings:
+      no_media: true
+      with_user_notes: false
+    only-include:
+      full_files:
+        - "**/*"
+      outline_files:
+        - "**/*"
+  code-prompt:  # Built-in profile that adds LLM instructions
+    base: "code"  # Inherits from code profile
+    prompt: "lc-prompt.md"  # Adds prompt template to output
 ```
 
 #### Settings Reference
 
 Profile settings control behavior:
 
-```toml
-settings = {
-    # Exclude binary/media files from folder structure
-    no_media = true,
-
-    # Include user notes from ~/.llm-context/lc-user-notes.md
-    with_user_notes = false,
-
-    # Write lc-context to file (relative to current directory) in addition to clipboard
-    context_file = "context.md.tmp"
-}
+```yaml
+settings:
+  # Exclude binary/media files from folder structure
+  no_media: true
+  # Include user notes from ~/.llm-context/lc-user-notes.md
+  with_user_notes: false
+  # Write lc-context to file (relative to current directory) in addition to clipboard
+  context_file: "context.md.tmp"
 ```
 
 #### File Selection Patterns
@@ -310,97 +322,103 @@ Two types of pattern collections:
 
 1. Additional Exclusions (gitignores):
 
-```toml
-gitignores = {
-    # Files excluded from full content
-    full_files = [".git", "*.lock"],
-
-    # Files excluded from outlines
-    outline_files = [".git", "*.lock"]
-}
+```yaml
+gitignores:
+  # Files excluded from full content
+  full_files:
+    - ".git"
+    - "*.lock"
+  # Files excluded from outlines
+  outline_files:
+    - ".git"
+    - "*.lock"
 ```
 
 2. Optional Restrictions (only-include):
 
-```toml
-only-include = {
-    # Only include these in full content
-    full_files = ["**/*"],  # Include everything not excluded
-
-    # Only include these in outlines
-    outline_files = ["**/*.py", "**/*.js"]  # Restrict outlines to Python and JS
-}
+```yaml
+only-include:
+only-include:
+  # Only include these in full content
+  full_files:
+    - "**/*"  # Include everything not excluded
+  # Only include these in outlines
+  outline_files:
+    - "**/*.py"
+    - "**/*.js"  # Restrict outlines to Python and JS
 ```
 
 #### Example Custom Profiles
 
 1. Documentation Focus:
 
-```toml
-[profiles.docs]
-gitignores = {
-    full_files = [".git", ".llm-context/", "*.lock"]
-}
-settings = {
-    no_media = true,
-    with_user_notes = true  # Include personal notes
-}
-only-include = {
-    full_files = [
-        "**/*.md", "**/*.txt",   # Documentation files
-        "README*", "LICENSE*"     # Project info
-    ]
-}
+```yaml
+profiles:
+  docs:
+    gitignores:
+      full_files:
+        - ".git"
+        - ".llm-context/"
+        - "*.lock"
+    settings:
+      no_media: true
+      with_user_notes: true  # Include personal notes
+    only-include:
+      full_files:
+        - "**/*.md"
+        - "**/*.txt"   # Documentation files
+        - "README*"     # Project info
+        - "LICENSE*"
 ```
 
 2. Source Files Only:
 
-```toml
-[profiles.source]
-gitignores = {
-    full_files = [".git", ".llm-context/", "*.lock"]
-}
-settings = {
-    no_media = true,
-}
-only-include = {
-    full_files = [
-        "src/**/*.py",           # Python source
-        "tests/**/*.py",         # Test files
-        "pyproject.toml"         # Project configuration
-    ]
-}
-prompt = "lc-prompt.md"
+```yaml
+profiles:
+  source:
+    gitignores:
+      full_files:
+        - ".git"
+        - ".llm-context/"
+        - "*.lock"
+    settings:
+      no_media: true
+    only-include:
+      full_files:
+        - "src/**/*.py"    # Python source
+        - "tests/**/*.py"  # Test files
+        - "pyproject.toml" # Project configuration
+    prompt: "lc-prompt.md"
 ```
 
 #### Profile Inheritance
 
 Profiles can extend others using the `base` field:
 
-```toml
-[profiles.base-docs]
-gitignores = {
-    full_files = [".git", ".llm-context/", "*.lock"]
-}
-settings = { no_media = true }
-only-include = {
-    full_files = ["**/*.md"]
-}
-
-[profiles.docs-with-notes]
-base = "base-docs"
-settings = {
-    no_media = true,
-    with_user_notes = true  # Add personal notes
-}
-
-[profiles.with-file]
-base = "code"
-settings = {
-    no_media = true,
-    with_user_notes = false,
-    context_file = "context.md.tmp" # Save to file as well as clipboard
-}
+```yaml
+profiles:
+  base-docs:
+    gitignores:
+      full_files:
+        - ".git"
+        - ".llm-context/"
+        - "*.lock"
+    settings:
+      no_media: true
+    only-include:
+      full_files:
+        - "**/*.md"
+  docs-with-notes:
+    base: "base-docs"
+    settings:
+      no_media: true
+      with_user_notes: true  # Add personal notes
+  with-file:
+    base: "code"
+    settings:
+      no_media: true
+      with_user_notes: false
+      context_file: "context.md.tmp" # Save to file as well as clipboard
 ```
 
 The inheritance system allows you to:
@@ -459,11 +477,11 @@ To customize templates:
 cp .llm-context/templates/lc-context.j2 .llm-context/templates/my-context.j2
 ```
 
-2. Update config.toml:
+2. Update config.yaml:
 
-```toml
-[templates]
-context = "my-context.j2"
+```yaml
+templates:
+  context: "my-context.j2"
 ```
 
 3. Modify new template as needed
@@ -507,7 +525,7 @@ Selects files for full content inclusion.
 
 - Uses active profile's configuration
 - Respects `.gitignore` patterns
-- Updates `curr_ctx.toml` with selections
+- Updates `curr_ctx.yaml` with selections
 
 ### lc-sel-outlines
 
@@ -570,16 +588,22 @@ uv tool install --python 3.12 "llm-context[outline]"
 
 Control outline behavior in profiles:
 
-```toml
-[profiles.with-outlines]
-gitignores = {
-    full_files = [".git", "*.lock"],
-    outline_files = [".git", "*.lock"]
-}
-only-include = {
-    full_files = ["**/*"],
-    outline_files = ["**/*.py", "**/*.js"]
-}
+```yaml
+profiles:
+  with-outlines:
+    gitignores:
+      full_files:
+        - ".git"
+        - "*.lock"
+      outline_files:
+        - ".git"
+        - "*.lock"
+    only-include:
+      full_files:
+        - "**/*"
+      outline_files:
+        - "**/*.py"
+        - "**/*.js"
 ```
 
 #### Language Support
@@ -619,38 +643,44 @@ Currently supported languages:
 
 1. Efficient Patterns:
 
-```toml
+```yaml
 # Optimize pattern matching
-gitignores = {
-    full_files = ["node_modules/**", "*.min.*"],
-    outline_files = ["node_modules/**"]
-}
+gitignores:
+  full_files:
+    - "node_modules/**"
+    - "*.min.*"
+  outline_files:
+    - "node_modules/**"
 ```
 
 2. Language-Specific Profiles:
 
-```toml
+```yaml
 # Python project optimization
-[profiles.python-opt]
-only-include = {
-    full_files = ["**/main.py", "**/core/*.py"],
-    outline_files = ["**/*.py"]
-}
+profiles:
+  python-opt:
+    only-include:
+      full_files:
+        - "**/main.py"
+        - "**/core/*.py"
+      outline_files:
+        - "**/*.py"
 ```
 
 3. Custom Combinations:
 
-```toml
+```yaml
 # Mixed content optimization
-[profiles.web-opt]
-only-include = {
-    full_files = [
-        "**/index.html",
-        "**/main.js",
-        "**/*.md"
-    ],
-    outline_files = ["**/*.js", "**/*.ts"]
-}
+profiles:
+  web-opt:
+    only-include:
+      full_files:
+        - "**/index.html"
+        - "**/main.js"
+        - "**/*.md"
+      outline_files:
+        - "**/*.js"
+        - "**/*.ts"
 ```
 
 ## Workflows
@@ -732,14 +762,14 @@ lc-read-cliplist
 
 ### Project Organization
 
-- Keep `.llm-context/config.toml` in version control
-- Ignore `curr_ctx.toml` in git
+- Keep `.llm-context/config.yaml` in version control
+- Ignore `curr_ctx.yaml` in git
 - Document any custom templates you create
 
 ### Profile Management
 
 - Start with built-in profiles, customize as needed
-- Document profile purposes in a comment in config.toml
+- Document profile purposes in a comment in config.yaml
 - Share working profiles with your team
 
 ### Performance Tips
@@ -774,7 +804,7 @@ lc-read-cliplist
 
    - Don't modify files starting with `lc-`
    - Create your own templates with different names
-   - Update references in config.toml
+   - Update references in config.yaml
 
 3. No Files Selected:
 
@@ -789,6 +819,6 @@ lc-read-cliplist
    - Make sure files aren't already selected for full content
 
 5. Context Too Large:
-   - Review selected files with `cat .llm-context/curr_ctx.toml`
+   - Review selected files with `cat .llm-context/curr_ctx.yaml`
    - Adjust profile patterns to exclude large files
    - Use outlines instead of full content where possible

@@ -39,7 +39,7 @@ def select_all_files(env: ExecutionEnvironment) -> ExecutionResult:
 @create_command
 def init_project(env: ExecutionEnvironment):
     log(INFO, f"LLM Context initialized for project: {env.config.project_root}")
-    log(INFO, "You can now edit .llm-context/config.toml to customize ignore patterns.")
+    log(INFO, "You can now edit .llm-context/config.yaml to customize ignore patterns.")
     return ExecutionResult(None, env)
 
 

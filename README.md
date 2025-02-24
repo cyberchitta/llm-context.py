@@ -5,7 +5,11 @@
 
 LLM Context is a tool that helps developers quickly inject relevant content from code/text projects into Large Language Model chat interfaces. It leverages `.gitignore` patterns for smart file selection and provides both a streamlined clipboard workflow using the command line and direct LLM integration through the Model Context Protocol (MCP).
 
-> **Note**: This project was developed in collaboration with Claude-3.5-Sonnet, using LLM Context itself to share code during development. All code in the repository is human-curated (by me 😇, @restlessronin).
+> **Note**: This project was developed in collaboration with Claude-3.5-Sonnet (and more recently Grok-3), using LLM Context itself to share code during development. All code in the repository is human-curated (by me 😇, @restlessronin).
+
+## Important: Configuration File Format Change
+
+Configuration files were converted from TOML to YAML in v 0.2.9. Existing users **must manually convert** any customizations in `.llm-context/config.yaml` files to the new `.llm-context/config.yaml`.
 
 ## Why LLM Context?
 
@@ -34,7 +38,7 @@ To upgrade to the latest version:
 uv tool upgrade llm-context
 ```
 
-> **Warning**: LLM Context is under active development. Updates may overwrite configuration files prefixed with `lc-`. We recommend backing up any customized files before updating.
+> **Warning**: LLM Context is under active development. Updates may overwrite configuration files prefixed with `lc-`. We recommend all configuration files be version controlled for this reason.
 
 ## Quickstart
 
@@ -65,9 +69,9 @@ Once configured, you can start working with your project in two simple ways:
 
 1. Navigate to your project's root directory
 2. Initialize repository: `lc-init` (only needed once)
-3. (Optional) Edit `.llm-context/config.toml` to customize ignore patterns
+3. (Optional) Edit `.llm-context/config.yaml` to customize ignore patterns
 4. Select files: `lc-sel-files`
-5. (Optional) Review selected files in `.llm-context/curr_ctx.toml`
+5. (Optional) Review selected files in `.llm-context/curr_ctx.yaml`
 6. Generate context: `lc-context`
 7. Use with your preferred interface:
 

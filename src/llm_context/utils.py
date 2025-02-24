@@ -4,20 +4,25 @@ from logging import CRITICAL, DEBUG, ERROR, INFO, WARNING, getLogger
 from pathlib import Path
 from typing import Any, Optional, Union
 
-import tomlkit
+import yaml
+
+
+class _NoAliasDumper(yaml.SafeDumper):
+    def ignore_aliases(self, data: Any) -> bool:
+        return True
 
 
 @dataclass(frozen=True)
-class Toml:
+class Yaml:
     @staticmethod
     def load(file_path: Path) -> dict[str, Any]:
         with open(file_path, "r") as f:
-            return tomlkit.load(f)
+            return yaml.safe_load(f)
 
     @staticmethod
     def save(file_path: Path, data: dict[str, Any]):
         with open(file_path, "w") as f:
-            f.write(tomlkit.dumps(data))
+            yaml.dump(data, f, Dumper=_NoAliasDumper, default_flow_style=False)
 
 
 @dataclass(frozen=True)
@@ -38,15 +43,15 @@ class ProjectLayout:
 
     @property
     def config_path(self) -> Path:
-        return self.project_config_path / "config.toml"
+        return self.project_config_path / "config.yaml"
 
     @property
     def state_path(self) -> Path:
-        return self.project_config_path / "lc-state.toml"
+        return self.project_config_path / "lc-state.yaml"
 
     @property
     def state_store_path(self) -> Path:
-        return self.project_config_path / "curr_ctx.toml"
+        return self.project_config_path / "curr_ctx.yaml"
 
     @property
     def templates_path(self) -> Path:

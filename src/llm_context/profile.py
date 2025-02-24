@@ -4,7 +4,7 @@ from typing import Any, Optional, cast
 
 from packaging import version
 
-from llm_context.utils import ProjectLayout, Toml, safe_read_file
+from llm_context.utils import ProjectLayout, Yaml, safe_read_file
 
 CURRENT_CONFIG_VERSION = version.parse("2.5")
 
@@ -148,7 +148,7 @@ class ToolConstants:
     @staticmethod
     def load(path: Path) -> "ToolConstants":
         try:
-            return ToolConstants(**Toml.load(path))
+            return ToolConstants(**Yaml.load(path))
         except Exception:
             return ToolConstants.create_null()
 

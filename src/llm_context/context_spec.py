@@ -5,7 +5,7 @@ from llm_context.exceptions import LLMContextError
 from llm_context.profile import Profile, ProfileResolver, ToolConstants
 from llm_context.project_setup import ProjectSetup
 from llm_context.state import StateStore
-from llm_context.utils import ProjectLayout, Toml
+from llm_context.utils import ProjectLayout, Yaml
 
 
 @dataclass(frozen=True)
@@ -20,7 +20,7 @@ class ContextSpec:
         ContextSpec.ensure_gitignore_exists(project_root)
         project_layout = ProjectLayout(project_root)
         ProjectSetup.create(project_layout).initialize()
-        raw_config = Toml.load(project_layout.config_path)
+        raw_config = Yaml.load(project_layout.config_path)
         profile = ProfileResolver.create(raw_config, state).get_profile(profile_name)
         return ContextSpec(project_layout, raw_config["templates"], profile, state)
 
@@ -33,7 +33,7 @@ class ContextSpec:
             )
 
     def has_profile(self, profile_name: str):
-        raw_config = Toml.load(self.project_layout.config_path)
+        raw_config = Yaml.load(self.project_layout.config_path)
         return ProfileResolver.create(raw_config, self.state).has_profile(profile_name)
 
     @property

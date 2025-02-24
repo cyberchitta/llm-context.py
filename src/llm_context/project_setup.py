@@ -6,7 +6,7 @@ from typing import Any
 
 from llm_context import lc_resources
 from llm_context.profile import Profile, ProjectLayout, ToolConstants
-from llm_context.utils import Toml, log
+from llm_context.utils import Yaml, log
 
 PROJECT_INFO: str = (
     "This project uses llm-context. For more information, visit: "
@@ -60,7 +60,7 @@ class ProjectSetup:
         start_state = (
             ToolConstants.create_null()
             if not project_layout.state_path.exists()
-            else ToolConstants(**Toml.load(project_layout.state_path))
+            else ToolConstants(**Yaml.load(project_layout.state_path))
         )
         return ProjectSetup(project_layout, start_state)
 
@@ -81,17 +81,17 @@ class ProjectSetup:
 
     def _create_curr_ctx_file(self):
         if not self.project_layout.state_store_path.exists():
-            Toml.save(self.project_layout.state_store_path, {"selections": {}})
+            Yaml.save(self.project_layout.state_store_path, {"selections": {}})
 
     def _update_templates_if_needed(self):
         if self.constants.needs_update:
-            config = Toml.load(self.project_layout.config_path)
+            config = Yaml.load(self.project_layout.config_path)
             for _, template_name in config["templates"].items():
                 template_path = self.project_layout.get_template_path(template_name)
                 self._copy_template(template_name, template_path)
 
     def create_state_file(self):
-        Toml.save(self.project_layout.state_path, ToolConstants.create_new().to_dict())
+        Yaml.save(self.project_layout.state_path, ToolConstants.create_new().to_dict())
 
     def _create_project_notes_file(self):
         notes_path = self.project_layout.project_notes_path
@@ -113,7 +113,7 @@ class ProjectSetup:
             )
 
     def _create_config_file(self):
-        Toml.save(self.project_layout.config_path, Config.create_default().to_dict())
+        Yaml.save(self.project_layout.config_path, Config.create_default().to_dict())
 
     def _copy_template(self, template_name: str, dest_path: Path):
         template_content = resources.read_text(lc_resources, template_name)
