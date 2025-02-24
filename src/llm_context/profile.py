@@ -82,19 +82,17 @@ class Profile:
     only_includes: dict[str, list[str]]
     settings: dict[str, Any]
     prompt: str
+    description: str
 
     @staticmethod
-    def create_default() -> "Profile":
+    def create_code() -> "Profile":
         return Profile.create(
             {"full_files": GIT_IGNORE_DEFAULT, "outline_files": GIT_IGNORE_DEFAULT},
             {"full_files": INCLUDE_ALL, "outline_files": INCLUDE_ALL},
             {"no_media": False, "with_user_notes": False, "with_prompt": False},
             "lc-prompt.md",
+            "Default profile for software projects, selecting all code files while excluding media and git-related files.",
         )
-
-    @staticmethod
-    def create_code() -> "Profile":
-        return Profile.create_default()
 
     @staticmethod
     def from_config(config: dict[str, Any]) -> "Profile":
@@ -102,12 +100,13 @@ class Profile:
             config["gitignores"],
             config["only-include"],
             config["settings"],
-            config.get("prompt", {}),
+            config.get("prompt", ""),
+            config.get("description", ""),
         )
 
     @staticmethod
-    def create(gitignores, only_include, settings, prompt) -> "Profile":
-        return Profile(gitignores, only_include, settings, prompt)
+    def create(gitignores, only_include, settings, prompt, description) -> "Profile":
+        return Profile(gitignores, only_include, settings, prompt, description)
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
         return self.gitignores[f"{context_type}_files"]
@@ -162,7 +161,7 @@ class ToolConstants:
 
     @staticmethod
     def create_default(version: str) -> "ToolConstants":
-        return ToolConstants.create(version, Profile.create_default().to_dict())
+        return ToolConstants.create(version, Profile.create_code().to_dict())
 
     @staticmethod
     def create(config_version: str, default_profile: dict[str, Any]) -> "ToolConstants":

@@ -32,7 +32,7 @@
    - [lc-prompt](#lc-prompt)
    - [lc-read-cliplist](#lc-read-cliplist)
    - [lc-changed](#lc-changed)
- 
+
 5. [Advanced Features](#advanced-features)
 
    - [Code Outlining](#code-outlining)
@@ -156,7 +156,7 @@ Standard project layout:
 your-project/
 ├── .llm-context/
 │   ├── config.yaml          # Main configuration
-│   ├── lc-project-notes.md  # Project notes 
+│   ├── lc-project-notes.md  # Project notes
 │   ├── lc-prompt.md         # LLM Instructions
 │   ├── curr_ctx.yaml        # Current state
 │   └── templates/           # Template files
@@ -193,8 +193,10 @@ Profiles control how LLM Context handles your project:
    - Output formatting
 
 3. Built-in Profiles
-   - `code`: Default for software projects
-   - `code-prompt`: Adds LLM instructions
+
+   - `code`: "Default profile for software projects, selecting all code files while excluding media and git-related files."
+   - `code-prompt`: "Extends 'code' by including LLM instructions from lc-prompt.md for guided interactions."
+   - `code-file`: "Extends 'code' by saving the generated context to 'project-context.md.tmp' for external use."
 
 ## Configuration
 
@@ -270,6 +272,7 @@ Profiles control how files are selected and context is generated. Each profile c
 - Repository .gitignore patterns (always active)
 - Additional exclusion patterns from profile's gitignores
 - Optional inclusion patterns to restrict file selection
+- An optional `description` field to document the profile’s purpose
 
 Important: The `.git` directory should always be included in your profile's gitignores patterns since it isn't typically in .gitignore files but should always be excluded from context generation.
 
@@ -278,6 +281,7 @@ Here's a complete example:
 ```yaml
 profiles:
   code:  # Default profile included with LLM Context
+    description: "Default profile for software projects, selecting all code files while excluding media and git-related files."
     gitignores:
       full_files:
         - ".git"
@@ -298,8 +302,16 @@ profiles:
       outline_files:
         - "**/*"
   code-prompt:  # Built-in profile that adds LLM instructions
+    description: "Extends 'code' by including LLM instructions from lc-prompt.md for guided interactions."
     base: "code"  # Inherits from code profile
     prompt: "lc-prompt.md"  # Adds prompt template to output
+    settings:
+      with_prompt: true
+  code-file:  # Built-in profile for file output
+    description: "Extends 'code' by saving the generated context to 'project-context.md.tmp' for external use."
+    base: "code"
+    settings:
+      context_file: "project-context.md.tmp"
 ```
 
 #### Settings Reference
@@ -362,12 +374,12 @@ profiles:
         - "*.lock"
     settings:
       no_media: true
-      with_user_notes: true  # Include personal notes
+      with_user_notes: true # Include personal notes
     only-include:
       full_files:
         - "**/*.md"
-        - "**/*.txt"   # Documentation files
-        - "README*"     # Project info
+        - "**/*.txt" # Documentation files
+        - "README*" # Project info
         - "LICENSE*"
 ```
 
@@ -385,8 +397,8 @@ profiles:
       no_media: true
     only-include:
       full_files:
-        - "src/**/*.py"    # Python source
-        - "tests/**/*.py"  # Test files
+        - "src/**/*.py" # Python source
+        - "tests/**/*.py" # Test files
         - "pyproject.toml" # Project configuration
     prompt: "lc-prompt.md"
 ```
@@ -412,7 +424,7 @@ profiles:
     base: "base-docs"
     settings:
       no_media: true
-      with_user_notes: true  # Add personal notes
+      with_user_notes: true # Add personal notes
   with-file:
     base: "code"
     settings:
@@ -554,7 +566,7 @@ Generates project-specific instructions suitable for "System Prompts" or "Custom
   - Custom GPT "System Prompts"
   - Similar "Custom Instruction" sections in other LLM interfaces
   - Setting up consistent project-specific LLM behavior
-  
+
 ### lc-read-cliplist
 
 Processes file requests from clipboard.
@@ -703,10 +715,10 @@ profiles:
 2. Start working with your project in two simple ways:
 
    - Say: "I would like to work with my project"
-      Claude will ask you for the project root path.
-   
+     Claude will ask you for the project root path.
+
    - Or directly specify: "I would like to work with my project /path/to/your/project"
-      Claude will automatically load the project context.
+     Claude will automatically load the project context.
 
 3. Usage:
    - Files requested via MCP are automatically processed

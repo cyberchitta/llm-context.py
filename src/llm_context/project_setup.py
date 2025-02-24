@@ -33,10 +33,15 @@ class Config:
             },
             profiles={
                 "code": Profile.create_code().to_dict(),
-                "code-prompt": {"base": "code", "settings": {"with_prompt": True}},
+                "code-prompt": {
+                    "base": "code",
+                    "settings": {"with_prompt": True},
+                    "description": "Extends 'code' by including LLM instructions from lc-prompt.md for guided interactions.",
+                },
                 "code-file": {
                     "base": "code",
                     "settings": {"context_file": "project-context.md.tmp"},
+                    "description": "Extends 'code' by saving the generated context to 'project-context.md.tmp' for external use.",
                 },
             },
         )
