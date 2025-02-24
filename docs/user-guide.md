@@ -89,7 +89,7 @@
 3. Paste the context into your LLM chat interface:
 
    - For Claude Projects/Custom GPTs: Use the knowledge section
-   - For regular chats: Use `lc-profile code-prompt` first to include guiding instructions
+   - For regular chats: Use `lc-set-profile code-prompt` first to include guiding instructions
 
 4. When the LLM requests additional files:
    - Copy the file list from the LLM
@@ -117,7 +117,7 @@ Core commands you'll use frequently:
 
 2. Documentation Projects:
 
-   - Switch to documentation focus: `lc-profile copy`
+   - Switch to documentation focus: `lc-set-profile copy`
    - Select content: `lc-sel-files`
    - Good for markdown/text collections
 
@@ -780,7 +780,7 @@ lc-read-cliplist
 
    - Check your profile's gitignores and only-include patterns
    - Review `.gitignore` patterns
-   - Try `lc-profile code` to use default profile
+   - Try `lc-set-profile code` to use default profile
 
 4. Outline Generation Not Working:
 
