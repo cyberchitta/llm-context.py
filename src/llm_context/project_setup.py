@@ -69,6 +69,7 @@ class ProjectSetup:
         self._create_curr_ctx_file()
         self._update_templates_if_needed()
         self.create_state_file()
+        self._copy_template("dotgitignore", self.project_layout.project_config_path / ".gitignore")
         self._copy_template(
             "lc-prompt.md", self.project_layout.project_config_path / "lc-prompt.md"
         )

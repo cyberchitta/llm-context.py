@@ -3,3 +3,5 @@ include README.md
 recursive-include src/llm_context/templates *.j2
 recursive-include src/llm_context *.py
 recursive-include src/llm_context/highlighter/tag-qry *.scm
+include src/llm_context/lc_resources/lc-prompt.md
+include src/llm_context/lc_resources/dotgitignore
