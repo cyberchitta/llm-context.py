@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.9] - 2025-02-24
+
+### BREAKING
+- Switch configuration from TOML to YAML (customization in toml files has to be manually re-applied)
+
+## [0.2.9] - 2025-02-24
+
+### Bug Fixes
+- Ensure profile switch updates file selection correctly
+
+### Features
+- Add profile descriptions for better usability
+- Add .gitignore creation in .llm_context during init
+
 ## [0.2.8] - 2025-02-09
 
 ### Features
@@ -62,7 +76,7 @@ All notable changes to this project will be documented in this file.
 - Bug introduced by warning key
 - Missing argument
 - Restore version map
-- Remove erroneous '\*.scm' from gitignores in config.toml
+- Remove erroneous '\*.scm' from gitignores in config.yaml
 
 ### Features
 
@@ -132,5 +146,5 @@ Initial public release.
   - `lc-context`: Generate and copy context to clipboard
   - `lc-read-cliplist`: Process LLM-requested files
 - Add `--with-prompt` flag to `lc-context` command for including default prompt
-- Implement customizable ignore patterns via `.llm-context/config.toml`
+- Implement customizable ignore patterns via `.llm-context/config.yaml`
 - Add support for custom templates in `.llm-context/templates/`
