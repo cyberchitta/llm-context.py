@@ -130,12 +130,13 @@ class Profile:
         return safe_read_file(str(project_layout.user_notes_path))
 
     def to_dict(self) -> dict[str, Any]:
-        non_optional = {
+        return {
             "gitignores": self.gitignores,
             "only-include": self.only_includes,
             "settings": self.settings,
+            "prompt": self.prompt,
+            "description": self.description,
         }
-        return {**non_optional, "prompt": self.prompt} if self.prompt else non_optional
 
 
 @dataclass(frozen=True)
