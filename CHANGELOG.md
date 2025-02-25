@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.10] - 2025-02-25
+
+### Bug Fixes
+- Broken resource update
+
 ## [0.2.9] - 2025-02-24
 
 ### BREAKING

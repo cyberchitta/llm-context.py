@@ -1,6 +1,6 @@
 [project]
 name = "llm-context"
-version = "0.2.9"
+version = "0.2.10"
 description = "Share code with LLMs via Model Context Protocol or clipboard. Profile-based customization enables easy switching between different tasks (like code review and documentation). Code outlining support is available as an experimental feature."
 authors = [
   { name = "restlessronin", email = "88921269+restlessronin@users.noreply.github.com" },
@@ -90,3 +90,10 @@ target-version = ['py39', 'py310', 'py311', 'py312']
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build]
+include = [
+  "LICENSE",
+  "README.md",
+  "src/llm_context/**",
+]

@@ -79,10 +79,14 @@ profiles:
       with_user_notes: false
   code-file:
     base: code
+    description: Extends 'code' by saving the generated context to 'project-context.md.tmp'
+      for external use.
     settings:
       context_file: project-context.md.tmp
   code-prompt:
     base: code
+    description: Extends 'code' by including LLM instructions from lc-prompt.md for
+      guided interactions.
     settings:
       with_prompt: true
       with_user_notes: true
