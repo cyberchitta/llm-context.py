@@ -1,6 +1,6 @@
 [project]
 name = "llm-context"
-version = "0.2.10"
+version = "0.2.11"
 description = "Share code with LLMs via Model Context Protocol or clipboard. Profile-based customization enables easy switching between different tasks (like code review and documentation). Code outlining support is available as an experimental feature."
 authors = [
   { name = "restlessronin", email = "88921269+restlessronin@users.noreply.github.com" },
@@ -55,6 +55,7 @@ lc-changed = "llm_context.cli:changed_files"
 lc-init = "llm_context.cli:init_project"
 lc-read-cliplist = "llm_context.cli:files_from_clip"
 lc-mcp = "llm_context.mcp:run_server"
+lc-outlines = "llm_context.cli:outlines"
 lc-prompt = "llm_context.cli:prompt"
 lc-sel-files = "llm_context.cli:select_full_files"
 lc-sel-outlines = "llm_context.cli:select_outline_files"

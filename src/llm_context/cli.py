@@ -131,6 +131,15 @@ def context(env: ExecutionEnvironment) -> ExecutionResult:
 
 
 @create_clipboard_cmd
+def outlines(env: ExecutionEnvironment) -> ExecutionResult:
+    profile_feedback(env)
+    selector = ContextSelector.create(env.config)
+    file_sel_out = selector.select_outline_only(env.state.file_selection)
+    content = ContextGenerator.create(env.config, file_sel_out).outlines()
+    return ExecutionResult(content, env)
+
+
+@create_clipboard_cmd
 def changed_files(env: ExecutionEnvironment) -> ExecutionResult:
     timestamp = env.state.file_selection.timestamp
     selector = ContextSelector.create(env.config, timestamp)

@@ -93,6 +93,7 @@ Once configured, you can start working with your project in two simple ways:
 - `lc-prompt`: Generate project instructions for LLMs
 - `lc-read-cliplist`: Process LLM file requests
 - `lc-changed`: List files modified since last context generation
+- `lc-outlines`: Generate outlines for code files (requires [outline] extra at uv install time)
 
 ## Features & Advanced Usage
 
@@ -101,6 +102,7 @@ LLM Context provides advanced features for customizing how project content is ca
 - Smart file selection using `.gitignore` patterns
 - Multiple profiles for different use cases
 - Code outline generation for supported languages
+- Easy viewing of code structure with `lc-outlines` command
 - Customizable templates and prompts
 
 See our [User Guide](docs/user-guide.md) for detailed documentation of these features.

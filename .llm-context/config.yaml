@@ -2,12 +2,10 @@ __info__: 'This project uses llm-context. For more information, visit: https://g
   or https://pypi.org/project/llm-context/'
 profiles:
   code:
+    description: Default profile for software projects, selecting all code files while
+      excluding media and git-related files.
     gitignores:
       full_files:
-      - "tests/"
-      - "*.md"
-      - "*.scm"
-      - "*.yaml"
       - .git
       - .gitignore
       - .llm-context/
@@ -89,7 +87,6 @@ profiles:
       guided interactions.
     settings:
       with_prompt: true
-      with_user_notes: true
 templates:
   context: lc-context.j2
   context-mcp: lc-context-mcp.j2

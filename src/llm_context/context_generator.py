@@ -123,6 +123,10 @@ class ContextGenerator:
         rel_paths = in_files if in_files else self.full_rel
         return self._render("files", {"files": self.collector.files(rel_paths)})
 
+    def outlines(self, template_id: str = "highlights") -> str:
+        context = {"highlights": self.collector.outlines(self.outline_rel)}
+        return self._render(template_id, context)
+
     def prompt(self, template_id: str = "prompt") -> str:
         descriptor = self.spec.profile
         layout = self.spec.project_layout

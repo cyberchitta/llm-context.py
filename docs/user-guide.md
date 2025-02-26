@@ -32,6 +32,7 @@
    - [lc-prompt](#lc-prompt)
    - [lc-read-cliplist](#lc-read-cliplist)
    - [lc-changed](#lc-changed)
+   - [lc-outlines](#lc-outlines)
 
 5. [Advanced Features](#advanced-features)
 
@@ -280,7 +281,7 @@ Here's a complete example:
 
 ```yaml
 profiles:
-  code:  # Default profile included with LLM Context
+  code: # Default profile included with LLM Context
     description: "Default profile for software projects, selecting all code files while excluding media and git-related files."
     gitignores:
       full_files:
@@ -301,13 +302,13 @@ profiles:
         - "**/*"
       outline_files:
         - "**/*"
-  code-prompt:  # Built-in profile that adds LLM instructions
+  code-prompt: # Built-in profile that adds LLM instructions
     description: "Extends 'code' by including LLM instructions from lc-prompt.md for guided interactions."
-    base: "code"  # Inherits from code profile
-    prompt: "lc-prompt.md"  # Adds prompt template to output
+    base: "code" # Inherits from code profile
+    prompt: "lc-prompt.md" # Adds prompt template to output
     settings:
       with_prompt: true
-  code-file:  # Built-in profile for file output
+  code-file: # Built-in profile for file output
     description: "Extends 'code' by saving the generated context to 'project-context.md.tmp' for external use."
     base: "code"
     settings:
@@ -584,16 +585,32 @@ Lists files that have been modified since the context was generated:
 - Useful for reviewing changes before updates
 - Respects current profile's file selection patterns
 
+### lc-outlines
+
+Generates smart outlines for all outline-eligible code files and copies to clipboard.
+
+- Uses active profile's configuration for file selection
+- Shows important code definitions (classes, functions, methods)
+- Helps understand code structure without full content
+- Useful for:
+  - Getting a quick overview of a repository's structure
+  - Identifying key components without reading all code
+  - Sharing code organization with LLMs
+
+The outline displays:
+
+- Definition lines marked with █
+- Context lines marked with │
+- Skipped sections indicated with ⋮...
+
 ## Advanced Features
 
 ### Code Outlining
 
 #### Installation
 
-Requires Python ≤ 3.12 due to dependencies:
-
 ```bash
-uv tool install --python 3.12 "llm-context[outline]"
+uv tool install "llm-context[outline]"
 ```
 
 #### Configuration
@@ -720,7 +737,20 @@ profiles:
    - Or directly specify: "I would like to work with my project /path/to/your/project"
      Claude will automatically load the project context.
 
-3. Usage:
+3. Available MCP Tools:
+
+   | Tool Name | Description |
+   |-----------|-------------|
+   | lc-project-context | Generates a full repository overview with file contents and outlines |
+   | lc-get-files | Retrieves specific files from the project |
+   | lc-list-modified-files | Lists files modified since a specific timestamp |
+   | lc-code-outlines | Returns smart outlines for all code files in the repository (requires [outline] extra) |
+
+   Note: The `lc-code-outlines` tool is only available if you have installed llm-context with the [outline] extra:
+   ```bash
+   uv tool install "llm-context[outline]"
+
+4. Usage:
    - Files requested via MCP are automatically processed
    - No manual clipboard operations needed
    - Maintains conversation context
@@ -826,7 +856,7 @@ lc-read-cliplist
 
 4. Outline Generation Not Working:
 
-   - Ensure you installed with `uv tool install --python 3.12 "llm-context[outline]"`
+   - Ensure you installed with `uv tool install "llm-context[outline]"`
    - Check if your files are in supported languages
    - Make sure files aren't already selected for full content
 

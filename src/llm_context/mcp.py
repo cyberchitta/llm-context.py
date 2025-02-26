@@ -124,12 +124,47 @@ async def list_modified_files(arguments: dict) -> list[TextContent]:
     return [TextContent(type="text", text="\n".join(file_sel_out.files))]
 
 
+class OutlinesRequest(BaseModel):
+    root_path: Path = Field(
+        ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
+    )
+    profile_name: str = Field(
+        "code",
+        description="Profile to use for file selection rules",
+        pattern="^[a-zA-Z0-9_-]+$",
+    )
+
+
+outlines_tool = Tool(
+    name="lc-code-outlines",
+    description=(
+        "Returns smart outlines highlighting important definitions in all supported code files. "
+        "This provides a high-level overview of code structure without retrieving full file contents. "
+        "Outlines show key definitions (classes, functions, methods) in the codebase."
+    ),
+    inputSchema=OutlinesRequest.model_json_schema(),
+)
+
+
+async def code_outlines(arguments: dict) -> list[TextContent]:
+    request = OutlinesRequest(**arguments)
+    env = ExecutionEnvironment.create(Path(request.root_path))
+    cur_env = env.with_profile(request.profile_name)
+    with cur_env.activate():
+        selector = ContextSelector.create(cur_env.config)
+        file_sel_out = selector.select_outline_only(cur_env.state.file_selection)
+        content = ContextGenerator.create(cur_env.config, file_sel_out).outlines()
+        return [TextContent(type="text", text=content)]
+
+
 async def serve() -> None:
     server = Server("llm-context")
 
     @server.list_tools()
     async def handle_list_tools() -> list[Tool]:
-        return [project_context_tool, get_files_tool, list_modified_files_tool]
+        base_tools = [project_context_tool, get_files_tool, list_modified_files_tool]
+        optional_tools = [outlines_tool] if ContextSelector.has_outliner(False) else []
+        return base_tools + optional_tools
 
     @server.call_tool()
     async def handle_call_tool(name: str, arguments: dict) -> list[TextContent]:
@@ -138,6 +173,8 @@ async def serve() -> None:
             "lc-get-files": get_files,
             "lc-list-modified-files": list_modified_files,
         }
+        if ContextSelector.has_outliner(False):
+            handlers["lc-code-outlines"] = code_outlines
         try:
             return await handlers[name](arguments)
         except KeyError:
