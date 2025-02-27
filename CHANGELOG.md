@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.11] - 2025-02-27
+
+### Bug Fixes
+- Broken build updated
+
+### Features
+- Improve parser performance with caching
+- Add code outlines command
+
 ## [0.2.10] - 2025-02-25
 
 ### Bug Fixes
