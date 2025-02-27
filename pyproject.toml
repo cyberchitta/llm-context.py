@@ -90,4 +90,5 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
-include = ["LICENSE", "README.md", "src/llm_context/**"]
+include = ["LICENSE", "README.md", "src/**"]
+packages = ["src/llm_context"]
