@@ -52,9 +52,9 @@ async def project_context(arguments: dict) -> list[TextContent]:
         )
         cur_env = cur_env.with_state(cur_env.state.with_selection(file_sel_out))
         cur_env.state.store()
-        context = ContextGenerator.create(cur_env.config, cur_env.state.file_selection).context(
-            "context-mcp"
-        )
+        context = ContextGenerator.create(
+            cur_env.config, cur_env.state.file_selection, env.tagger
+        ).context("context-mcp")
         return [TextContent(type="text", text=context)]
 
 
@@ -153,7 +153,7 @@ async def code_outlines(arguments: dict) -> list[TextContent]:
     with cur_env.activate():
         selector = ContextSelector.create(cur_env.config)
         file_sel_out = selector.select_outline_only(cur_env.state.file_selection)
-        content = ContextGenerator.create(cur_env.config, file_sel_out).outlines()
+        content = ContextGenerator.create(cur_env.config, file_sel_out, env.tagger).outlines()
         return [TextContent(type="text", text=content)]
 
 

@@ -174,7 +174,7 @@ class ToolConstants:
 
     @property
     def needs_update(self) -> bool:
-        return version.parse(self.config_version) < CURRENT_CONFIG_VERSION
+        return cast(bool, version.parse(self.config_version) < CURRENT_CONFIG_VERSION)
 
     def to_dict(self) -> dict[str, Any]:
         return {

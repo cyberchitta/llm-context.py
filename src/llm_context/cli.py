@@ -120,7 +120,7 @@ def prompt(env: ExecutionEnvironment) -> ExecutionResult:
 @create_clipboard_cmd
 def context(env: ExecutionEnvironment) -> ExecutionResult:
     profile_feedback(env)
-    content = ContextGenerator.create(env.config, env.state.file_selection).context()
+    content = ContextGenerator.create(env.config, env.state.file_selection, env.tagger).context()
     context_file = env.config.profile.get_settings().get("context_file")
     nxt_env = env.with_state(env.state.with_selection(env.state.file_selection.with_now()))
     nxt_env.state.store()
@@ -135,7 +135,7 @@ def outlines(env: ExecutionEnvironment) -> ExecutionResult:
     profile_feedback(env)
     selector = ContextSelector.create(env.config)
     file_sel_out = selector.select_outline_only(env.state.file_selection)
-    content = ContextGenerator.create(env.config, file_sel_out).outlines()
+    content = ContextGenerator.create(env.config, file_sel_out, env.tagger).outlines()
     return ExecutionResult(content, env)
 
 

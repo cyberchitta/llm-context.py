@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import NamedTuple, Optional, Protocol
 
-from llm_context.highlighter.parser import AST, Source
+from llm_context.highlighter.parser import AST, ASTFactory, Source
 
 
 class Position(NamedTuple):
@@ -56,12 +56,15 @@ class Tagger:
 
 @dataclass(frozen=True)
 class ASTBasedTagger(TagExtractor):
+    workspace_path: str
+    ast_factory: ASTFactory
+
     @staticmethod
-    def create():
-        return ASTBasedTagger()
+    def create(workspace_path: str, ast_factory: ASTFactory) -> "ASTBasedTagger":
+        return ASTBasedTagger(workspace_path, ast_factory)
 
     def extract_tags(self, source: Source) -> list[Tag]:
-        ast = AST.create_from_code(source)
+        ast = self.ast_factory.create_from_code(source)
         return Tagger.create(ast).read()
 
 

@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Optional
 
-from llm_context.highlighter.parser import AST, Source
+from llm_context.highlighter.parser import AST, ASTFactory, Source
 from llm_context.highlighter.tagger import ASTBasedTagger, DefRef, Tag
 
 
@@ -89,19 +89,20 @@ class Highlighter:
 
 @dataclass(frozen=True)
 class TagProcessor:
+    tagger: ASTBasedTagger
     source: Source
     lines_of_interest: list[int]
 
     @staticmethod
-    def create(file_tags: list[dict], code: str) -> "TagProcessor":
+    def create(tagger, file_tags: list[dict], code: str) -> "TagProcessor":
         rel_path = file_tags[0]["rel_path"]
         lines_of_interest = [tag["start"]["ln"] for tag in file_tags]
         assert lines_of_interest
         source = Source(rel_path=rel_path, code=code)
-        return TagProcessor(source, lines_of_interest)
+        return TagProcessor(tagger, source, lines_of_interest)
 
     def to_highlights(self) -> dict[str, str]:
-        ast = AST.create_from_code(self.source)
+        ast = self.tagger.ast_factory.create_from_code(self.source)
         scope_tracker = Scoper.create(
             len(self.source.code.splitlines())
         ).with_scope_data_initialized(ast.tree.root_node)
@@ -113,27 +114,29 @@ class TagProcessor:
 
 @dataclass(frozen=True)
 class Highlights:
+    tagger: ASTBasedTagger
     tags: list[list[Tag]]
     source_set: list[Source]
 
     @staticmethod
-    def create(source_set: list[Source]) -> "Highlights":
-        extractor = ASTBasedTagger.create()
-        def_refs = [DefRef.create(extractor, source) for source in source_set]
+    def create(tagger: ASTBasedTagger, source_set: list[Source]) -> "Highlights":
+        def_refs = [DefRef.create(tagger, source) for source in source_set]
         tags = [def_ref.defs for def_ref in def_refs]
-        return Highlights(tags, source_set)
+        return Highlights(tagger, tags, source_set)
 
     def to_code_highlights(self) -> list[dict[str, str]]:
         code_highlights = []
         for tags, source in zip(self.tags, self.source_set):
             if tags:
-                tag_processor = TagProcessor(source, [tag.start.ln for tag in tags])
+                tag_processor = TagProcessor(self.tagger, source, [tag.start.ln for tag in tags])
                 highlights = tag_processor.to_highlights()
                 if highlights:
                     code_highlights.append(highlights)
         return code_highlights
 
 
-def generate_highlights(source_set: list[Source]) -> Optional[list[dict[str, str]]]:
-    highlights = Highlights.create(source_set)
+def generate_highlights(
+    tagger: ASTBasedTagger, source_set: list[Source]
+) -> Optional[list[dict[str, str]]]:
+    highlights = Highlights.create(tagger, source_set)
     return highlights.to_code_highlights() if highlights else None
