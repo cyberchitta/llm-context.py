@@ -7,6 +7,8 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">=3.10"
+packages = [{ include = "llm_context", from = "src" }]
+include = ["src/llm_context/lc_resources/*.*"]
 license = "Apache-2.0"
 keywords = ["llm", "ai", "context", "code", "clipboard", "chat"]
 classifiers = [
