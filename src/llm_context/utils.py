@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime as dt
 from logging import CRITICAL, DEBUG, ERROR, INFO, WARNING, getLogger
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, cast
 
 import yaml
 
@@ -17,7 +17,7 @@ class Yaml:
     @staticmethod
     def load(file_path: Path) -> dict[str, Any]:
         with open(file_path, "r") as f:
-            return yaml.safe_load(f)
+            return cast(dict[str, Any], yaml.safe_load(f))
 
     @staticmethod
     def save(file_path: Path, data: dict[str, Any]):

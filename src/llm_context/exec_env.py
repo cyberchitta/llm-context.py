@@ -7,7 +7,9 @@ from typing import ClassVar, Optional
 
 from llm_context.context_spec import ContextSpec
 from llm_context.file_selector import ContextSelector
-from llm_context.profile import Profile, ToolConstants
+from llm_context.highlighter.parser import ASTFactory
+from llm_context.highlighter.tagger import ASTBasedTagger
+from llm_context.profile import ToolConstants
 from llm_context.state import AllSelections, FileSelection, StateStore
 from llm_context.utils import ProjectLayout
 
@@ -89,6 +91,7 @@ class ExecutionEnvironment:
     runtime: RuntimeContext
     state: ExecutionState
     constants: ToolConstants
+    tagger: ASTBasedTagger
 
     @staticmethod
     def create(project_root: Path) -> "ExecutionEnvironment":
@@ -97,10 +100,13 @@ class ExecutionEnvironment:
         state = ExecutionState.load(project_layout)
         constants = ToolConstants.load(project_layout.state_path)
         config = ContextSpec.create(project_root, state.file_selection.profile_name, constants)
-        return ExecutionEnvironment(config, runtime, state, constants)
+        tagger = ASTBasedTagger.create(str(project_root), ASTFactory.create())
+        return ExecutionEnvironment(config, runtime, state, constants, tagger)
 
     def with_state(self, new_state: ExecutionState) -> "ExecutionEnvironment":
-        return ExecutionEnvironment(self.config, self.runtime, new_state, self.constants)
+        return ExecutionEnvironment(
+            self.config, self.runtime, new_state, self.constants, self.tagger
+        )
 
     def with_profile(self, profile_name: str) -> "ExecutionEnvironment":
         if profile_name == self.state.file_selection.profile_name:
@@ -115,7 +121,7 @@ class ExecutionEnvironment:
             else file_selection
         )
         new_state = self.state.with_selection(outline_selection).with_profile(profile_name)
-        return ExecutionEnvironment(config, self.runtime, new_state, self.constants)
+        return ExecutionEnvironment(config, self.runtime, new_state, self.constants, self.tagger)
 
     @property
     def logger(self) -> logging.Logger:

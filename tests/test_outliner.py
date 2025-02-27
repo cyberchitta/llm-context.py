@@ -1,9 +1,14 @@
 import pytest
 
 from llm_context.highlighter.highlighter import generate_highlights
-from llm_context.highlighter.outliner import Outliner, Outlines
-from llm_context.highlighter.parser import Source
-from llm_context.highlighter.tagger import Position, Tag
+from llm_context.highlighter.outliner import Outliner
+from llm_context.highlighter.parser import ASTFactory, Source
+from llm_context.highlighter.tagger import ASTBasedTagger, Position, Tag
+
+
+@pytest.fixture
+def tagger():
+    return ASTBasedTagger.create("", ASTFactory.create())
 
 
 def test_outliner_line_numbering():
@@ -152,8 +157,8 @@ def test_outliner_highlights(sample_source):
     assert highlights["highlights"].strip() == expected_output.strip()
 
 
-def test_generate_highlights(sample_source):
-    highlights = generate_highlights([sample_source])
+def test_generate_highlights(sample_source, tagger):
+    highlights = generate_highlights(tagger, [sample_source])
 
     assert highlights is not None
     assert len(highlights) == 1

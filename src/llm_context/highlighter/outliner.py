@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from llm_context.highlighter.parser import Source
+from llm_context.highlighter.parser import ASTFactory, Source
 from llm_context.highlighter.tagger import ASTBasedTagger, DefRef, Tag
 
 
@@ -55,9 +55,8 @@ class Outlines:
     source_set: list[Source]
 
     @staticmethod
-    def create(source_set: list[Source]) -> "Outlines":
-        extractor = ASTBasedTagger.create()
-        def_refs = [DefRef.create(extractor, source) for source in source_set]
+    def create(tagger: ASTBasedTagger, source_set: list[Source]) -> "Outlines":
+        def_refs = [DefRef.create(tagger, source) for source in source_set]
         defs = [def_ref.defs for def_ref in def_refs]
         return Outlines(defs, source_set)
 
@@ -71,5 +70,5 @@ class Outlines:
         return code_outlines
 
 
-def generate_outlines(source_set: list[Source]) -> list[dict[str, str]]:
-    return Outlines.create(source_set).to_code_outlines()
+def generate_outlines(tagger: ASTBasedTagger, source_set: list[Source]) -> list[dict[str, str]]:
+    return Outlines.create(tagger, source_set).to_code_outlines()

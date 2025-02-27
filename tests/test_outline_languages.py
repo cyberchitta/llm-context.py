@@ -2,6 +2,7 @@ import pytest
 
 from llm_context.highlighter.outliner import generate_outlines
 from llm_context.highlighter.parser import Source
+from llm_context.highlighter.tagger import ASTBasedTagger
 
 TEST_CASES = [
     (
@@ -638,10 +639,17 @@ IO.puts "Cube of 3: #{MathOperations.cube(math_op)}"
 ]
 
 
+@pytest.fixture
+def tagger():
+    from llm_context.highlighter.parser import ASTFactory
+
+    return ASTBasedTagger.create("", ASTFactory.create())
+
+
 @pytest.mark.parametrize("language,extension,code,expected_highlights", TEST_CASES)
-def test_outline_generation(language, extension, code, expected_highlights):
+def test_outline_generation(language, extension, code, expected_highlights, tagger):
     source = Source(f"test_file.{extension}", code)
-    outlines = generate_outlines([source])
+    outlines = generate_outlines(tagger, [source])
 
     assert len(outlines) == 1
     assert outlines[0]["rel_path"] == f"test_file.{extension}"

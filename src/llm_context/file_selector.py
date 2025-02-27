@@ -179,3 +179,11 @@ class ContextSelector:
         return FileSelection._create(
             file_selection.profile_name, full_files, outline_files, file_selection.timestamp
         )
+
+    def select_outline_only(self, file_selection: FileSelection) -> "FileSelection":
+        if not ContextSelector.has_outliner(True):
+            return FileSelection.create(file_selection.profile_name, [], [])
+        all_outline_files = self.outline_selector.get_relative_files()
+        return FileSelection._create(
+            file_selection.profile_name, [], all_outline_files, file_selection.timestamp
+        )

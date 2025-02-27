@@ -1,10 +1,17 @@
 import asyncio
+from importlib.metadata import version as pkg_ver
 from pathlib import Path
 
 from mcp.server import Server  # type: ignore
 from mcp.server.stdio import stdio_server  # type: ignore
 from mcp.shared.exceptions import McpError  # type: ignore
-from mcp.types import INTERNAL_ERROR, INVALID_PARAMS, TextContent, Tool  # type: ignore
+from mcp.types import (
+    INTERNAL_ERROR,
+    INVALID_PARAMS,
+    ErrorData,
+    TextContent,
+    Tool,
+)  # type: ignore
 from pydantic import BaseModel, Field, ValidationError  # type: ignore
 
 from llm_context.context_generator import ContextGenerator
@@ -52,9 +59,9 @@ async def project_context(arguments: dict) -> list[TextContent]:
         )
         cur_env = cur_env.with_state(cur_env.state.with_selection(file_sel_out))
         cur_env.state.store()
-        context = ContextGenerator.create(cur_env.config, cur_env.state.file_selection).context(
-            "context-mcp"
-        )
+        context = ContextGenerator.create(
+            cur_env.config, cur_env.state.file_selection, env.tagger
+        ).context("context-mcp")
         return [TextContent(type="text", text=context)]
 
 
@@ -124,12 +131,47 @@ async def list_modified_files(arguments: dict) -> list[TextContent]:
     return [TextContent(type="text", text="\n".join(file_sel_out.files))]
 
 
+class OutlinesRequest(BaseModel):
+    root_path: Path = Field(
+        ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
+    )
+    profile_name: str = Field(
+        "code",
+        description="Profile to use for file selection rules",
+        pattern="^[a-zA-Z0-9_-]+$",
+    )
+
+
+outlines_tool = Tool(
+    name="lc-code-outlines",
+    description=(
+        "Returns smart outlines highlighting important definitions in all supported code files. "
+        "This provides a high-level overview of code structure without retrieving full file contents. "
+        "Outlines show key definitions (classes, functions, methods) in the codebase."
+    ),
+    inputSchema=OutlinesRequest.model_json_schema(),
+)
+
+
+async def code_outlines(arguments: dict) -> list[TextContent]:
+    request = OutlinesRequest(**arguments)
+    env = ExecutionEnvironment.create(Path(request.root_path))
+    cur_env = env.with_profile(request.profile_name)
+    with cur_env.activate():
+        selector = ContextSelector.create(cur_env.config)
+        file_sel_out = selector.select_outline_only(cur_env.state.file_selection)
+        content = ContextGenerator.create(cur_env.config, file_sel_out, env.tagger).outlines()
+        return [TextContent(type="text", text=content)]
+
+
 async def serve() -> None:
-    server = Server("llm-context")
+    server: Server = Server("llm-context", pkg_ver("llm-context"))
 
     @server.list_tools()
     async def handle_list_tools() -> list[Tool]:
-        return [project_context_tool, get_files_tool, list_modified_files_tool]
+        base_tools = [project_context_tool, get_files_tool, list_modified_files_tool]
+        optional_tools = [outlines_tool] if ContextSelector.has_outliner(False) else []
+        return base_tools + optional_tools
 
     @server.call_tool()
     async def handle_call_tool(name: str, arguments: dict) -> list[TextContent]:
@@ -138,14 +180,16 @@ async def serve() -> None:
             "lc-get-files": get_files,
             "lc-list-modified-files": list_modified_files,
         }
+        if ContextSelector.has_outliner(False):
+            handlers["lc-code-outlines"] = code_outlines
         try:
             return await handlers[name](arguments)
         except KeyError:
-            raise McpError(INVALID_PARAMS, f"Unknown tool: {name}")
+            raise McpError(ErrorData(code=INVALID_PARAMS, message=f"Unknown tool: {name}"))
         except ValidationError as e:
-            raise McpError(INVALID_PARAMS, str(e))
+            raise McpError(ErrorData(code=INVALID_PARAMS, message=str(e)))
         except Exception as e:
-            raise McpError(INTERNAL_ERROR, str(e))
+            raise McpError(ErrorData(code=INTERNAL_ERROR, message=str(e)))
 
     async with stdio_server() as (read_stream, write_stream):
         await server.run(

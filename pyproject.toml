@@ -1,14 +1,12 @@
 [project]
 name = "llm-context"
-version = "0.2.10"
+version = "0.2.11"
 description = "Share code with LLMs via Model Context Protocol or clipboard. Profile-based customization enables easy switching between different tasks (like code review and documentation). Code outlining support is available as an experimental feature."
 authors = [
   { name = "restlessronin", email = "88921269+restlessronin@users.noreply.github.com" },
 ]
 readme = "README.md"
 requires-python = ">=3.10"
-packages = [{ include = "llm_context", from = "src" }]
-include = ["src/llm_context/lc_resources/*.*"]
 license = "Apache-2.0"
 keywords = ["llm", "ai", "context", "code", "clipboard", "chat"]
 classifiers = [
@@ -39,11 +37,11 @@ Repository = "https://github.com/cyberchitta/llm-context.py"
 [project.optional-dependencies]
 outline = ["tree-sitter-language-pack>=0.4.0", "tree-sitter>=0.22"]
 dev = [
-  "black>=24.10.0, <25.0",
   "git-cliff>=2.6.1, <3.0",
   "isort>=5.13.2, <6.0",
   "mypy>=1.11.2, <2.0",
   "pytest>=8.3.3, <9.0",
+  "types-pyyaml>=6.0.12.20241230",
   "ruff>=0.6.9, <1.0",
   "taplo>=0.9.3, <1.0",
 ]
@@ -55,6 +53,7 @@ lc-changed = "llm_context.cli:changed_files"
 lc-init = "llm_context.cli:init_project"
 lc-read-cliplist = "llm_context.cli:files_from_clip"
 lc-mcp = "llm_context.mcp:run_server"
+lc-outlines = "llm_context.cli:outlines"
 lc-prompt = "llm_context.cli:prompt"
 lc-sel-files = "llm_context.cli:select_full_files"
 lc-sel-outlines = "llm_context.cli:select_outline_files"
@@ -74,19 +73,16 @@ ignore_missing_imports = true
 
 [tool.ruff]
 line-length = 100
-target-version = "py39"
+target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
 ignore = ["E203", "E266", "E501", "F403", "F401"]
-
-[tool.black]
-line-length = 100
-target-version = ['py39', 'py310', 'py311', 'py312']
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
-include = ["LICENSE", "README.md", "src/llm_context/**"]
+include = ["LICENSE", "README.md", "src/**"]
+packages = ["src/llm_context"]
