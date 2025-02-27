@@ -4,7 +4,7 @@ from typing import NamedTuple, cast
 
 from tree_sitter import Language, Parser, Tree  # type: ignore
 
-from llm_context.highlighter.language_mapping import TagQuery, to_language
+from llm_context.highlighter.language_mapping import to_language
 
 warnings.filterwarnings("ignore", category=FutureWarning, module="tree_sitter")
 
@@ -23,10 +23,10 @@ class ParserFactory:
         return ParserFactory({})
 
     def _create_tuple(self, language_name: str) -> tuple[Language, Parser]:
-        from tree_sitter_language_pack import get_language, get_parser
+        from tree_sitter_language_pack import SupportedLanguage, get_language, get_parser
 
-        language = get_language(language_name)
-        parser = get_parser(language_name)
+        language = get_language(cast(SupportedLanguage, language_name))
+        parser = get_parser(cast(SupportedLanguage, language_name))
         return (language, parser)
 
     def get_tuple(self, language_name: str) -> tuple[Language, Parser]:

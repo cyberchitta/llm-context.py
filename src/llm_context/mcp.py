@@ -1,10 +1,17 @@
 import asyncio
+from importlib.metadata import version as pkg_ver
 from pathlib import Path
 
 from mcp.server import Server  # type: ignore
 from mcp.server.stdio import stdio_server  # type: ignore
 from mcp.shared.exceptions import McpError  # type: ignore
-from mcp.types import INTERNAL_ERROR, INVALID_PARAMS, TextContent, Tool  # type: ignore
+from mcp.types import (
+    INTERNAL_ERROR,
+    INVALID_PARAMS,
+    ErrorData,
+    TextContent,
+    Tool,
+)  # type: ignore
 from pydantic import BaseModel, Field, ValidationError  # type: ignore
 
 from llm_context.context_generator import ContextGenerator
@@ -158,7 +165,7 @@ async def code_outlines(arguments: dict) -> list[TextContent]:
 
 
 async def serve() -> None:
-    server = Server("llm-context")
+    server: Server = Server("llm-context", pkg_ver("llm-context"))
 
     @server.list_tools()
     async def handle_list_tools() -> list[Tool]:
@@ -178,11 +185,11 @@ async def serve() -> None:
         try:
             return await handlers[name](arguments)
         except KeyError:
-            raise McpError(INVALID_PARAMS, f"Unknown tool: {name}")
+            raise McpError(ErrorData(code=INVALID_PARAMS, message=f"Unknown tool: {name}"))
         except ValidationError as e:
-            raise McpError(INVALID_PARAMS, str(e))
+            raise McpError(ErrorData(code=INVALID_PARAMS, message=str(e)))
         except Exception as e:
-            raise McpError(INTERNAL_ERROR, str(e))
+            raise McpError(ErrorData(code=INTERNAL_ERROR, message=str(e)))
 
     async with stdio_server() as (read_stream, write_stream):
         await server.run(
