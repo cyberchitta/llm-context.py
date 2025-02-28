@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.13] - 2025-02-28
+
+### Bug Fixes
+- Fix hatch build problems
+
 ## [0.2.11] - 2025-02-27
 
 ### Bug Fixes

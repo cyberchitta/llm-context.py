@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from logging import ERROR
 from pathlib import Path
-from typing import Optional, cast
+from typing import Any, Optional, cast
 
 from jinja2 import Environment, FileSystemLoader  # type: ignore
 
@@ -11,8 +11,6 @@ from llm_context.context_spec import ContextSpec
 from llm_context.file_selector import FileSelector
 from llm_context.flat_diagram import get_flat_diagram
 from llm_context.highlighter.language_mapping import to_language
-from llm_context.highlighter.parser import ASTFactory
-from llm_context.highlighter.tagger import ASTBasedTagger
 from llm_context.profile import IGNORE_NOTHING, INCLUDE_ALL
 from llm_context.state import FileSelection
 from llm_context.utils import PathConverter, log, safe_read_file
@@ -68,7 +66,7 @@ class ContextCollector:
             if (content := safe_read_file(abs_path)) is not None
         ]
 
-    def outlines(self, tagger: ASTBasedTagger, rel_paths: list[str]) -> list[dict[str, str]]:
+    def outlines(self, tagger: Any, rel_paths: list[str]) -> list[dict[str, str]]:
         abs_paths = PathConverter.create(self.root_path).to_absolute(rel_paths)
         if rel_paths and (outliner := ContextCollector.get_outliner()):
             from llm_context.highlighter.parser import Source
@@ -98,11 +96,11 @@ class ContextGenerator:
     full_abs: list[str]
     outline_rel: list[str]
     outline_abs: list[str]
-    tagger: Optional[ASTBasedTagger]
+    tagger: Optional[Any]
 
     @staticmethod
     def create(
-        spec: ContextSpec, file_selection: FileSelection, tagger: Optional[ASTBasedTagger] = None
+        spec: ContextSpec, file_selection: FileSelection, tagger: Optional[Any] = None
     ) -> "ContextGenerator":
         project_root = spec.project_root_path
         collector = ContextCollector.create(project_root)
@@ -130,11 +128,7 @@ class ContextGenerator:
         return self._render("files", {"files": self.collector.files(rel_paths)})
 
     def outlines(self, template_id: str = "highlights") -> str:
-        context = {
-            "highlights": self.collector.outlines(
-                cast(ASTBasedTagger, self.tagger), self.outline_rel
-            )
-        }
+        context = {"highlights": self.collector.outlines(self.tagger, self.outline_rel)}
         return self._render(template_id, context)
 
     def prompt(self, template_id: str = "prompt") -> str:
@@ -161,9 +155,7 @@ class ContextGenerator:
                 self.full_abs, self.outline_abs, no_media
             ),
             "files": self.collector.files(self.full_rel),
-            "highlights": self.collector.outlines(
-                cast(ASTBasedTagger, self.tagger), self.outline_rel
-            ),
+            "highlights": self.collector.outlines(self.tagger, self.outline_rel),
             "sample_requested_files": self.converter.to_relative(
                 self.collector.sample_file_abs(self.full_abs)
             ),

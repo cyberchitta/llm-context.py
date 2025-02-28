@@ -3,12 +3,10 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
 from pathlib import Path
-from typing import ClassVar, Optional
+from typing import Any, ClassVar, Optional
 
 from llm_context.context_spec import ContextSpec
 from llm_context.file_selector import ContextSelector
-from llm_context.highlighter.parser import ASTFactory
-from llm_context.highlighter.tagger import ASTBasedTagger
 from llm_context.profile import ToolConstants
 from llm_context.state import AllSelections, FileSelection, StateStore
 from llm_context.utils import ProjectLayout
@@ -91,7 +89,7 @@ class ExecutionEnvironment:
     runtime: RuntimeContext
     state: ExecutionState
     constants: ToolConstants
-    tagger: ASTBasedTagger
+    tagger: Optional[Any]
 
     @staticmethod
     def create(project_root: Path) -> "ExecutionEnvironment":
@@ -100,8 +98,18 @@ class ExecutionEnvironment:
         state = ExecutionState.load(project_layout)
         constants = ToolConstants.load(project_layout.state_path)
         config = ContextSpec.create(project_root, state.file_selection.profile_name, constants)
-        tagger = ASTBasedTagger.create(str(project_root), ASTFactory.create())
+        tagger = ExecutionEnvironment._tagger(project_root)
         return ExecutionEnvironment(config, runtime, state, constants, tagger)
+
+    @staticmethod
+    def _tagger(project_root: Path):
+        if ContextSelector.has_outliner(False):
+            from llm_context.highlighter.parser import ASTFactory
+            from llm_context.highlighter.tagger import ASTBasedTagger
+
+            return ASTBasedTagger.create(str(project_root), ASTFactory.create())
+        else:
+            return None
 
     def with_state(self, new_state: ExecutionState) -> "ExecutionEnvironment":
         return ExecutionEnvironment(

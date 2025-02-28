@@ -2,17 +2,17 @@ import asyncio
 from importlib.metadata import version as pkg_ver
 from pathlib import Path
 
-from mcp.server import Server  # type: ignore
-from mcp.server.stdio import stdio_server  # type: ignore
-from mcp.shared.exceptions import McpError  # type: ignore
+from mcp.server import Server
+from mcp.server.stdio import stdio_server
+from mcp.shared.exceptions import McpError
 from mcp.types import (
     INTERNAL_ERROR,
     INVALID_PARAMS,
     ErrorData,
     TextContent,
     Tool,
-)  # type: ignore
-from pydantic import BaseModel, Field, ValidationError  # type: ignore
+)
+from pydantic import BaseModel, Field, ValidationError
 
 from llm_context.context_generator import ContextGenerator
 from llm_context.exec_env import ExecutionEnvironment

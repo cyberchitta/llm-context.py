@@ -1,14 +1,12 @@
 [project]
 name = "llm-context"
-version = "0.2.11"
+version = "0.2.13"
 description = "Share code with LLMs via Model Context Protocol or clipboard. Profile-based customization enables easy switching between different tasks (like code review and documentation). Code outlining support is available as an experimental feature."
 authors = [
   { name = "restlessronin", email = "88921269+restlessronin@users.noreply.github.com" },
 ]
 readme = "README.md"
 requires-python = ">=3.10"
-packages = [{ include = "llm_context", from = "src" }]
-include = ["src/llm_context/lc_resources/*.*"]
 license = "Apache-2.0"
 keywords = ["llm", "ai", "context", "code", "clipboard", "chat"]
 classifiers = [
@@ -86,5 +84,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
-include = ["LICENSE", "README.md", "src/**"]
-packages = ["src/llm_context"]
+include=["src/**"]
+
+[tool.hatch.build.targets.wheel]
+sources = ["src"]
