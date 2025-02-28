@@ -29,13 +29,21 @@ For an in-depth exploration of the reasoning behind LLM Context and its approach
 Install LLM Context using [uv](https://github.com/astral-sh/uv):
 
 ```bash
+# Basic installation
 uv tool install llm-context
+
+# Or with code outlining support (recommended for developers)
+# uv tool install "llm-context[outline]"
 ```
 
 To upgrade to the latest version:
 
 ```bash
+# Basic upgrade
 uv tool upgrade llm-context
+
+# Or with code outlining support
+# uv tool upgrade "llm-context[outline]"
 ```
 
 > **Warning**: LLM Context is under active development. Updates may overwrite configuration files prefixed with `lc-`. We recommend all configuration files be version controlled for this reason.
@@ -51,7 +59,10 @@ Add to 'claude_desktop_config.json':
   "mcpServers": {
     "CyberChitta": {
       "command": "uvx",
+      // Basic installation:
       "args": ["--from", "llm-context", "lc-mcp"]
+      // With code outlining support (uncomment this line and comment the line above:
+      // "args": ["--from", "llm-context[outline]", "lc-mcp"]
     }
   }
 }
@@ -87,13 +98,13 @@ Once configured, you can start working with your project in two simple ways:
 ## Core Commands
 
 - `lc-init`: Initialize project configuration
-- `lc-set-profile <name>`: Switch profiles
+- `lc-set-profile <n>`: Switch profiles
 - `lc-sel-files`: Select files for inclusion
 - `lc-context`: Generate and copy context
 - `lc-prompt`: Generate project instructions for LLMs
 - `lc-read-cliplist`: Process LLM file requests
 - `lc-changed`: List files modified since last context generation
-- `lc-outlines`: Generate outlines for code files (requires [outline] extra at uv install time)
+- `lc-outlines`: Generate outlines for code files (requires installing with `[outline]` extra)
 
 ## Features & Advanced Usage
 
@@ -101,7 +112,7 @@ LLM Context provides advanced features for customizing how project content is ca
 
 - Smart file selection using `.gitignore` patterns
 - Multiple profiles for different use cases
-- Code outline generation for supported languages
+- Code outline generation for supported languages (requires `[outline]` extra)
 - Easy viewing of code structure with `lc-outlines` command
 - Customizable templates and prompts
 
