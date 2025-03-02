@@ -34,9 +34,7 @@ class Outliner:
         if not file_tags:
             return None
         rel_path = file_tags[0].rel_path
-        lines_of_interest = [
-            tag.name.begin.ln if tag.name else tag.begin.ln for tag in file_tags
-        ]
+        lines_of_interest = [tag.name.begin.ln if tag.name else tag.begin.ln for tag in file_tags]
         source = Source(rel_path=rel_path, code=code)
         return Outliner(source, lines_of_interest)
 

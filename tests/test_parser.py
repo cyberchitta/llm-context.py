@@ -61,16 +61,16 @@ def test_defref_creation(sample_defref):
 def test_defref_contents(sample_defref):
     defs = sample_defref.definitions
     assert len(defs) >= 2  # At least TestClass and test_function
-    
+
     class_def = next((d for d in defs if d.name and d.name.text == "TestClass"), None)
     func_def = next((d for d in defs if d.name and d.name.text == "test_function"), None)
-    
+
     assert class_def is not None, "TestClass definition not found"
     assert func_def is not None, "test_function definition not found"
-    
+
     assert class_def.name is not None
     assert class_def.name.text == "TestClass"
-    
+
     if func_def.name:
         assert func_def.name.text == "test_function"
 
