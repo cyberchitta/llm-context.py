@@ -96,7 +96,10 @@ class TagProcessor:
     @staticmethod
     def create(tagger, file_tags: list[dict], code: str) -> "TagProcessor":
         rel_path = file_tags[0]["rel_path"]
-        lines_of_interest = [tag["start"]["ln"] for tag in file_tags]
+        lines_of_interest = [
+            tag["name"]["start"]["ln"] if tag["name"] else tag["start"]["ln"]
+            for tag in file_tags
+        ]
         assert lines_of_interest
         source = Source(rel_path=rel_path, code=code)
         return TagProcessor(tagger, source, lines_of_interest)
