@@ -5,13 +5,7 @@ from pathlib import Path
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.shared.exceptions import McpError
-from mcp.types import (
-    INTERNAL_ERROR,
-    INVALID_PARAMS,
-    ErrorData,
-    TextContent,
-    Tool,
-)
+from mcp.types import INTERNAL_ERROR, INVALID_PARAMS, ErrorData, TextContent, Tool
 from pydantic import BaseModel, Field, ValidationError
 
 from llm_context.context_generator import ContextGenerator

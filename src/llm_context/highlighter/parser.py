@@ -1,8 +1,8 @@
 import warnings
 from dataclasses import dataclass
-from typing import NamedTuple, cast
+from typing import Any, NamedTuple, cast
 
-from tree_sitter import Language, Parser, Tree  # type: ignore
+from tree_sitter import Language, Node, Parser, Tree  # type: ignore
 
 from llm_context.highlighter.language_mapping import to_language
 
@@ -84,15 +84,45 @@ class AST:
     tag_query_factory: TagQueryFactory
     rel_path: str
 
-    def get_tag_query(self) -> str:
+    def _get_tag_query(self) -> str:
         return self.tag_query_factory.get_tag_query(self.language_name)
 
-    def captures(self, query_scm: str) -> list[tuple]:
+    def tag_matches(self) -> list[tuple[int, dict[str, list[Node]]]]:
+        query_scm = self._get_tag_query()
         query = self.language.query(query_scm)
-        matches = query.matches(self.tree.root_node)
-        captures = []
-        for _, capture_dict in matches:
-            for tag_name, nodes in capture_dict.items():
-                for node in nodes:
-                    captures.append((node, tag_name))
-        return captures
+        return query.matches(self.tree.root_node)
+
+
+@dataclass(frozen=True)
+class ASTNode:
+    node: Node
+
+    @staticmethod
+    def create(node: Node | None):
+        return ASTNode(node) if node else None
+
+    def to_definition(self, name: "ASTNode") -> dict[str, Any]:
+        return {"type": self.node.type, "name": name.to_text(), **self.to_text()}
+
+    def to_text(self) -> dict[str, Any]:
+        text = self.node.text.decode("utf8") if self.node.text else ""
+        return {"text": text, **self.to_pos_info()} if self.node else {}
+
+    def to_pos_info(self) -> dict[str, Any]:
+        return {
+            "start_point": self.node.start_point,
+            "end_point": self.node.end_point,
+            "start_byte": self.node.start_byte,
+            "end_byte": self.node.end_byte,
+        }
+
+
+def to_definition(match: tuple[int, dict[str, list[Any]]]) -> dict[str, Any]:
+    _, captures = match
+    def_capture = next((name for name in captures if name.startswith("definition.")), None)
+    if not def_capture:
+        return {}
+    name_nodes: list[Node] = captures.get("name", [])
+    name_node = ASTNode.create(name_nodes[0] if name_nodes else None)
+    def_node = ASTNode.create(captures[def_capture][0])
+    return def_node.to_definition(name_node)

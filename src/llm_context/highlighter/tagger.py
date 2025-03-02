@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from typing import NamedTuple, Optional, Protocol
+from typing import Any, NamedTuple, Optional, Protocol
 
-from llm_context.highlighter.parser import AST, ASTFactory, Source
+from llm_context.highlighter.parser import AST, ASTFactory, Source, to_definition
 
 
 class Position(NamedTuple):
@@ -9,49 +9,56 @@ class Position(NamedTuple):
     col: int
 
 
-class Tag(NamedTuple):
-    rel_path: str
+@dataclass(frozen=True)
+class Tag:
     text: str
-    kind: str
-    start: Position
+    begin: Position
     end: Position
+    start: int
+    finish: int
+
+    @staticmethod
+    def create(node: dict[str, Any]) -> Optional["Tag"]:
+        return (
+            Tag(
+                node["text"],
+                Position(node["start_point"][0], node["start_point"][1]),
+                Position(node["end_point"][0], node["end_point"][1]),
+                node["start_byte"],
+                node["end_byte"],
+            )
+            if node
+            else None
+        )
+
+
+@dataclass(frozen=True)
+class Definition:
+    rel_path: str
+    name: Tag | None
+    text: str
+    begin: Position
+    end: Position
+    start: int
+    finish: int
+
+    @staticmethod
+    def create(rel_path: str, node: dict[str, Any]) -> "Definition":
+        return Definition(
+            rel_path,
+            Tag.create(node["name"]),
+            node["text"],
+            Position(node["start_point"][0], node["start_point"][1]),
+            Position(node["end_point"][0], node["end_point"][1]),
+            node["start_byte"],
+            node["end_byte"],
+        )
 
 
 class TagExtractor(Protocol):
     workspace_path: str
 
-    def extract_tags(self, source: Source) -> list[Tag]: ...
-
-
-@dataclass(frozen=True)
-class Tagger:
-    ast: AST
-    query_scm: str
-
-    @staticmethod
-    def create(ast: AST) -> "Tagger":
-        return Tagger(ast, ast.get_tag_query())
-
-    @staticmethod
-    def _get_kind(tag: str) -> str:
-        if tag.startswith("definition."):
-            return "def"
-        elif tag.startswith("reference."):
-            return "ref"
-        return ""
-
-    def read(self) -> list[Tag]:
-        return [
-            Tag(
-                self.ast.rel_path,
-                node.text.decode(),
-                self._get_kind(tag),
-                Position(node.start_point[0], node.start_point[1]),
-                Position(node.end_point[0], node.end_point[1]),
-            )
-            for node, tag in self.ast.captures(self.query_scm)
-            if self._get_kind(tag)
-        ]
+    def extract_definitions(self, source: Source) -> list[Definition]: ...
 
 
 @dataclass(frozen=True)
@@ -63,76 +70,25 @@ class ASTBasedTagger(TagExtractor):
     def create(workspace_path: str, ast_factory: ASTFactory) -> "ASTBasedTagger":
         return ASTBasedTagger(workspace_path, ast_factory)
 
-    def extract_tags(self, source: Source) -> list[Tag]:
+    def extract_definitions(self, source: Source) -> list[Definition]:
         ast = self.ast_factory.create_from_code(source)
-        return Tagger.create(ast).read()
+        return [
+            Definition.create(ast.rel_path, defn)
+            for defn in map(to_definition, ast.tag_matches())
+            if defn
+        ]
 
 
 @dataclass(frozen=True)
-class DefRef:
+class FileTags:
     rel_path: str
-    all: list[Tag]
-    defs: list[Tag]
-    refs: list[Tag]
+    definitions: list[Definition]
 
     @staticmethod
-    def create(extractor: TagExtractor, source: Source) -> "DefRef":
-        tags = extractor.extract_tags(source)
-        defs = [tag for tag in tags if tag.kind == "def"]
-        refs = [tag for tag in tags if tag.kind == "ref"]
-        return DefRef(source.rel_path, tags, defs, refs)
+    def create(extractor: TagExtractor, source: Source) -> "FileTags":
+        definitions = extractor.extract_definitions(source)
+        return FileTags(source.rel_path, definitions)
 
     @staticmethod
-    def create_each(extractor: TagExtractor, sources: list[Source]) -> list["DefRef"]:
-        return [DefRef.create(extractor, source) for source in sources]
-
-
-class SymbolRegistry(NamedTuple):
-    workspace_path: str
-    rel_paths: set[str]
-    defines: dict[str, set[str]]
-    definitions: dict[str, set[Tag]]
-    references: dict[str, list[str]]
-    identifiers: list[str]
-
-
-@dataclass(frozen=True)
-class DefRefs:
-    workspace_path: str
-    def_refs: list[DefRef]
-
-    @staticmethod
-    def create(teg_xtractor: TagExtractor, sources: list[Source]) -> Optional["DefRefs"]:
-        def_refs = DefRef.create_each(teg_xtractor, sources)
-        non_empty = [def_ref for def_ref in def_refs if def_ref.defs or def_ref.refs]
-        if not non_empty:
-            return None
-        return DefRefs(teg_xtractor.workspace_path, non_empty)
-
-    def create_tags(self) -> Optional["SymbolRegistry"]:
-        defines: dict[str, set[str]] = {}
-        definitions: dict[str, set[Tag]] = {}
-        references: dict[str, list[str]] = {}
-
-        for def_ref in self.def_refs:
-            for def_ in def_ref.defs:
-                defines.setdefault(def_.text, set()).add(def_ref.rel_path)
-                definitions.setdefault(f"{def_ref.rel_path},{def_.text}", set()).add(def_)
-
-            for ref in def_ref.refs:
-                references.setdefault(ref.text, []).append(def_ref.rel_path)
-
-        if not references:
-            for key, value in defines.items():
-                references[key] = list(value)
-
-        rel_paths = set([def_ref.rel_path for def_ref in self.def_refs])
-
-        if not defines or not definitions or not references:
-            return None
-
-        identifiers = [key for key in defines.keys() if key in references]
-
-        return SymbolRegistry(
-            self.workspace_path, rel_paths, defines, definitions, references, identifiers
-        )
+    def create_each(extractor: TagExtractor, sources: list[Source]) -> list["FileTags"]:
+        return [FileTags.create(extractor, source) for source in sources]
