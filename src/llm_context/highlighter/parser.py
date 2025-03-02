@@ -42,29 +42,29 @@ class ParserFactory:
 
 
 @dataclass(frozen=True)
-class TagQueryFactory:
+class LangQueryFactory:
     query_cache: dict[str, str]
 
     @staticmethod
-    def create() -> "TagQueryFactory":
-        return TagQueryFactory({})
+    def create() -> "LangQueryFactory":
+        return LangQueryFactory({})
 
     def get_tag_query(self, language: str) -> str:
         if language not in self.query_cache:
-            from llm_context.highlighter.language_mapping import TagQuery
+            from llm_context.highlighter.language_mapping import LangQuery
 
-            self.query_cache[language] = TagQuery().get_query(language)
+            self.query_cache[language] = LangQuery().get_tag_query(language)
         return self.query_cache[language]
 
 
 @dataclass(frozen=True)
 class ASTFactory:
     parser_factory: ParserFactory
-    tagqry_factory: TagQueryFactory
+    tagqry_factory: LangQueryFactory
 
     @staticmethod
     def create():
-        return ASTFactory(ParserFactory.create(), TagQueryFactory.create())
+        return ASTFactory(ParserFactory.create(), LangQueryFactory.create())
 
     def create_from_code(self, source: Source) -> "AST":
         language_name = to_language(source.rel_path)
@@ -81,11 +81,11 @@ class AST:
     language: Language
     parser: Parser
     tree: Tree
-    tag_query_factory: TagQueryFactory
+    lang_query_factory: LangQueryFactory
     rel_path: str
 
     def _get_tag_query(self) -> str:
-        return self.tag_query_factory.get_tag_query(self.language_name)
+        return self.lang_query_factory.get_tag_query(self.language_name)
 
     def tag_matches(self) -> list[tuple[int, dict[str, list[Node]]]]:
         query_scm = self._get_tag_query()

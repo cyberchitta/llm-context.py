@@ -31,8 +31,8 @@ def to_query_file_name(lang: str) -> Optional[str]:
 
 
 @dataclass(frozen=True)
-class TagQuery:
-    def get_query(self, language: str) -> str:
+class LangQuery:
+    def get_tag_query(self, language: str) -> str:
         if language == "typescript":
             return self._read_query("javascript") + self._read_query("typescript")
         return self._read_query(language)
