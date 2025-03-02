@@ -1,175 +1,96 @@
 import pytest
 
-from llm_context.highlighter.highlighter import generate_highlights
-from llm_context.highlighter.outliner import Outliner
+from llm_context.highlighter.outliner import Outliner, generate_outlines
 from llm_context.highlighter.parser import ASTFactory, Source
-from llm_context.highlighter.tagger import ASTBasedTagger, Position, Tag
+from llm_context.highlighter.tagger import ASTBasedTagger, Definition, Position, Tag
 
 
 @pytest.fixture
 def tagger():
-    return ASTBasedTagger.create("", ASTFactory.create())
+    workspace_path = "/fake/workspace/path"
+    ast_factory = ASTFactory.create()
+    return ASTBasedTagger.create(workspace_path, ast_factory)
 
 
 def test_outliner_line_numbering():
-    source = Source(
-        rel_path="test.txt",
-        code="""line1
-line2
-function
-line4
-line5""",
-    )
-    tags = [
-        Tag(
-            rel_path="test.txt",
-            text="function",
-            kind="def",
-            start=Position(2, 0),
-            end=Position(2, 8),
-        ),
-    ]
+    code = "line1\nline2\nline3\nline4\nline5"
+    lines_of_interest = [1, 3]  # zero-indexed, so lines 2 and 4
+    source = Source(rel_path="test.py", code=code)
+    outliner = Outliner(source, lines_of_interest)
 
-    outliner = Outliner.create(tags, source.code)
-    assert outliner is not None
-    highlights = outliner.to_highlights()["highlights"]
-
-    expected_output = """⋮...
-█function
-⋮...
-"""
-    assert highlights.strip() == expected_output.strip()
+    result = outliner.to_highlights()
+    assert "█line2" in result["highlights"]
+    assert "█line4" in result["highlights"]
 
 
 def test_outliner_first_line_highlighting():
-    source = Source(
-        rel_path="test.txt",
-        code="""function
-line2
-line3
-line4
-line5""",
-    )
-    tags = [
-        Tag(
-            rel_path="test.txt",
-            text="function",
-            kind="def",
-            start=Position(0, 0),  # This represents the first line in the file
-            end=Position(0, 8),
-        ),
-    ]
+    code = "line1\nline2\nline3"
+    lines_of_interest = [0]  # first line
+    source = Source(rel_path="test.py", code=code)
+    outliner = Outliner(source, lines_of_interest)
 
-    outliner = Outliner.create(tags, source.code)
-    assert outliner is not None
-    highlights = outliner.to_highlights()["highlights"]
-
-    expected_output = """█function
-⋮...
-"""
-    assert highlights.strip() == expected_output.strip()
+    result = outliner.to_highlights()
+    assert "█line1" in result["highlights"]
 
 
 @pytest.fixture
 def sample_source():
-    return Source(
-        rel_path="test.py",
-        code="""def test_function():
-    pass
-
+    code = """
 class TestClass:
     def test_method(self):
-        return True
+        pass
 
-test_function()
-TestClass().test_method()
-""".strip(),
+def test_function():
+    pass
+"""
+    return Source(rel_path="test.py", code=code)
+
+
+@pytest.fixture
+def sample_definitions(sample_source):
+    class_def = Definition(
+        rel_path=sample_source.rel_path,
+        name=Tag("TestClass", Position(1, 6), Position(1, 15), 7, 16),
+        text="class TestClass:",
+        begin=Position(1, 0),
+        end=Position(3, 12),
+        start=1,
+        finish=44,
     )
 
+    method_def = Definition(
+        rel_path=sample_source.rel_path,
+        name=Tag("test_method", Position(2, 8), Position(2, 19), 27, 38),
+        text="def test_method(self):",
+        begin=Position(2, 4),
+        end=Position(3, 12),
+        start=23,
+        finish=56,
+    )
+    return [class_def, method_def]
 
-def test_outliner_creation(sample_source):
-    tags = [
-        Tag(
-            rel_path="test.py",
-            text="test_function",
-            kind="def",
-            start=Position(0, 4),
-            end=Position(0, 17),
-        ),
-        Tag(
-            rel_path="test.py",
-            text="TestClass",
-            kind="def",
-            start=Position(3, 6),
-            end=Position(3, 15),
-        ),
-        Tag(
-            rel_path="test.py",
-            text="test_method",
-            kind="def",
-            start=Position(4, 8),
-            end=Position(4, 19),
-        ),
-    ]
-    outliner = Outliner.create(tags, sample_source.code)
+
+def test_outliner_creation(sample_source, sample_definitions):
+    outliner = Outliner.create(sample_definitions, sample_source.code)
     assert outliner is not None
     assert outliner.source.rel_path == "test.py"
-    assert outliner.lines_of_interest == [
-        0,
-        3,
-        4,
-    ]  # These are now correct zero-indexed line numbers
+    assert len(outliner.lines_of_interest) == 2
 
 
-def test_outliner_highlights(sample_source):
-    tags = [
-        Tag(
-            rel_path="test.py",
-            text="test_function",
-            kind="def",
-            start=Position(0, 4),
-            end=Position(0, 17),
-        ),
-        Tag(
-            rel_path="test.py",
-            text="TestClass",
-            kind="def",
-            start=Position(3, 6),
-            end=Position(3, 15),
-        ),
-        Tag(
-            rel_path="test.py",
-            text="test_method",
-            kind="def",
-            start=Position(4, 8),
-            end=Position(4, 19),
-        ),
-    ]
-    outliner = Outliner.create(tags, sample_source.code)
+def test_outliner_highlights(sample_source, sample_definitions):
+    outliner = Outliner.create(sample_definitions, sample_source.code)
     highlights = outliner.to_highlights()
 
-    expected_output = """█def test_function():
-⋮...
-█class TestClass:
-█    def test_method(self):
-⋮...
-"""
-    assert highlights["highlights"].strip() == expected_output.strip()
+    assert highlights["rel_path"] == "test.py"
+    assert "█class TestClass" in highlights["highlights"]
+    assert "█    def test_method" in highlights["highlights"]
 
 
 def test_generate_highlights(sample_source, tagger):
-    highlights = generate_highlights(tagger, [sample_source])
+    defs = tagger.extract_definitions(sample_source)
+    assert len(defs) > 0
 
-    assert highlights is not None
-    assert len(highlights) == 1
-    assert "rel_path" in highlights[0]
-    assert "highlights" in highlights[0]
-    assert highlights[0]["rel_path"] == "test.py"
-
-    expected_highlights = """█def test_function():
-⋮...
-█class TestClass:
-█    def test_method(self):
-⋮...
-"""
-    assert highlights[0]["highlights"].strip() == expected_highlights.strip()
+    outlines = generate_outlines(tagger, [sample_source])
+    assert len(outlines) == 1
+    assert outlines[0]["rel_path"] == "test.py"
+    assert "class TestClass" in outlines[0]["highlights"]

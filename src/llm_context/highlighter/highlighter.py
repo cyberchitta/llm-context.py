@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from llm_context.highlighter.parser import AST, ASTFactory, Source
-from llm_context.highlighter.tagger import ASTBasedTagger, DefRef, Tag
+from llm_context.highlighter.tagger import ASTBasedTagger, Definition, FileTags
 
 
 @dataclass(frozen=True)
@@ -115,20 +115,19 @@ class TagProcessor:
 @dataclass(frozen=True)
 class Highlights:
     tagger: ASTBasedTagger
-    tags: list[list[Tag]]
+    tags: list[list[Definition]]
     source_set: list[Source]
 
     @staticmethod
     def create(tagger: ASTBasedTagger, source_set: list[Source]) -> "Highlights":
-        def_refs = [DefRef.create(tagger, source) for source in source_set]
-        tags = [def_ref.defs for def_ref in def_refs]
-        return Highlights(tagger, tags, source_set)
+        file_tags = [FileTags.create(tagger, source).definitions for source in source_set]
+        return Highlights(tagger, file_tags, source_set)
 
     def to_code_highlights(self) -> list[dict[str, str]]:
         code_highlights = []
         for tags, source in zip(self.tags, self.source_set):
             if tags:
-                tag_processor = TagProcessor(self.tagger, source, [tag.start.ln for tag in tags])
+                tag_processor = TagProcessor(self.tagger, source, [tag.begin.ln for tag in tags])
                 highlights = tag_processor.to_highlights()
                 if highlights:
                     code_highlights.append(highlights)

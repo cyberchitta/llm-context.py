@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from llm_context.highlighter.parser import ASTFactory, Source
-from llm_context.highlighter.tagger import ASTBasedTagger, DefRef, Tag
+from llm_context.highlighter.parser import Source
+from llm_context.highlighter.tagger import ASTBasedTagger, Definition, FileTags
 
 
 @dataclass(frozen=True)
@@ -30,11 +30,11 @@ class Outliner:
     lines_of_interest: list[int]
 
     @staticmethod
-    def create(file_tags: list[Tag], code: str) -> Optional["Outliner"]:
+    def create(file_tags: list[Definition], code: str) -> Optional["Outliner"]:
         if not file_tags:
             return None
         rel_path = file_tags[0].rel_path
-        lines_of_interest = [tag.start.ln for tag in file_tags]
+        lines_of_interest = [tag.begin.ln for tag in file_tags]
         source = Source(rel_path=rel_path, code=code)
         return Outliner(source, lines_of_interest)
 
@@ -51,14 +51,13 @@ class Outliner:
 
 @dataclass(frozen=True)
 class Outlines:
-    defs: list[list[Tag]]
+    defs: list[list[Definition]]
     source_set: list[Source]
 
     @staticmethod
     def create(tagger: ASTBasedTagger, source_set: list[Source]) -> "Outlines":
-        def_refs = [DefRef.create(tagger, source) for source in source_set]
-        defs = [def_ref.defs for def_ref in def_refs]
-        return Outlines(defs, source_set)
+        all_tags = [FileTags.create(tagger, source).definitions for source in source_set]
+        return Outlines(all_tags, source_set)
 
     def to_code_outlines(self) -> list[dict[str, str]]:
         code_outlines = []
