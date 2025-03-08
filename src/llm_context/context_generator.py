@@ -35,6 +35,7 @@ class Template:
 @dataclass(frozen=True)
 class ContextCollector:
     root_path: Path
+    converter: PathConverter
 
     @staticmethod
     def get_outliner():
@@ -51,7 +52,7 @@ class ContextCollector:
 
     @staticmethod
     def create(root_path: Path) -> "ContextCollector":
-        return ContextCollector(root_path)
+        return ContextCollector(root_path, PathConverter.create(root_path))
 
     def sample_file_abs(self, full_abs: list[str]) -> list[str]:
         all_abs = set(FileSelector.create(self.root_path, IGNORE_NOTHING, INCLUDE_ALL).get_files())
@@ -59,7 +60,7 @@ class ContextCollector:
         return random.sample(incomplete_files, min(2, len(incomplete_files)))
 
     def files(self, rel_paths: list[str]) -> list[dict[str, str]]:
-        abs_paths = PathConverter.create(self.root_path).to_absolute(rel_paths)
+        abs_paths = self.converter.to_absolute(rel_paths)
         return [
             {"path": rel_path, "content": content}
             for rel_path, abs_path in zip(rel_paths, abs_paths)
@@ -67,7 +68,7 @@ class ContextCollector:
         ]
 
     def outlines(self, tagger: Any, rel_paths: list[str]) -> list[dict[str, str]]:
-        abs_paths = PathConverter.create(self.root_path).to_absolute(rel_paths)
+        abs_paths = self.converter.to_absolute(rel_paths)
         if rel_paths and (outliner := ContextCollector.get_outliner()):
             from llm_context.highlighter.parser import Source
 
@@ -77,6 +78,29 @@ class ContextCollector:
                 if (content := safe_read_file(abs_path)) is not None
             ]
             return cast(list[dict[str, str]], outliner(tagger, source_set))
+        else:
+            return []
+
+    def definitions(self, tagger: Any, requests: list[tuple[str, str]]) -> str:
+        if requests and ContextCollector.get_outliner():
+            from llm_context.highlighter.parser import Source
+            from llm_context.highlighter.tagger import find_definition
+
+            rel_paths = list({path for path, _ in requests})
+            abs_paths = self.converter.to_absolute(rel_paths)
+            sources = [
+                Source(rel, content)
+                for rel, abs_path in zip(rel_paths, abs_paths)
+                if (content := safe_read_file(abs_path)) is not None
+            ]
+            all_defs = {
+                source.rel_path: tagger.extract_definitions(source, with_body=True)
+                for source in sources
+            }
+            return [
+                {"path": path, "name": name, "code": find_definition(all_defs.get(path, []), name)}
+                for path, name in requests
+            ]
         else:
             return []
 
@@ -129,6 +153,10 @@ class ContextGenerator:
 
     def outlines(self, template_id: str = "highlights") -> str:
         context = {"highlights": self.collector.outlines(self.tagger, self.outline_rel)}
+        return self._render(template_id, context)
+
+    def definitions(self, requests, template_id: str = "definitions") -> str:
+        context = {"definitions": self.collector.definitions(self.tagger, requests)}
         return self._render(template_id, context)
 
     def prompt(self, template_id: str = "prompt") -> str:

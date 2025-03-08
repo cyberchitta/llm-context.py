@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, NamedTuple, Optional, Protocol
 
-from llm_context.highlighter.parser import AST, ASTFactory, Source, to_definition
+from llm_context.highlighter.parser import ASTFactory, Source, to_definition
 
 
 class Position(NamedTuple):
@@ -58,7 +58,7 @@ class Definition:
 class TagExtractor(Protocol):
     workspace_path: str
 
-    def extract_definitions(self, source: Source) -> list[Definition]: ...
+    def extract_definitions(self, source: Source, with_body: bool) -> list[Definition]: ...
 
 
 @dataclass(frozen=True)
@@ -70,11 +70,11 @@ class ASTBasedTagger(TagExtractor):
     def create(workspace_path: str, ast_factory: ASTFactory) -> "ASTBasedTagger":
         return ASTBasedTagger(workspace_path, ast_factory)
 
-    def extract_definitions(self, source: Source) -> list[Definition]:
+    def extract_definitions(self, source: Source, with_body: bool) -> list[Definition]:
         ast = self.ast_factory.create_from_code(source)
         return [
             Definition.create(ast.rel_path, defn)
-            for defn in map(to_definition, ast.tag_matches())
+            for defn in map(to_definition, ast.body_matches() if with_body else ast.tag_matches())
             if defn
         ]
 
@@ -86,9 +86,13 @@ class FileTags:
 
     @staticmethod
     def create(extractor: TagExtractor, source: Source) -> "FileTags":
-        definitions = extractor.extract_definitions(source)
+        definitions = extractor.extract_definitions(source, False)
         return FileTags(source.rel_path, definitions)
 
     @staticmethod
     def create_each(extractor: TagExtractor, sources: list[Source]) -> list["FileTags"]:
         return [FileTags.create(extractor, source) for source in sources]
+
+
+def find_definition(definitions, name):
+    return next((d.text for d in definitions if d.name and d.name.text == name), None)

@@ -4,7 +4,7 @@ from typing import Any, NamedTuple, cast
 
 from tree_sitter import Language, Node, Parser, Tree  # type: ignore
 
-from llm_context.highlighter.language_mapping import to_language
+from llm_context.highlighter.language_mapping import LangQuery, to_language
 
 warnings.filterwarnings("ignore", category=FutureWarning, module="tree_sitter")
 
@@ -42,29 +42,33 @@ class ParserFactory:
 
 
 @dataclass(frozen=True)
-class TagQueryFactory:
-    query_cache: dict[str, str]
+class LangQueryFactory:
+    tag_query_cache: dict[str, str]
+    body_query_cache: dict[str, str]
 
     @staticmethod
-    def create() -> "TagQueryFactory":
-        return TagQueryFactory({})
+    def create() -> "LangQueryFactory":
+        return LangQueryFactory({}, {})
 
     def get_tag_query(self, language: str) -> str:
-        if language not in self.query_cache:
-            from llm_context.highlighter.language_mapping import TagQuery
+        if language not in self.tag_query_cache:
+            self.tag_query_cache[language] = LangQuery().get_tag_query(language)
+        return self.tag_query_cache[language]
 
-            self.query_cache[language] = TagQuery().get_query(language)
-        return self.query_cache[language]
+    def get_body_query(self, language: str) -> str:
+        if language not in self.body_query_cache:
+            self.body_query_cache[language] = LangQuery().get_body_query(language)
+        return self.body_query_cache[language]
 
 
 @dataclass(frozen=True)
 class ASTFactory:
     parser_factory: ParserFactory
-    tagqry_factory: TagQueryFactory
+    lang_qry_factory: LangQueryFactory
 
     @staticmethod
     def create():
-        return ASTFactory(ParserFactory.create(), TagQueryFactory.create())
+        return ASTFactory(ParserFactory.create(), LangQueryFactory.create())
 
     def create_from_code(self, source: Source) -> "AST":
         language_name = to_language(source.rel_path)
@@ -72,7 +76,7 @@ class ASTFactory:
         language = self.parser_factory.get_language(language_name)
         parser = self.parser_factory.get_parser(language_name)
         tree = parser.parse(bytes(source.code, "utf-8"))
-        return AST(language_name, language, parser, tree, self.tagqry_factory, source.rel_path)
+        return AST(language_name, language, parser, tree, self.lang_qry_factory, source.rel_path)
 
 
 @dataclass(frozen=True)
@@ -81,16 +85,24 @@ class AST:
     language: Language
     parser: Parser
     tree: Tree
-    tag_query_factory: TagQueryFactory
+    lang_qry_factory: LangQueryFactory
     rel_path: str
 
-    def _get_tag_query(self) -> str:
-        return self.tag_query_factory.get_tag_query(self.language_name)
-
-    def tag_matches(self) -> list[tuple[int, dict[str, list[Node]]]]:
-        query_scm = self._get_tag_query()
+    def match(self, query_scm) -> list[tuple[int, dict[str, list[Node]]]]:
         query = self.language.query(query_scm)
         return query.matches(self.tree.root_node)
+
+    def tag_matches(self) -> list[tuple[int, dict[str, list[Node]]]]:
+        return self.match(self._get_tag_query())
+
+    def body_matches(self) -> list[tuple[int, dict[str, list[Node]]]]:
+        return self.match(self._get_body_query())
+
+    def _get_tag_query(self) -> str:
+        return self.lang_qry_factory.get_tag_query(self.language_name)
+
+    def _get_body_query(self) -> str:
+        return self.lang_qry_factory.get_body_query(self.language_name)
 
 
 @dataclass(frozen=True)

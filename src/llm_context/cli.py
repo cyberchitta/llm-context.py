@@ -150,3 +150,12 @@ def changed_files(env: ExecutionEnvironment) -> ExecutionResult:
         else file_sel_full
     )
     return ExecutionResult("\n".join(file_sel_out.files), env)
+
+
+@create_clipboard_cmd
+def definitions_from_clip(env: ExecutionEnvironment):
+    requests = [tuple(line.split(",", 1)) for line in pyperclip.paste().strip().splitlines()]
+    return ExecutionResult(
+        ContextGenerator.create(env.config, env.state.file_selection).files(),
+        env,
+    )
