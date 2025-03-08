@@ -27,7 +27,7 @@ def to_language(filename: str) -> Optional[str]:
 
 
 def to_query_file_name(pfx: str, lang: str) -> Optional[str]:
-    return f"tree-sitter-{lang}-{"tags" if pfx == "tag" else "body"}.scm" if lang else None
+    return f"tree-sitter-{lang}-{'tags' if pfx == 'tag' else 'body'}.scm" if lang else None
 
 
 @dataclass(frozen=True)
@@ -37,8 +37,16 @@ class LangQuery:
             return self._read_tag_query("javascript") + self._read_tag_query("typescript")
         return self._read_tag_query(language)
 
+    def get_body_query(self, language: str) -> str:
+        if language == "typescript":
+            return self._read_body_query("javascript") + self._read_body_query("typescript")
+        return self._read_body_query(language)
+
     def _read_tag_query(self, language: str) -> str:
         return self._read_query("tag", language)
+
+    def _read_body_query(self, language: str) -> str:
+        return self._read_query("bdy", language)
 
     def _read_query(self, pfx: str, language: str) -> str:
         query_file_name = to_query_file_name(pfx, language)

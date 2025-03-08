@@ -30,6 +30,7 @@ class Config:
                 "files": "lc-files.j2",
                 "highlights": "lc-highlights.j2",
                 "prompt": "lc-prompt.j2",
+                "definitions": "lc-definitions.j2",
             },
             profiles={
                 "code": Profile.create_code().to_dict(),
