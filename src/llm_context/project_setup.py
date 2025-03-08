@@ -75,12 +75,18 @@ class ProjectSetup:
         self._create_curr_ctx_file()
         self._update_templates_if_needed()
         self.create_state_file()
-        self._copy_template("dotgitignore", self.project_layout.project_config_path / ".gitignore")
-        self._copy_template(
-            "lc-prompt.md", self.project_layout.project_config_path / "lc-prompt.md"
-        )
+        self._create_or_update_ancillary_files()
         self._create_project_notes_file()
         self._create_user_notes_file()
+
+    def _create_or_update_ancillary_files(self):
+        if not self.project_layout.config_path.exists() or self.constants.needs_update:
+            self._copy_template(
+                "dotgitignore", self.project_layout.project_config_path / ".gitignore"
+            )
+            self._copy_template(
+                "lc-prompt.md", self.project_layout.project_config_path / "lc-prompt.md"
+            )
 
     def _create_or_update_config_file(self):
         if not self.project_layout.config_path.exists() or self.constants.needs_update:
