@@ -169,7 +169,7 @@ class ImplementationsRequest(BaseModel):
 
 get_implementations_tool = Tool(
     name="lc-get-implementations",
-    description="Retrieves complete code implementations of definitions identified in code outlines. Provide a list of file paths and definition names to get their full implementations. This tool works with the same languages supported by the code outliner.",
+    description="Retrieves complete code implementations of definitions identified in code outlines. Provide a list of file paths and definition names to get their full implementations. This tool works with all supported languages except C and C++.",
     inputSchema=ImplementationsRequest.model_json_schema(),
 )
 
