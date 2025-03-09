@@ -64,11 +64,10 @@ Check if lc-get-files tool is available in your environment before proceeding to
 ## Code Outlines
 
 Smart outlines highlighting important definitions in the codebase.
-Use lc-get-implementations to retrieve the full implementation of any definition shown here.
 
-> **Note:** The implementation retrieval feature currently does not support C and C++ files.
+> **Note:** Implementation retrieval doesn't support C/C++ files.
 
-1. Using the lc-get-implementations tool (if available):
+1. Using the lc-get-implementations tool:
    ```json
    {
      "root_path": "{{ abs_root_path }}",
@@ -80,13 +79,13 @@ Use lc-get-implementations to retrieve the full implementation of any definition
    }
    ```
 
-2. Or using the CLI by copying definition references to clipboard in format:
+2. Without tools: Copy these references to clipboard:
    ```
    {% for path, name in sample_definitions %}
    {{ path }}:{{ name }}
    {% endfor %}
    ```
-   Then running the `lc-clip-implementations` command.
+   Then ask the human to run `lc-clip-implementations`
 
 {% include 'lc-highlights.j2' %}
 {% endif %}
