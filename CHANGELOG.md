@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.14] - 2025-03-09
+
+### Features
+- Expose (MCP & CLI) definition implementation extraction capabilities
+- Add explicit markers to prevent redundant context requests
+- Use name line for outlines and highlights
+
 ## [0.2.13] - 2025-02-28
 
 ### Bug Fixes
