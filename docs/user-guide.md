@@ -30,7 +30,7 @@
    - [lc-sel-outlines](#lc-sel-outlines)
    - [lc-context](#lc-context)
    - [lc-prompt](#lc-prompt)
-   - [lc-read-cliplist](#lc-read-cliplist)
+   - [lc-clip-files](#lc-clip-files)
    - [lc-changed](#lc-changed)
    - [lc-outlines](#lc-outlines)
 
@@ -94,7 +94,7 @@
 
 4. When the LLM requests additional files:
    - Copy the file list from the LLM
-   - Run `lc-read-cliplist`
+   - Run `lc-clip-files`
    - Paste the new content back to the LLM
 
 ### Command Overview
@@ -106,7 +106,7 @@ Core commands you'll use frequently:
 - `lc-sel-files`: Select files for full content inclusion
 - `lc-sel-outlines`: Select files for structural outline generation
 - `lc-context`: Generate and copy context to clipboard
-- `lc-read-cliplist`: Process file requests from the LLM
+- `lc-clip-files`: Process file requests from the LLM
 
 ### Common Use Cases
 
@@ -568,7 +568,7 @@ Generates project-specific instructions suitable for "System Prompts" or "Custom
   - Similar "Custom Instruction" sections in other LLM interfaces
   - Setting up consistent project-specific LLM behavior
 
-### lc-read-cliplist
+### lc-clip-files
 
 Processes file requests from clipboard.
 
@@ -769,7 +769,7 @@ lc-context             # Generate and copy
 
 ```bash
 # Copy file list from LLM
-lc-read-cliplist
+lc-clip-files
 # Paste result back
 ```
 
@@ -797,7 +797,7 @@ lc-read-cliplist
 
 2. Ongoing Usage:
    - Update knowledge as needed
-   - Use `lc-read-cliplist` for new files
+   - Use `lc-clip-files` for new files
    - Maintain consistent context
 
 ## Best Practices
@@ -829,7 +829,7 @@ lc-read-cliplist
    - Consider using outlines for large files
 
 3. Efficient Updates:
-   - Use `lc-read-cliplist` for targeted file access
+   - Use `lc-clip-files` for targeted file access
    - Update context when project structure changes
    - Switch profiles based on your current task
 

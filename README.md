@@ -92,7 +92,7 @@ Once configured, you can start working with your project in two simple ways:
 
 8. When the LLM requests additional files:
    - Copy the file list from the LLM
-   - Run `lc-read-cliplist`
+   - Run `lc-clip-files`
    - Paste the contents back to the LLM
 
 ## Core Commands
@@ -102,7 +102,7 @@ Once configured, you can start working with your project in two simple ways:
 - `lc-sel-files`: Select files for inclusion
 - `lc-context`: Generate and copy context
 - `lc-prompt`: Generate project instructions for LLMs
-- `lc-read-cliplist`: Process LLM file requests
+- `lc-clip-files`: Process LLM file requests
 - `lc-changed`: List files modified since last context generation
 - `lc-outlines`: Generate outlines for code files (requires installing with `[outline]` extra)
 
