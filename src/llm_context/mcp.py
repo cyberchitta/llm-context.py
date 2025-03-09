@@ -71,9 +71,7 @@ class FilesRequest(BaseModel):
 
 get_files_tool = Tool(
     name="lc-get-files",
-    description=(
-        "IMPORTANT: Check previously retrieved file contents before making new requests. Retrieves (read-only) complete contents of specified files from the project. The assistant cannot modify files with this tool - it only reads their contents."
-    ),
+    description="IMPORTANT: Check previously retrieved file contents before making new requests. Retrieves (read-only) complete contents of specified files from the project. For this project, this is the preferred method for all file content analysis and text searches - simply retrieve the relevant files and examine their contents. The assistant cannot modify files with this tool - it only reads their contents.",
     inputSchema=FilesRequest.model_json_schema(),
 )
 

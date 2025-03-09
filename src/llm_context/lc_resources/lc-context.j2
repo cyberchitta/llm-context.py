@@ -30,6 +30,8 @@ Check if lc-get-files tool is available in your environment before proceeding to
     "paths": [{% for file in sample_requested_files %}"{{ file }}"{% if not loop.last %},{% endif %}{% endfor %}]
   }
   ```
+   NOTE: This tool should be your primary method for examining file contents and conducting text searches in this project.
+
 
 2. Only if lc-get-files is not available, follow these steps (do NOT use the above root_path):
     1. Immediately halt your current response.
