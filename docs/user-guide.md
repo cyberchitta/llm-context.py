@@ -33,6 +33,7 @@
    - [lc-clip-files](#lc-clip-files)
    - [lc-changed](#lc-changed)
    - [lc-outlines](#lc-outlines)
+   - [lc-clip-implementations](#lc-clip-implementations)
 
 5. [Advanced Features](#advanced-features)
 
@@ -81,18 +82,26 @@
 
    This uses your `.gitignore` and profile settings to choose relevant files.
 
-2. Generate and copy context to clipboard:
+2. If using code outlining (with [outline] extra installed), select files for outline generation:
+
+   ```bash
+   lc-sel-outlines
+   ```
+
+   This will select additional files to be presented as structural outlines.
+
+3. Generate and copy context to clipboard:
 
    ```bash
    lc-context
    ```
 
-3. Paste the context into your LLM chat interface:
+4. Paste the context into your LLM chat interface:
 
    - For Claude Projects/Custom GPTs: Use the knowledge section
    - For regular chats: Use `lc-set-profile code-prompt` first to include guiding instructions
 
-4. When the LLM requests additional files:
+5. When the LLM requests additional files:
    - Copy the file list from the LLM
    - Run `lc-clip-files`
    - Paste the new content back to the LLM
@@ -603,9 +612,32 @@ The outline displays:
 - Context lines marked with │
 - Skipped sections indicated with ⋮...
 
+### lc-clip-implementations
+
+Extract code implementations requested by LLMs.
+
+- Reads file path and definition name pairs from clipboard
+- Extracts full implementation of requested definitions
+- Copies result to clipboard
+- Format for clipboard input:
+  ```
+  /path/to/file.py:DefinitionName
+  /path/to/file.py:another_function_name
+  ```
+- Useful when LLMs request to see specific implementation details
+- Requires [outline] extra
+- Note: Currently doesn't support C and C++ files
+
 ## Advanced Features
 
 ### Code Outlining
+
+LLM Context provides two powerful code navigation features:
+
+1. Generating smart outlines to understand code structure
+2. Extracting full implementations of specific definitions
+
+These capabilities work together to help LLMs efficiently explore and understand your codebase.
 
 #### Installation
 
@@ -647,11 +679,51 @@ Currently supported languages:
 - Ruby, Rust
 - TypeScript
 
+#### Workflow
+
+For code outlining to work properly:
+
+1. First run `lc-sel-files` to select files for full content
+2. Then run `lc-sel-outlines` to select additional files for outline generation
+3. Finally run `lc-context` to generate the complete context including both full files and outlines
+
+If you skip the `lc-sel-outlines` step, your context will not include any code outlines.
+
 #### Limitations
 
-- Language support is fixed
-- Unsupported files are excluded
-- May impact context size
+- Implementation extraction doesn't currently support C and C++ files
+- You must have the [outline] extra installed for these features to work
+
+#### Definition Implementation Extraction
+
+After reviewing code outlines, LLMs may request to see the full implementation of specific definitions (classes, functions, methods, etc.). LLM Context provides a seamless workflow for this:
+
+1. The LLM will request implementations in the format:
+   ```
+   /path/to/file.py:DefinitionName
+   /path/to/file.py:another_function_name
+   ```
+
+2. Copy these requests to your clipboard
+
+3. Run the command:
+   ```bash
+   lc-clip-implementations
+   ```
+
+4. Paste the results back to the LLM
+
+This feature:
+- Works with all languages supported by the code outliner, except C and C++ (currently not supported)
+- Extracts the complete implementation, not just signatures
+- Helps LLMs understand specific code components without requiring the entire file
+- Enables a two-step exploration workflow: first understand structure, then examine specific implementations
+
+Example workflow:
+1. Generate context with outlines: `lc-context`
+2. LLM reviews the code structure and requests specific implementations
+3. Copy the requests, run `lc-clip-implementations`, paste results
+4. LLM can now analyze the detailed implementations
 
 ### Performance Optimization
 
@@ -745,10 +817,13 @@ profiles:
    | lc-get-files | Retrieves specific files from the project |
    | lc-list-modified-files | Lists files modified since a specific timestamp |
    | lc-code-outlines | Returns smart outlines for all code files in the repository (requires [outline] extra) |
-
-   Note: The `lc-code-outlines` tool is only available if you have installed llm-context with the [outline] extra:
+   | lc-get-implementations | Retrieves complete code implementations of definitions identified in code outlines |
+   
+   Note: The `lc-code-outlines` and `lc-get-implementations` tools are only available if you have installed llm-context with the [outline] extra:
+   
    ```bash
    uv tool install "llm-context[outline]"
+   ```
 
 4. Usage:
    - Files requested via MCP are automatically processed

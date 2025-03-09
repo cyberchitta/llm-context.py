@@ -105,6 +105,7 @@ Once configured, you can start working with your project in two simple ways:
 - `lc-clip-files`: Process LLM file requests
 - `lc-changed`: List files modified since last context generation
 - `lc-outlines`: Generate outlines for code files (requires installing with `[outline]` extra)
+- `lc-clip-implementations`: Extract code implementations requested by LLMs (requires installing with `[outline]` extra, doesn't support C/C++)
 
 ## Features & Advanced Usage
 
@@ -112,8 +113,9 @@ LLM Context provides advanced features for customizing how project content is ca
 
 - Smart file selection using `.gitignore` patterns
 - Multiple profiles for different use cases
-- Code outline generation for supported languages (requires `[outline]` extra)
-- Easy viewing of code structure with `lc-outlines` command
+- Code Navigation Features:
+  1. **Smart Code Outlines**: Allows LLMs to view the high-level structure of your codebase with automatically generated outlines highlighting important definitions (requires `[outline]` extra)
+  2. **Definition Implementation Extraction**: Paste full implementations of specific definitions that are requested by LLMs after they review the code outlines, using the `lc-clip-implementations` command
 - Customizable templates and prompts
 
 See our [User Guide](docs/user-guide.md) for detailed documentation of these features.
