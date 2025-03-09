@@ -6,6 +6,10 @@ profiles:
       excluding media and git-related files.
     gitignores:
       full_files:
+      - 'tests/'
+      - '*.md'
+      - '*.scm'
+      - '*.yaml'
       - .git
       - .gitignore
       - .llm-context/
@@ -36,6 +40,10 @@ profiles:
       - '*.ttf'
       - '*.map'
       outline_files:
+      - 'tests/'
+      - '*.md'
+      - '*.scm'
+      - '*.yaml'
       - .git
       - .gitignore
       - .llm-context/
