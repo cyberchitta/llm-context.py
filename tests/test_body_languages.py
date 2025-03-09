@@ -70,7 +70,6 @@ console.log(`Cube of 3: ${mathOp.cube()}`);
             "function factorial(n) {\n    if (n === 0 || n === 1) return 1;\n    return n * factorial(n - 1);\n}",
             "class MathOperations {\n    static square(x) {\n        return x * x;\n    }\n\n    constructor(value) {\n        this.value = value;\n    }\n\n    cube() {\n        return Math.pow(this.value, 3);\n    }\n}",
             "static square(x) {\n        return x * x;\n    }",
-            "constructor(value) {\n        this.value = value;\n    }",
             "cube() {\n        return Math.pow(this.value, 3);\n    }",
         ],
     ),
@@ -106,10 +105,16 @@ console.log(`Cube of 3: ${mathOp.cube()}`);
 """,
         [
             "function factorial(n: number): number {\n    if (n === 0 || n === 1) return 1;\n    return n * factorial(n - 1);\n}",
+            "function factorial(n: number): number {\n    if (n === 0 || n === 1) return 1;\n    return n * factorial(n - 1);\n}",
             "interface IMathOperations {\n    cube(): number;\n}",
+            "interface IMathOperations {\n    cube(): number;\n}",
+            "cube(): number",
+            "class MathOperations implements IMathOperations {\n    static square(x: number): number {\n        return x * x;\n    }\n\n    constructor(private value: number) {}\n\n    cube(): number {\n        return Math.pow(this.value, 3);\n    }\n}",
             "class MathOperations implements IMathOperations {\n    static square(x: number): number {\n        return x * x;\n    }\n\n    constructor(private value: number) {}\n\n    cube(): number {\n        return Math.pow(this.value, 3);\n    }\n}",
             "static square(x: number): number {\n        return x * x;\n    }",
+            "static square(x: number): number {\n        return x * x;\n    }",
             "constructor(private value: number) {}",
+            "cube(): number {\n        return Math.pow(this.value, 3);\n    }",
             "cube(): number {\n        return Math.pow(this.value, 3);\n    }",
         ],
     ),
@@ -191,11 +196,12 @@ int main() {
 }
 """,
         [
-            "int factorial(int n) {\n    if (n == 0 || n == 1) return 1;\n    return n * factorial(n - 1);\n}",
-            "double square(double x) {\n    return x * x;\n}",
-            "MathOperations create_math_operations(double value) {\n    MathOperations mo = {value};\n    return mo;\n}",
-            "double cube(MathOperations* mo) {\n    return pow(mo->value, 3);\n}",
-            'int main() {\n    MathOperations mo = create_math_operations(3);\n    printf("Factorial of 5: %d\\n", factorial(5));\n    printf("Square of 4: %f\\n", square(4));\n    printf("Cube of 3: %f\\n", cube(&mo));\n    return 0;\n}',
+            "factorial(int n)",
+            "square(double x)",
+            "typedef struct {\n    double value;\n} MathOperations;",
+            "create_math_operations(double value)",
+            "cube(MathOperations* mo)",
+            "main()",
         ],
     ),
     (
@@ -235,12 +241,12 @@ int main() {
 }
 """,
         [
-            "int factorial(int n) {\n    if (n == 0 || n == 1) return 1;\n    return n * factorial(n - 1);\n}",
+            "factorial(int n)",
             "class MathOperations {\npublic:\n    static double square(double x) {\n        return x * x;\n    }\n\n    MathOperations(double value) : value(value) {}\n\n    double cube() const {\n        return std::pow(value, 3);\n    }\n\nprivate:\n    double value;\n}",
-            "static double square(double x) {\n        return x * x;\n    }",
-            "MathOperations(double value) : value(value) {}",
-            "double cube() const {\n        return std::pow(value, 3);\n    }",
-            'int main() {\n    MathOperations mo(3);\n    std::cout << "Factorial of 5: " << factorial(5) << std::endl;\n    std::cout << "Square of 4: " << MathOperations::square(4) << std::endl;\n    std::cout << "Cube of 3: " << mo.cube() << std::endl;\n    return 0;\n}',
+            "square(double x)",
+            "MathOperations(double value)",
+            "cube() const",
+            "main()",
         ],
     ),
     (
@@ -280,6 +286,8 @@ public class MathOperations
         [
             'public class MathOperations\n{\n    public static int Factorial(int n)\n    {\n        if (n == 0 || n == 1) return 1;\n        return n * Factorial(n - 1);\n    }\n\n    public static double Square(double x) => x * x;\n\n    private readonly double _value;\n\n    public MathOperations(double value)\n    {\n        _value = value;\n    }\n\n    public double Cube() => Math.Pow(_value, 3);\n\n    public static void Main(string[] args)\n    {\n        var mathOp = new MathOperations(3);\n        Console.WriteLine($"Factorial of 5: {Factorial(5)}");\n        Console.WriteLine($"Square of 4: {Square(4)}");\n        Console.WriteLine($"Cube of 3: {mathOp.Cube()}");\n    }\n}',
             "public static int Factorial(int n)\n    {\n        if (n == 0 || n == 1) return 1;\n        return n * Factorial(n - 1);\n    }",
+            "public static double Square(double x) => x * x;",
+            "public double Cube() => Math.Pow(_value, 3);",
             'public static void Main(string[] args)\n    {\n        var mathOp = new MathOperations(3);\n        Console.WriteLine($"Factorial of 5: {Factorial(5)}");\n        Console.WriteLine($"Square of 4: {Square(4)}");\n        Console.WriteLine($"Cube of 3: {mathOp.Cube()}");\n    }',
         ],
     ),
@@ -403,6 +411,8 @@ fn main() {
         [
             "struct MathOperations {\n    value: f64,\n}",
             "fn new(value: f64) -> Self {\n        MathOperations { value }\n    }",
+            "fn new(value: f64) -> Self {\n        MathOperations { value }\n    }",
+            "fn cube(&self) -> f64 {\n        self.value.powi(3)\n    }",
             "fn cube(&self) -> f64 {\n        self.value.powi(3)\n    }",
             "fn factorial(n: u64) -> u64 {\n    match n {\n        0 | 1 => 1,\n        _ => n * factorial(n - 1),\n    }\n}",
             "fn square(x: f64) -> f64 {\n    x * x\n}",
@@ -444,6 +454,7 @@ echo "Cube of 3: " . $mathOp->cube() . "\\n";
         [
             "function factorial($n) {\n    if ($n == 0 || $n == 1) return 1;\n    return $n * factorial($n - 1);\n}",
             "class MathOperations {\n    private $value;\n\n    public function __construct($value) {\n        $this->value = $value;\n    }\n\n    public static function square($x) {\n        return $x * $x;\n    }\n\n    public function cube() {\n        return pow($this->value, 3);\n    }\n}",
+            "private $value;",
             "public function __construct($value) {\n        $this->value = $value;\n    }",
             "public static function square($x) {\n        return $x * $x;\n    }",
             "public function cube() {\n        return pow($this->value, 3);\n    }",
@@ -486,10 +497,14 @@ main =
         |> Debug.log "Results"
 """,
         [
+            "module MathOperations exposing (factorial, square, cube)",
             "factorial n =\n    if n <= 1 then\n        1\n    else\n        n * factorial (n - 1)",
             "square x =\n    x * x",
+            "type MathOp =\n    MathOp Float",
+            "type MathOp =\n    MathOp Float",
             "cube (MathOp value) =\n    value ^ 3",
             'main =\n    let\n        mathOp =\n            MathOp 3\n    in\n    [ "Factorial of 5: " ++ String.fromInt (factorial 5)\n    , "Square of 4: " ++ String.fromFloat (square 4)\n    , "Cube of 3: " ++ String.fromFloat (cube mathOp)\n    ]\n        |> String.join "\\n"\n        |> Debug.log "Results"',
+            "mathOp =\n            MathOp 3",
         ],
     ),
     (
@@ -518,6 +533,12 @@ IO.puts "Cube of 3: #{MathOperations.cube(math_op)}"
 """,
         [
             "defmodule MathOperations do\n  def factorial(0), do: 1\n  def factorial(1), do: 1\n  def factorial(n) when n > 1, do: n * factorial(n - 1)\n\n  def square(x), do: x * x\n\n  defstruct [:value]\n\n  def new(value), do: %__MODULE__{value: value}\n\n  def cube(%__MODULE__{value: value}), do: :math.pow(value, 3)\nend",
+            "def factorial(0), do: 1",
+            "def factorial(1), do: 1",
+            "def factorial(n) when n > 1, do: n * factorial(n - 1)",
+            "def square(x), do: x * x",
+            "def new(value), do: %__MODULE__{value: value}",
+            "def cube(%__MODULE__{value: value}), do: :math.pow(value, 3)",
         ],
     ),
     (
@@ -566,7 +587,7 @@ def tagger():
 @pytest.mark.parametrize("language,extension,code,expected_bodies", TEST_CASES)
 def test_body_extraction(language, extension, code, expected_bodies, tagger):
     source = Source(f"test_file.{extension}", code)
-    definitions = tagger.extract_definitions(source, with_body=True)
+    definitions = tagger.extract_definitions(source)
 
     # Extract the text of all definitions
     actual_bodies = [defn.text for defn in definitions if defn.text]

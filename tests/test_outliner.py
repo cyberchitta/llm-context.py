@@ -87,7 +87,7 @@ def test_outliner_highlights(sample_source, sample_definitions):
 
 
 def test_generate_highlights(sample_source, tagger):
-    defs = tagger.extract_definitions(sample_source, False)
+    defs = tagger.extract_definitions(sample_source)
     assert len(defs) > 0
 
     outlines = generate_outlines(tagger, [sample_source])

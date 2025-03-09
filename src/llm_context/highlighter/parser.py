@@ -44,21 +44,15 @@ class ParserFactory:
 @dataclass(frozen=True)
 class LangQueryFactory:
     tag_query_cache: dict[str, str]
-    body_query_cache: dict[str, str]
 
     @staticmethod
     def create() -> "LangQueryFactory":
-        return LangQueryFactory({}, {})
+        return LangQueryFactory({})
 
     def get_tag_query(self, language: str) -> str:
         if language not in self.tag_query_cache:
             self.tag_query_cache[language] = LangQuery().get_tag_query(language)
         return self.tag_query_cache[language]
-
-    def get_body_query(self, language: str) -> str:
-        if language not in self.body_query_cache:
-            self.body_query_cache[language] = LangQuery().get_body_query(language)
-        return self.body_query_cache[language]
 
 
 @dataclass(frozen=True)
@@ -95,14 +89,8 @@ class AST:
     def tag_matches(self) -> list[tuple[int, dict[str, list[Node]]]]:
         return self.match(self._get_tag_query())
 
-    def body_matches(self) -> list[tuple[int, dict[str, list[Node]]]]:
-        return self.match(self._get_body_query())
-
     def _get_tag_query(self) -> str:
         return self.lang_qry_factory.get_tag_query(self.language_name)
-
-    def _get_body_query(self) -> str:
-        return self.lang_qry_factory.get_body_query(self.language_name)
 
 
 @dataclass(frozen=True)

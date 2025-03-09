@@ -94,7 +94,7 @@ class ContextCollector:
                 if (content := safe_read_file(abs_path)) is not None
             ]
             all_defs = {
-                source.rel_path: tagger.extract_definitions(source, with_body=True)
+                source.rel_path: tagger.extract_definitions(source)
                 for source in sources
             }
             return [

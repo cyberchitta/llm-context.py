@@ -58,7 +58,7 @@ class Definition:
 class TagExtractor(Protocol):
     workspace_path: str
 
-    def extract_definitions(self, source: Source, with_body: bool) -> list[Definition]: ...
+    def extract_definitions(self, source: Source) -> list[Definition]: ...
 
 
 @dataclass(frozen=True)
@@ -70,11 +70,11 @@ class ASTBasedTagger(TagExtractor):
     def create(workspace_path: str, ast_factory: ASTFactory) -> "ASTBasedTagger":
         return ASTBasedTagger(workspace_path, ast_factory)
 
-    def extract_definitions(self, source: Source, with_body: bool) -> list[Definition]:
+    def extract_definitions(self, source: Source) -> list[Definition]:
         ast = self.ast_factory.create_from_code(source)
         return [
             Definition.create(ast.rel_path, defn)
-            for defn in map(to_definition, ast.body_matches() if with_body else ast.tag_matches())
+            for defn in map(to_definition, ast.tag_matches())
             if defn
         ]
 
@@ -86,7 +86,7 @@ class FileTags:
 
     @staticmethod
     def create(extractor: TagExtractor, source: Source) -> "FileTags":
-        definitions = extractor.extract_definitions(source, False)
+        definitions = extractor.extract_definitions(source)
         return FileTags(source.rel_path, definitions)
 
     @staticmethod
