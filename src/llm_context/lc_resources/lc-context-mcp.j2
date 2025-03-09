@@ -31,5 +31,22 @@ NOTE: Always use lc-get-files as your primary method for examining file contents
 {% if highlights %}
 ## Code Outlines
 
+Smart outlines highlighting important definitions in the codebase.
+Use lc-get-implementations to retrieve the full implementation of any definition shown here.
+
+> **Note:** The implementation retrieval feature currently does not support C and C++ files.
+
+Example implementation request:
+```json
+{
+  "root_path": "{{ abs_root_path }}",
+  "queries": [
+    {% for path, name in sample_definitions %}
+    ["{{ path }}", "{{ name }}"]{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+```
+
 {% include 'lc-highlights.j2' %}
 {% endif %}

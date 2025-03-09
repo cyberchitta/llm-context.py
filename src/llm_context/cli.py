@@ -153,9 +153,12 @@ def changed_files(env: ExecutionEnvironment) -> ExecutionResult:
 
 
 @create_clipboard_cmd
-def definitions_from_clip(env: ExecutionEnvironment):
-    requests = [tuple(line.split(",", 1)) for line in pyperclip.paste().strip().splitlines()]
-    return ExecutionResult(
-        ContextGenerator.create(env.config, env.state.file_selection).files(),
-        env,
+def implementations_from_clip(env: ExecutionEnvironment) -> ExecutionResult:
+    if not ContextSelector.has_outliner(True):
+        return ExecutionResult(None, env)
+    clip = pyperclip.paste().strip()
+    requests = [(w[0], w[1]) for line in clip.splitlines() if len(w := line.split(":", 1)) == 2]
+    content = ContextGenerator.create(env.config, env.state.file_selection, env.tagger).definitions(
+        requests
     )
+    return ExecutionResult(content, env)

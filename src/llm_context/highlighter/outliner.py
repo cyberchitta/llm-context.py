@@ -1,8 +1,9 @@
+import random
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, cast
 
 from llm_context.highlighter.parser import Source
-from llm_context.highlighter.tagger import ASTBasedTagger, Definition, FileTags
+from llm_context.highlighter.tagger import ASTBasedTagger, Definition, FileTags, Tag
 
 
 @dataclass(frozen=True)
@@ -68,6 +69,20 @@ class Outlines:
                     code_outlines.append(outliner.to_highlights())
         return code_outlines
 
+    def sample_definitions(self, max_samples: int = 2) -> list[tuple[str, str]]:
+        files_with_defs = [
+            (i, [t for t in tags if t.name and t.name.text])
+            for i, tags in enumerate(self.defs)
+            if any(t.name and t.name.text for t in tags)
+        ]
+        sampled = random.sample(files_with_defs, min(max_samples, len(files_with_defs)))
+        return [(d.rel_path, d.name.text) for _, defs in sampled for d in [random.choice(defs)]]
 
-def generate_outlines(tagger: ASTBasedTagger, source_set: list[Source]) -> list[dict[str, str]]:
-    return Outlines.create(tagger, source_set).to_code_outlines()
+
+def generate_outlines(
+    tagger: ASTBasedTagger, source_set: list[Source]
+) -> tuple[list[dict[str, str]], list[tuple[str, str]]]:
+    outlines = Outlines.create(tagger, source_set)
+    code_outlines = outlines.to_code_outlines()
+    sample_definitions = outlines.sample_definitions()
+    return code_outlines, sample_definitions

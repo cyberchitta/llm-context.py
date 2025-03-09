@@ -139,7 +139,8 @@ outlines_tool = Tool(
     description=(
         "Returns smart outlines highlighting important definitions in all supported code files. "
         "This provides a high-level overview of code structure without retrieving full file contents. "
-        "Outlines show key definitions (classes, functions, methods) in the codebase."
+        "Outlines show key definitions (classes, functions, methods) in the codebase. "
+        "Use lc-get-implementations to retrieve the full implementation of any definition shown in these outlines."
     ),
     inputSchema=OutlinesRequest.model_json_schema(),
 )
@@ -156,13 +157,42 @@ async def code_outlines(arguments: dict) -> list[TextContent]:
         return [TextContent(type="text", text=content)]
 
 
+class ImplementationsRequest(BaseModel):
+    root_path: Path = Field(
+        ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
+    )
+    queries: list[tuple[str, str]] = Field(
+        ...,
+        description="List of (file_path, definition_name) tuples to fetch implementations for",
+    )
+
+
+get_implementations_tool = Tool(
+    name="lc-get-implementations",
+    description="Retrieves complete code implementations of definitions identified in code outlines. Provide a list of file paths and definition names to get their full implementations. This tool works with the same languages supported by the code outliner.",
+    inputSchema=ImplementationsRequest.model_json_schema(),
+)
+
+
+async def get_implementations(arguments: dict) -> list[TextContent]:
+    request = ImplementationsRequest(**arguments)
+    env = ExecutionEnvironment.create(Path(request.root_path))
+    with env.activate():
+        context = ContextGenerator.create(
+            env.config, env.state.file_selection, env.tagger
+        ).definitions(request.queries)
+        return [TextContent(type="text", text=context)]
+
+
 async def serve() -> None:
     server: Server = Server("llm-context", pkg_ver("llm-context"))
 
     @server.list_tools()
     async def handle_list_tools() -> list[Tool]:
         base_tools = [project_context_tool, get_files_tool, list_modified_files_tool]
-        optional_tools = [outlines_tool] if ContextSelector.has_outliner(False) else []
+        optional_tools = (
+            [outlines_tool, get_implementations_tool] if ContextSelector.has_outliner(False) else []
+        )
         return base_tools + optional_tools
 
     @server.call_tool()
@@ -174,6 +204,7 @@ async def serve() -> None:
         }
         if ContextSelector.has_outliner(False):
             handlers["lc-code-outlines"] = code_outlines
+            handlers["lc-get-implementations"] = get_implementations
         try:
             return await handlers[name](arguments)
         except KeyError:

@@ -95,4 +95,4 @@ class FileTags:
 
 
 def find_definition(definitions, name):
-    return next((d.text for d in definitions if d.name and d.name.text == name), None)
+    return [d.text for d in definitions if d.name and d.name.text == name]

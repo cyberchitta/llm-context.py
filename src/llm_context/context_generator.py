@@ -67,7 +67,9 @@ class ContextCollector:
             if (content := safe_read_file(abs_path)) is not None
         ]
 
-    def outlines(self, tagger: Any, rel_paths: list[str]) -> list[dict[str, str]]:
+    def outlines(
+        self, tagger: Any, rel_paths: list[str]
+    ) -> tuple[list[dict[str, str]], list[tuple[str, str]]]:
         abs_paths = self.converter.to_absolute(rel_paths)
         if rel_paths and (outliner := ContextCollector.get_outliner()):
             from llm_context.highlighter.parser import Source
@@ -77,11 +79,13 @@ class ContextCollector:
                 for rel, abs_path in zip(rel_paths, abs_paths)
                 if (content := safe_read_file(abs_path)) is not None
             ]
-            return cast(list[dict[str, str]], outliner(tagger, source_set))
+            return cast(
+                tuple[list[dict[str, str]], list[tuple[str, str]]], outliner(tagger, source_set)
+            )
         else:
-            return []
+            return ([], [])
 
-    def definitions(self, tagger: Any, requests: list[tuple[str, str]]) -> str:
+    def definitions(self, tagger: Any, requests: list[tuple[str, str]]) -> list[dict[str, Any]]:
         if requests and ContextCollector.get_outliner():
             from llm_context.highlighter.parser import Source
             from llm_context.highlighter.tagger import find_definition
@@ -93,10 +97,7 @@ class ContextCollector:
                 for rel, abs_path in zip(rel_paths, abs_paths)
                 if (content := safe_read_file(abs_path)) is not None
             ]
-            all_defs = {
-                source.rel_path: tagger.extract_definitions(source)
-                for source in sources
-            }
+            all_defs = {source.rel_path: tagger.extract_definitions(source) for source in sources}
             return [
                 {"path": path, "name": name, "code": find_definition(all_defs.get(path, []), name)}
                 for path, name in requests
@@ -175,6 +176,7 @@ class ContextGenerator:
         no_media, with_user_notes, with_prompt = map(
             lambda x: bool(ctx_settings.get(x)), ("no_media", "with_user_notes", "with_prompt")
         )
+        outlines, sample_definitions = self.collector.outlines(self.tagger, self.outline_rel)
         context = {
             "project_name": self.project_root.name,
             "context_timestamp": datetime.now().timestamp(),
@@ -183,7 +185,8 @@ class ContextGenerator:
                 self.full_abs, self.outline_abs, no_media
             ),
             "files": self.collector.files(self.full_rel),
-            "highlights": self.collector.outlines(self.tagger, self.outline_rel),
+            "highlights": outlines,
+            "sample_definitions": sample_definitions,
             "sample_requested_files": self.converter.to_relative(
                 self.collector.sample_file_abs(self.full_abs)
             ),

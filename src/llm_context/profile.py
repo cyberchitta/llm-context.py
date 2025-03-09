@@ -6,7 +6,7 @@ from packaging import version
 
 from llm_context.utils import ProjectLayout, Yaml, safe_read_file
 
-CURRENT_CONFIG_VERSION = version.parse("2.6")
+CURRENT_CONFIG_VERSION = version.parse("2.7")
 
 MEDIA_EXTENSIONS: set[str] = {
     ".jpg",
