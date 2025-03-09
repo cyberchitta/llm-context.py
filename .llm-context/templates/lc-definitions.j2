@@ -1,0 +1,11 @@
+{% for item in definitions -%}
+{{ item.path }}:{{ item.name }}
+॥๛॥
+{%- for implementation in item.code %}
+{{ implementation }}
+{%- if not loop.last %}
+⋮...
+{% endif -%}
+{%- endfor %}
+॥๛॥
+{% endfor %}

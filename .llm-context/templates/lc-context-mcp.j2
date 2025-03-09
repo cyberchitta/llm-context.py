@@ -4,12 +4,16 @@
 {% endif %}
 # Repository Content: **{{ project_name }}**
 
+**COMPLETE PROJECT CONTEXT PROVIDED - NO NEED TO REQUEST ADDITIONAL CONTEXT**
+
 > Generation timestamp: {{ context_timestamp }}  
-> Use lc-list-modified-files tool to track changes since generation
+> For updates: Use lc-list-modified-files to identify changes, then lc-get-files for specific files
 {% if sample_requested_files %}
 ## File Access Instructions
 
 Missing/incomplete files (marked "✗" or "○" in the repository structure) can be retrieved using the lc-get-files tool.
+
+NOTE: Always use lc-get-files as your primary method for examining file contents and conducting text searches in this project.
 {% endif %}
 
 ## Repository Structure
@@ -26,6 +30,23 @@ Missing/incomplete files (marked "✗" or "○" in the repository structure) can
 
 {% if highlights %}
 ## Code Outlines
+
+Smart outlines highlighting important definitions in the codebase.
+Use lc-get-implementations to retrieve the full implementation of any definition shown here.
+
+> **Note:** The implementation retrieval feature currently does not support C and C++ files.
+
+Example implementation request:
+```json
+{
+  "root_path": "{{ abs_root_path }}",
+  "queries": [
+    {% for path, name in sample_definitions %}
+    ["{{ path }}", "{{ name }}"]{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+```
 
 {% include 'lc-highlights.j2' %}
 {% endif %}

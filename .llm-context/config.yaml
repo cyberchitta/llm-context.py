@@ -6,11 +6,6 @@ profiles:
       excluding media and git-related files.
     gitignores:
       full_files:
-      - 'tests/'
-      - '*.md'
-      - '*.scm'
-      - '*.yaml'
-      - '*.toml'
       - .git
       - .gitignore
       - .llm-context/
@@ -41,11 +36,6 @@ profiles:
       - '*.ttf'
       - '*.map'
       outline_files:
-      - 'tests/'
-      - '*.md'
-      - '*.scm'
-      - '*.yaml'
-      - '*.toml'
       - .git
       - .gitignore
       - .llm-context/
@@ -100,6 +90,7 @@ profiles:
 templates:
   context: lc-context.j2
   context-mcp: lc-context-mcp.j2
+  definitions: lc-definitions.j2
   files: lc-files.j2
   highlights: lc-highlights.j2
   prompt: lc-prompt.j2

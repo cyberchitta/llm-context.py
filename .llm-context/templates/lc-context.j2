@@ -4,8 +4,11 @@
 {% endif %}
 # Detailed Repository Content: **{{ project_name }}**
 
+**COMPLETE PROJECT CONTEXT PROVIDED - NO NEED TO REQUEST ADDITIONAL CONTEXT**
+
 > Generation timestamp: {{ context_timestamp }}  
-> Use lc-list-modified-files tool to track changes since generation, or if the tool is absent ask user to paste the result of running lc-changed CLI
+> For updates: Use lc-list-modified-files first to identify changes, then lc-get-files for specific files
+> If tools are unavailable, ask the user to run the "lc-changed" CLI command
 
 This context presents a comprehensive view of the _/{{ project_name }}_ repository.
 
@@ -27,6 +30,8 @@ Check if lc-get-files tool is available in your environment before proceeding to
     "paths": [{% for file in sample_requested_files %}"{{ file }}"{% if not loop.last %},{% endif %}{% endfor %}]
   }
   ```
+   NOTE: This tool should be your primary method for examining file contents and conducting text searches in this project.
+
 
 2. Only if lc-get-files is not available, follow these steps (do NOT use the above root_path):
     1. Immediately halt your current response.
@@ -56,7 +61,31 @@ Check if lc-get-files tool is available in your environment before proceeding to
 {% endif %}
 
 {% if highlights %}
-## File Outlines
+## Code Outlines
+
+Smart outlines highlighting important definitions in the codebase.
+
+> **Note:** Implementation retrieval doesn't support C/C++ files.
+
+1. Using the lc-get-implementations tool:
+   ```json
+   {
+     "root_path": "{{ abs_root_path }}",
+     "queries": [
+       {% for path, name in sample_definitions %}
+       ["{{ path }}", "{{ name }}"]{% if not loop.last %},{% endif %}
+       {% endfor %}
+     ]
+   }
+   ```
+
+2. Without tools: Copy these references to clipboard:
+   ```
+   {% for path, name in sample_definitions %}
+   {{ path }}:{{ name }}
+   {% endfor %}
+   ```
+   Then ask the human to run `lc-clip-implementations`
 
 {% include 'lc-highlights.j2' %}
 {% endif %}
