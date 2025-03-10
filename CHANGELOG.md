@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.15] - 2025-03-10
+
+### Bug Fixes
+- Clarify C/C++ implementation retrieval limitation in tool description
+
+### Features
+- Preserve custom profiles during config updates
+
 ## [0.2.14] - 2025-03-09
 
 ### Features
