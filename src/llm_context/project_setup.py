@@ -89,8 +89,10 @@ class ProjectSetup:
             )
 
     def _create_or_update_config_file(self):
-        if not self.project_layout.config_path.exists() or self.constants.needs_update:
+        if not self.project_layout.config_path.exists():
             self._create_config_file()
+        elif self.constants.needs_update:
+            self._update_config_file()
 
     def _create_curr_ctx_file(self):
         if not self.project_layout.state_store_path.exists():
@@ -124,6 +126,17 @@ class ProjectSetup:
                 "Add any personal notes or reminders about this or other projects here.\n"
                 "This file is private and stored in your user config directory.\n"
             )
+
+    def _update_config_file(self):
+        user_config = Yaml.load(self.project_layout.config_path)
+        new_config = Config.create_default().to_dict()
+        new_profiles = new_config["profiles"]
+        custom_profiles = {
+            n: c for n, c in user_config.get("profiles", {}).items() if n not in new_profiles
+        }
+        merged_profiles = {**new_profiles, **custom_profiles}
+        merged_config = {**new_config, "profiles": merged_profiles}
+        Yaml.save(self.project_layout.config_path, merged_config)
 
     def _create_config_file(self):
         Yaml.save(self.project_layout.config_path, Config.create_default().to_dict())
