@@ -100,6 +100,7 @@ Once configured, you can start working with your project in two simple ways:
 - `lc-init`: Initialize project configuration
 - `lc-set-profile <n>`: Switch profiles
 - `lc-sel-files`: Select files for inclusion
+- `lc-sel-outlines`: Select files for outline generation (requires installing with `[outline]` extra)
 - `lc-context`: Generate and copy context
 - `lc-prompt`: Generate project instructions for LLMs
 - `lc-clip-files`: Process LLM file requests
