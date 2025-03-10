@@ -5,7 +5,7 @@
 
 LLM Context is a tool that helps developers quickly inject relevant content from code/text projects into Large Language Model chat interfaces. It leverages `.gitignore` patterns for smart file selection and provides both a streamlined clipboard workflow using the command line and direct LLM integration through the Model Context Protocol (MCP).
 
-> **Note**: This project was developed in collaboration with Claude-3.5-Sonnet (and more recently Grok-3), using LLM Context itself to share code during development. All code in the repository is human-curated (by me 😇, @restlessronin).
+> **Note**: This project was developed in collaboration with several Claude Sonnets - 3.5, 3.6 and 3.7 (and more recently Grok-3 as well), using LLM Context itself to share code during development. All code in the repository is human-curated (by me 😇, @restlessronin).
 
 ## Important: Configuration File Format Change
 
