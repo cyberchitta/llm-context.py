@@ -650,7 +650,7 @@ def tagger():
 @pytest.mark.parametrize("language,extension,code,expected_highlights", TEST_CASES)
 def test_outline_generation(language, extension, code, expected_highlights, tagger):
     source = Source(f"test_file.{extension}", code)
-    outlines = generate_outlines(tagger, [source])
+    outlines, _ = generate_outlines(tagger, [source])
 
     assert len(outlines) == 1
     assert outlines[0]["rel_path"] == f"test_file.{extension}"

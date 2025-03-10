@@ -90,7 +90,7 @@ def test_generate_highlights(sample_source, tagger):
     defs = tagger.extract_definitions(sample_source)
     assert len(defs) > 0
 
-    outlines = generate_outlines(tagger, [sample_source])
+    outlines, _ = generate_outlines(tagger, [sample_source])
     assert len(outlines) == 1
     assert outlines[0]["rel_path"] == "test.py"
     assert "class TestClass" in outlines[0]["highlights"]
