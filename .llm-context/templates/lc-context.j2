@@ -6,9 +6,9 @@
 
 **COMPLETE PROJECT CONTEXT PROVIDED - NO NEED TO REQUEST ADDITIONAL CONTEXT**
 
-> Generation timestamp: {{ context_timestamp }}  
-> For updates: Use lc-list-modified-files first to identify changes, then lc-get-files for specific files
-> If tools are unavailable, ask the user to run the "lc-changed" CLI command
+> Context generation timestamp: {{ context_timestamp }}  
+> For tracking code changes: Use lc-list-modified-files with this timestamp to identify files modified since this context was generated, then lc-get-files to retrieve their contents
+> If tools are unavailable: Ask the user to run the "lc-changed" CLI command, then "lc-get-files" for specific files
 
 This context presents a comprehensive view of the _/{{ project_name }}_ repository.
 

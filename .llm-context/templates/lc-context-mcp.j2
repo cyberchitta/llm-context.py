@@ -6,8 +6,8 @@
 
 **COMPLETE PROJECT CONTEXT PROVIDED - NO NEED TO REQUEST ADDITIONAL CONTEXT**
 
-> Generation timestamp: {{ context_timestamp }}  
-> For updates: Use lc-list-modified-files to identify changes, then lc-get-files for specific files
+> Context generation timestamp: {{ context_timestamp }}  
+> For tracking code changes: Use lc-list-modified-files with this timestamp to identify files modified since this context was generated, then lc-get-files to retrieve their contents
 {% if sample_requested_files %}
 ## File Access Instructions
 
