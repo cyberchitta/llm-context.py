@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![PyPI version](https://img.shields.io/pypi/v/llm-context.svg)](https://pypi.org/project/llm-context/)
-[![PyPI Downloads](https://img.shields.io/pypi/dw/llm-context.svg)](https://pypi.org/project/llm-context/)
+[![Downloads](https://static.pepy.tech/badge/llm-context/week)](https://pepy.tech/project/llm-context)
 
 LLM Context is a tool that helps developers quickly inject relevant content from code/text projects into Large Language Model chat interfaces. It leverages `.gitignore` patterns for smart file selection and provides both a streamlined clipboard workflow using the command line and direct LLM integration through the Model Context Protocol (MCP).
 
