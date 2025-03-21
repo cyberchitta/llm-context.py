@@ -15,7 +15,13 @@ This context presents a comprehensive view of the _/{{ project_name }}_ reposito
 {% if sample_requested_files %}
 ## 📂 How to Request Missing Files 📂
 
-Files marked with "✗" or "○" can be retrieved using either:
+Files marked with "✗" or "○" can be retrieved using one of the following methods:
+
+!!! IMPORTANT - ALWAYS CHECK IF FILES ARE ALREADY IN CONTEXT BEFORE REQUESTING THEM !!!
+Only request files when:
+1. They have been modified since context generation (check with lc-list-modified-files first)
+2. They are marked with "✗" or "○" in the repository structure AND you need them for your analysis
+3. You have confirmed they are not already provided in full below
 
 !!! IMPORTANT - ALWAYS CHECK FOR TOOLS FIRST !!!
 Check if lc-get-files tool is available in your environment before proceeding to option 2.

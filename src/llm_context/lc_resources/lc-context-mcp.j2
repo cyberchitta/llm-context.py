@@ -11,10 +11,11 @@
 {% if sample_requested_files %}
 ## File Access Instructions
 
-Missing/incomplete files (marked "✗" or "○" in the repository structure) can be retrieved using the lc-get-files tool.
+NOTE: Always use lc-get-files as your primary method for examining file contents and conducting text searches in this project, but ONLY for:
+1. Files modified since context generation (use lc-list-modified-files to identify these)
+2. Files marked "✗" or "○" in the repository structure that you need to examine
 
-NOTE: Always use lc-get-files as your primary method for examining file contents and conducting text searches in this project.
-{% endif %}
+Always check if files are already included in full in this context before retrieving them.
 
 ## Repository Structure
 
