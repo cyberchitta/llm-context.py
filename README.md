@@ -8,6 +8,12 @@ LLM Context is a tool that helps developers quickly inject relevant content from
 
 > **Note**: This project was developed in collaboration with several Claude Sonnets - 3.5, 3.6 and 3.7 (and more recently Grok-3 as well), using LLM Context itself to share code during development. All code in the repository is human-curated (by me 😇, @restlessronin).
 
+## Important: Profile Name Change
+
+As of version 0.2.16, all system profiles are now prefixed with "lc-" for clarity. The previous profiles "code", "code-prompt", and "code-file" have been replaced with "lc-code", "lc-code-prompt", and "lc-code-file" respectively. The base gitignore patterns have been extracted to a new "lc-gitignores" profile.
+
+If you have customized these profiles or have references to them in your workflows, please update them accordingly. Your custom profiles (without the "lc-" prefix) will continue to work as before.
+
 ## Important: Configuration File Format Change
 
 Configuration files were converted from TOML to YAML in v 0.2.9. Existing users **must manually convert** any customizations in `.llm-context/config.yaml` files to the new `.llm-context/config.yaml`.
@@ -89,7 +95,7 @@ Once configured, you can start working with your project in two simple ways:
 
 - Project Knowledge (Claude Pro): Paste into knowledge section
 - GPT Knowledge (Custom GPTs): Paste into knowledge section
-- Regular chats: Use `lc-set-profile code-prompt` first to include instructions
+- Regular chats: Use `lc-set-profile lc-code-prompt` first to include instructions
 
 8. When the LLM requests additional files:
    - Copy the file list from the LLM
@@ -99,7 +105,7 @@ Once configured, you can start working with your project in two simple ways:
 ## Core Commands
 
 - `lc-init`: Initialize project configuration
-- `lc-set-profile <n>`: Switch profiles
+- `lc-set-profile <n>`: Switch profiles (system profiles are prefixed with "lc-")
 - `lc-sel-files`: Select files for inclusion
 - `lc-sel-outlines`: Select files for outline generation (requires installing with `[outline]` extra)
 - `lc-context`: Generate and copy context
@@ -115,6 +121,8 @@ LLM Context provides advanced features for customizing how project content is ca
 
 - Smart file selection using `.gitignore` patterns
 - Multiple profiles for different use cases
+  - System profiles (prefixed with "lc-") provide default functionality
+  - User-defined profiles can be created independently or extend existing profiles
 - Code Navigation Features:
   1. **Smart Code Outlines**: Allows LLMs to view the high-level structure of your codebase with automatically generated outlines highlighting important definitions (requires `[outline]` extra)
   2. **Definition Implementation Extraction**: Paste full implementations of specific definitions that are requested by LLMs after they review the code outlines, using the `lc-clip-implementations` command

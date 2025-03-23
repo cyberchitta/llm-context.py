@@ -1,11 +1,19 @@
 from dataclasses import dataclass
 from importlib import resources
-from logging import INFO
+from logging import INFO, WARNING
 from pathlib import Path
 from typing import Any
 
 from llm_context import lc_resources
-from llm_context.profile import Profile, ProjectLayout, ToolConstants
+from llm_context.profile import (
+    DEFAULT_CODE_FILE_PROFILE,
+    DEFAULT_CODE_PROFILE,
+    DEFAULT_CODE_PROMPT_PROFILE,
+    DEFAULT_GITIGNORES_PROFILE,
+    Profile,
+    ProjectLayout,
+    ToolConstants,
+)
 from llm_context.utils import Yaml, log
 
 PROJECT_INFO: str = (
@@ -33,16 +41,17 @@ class Config:
                 "definitions": "lc-definitions.j2",
             },
             profiles={
-                "code": Profile.create_code().to_dict(),
-                "code-prompt": {
-                    "base": "code",
+                DEFAULT_GITIGNORES_PROFILE: Profile.create_code_gitignores().to_dict(),
+                DEFAULT_CODE_PROFILE: Profile.create_code_dict(),
+                DEFAULT_CODE_PROMPT_PROFILE: {
+                    "base": DEFAULT_CODE_PROFILE,
                     "settings": {"with_prompt": True},
-                    "description": "Extends 'code' by including LLM instructions from lc-prompt.md for guided interactions.",
+                    "description": f"Extends '{DEFAULT_CODE_PROFILE}' by including LLM instructions from lc-prompt.md for guided interactions.",
                 },
-                "code-file": {
-                    "base": "code",
+                DEFAULT_CODE_FILE_PROFILE: {
+                    "base": DEFAULT_CODE_PROFILE,
                     "settings": {"context_file": "project-context.md.tmp"},
-                    "description": "Extends 'code' by saving the generated context to 'project-context.md.tmp' for external use.",
+                    "description": f"Extends '{DEFAULT_CODE_PROFILE}' by saving the generated context to 'project-context.md.tmp' for external use.",
                 },
             },
         )
@@ -78,6 +87,7 @@ class ProjectSetup:
         self._create_or_update_ancillary_files()
         self._create_project_notes_file()
         self._create_user_notes_file()
+        self._check_legacy_profiles()
 
     def _create_or_update_ancillary_files(self):
         if not self.project_layout.config_path.exists() or self.constants.needs_update:
@@ -131,6 +141,9 @@ class ProjectSetup:
         user_config = Yaml.load(self.project_layout.config_path)
         new_config = Config.create_default().to_dict()
         new_profiles = new_config["profiles"]
+        new_profiles[DEFAULT_GITIGNORES_PROFILE] = user_config.get("profiles", {}).get(
+            DEFAULT_GITIGNORES_PROFILE, new_profiles[DEFAULT_GITIGNORES_PROFILE]
+        )
         custom_profiles = {
             n: c for n, c in user_config.get("profiles", {}).items() if n not in new_profiles
         }
@@ -138,6 +151,16 @@ class ProjectSetup:
         merged_config = {**new_config, "profiles": merged_profiles}
         Yaml.save(self.project_layout.config_path, merged_config)
 
+    def _check_legacy_profiles(self):
+        try:
+            user_config = Yaml.load(self.project_layout.config_path)
+            legacy_profiles = ["code", "code-prompt", "code-file"]
+            profiles = user_config.get("profiles", {})
+            found_legacy = [p for p in legacy_profiles if p in profiles]
+            if found_legacy:
+                log(WARNING, f"Legacy profiles detected: {', '.join(found_legacy)}. These have been replaced by lc-prefixed versions (lc-code, lc-code-prompt, lc-code-file). Please update your references accordingly.")
+        except Exception:
+            pass
     def _create_config_file(self):
         Yaml.save(self.project_layout.config_path, Config.create_default().to_dict())
 

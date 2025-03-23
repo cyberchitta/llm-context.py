@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field, ValidationError
 from llm_context.context_generator import ContextGenerator
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
+from llm_context.profile import DEFAULT_CODE_PROFILE
 
 
 class ContextRequest(BaseModel):
@@ -18,7 +19,7 @@ class ContextRequest(BaseModel):
         ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
     )
     profile_name: str = Field(
-        "code",
+        DEFAULT_CODE_PROFILE,
         description="Profile to use (e.g. 'code', 'copy', 'full') - defines file inclusion and presentation rules",
         pattern="^[a-zA-Z0-9_-]+$",
     )
@@ -89,7 +90,7 @@ class ListModifiedFilesRequest(BaseModel):
         ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
     )
     profile_name: str = Field(
-        "code",
+        DEFAULT_CODE_PROFILE,
         description="Profile to use (e.g. 'code', 'copy', 'full') - defines file inclusion and presentation rules",
         pattern="^[a-zA-Z0-9_-]+$",
     )
@@ -128,7 +129,7 @@ class OutlinesRequest(BaseModel):
         ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
     )
     profile_name: str = Field(
-        "code",
+        DEFAULT_CODE_PROFILE,
         description="Profile to use for file selection rules",
         pattern="^[a-zA-Z0-9_-]+$",
     )

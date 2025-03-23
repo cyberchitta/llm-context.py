@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
+from llm_context.profile import DEFAULT_CODE_PROFILE
 from llm_context.utils import Yaml
 
 
@@ -14,7 +15,7 @@ class FileSelection:
 
     @staticmethod
     def create_default() -> "FileSelection":
-        return FileSelection.create("code", [], [])
+        return FileSelection.create(DEFAULT_CODE_PROFILE, [], [])
 
     @staticmethod
     def create(
@@ -73,9 +74,9 @@ class StateStore:
                     sel_data.get("outline_files", []),
                     sel_data.get("timestamp", datetime.now().timestamp()),
                 )
-            return AllSelections(selections), data.get("current_profile", "code")
+            return AllSelections(selections), data.get("current_profile", DEFAULT_CODE_PROFILE)
         except Exception:
-            return AllSelections.create_empty(), "code"
+            return AllSelections.create_empty(), DEFAULT_CODE_PROFILE
 
     def save(self, store: AllSelections, current_profile: str):
         data = {

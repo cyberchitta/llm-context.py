@@ -70,7 +70,7 @@
 
    This creates the `.llm-context` directory with default configuration files.
 
-3. The default "code" profile is ready to use. For specialized needs, you can customize settings in `.llm-context/config.yaml`.
+3. The default "lc-code" profile is ready to use. For specialized needs, you can customize settings in `.llm-context/config.yaml`.
 
 ### Basic Workflow
 
@@ -99,7 +99,7 @@
 4. Paste the context into your LLM chat interface:
 
    - For Claude Projects/Custom GPTs: Use the knowledge section
-   - For regular chats: Use `lc-set-profile code-prompt` first to include guiding instructions
+   - For regular chats: Use `lc-set-profile lc-code-prompt` first to include guiding instructions
 
 5. When the LLM requests additional files:
    - Copy the file list from the LLM
@@ -111,7 +111,7 @@
 Core commands you'll use frequently:
 
 - `lc-init`: Set up LLM Context in your project
-- `lc-set-profile <name>`: Switch between different profile configurations
+- `lc-set-profile <n>`: Switch between different profile configurations
 - `lc-sel-files`: Select files for full content inclusion
 - `lc-sel-outlines`: Select files for structural outline generation
 - `lc-context`: Generate and copy context to clipboard
@@ -121,13 +121,14 @@ Core commands you'll use frequently:
 
 1. Code Projects:
 
-   - Use default "code" profile
+   - Use default "lc-code" profile (or create your own)
    - Run `lc-sel-files` to include source code
    - Optional: Use `lc-sel-outlines` for structural overview
 
 2. Documentation Projects:
 
-   - Switch to documentation focus: `lc-set-profile copy`
+   - Create a custom profile "docs"
+   - Switch to documentation focus: `lc-set-profile docs` (after creating it)
    - Select content: `lc-sel-files`
    - Good for markdown/text collections
 
@@ -203,10 +204,10 @@ Profiles control how LLM Context handles your project:
    - Output formatting
 
 3. Built-in Profiles
-
-   - `code`: "Default profile for software projects, selecting all code files while excluding media and git-related files."
-   - `code-prompt`: "Extends 'code' by including LLM instructions from lc-prompt.md for guided interactions."
-   - `code-file`: "Extends 'code' by saving the generated context to 'project-context.md.tmp' for external use."
+   - `lc-gitignores`: "Base profile containing default gitignore patterns, customize this for project-specific ignores."
+   - `lc-code`: "Default profile for software projects, using lc-gitignores base profile."
+   - `lc-code-prompt`: "Extends 'lc-code' by including LLM instructions from lc-prompt.md for guided interactions."
+   - `lc-code-file`: "Extends 'lc-code' by saving the generated context to 'project-context.md.tmp' for external use."
 
 ## Configuration
 
@@ -225,7 +226,7 @@ templates:
 
 # Profile definitions
 profiles:
-  code:
+  lc-gitignores:
     gitignores:
       full_files:
         - ".git"
@@ -237,14 +238,16 @@ profiles:
         - ".gitignore"
         - ".llm-context/"
         - "*.lock"
-    settings:
-      no_media: true
-      with_user_notes: false
     only-include:
       full_files:
         - "**/*"
       outline_files:
         - "**/*"
+  lc-code:
+    base: "lc-gitignores"
+    settings:
+      no_media: true
+      with_user_notes: false
 ```
 
 #### Notes Files
@@ -282,7 +285,7 @@ Profiles control how files are selected and context is generated. Each profile c
 - Repository .gitignore patterns (always active)
 - Additional exclusion patterns from profile's gitignores
 - Optional inclusion patterns to restrict file selection
-- An optional `description` field to document the profile’s purpose
+- An optional `description` field to document the profile's purpose
 
 Important: The `.git` directory should always be included in your profile's gitignores patterns since it isn't typically in .gitignore files but should always be excluded from context generation.
 
@@ -290,8 +293,8 @@ Here's a complete example:
 
 ```yaml
 profiles:
-  code: # Default profile included with LLM Context
-    description: "Default profile for software projects, selecting all code files while excluding media and git-related files."
+  lc-gitignores: # Base profile for gitignore patterns
+    description: "Base profile containing default gitignore patterns, customize this for project-specific ignores."
     gitignores:
       full_files:
         - ".git"
@@ -303,23 +306,26 @@ profiles:
         - ".gitignore"
         - ".llm-context/"
         - "*.lock"
-    settings:
-      no_media: true
-      with_user_notes: false
     only-include:
       full_files:
         - "**/*"
       outline_files:
         - "**/*"
-  code-prompt: # Built-in profile that adds LLM instructions
-    description: "Extends 'code' by including LLM instructions from lc-prompt.md for guided interactions."
-    base: "code" # Inherits from code profile
+  lc-code: # Default profile included with LLM Context
+    description: "Default profile for software projects, using lc-gitignores base profile."
+    base: "lc-gitignores" # Inherits from gitignores profile
+    settings:
+      no_media: true
+      with_user_notes: false
+  lc-code-prompt: # Built-in profile that adds LLM instructions
+    description: "Extends 'lc-code' by including LLM instructions from lc-prompt.md for guided interactions."
+    base: "lc-code" # Inherits from code profile
     prompt: "lc-prompt.md" # Adds prompt template to output
     settings:
       with_prompt: true
-  code-file: # Built-in profile for file output
-    description: "Extends 'code' by saving the generated context to 'project-context.md.tmp' for external use."
-    base: "code"
+  lc-code-file: # Built-in profile for file output
+    description: "Extends 'lc-code' by saving the generated context to 'project-context.md.tmp' for external use."
+    base: "lc-code"
     settings:
       context_file: "project-context.md.tmp"
 ```
@@ -360,7 +366,6 @@ gitignores:
 
 ```yaml
 only-include:
-only-include:
   # Only include these in full content
   full_files:
     - "**/*"  # Include everything not excluded
@@ -376,7 +381,7 @@ only-include:
 
 ```yaml
 profiles:
-  docs:
+  docs: # User-defined profile (no lc- prefix)
     gitignores:
       full_files:
         - ".git"
@@ -397,12 +402,8 @@ profiles:
 
 ```yaml
 profiles:
-  source:
-    gitignores:
-      full_files:
-        - ".git"
-        - ".llm-context/"
-        - "*.lock"
+  source: # User-defined profile
+    base: "lc-code" # Inherit from lc-code
     settings:
       no_media: true
     only-include:
@@ -419,7 +420,7 @@ Profiles can extend others using the `base` field:
 
 ```yaml
 profiles:
-  base-docs:
+  base-docs: # User-defined profile
     gitignores:
       full_files:
         - ".git"
@@ -430,13 +431,11 @@ profiles:
     only-include:
       full_files:
         - "**/*.md"
-  docs-with-notes:
-    base: "base-docs"
+  docs-with-notes: # User-defined profile
     settings:
       no_media: true
       with_user_notes: true # Add personal notes
-  with-file:
-    base: "code"
+  with-file: # User-defined profile
     settings:
       no_media: true
       with_user_notes: false
@@ -448,6 +447,23 @@ The inheritance system allows you to:
 - Create base profiles for common settings
 - Override specific fields in derived profiles
 - Mix and match configurations for different use cases
+
+### System Profiles vs User Profiles
+
+LLM Context distinguishes between system-provided profiles and user-defined profiles:
+
+- **System Profiles**: Prefixed with "lc-" (e.g., `lc-code`, `lc-code-prompt`)
+  - Most system profiles are maintained by the system and may be updated during version upgrades
+  - **Exception**: The `lc-gitignores` profile is preserved during updates, allowing you to customize project-wide ignore patterns that will be maintained across upgrades
+  - System profiles inherit base ignore patterns from the `lc-gitignores` profile
+
+- **User Profiles**: Any profile without the "lc-" prefix
+  - These are always preserved during updates
+  - Best practice is to create your own profiles that extend system profiles
+
+When customizing gitignore patterns, you have two recommended approaches:
+1. Modify the `lc-gitignores` profile for project-wide ignore patterns that should apply to all profiles
+2. Create custom profiles with specific gitignore overrides for specialized use cases
 
 ### Template System
 
@@ -536,9 +552,9 @@ Initializes LLM Context in your project.
 Switches the active profile.
 
 ```bash
-lc-set-profile code        # Switch to default code profile
-lc-set-profile code-prompt # Switch to code profile with prompt
-lc-set-profile web        # Switch to web profile (if configured)
+lc-set-profile lc-code         # Switch to default code profile
+lc-set-profile lc-code-prompt  # Switch to code profile with prompt
+lc-set-profile docs            # Switch to a custom user profile (if configured)
 ```
 
 ### lc-sel-files
@@ -651,7 +667,7 @@ Control outline behavior in profiles:
 
 ```yaml
 profiles:
-  with-outlines:
+  with-outlines: # User-defined profile
     gitignores:
       full_files:
         - ".git"
@@ -746,12 +762,14 @@ Example workflow:
 
 ```yaml
 # Optimize pattern matching
-gitignores:
-  full_files:
-    - "node_modules/**"
-    - "*.min.*"
-  outline_files:
-    - "node_modules/**"
+profiles:
+  optimized: # User-defined profile
+    gitignores:
+      full_files:
+        - "node_modules/**"
+        - "*.min.*"
+      outline_files:
+        - "node_modules/**"
 ```
 
 2. Language-Specific Profiles:
@@ -759,7 +777,8 @@ gitignores:
 ```yaml
 # Python project optimization
 profiles:
-  python-opt:
+  python-opt: # User-defined profile
+    base: "lc-code"
     only-include:
       full_files:
         - "**/main.py"
@@ -773,7 +792,7 @@ profiles:
 ```yaml
 # Mixed content optimization
 profiles:
-  web-opt:
+  web-opt: # User-defined profile
     only-include:
       full_files:
         - "**/index.html"
@@ -835,8 +854,8 @@ profiles:
 1. Standard Chat:
 
 ```bash
-lc-set-profile code-prompt  # Include instructions
-lc-context             # Generate and copy
+lc-set-profile lc-code-prompt  # Include instructions
+lc-context                     # Generate and copy
 # Paste into chat
 ```
 
@@ -852,7 +871,7 @@ lc-clip-files
 
 1. Claude Projects:
 
-   - Use `lc-set-profile code`
+   - Use `lc-set-profile lc-code`
    - Generate context with `lc-context`
    - Paste into knowledge section
    - Update as project evolves
@@ -885,7 +904,9 @@ lc-clip-files
 
 ### Profile Management
 
-- Start with built-in profiles, customize as needed
+- Start with built-in profiles (prefixed with "lc-"), customize as needed
+- Create your own user profiles (without the "lc-" prefix) for custom configurations
+- Modify the `lc-gitignores` profile to customize project-wide ignore patterns
 - Document profile purposes in a comment in config.yaml
 - Share working profiles with your team
 
@@ -927,7 +948,7 @@ lc-clip-files
 
    - Check your profile's gitignores and only-include patterns
    - Review `.gitignore` patterns
-   - Try `lc-set-profile code` to use default profile
+   - Try `lc-set-profile lc-code` to use default profile
 
 4. Outline Generation Not Working:
 

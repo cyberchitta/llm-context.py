@@ -6,7 +6,7 @@ from packaging import version
 
 from llm_context.utils import ProjectLayout, Yaml, safe_read_file
 
-CURRENT_CONFIG_VERSION = version.parse("2.7")
+CURRENT_CONFIG_VERSION = version.parse("2.8")
 
 MEDIA_EXTENSIONS: set[str] = {
     ".jpg",
@@ -76,6 +76,12 @@ IGNORE_NOTHING = [".git"]
 INCLUDE_ALL = ["**/*"]
 
 
+DEFAULT_GITIGNORES_PROFILE = "lc-gitignores"
+DEFAULT_CODE_PROFILE = "lc-code"
+DEFAULT_CODE_PROMPT_PROFILE = "lc-code-prompt"
+DEFAULT_CODE_FILE_PROFILE = "lc-code-file"
+
+
 @dataclass(frozen=True)
 class Profile:
     gitignores: dict[str, list[str]]
@@ -85,14 +91,24 @@ class Profile:
     description: str
 
     @staticmethod
-    def create_code() -> "Profile":
+    def create_code_gitignores() -> "Profile":
         return Profile.create(
             {"full_files": GIT_IGNORE_DEFAULT, "outline_files": GIT_IGNORE_DEFAULT},
             {"full_files": INCLUDE_ALL, "outline_files": INCLUDE_ALL},
-            {"no_media": False, "with_user_notes": False, "with_prompt": False},
-            "lc-prompt.md",
-            "Default profile for software projects, selecting all code files while excluding media and git-related files.",
+            {},
+            "",
+            "Base ignore patterns for code files, customize this for project-specific ignores.",
         )
+
+    @staticmethod
+    def create_code_dict() -> dict[str, Any]:
+        """Creates the default code profile configuration."""
+        return {
+            "base": DEFAULT_GITIGNORES_PROFILE,
+            "settings": {"no_media": False, "with_user_notes": False, "with_prompt": False},
+            "prompt": "lc-prompt.md",
+            "description": f"Default profile for software projects, using {DEFAULT_GITIGNORES_PROFILE} base profile.",
+        }
 
     @staticmethod
     def from_config(config: dict[str, Any]) -> "Profile":
@@ -162,7 +178,7 @@ class ToolConstants:
 
     @staticmethod
     def create_default(version: str) -> "ToolConstants":
-        return ToolConstants.create(version, Profile.create_code().to_dict())
+        return ToolConstants.create(version, Profile.create_code_dict())
 
     @staticmethod
     def create(config_version: str, default_profile: dict[str, Any]) -> "ToolConstants":
