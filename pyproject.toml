@@ -40,7 +40,6 @@ outline = ["tree-sitter-language-pack>=0.6.0", "tree-sitter>=0.24"]
 [project.scripts]
 lc-context = "llm_context.cli:context"
 lc-changed = "llm_context.cli:changed_files"
-# lc-dirtree = "llm_context.cli:get_fs_diagram"
 lc-init = "llm_context.cli:init_project"
 lc-clip-files = "llm_context.cli:files_from_clip"
 lc-clip-implementations = "llm_context.cli:implementations_from_clip"

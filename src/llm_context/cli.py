@@ -9,7 +9,6 @@ from llm_context.cmd_pipeline import ExecutionResult, create_clipboard_cmd, crea
 from llm_context.context_generator import ContextGenerator, ContextSettings
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
-from llm_context.folder_diagram import get_fsd
 from llm_context.utils import log
 
 
@@ -61,11 +60,6 @@ def set_profile_with_args(env: ExecutionEnvironment) -> ExecutionResult:
 def show_version(*, env: ExecutionEnvironment) -> ExecutionResult:
     log(INFO, f"llm-context version {pkg_ver('llm-context')}")
     return ExecutionResult(None, env)
-
-
-@create_clipboard_cmd
-def get_fs_diagram(*, env: ExecutionEnvironment) -> ExecutionResult:
-    return ExecutionResult(get_fsd(), ExecutionEnvironment.current())
 
 
 @create_command
@@ -126,7 +120,6 @@ def context(env: ExecutionEnvironment) -> ExecutionResult:
     parser = argparse.ArgumentParser(description="Generate context for LLM")
     parser.add_argument("-p", action="store_true", help="Include prompt in context")
     parser.add_argument("-u", action="store_true", help="Include user notes in context")
-    parser.add_argument("-x", action="store_true", help="Exclude media files from diagram")
     parser.add_argument("-f", type=str, help="Write context to file")
     args, _ = parser.parse_known_args()
     settings = ContextSettings.create(args.p, args.u, args.x)
