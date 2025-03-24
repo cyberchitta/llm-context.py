@@ -657,6 +657,6 @@ def test_outline_generation(language, extension, code, expected_highlights, tagg
     assert "highlights" in outlines[0]
 
     actual_highlights = outlines[0]["highlights"].strip()
-    assert actual_highlights == expected_highlights, (
-        f"Mismatch in {language} highlights:\nExpected:\n{expected_highlights}\n\nActual:\n{actual_highlights}"
-    )
+    assert (
+        actual_highlights == expected_highlights
+    ), f"Mismatch in {language} highlights:\nExpected:\n{expected_highlights}\n\nActual:\n{actual_highlights}"
