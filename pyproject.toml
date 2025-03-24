@@ -1,6 +1,6 @@
 [project]
 name = "llm-context"
-version = "0.2.15"
+version = "0.2.16"
 description = "Share code with LLMs via Model Context Protocol or clipboard. Profile-based customization enables easy switching between different tasks (like code review and documentation). Code outlining support is available as an experimental feature."
 authors = [
   { name = "restlessronin", email = "88921269+restlessronin@users.noreply.github.com" },
@@ -36,15 +36,6 @@ Repository = "https://github.com/cyberchitta/llm-context.py"
 
 [project.optional-dependencies]
 outline = ["tree-sitter-language-pack>=0.6.0", "tree-sitter>=0.24"]
-dev = [
-  "git-cliff>=2.6.1, <3.0",
-  "isort>=6.0.1, <7.0",
-  "mypy>=1.11.2, <2.0",
-  "pytest>=8.3.5, <9.0",
-  "types-pyyaml>=6.0.12.20241230",
-  "ruff>=0.9.10, <1.0",
-  "taplo>=0.9.3, <1.0",
-]
 
 [project.scripts]
 lc-context = "llm_context.cli:context"
@@ -83,6 +74,17 @@ ignore = ["E203", "E266", "E501", "F403", "F401"]
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+  "git-cliff>=2.6.1, <3.0",
+  "isort>=6.0.1, <7.0",
+  "mypy>=1.11.2, <2.0",
+  "pytest>=8.3.5, <9.0",
+  "types-pyyaml>=6.0.12.20241230",
+  "ruff>=0.9.10, <1.0",
+  "taplo>=0.9.3, <1.0",
+]
 
 [tool.hatch.build]
 include=["src/**"]
