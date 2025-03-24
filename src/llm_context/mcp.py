@@ -54,7 +54,7 @@ async def project_context(arguments: dict) -> list[TextContent]:
         )
         cur_env = cur_env.with_state(cur_env.state.with_selection(file_sel_out))
         cur_env.state.store()
-        settings = ContextSettings.create(False, False, False)
+        settings = ContextSettings.create(False, False)
         context = ContextGenerator.create(
             cur_env.config, cur_env.state.file_selection, settings, env.tagger
         ).context()
@@ -82,7 +82,7 @@ async def get_files(arguments: dict) -> list[TextContent]:
     request = FilesRequest(**arguments)
     env = ExecutionEnvironment.create(Path(request.root_path))
     with env.activate():
-        settings = ContextSettings.create(False, False, False)
+        settings = ContextSettings.create(False, False)
         context = ContextGenerator.create(env.config, env.state.file_selection, settings).files(
             request.paths
         )
@@ -158,7 +158,7 @@ async def code_outlines(arguments: dict) -> list[TextContent]:
     with cur_env.activate():
         selector = ContextSelector.create(cur_env.config)
         file_sel_out = selector.select_outline_only(cur_env.state.file_selection)
-        settings = ContextSettings.create(False, False, False)
+        settings = ContextSettings.create(False, False)
         content = ContextGenerator.create(
             cur_env.config, file_sel_out, settings, env.tagger
         ).outlines()
@@ -186,7 +186,7 @@ async def get_implementations(arguments: dict) -> list[TextContent]:
     request = ImplementationsRequest(**arguments)
     env = ExecutionEnvironment.create(Path(request.root_path))
     with env.activate():
-        settings = ContextSettings.create(False, False, False)
+        settings = ContextSettings.create(False, False)
         context = ContextGenerator.create(
             env.config, env.state.file_selection, settings, env.tagger
         ).definitions(request.queries)

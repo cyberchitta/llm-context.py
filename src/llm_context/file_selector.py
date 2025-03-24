@@ -7,6 +7,7 @@ from typing import Optional
 from pathspec import GitIgnoreSpec  # type: ignore
 
 from llm_context.context_spec import ContextSpec
+from llm_context.profile import IGNORE_NOTHING, INCLUDE_ALL
 from llm_context.state import FileSelection
 from llm_context.utils import PathConverter, log, safe_read_file
 
@@ -82,6 +83,14 @@ class FileSelector:
     since: Optional[float]
 
     @staticmethod
+    def create_universal(root_path: Path) -> "FileSelector":
+        return FileSelector.create_ignorer(root_path, IGNORE_NOTHING)
+
+    @staticmethod
+    def create_ignorer(root_path: Path, pathspecs: list[str]) -> "FileSelector":
+        return FileSelector.create(root_path, pathspecs, INCLUDE_ALL)
+
+    @staticmethod
     def create(
         root_path: Path, pathspecs: list[str], includspecs: list[str], since: Optional[float] = None
     ) -> "FileSelector":
@@ -89,6 +98,9 @@ class FileSelector:
         converter = PathConverter.create(root_path)
         include_filter = IncludeFilter.create(includspecs)
         return FileSelector(str(root_path), ignorer, converter, include_filter, since)
+
+    def filter_files(self, files: list[str]) -> list[str]:
+        return [f for f in files if f in set(self.get_files())]
 
     def get_files(self) -> list[str]:
         files = self.traverse(self.root_path)

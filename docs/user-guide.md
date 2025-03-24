@@ -13,6 +13,7 @@
 
    - [Project Configuration](#project-configuration)
    - [Files and Directories](#files-and-directories)
+   - [Repository Structure Diagram](#repository-structure-diagram)
    - [State Management](#state-management)
    - [Profiles Overview](#profiles-overview)
 
@@ -191,6 +192,32 @@ your-project/
 └── [project files]
 ```
 
+### Repository Structure Diagram
+
+The repository structure diagram is a text-based representation of your project's file tree that helps LLMs understand your project's organization. It appears near the beginning of the generated context and serves several important purposes:
+
+1. **Project Overview**: Provides a clear view of how files and directories are organized
+2. **File Status Indication**: Shows which files are included as full content (✓), outlines (○), or excluded (✗)
+3. **Navigation Aid**: Helps the LLM locate files it might need to examine
+
+Example diagram:
+```
+Status: ✓=Full content, ○=Outline only, ✗=Excluded
+Format: status path bytes (size) age
+
+✓ /my-project/src/main.py 2048 (2.0 KB) 1d ago
+○ /my-project/src/utils.py 4096 (4.0 KB) 2d ago
+✗ /my-project/data/large_dataset.csv 10485760 (10.0 MB) 7d ago
+```
+
+The diagram includes:
+- File status indicators (✓, ○, ✗)
+- Relative paths from project root
+- File sizes (both in bytes and human-readable format)
+- File age (how recently the file was modified)
+
+By default, the diagram excludes common media and binary files to keep the context focused on code and documentation. You can customize which files appear in the diagram by modifying the `diagram_files` patterns in your profile's configuration.
+
 ### State Management
 
 LLM Context maintains state in `curr_ctx.yaml`:
@@ -312,10 +339,17 @@ profiles:
         - ".gitignore"
         - ".llm-context/"
         - "*.lock"
+      diagram_files:  # Control what files are excluded from diagram
+        - "*.jpg"
+        - "*.png"
+        - "*.pdf"
+        - "*.exe"
     only-include:
       full_files:
         - "**/*"
       outline_files:
+        - "**/*"
+      diagram_files:
         - "**/*"
   lc-code: # Default profile included with LLM Context
     description: "Default profile for software projects, using lc-gitignores base profile."
@@ -325,7 +359,7 @@ profiles:
 
 #### File Selection Patterns
 
-Two types of pattern collections:
+Three types of pattern collections:
 
 1. Additional Exclusions (gitignores):
 
@@ -339,6 +373,11 @@ gitignores:
   outline_files:
     - ".git"
     - "*.lock"
+  # Files excluded from diagram
+  diagram_files:
+    - "*.jpg"
+    - "*.png"
+    - "*.gif"
 ```
 
 2. Optional Restrictions (only-include):
@@ -352,7 +391,13 @@ only-include:
   outline_files:
     - "**/*.py"
     - "**/*.js" # Restrict outlines to Python and JS
+  # Only include these in diagram
+  diagram_files:
+    - "**/*" # Include everything not excluded
 ```
+
+The `diagram_files` patterns control which files are displayed in the repository structure diagram. This replaces the previous `-x` flag, giving you more fine-grained control over what files appear in the diagram. By default, common media and binary file types are excluded.
+
 
 #### Example Custom Profiles
 

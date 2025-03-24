@@ -41,7 +41,7 @@ MEDIA_EXTENSIONS: set[str] = {
     ".map",
 }
 
-GIT_IGNORE_DEFAULT: list[str] = [
+GITIGNORE: list[str] = [
     ".git",
     ".gitignore",
     ".llm-context/",
@@ -89,9 +89,14 @@ class Profile:
 
     @staticmethod
     def create_code_gitignores() -> "Profile":
+        media = [f"*.{ext.lstrip('.')}" for ext in MEDIA_EXTENSIONS]
         return Profile.create(
-            {"full_files": GIT_IGNORE_DEFAULT, "outline_files": GIT_IGNORE_DEFAULT},
-            {"full_files": INCLUDE_ALL, "outline_files": INCLUDE_ALL},
+            {
+                "full_files": GITIGNORE,
+                "outline_files": GITIGNORE,
+                "diagram_files": media,
+            },
+            {"full_files": INCLUDE_ALL, "outline_files": INCLUDE_ALL, "diagram_files": INCLUDE_ALL},
             "",
             "Base ignore patterns for code files, customize this for project-specific ignores.",
         )
@@ -119,10 +124,10 @@ class Profile:
         return Profile(gitignores, only_include, prompt, description)
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
-        return self.gitignores[f"{context_type}_files"]
+        return self.gitignores.get(f"{context_type}_files", IGNORE_NOTHING)
 
     def get_only_includes(self, context_type: str) -> list[str]:
-        return self.only_includes[f"{context_type}_files"]
+        return self.only_includes.get(f"{context_type}_files", INCLUDE_ALL)
 
     def get_prompt(self, project_layout: ProjectLayout) -> Optional[str]:
         if not self.prompt:

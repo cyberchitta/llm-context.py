@@ -106,20 +106,19 @@ class ContextCollector:
             return []
 
     def folder_structure_diagram(
-        self, full_abs: list[str], outline_abs: list[str], no_media: bool
+        self, full_abs: list[str], outline_abs: list[str], diagram_ignores: list[str]
     ) -> str:
-        return get_flat_diagram(self.root_path, full_abs, outline_abs, no_media)
+        return get_flat_diagram(self.root_path, full_abs, outline_abs, diagram_ignores)
 
 
 @dataclass(frozen=True)
 class ContextSettings:
     with_prompt: bool = False
     with_user_notes: bool = False
-    no_media: bool = False
 
     @staticmethod
-    def create(with_prompt: bool, with_user_notes: bool, no_media: bool) -> "ContextSettings":
-        return ContextSettings(with_prompt, with_user_notes, no_media)
+    def create(with_prompt: bool, with_user_notes: bool) -> "ContextSettings":
+        return ContextSettings(with_prompt, with_user_notes)
 
 
 @dataclass(frozen=True)
@@ -193,7 +192,7 @@ class ContextGenerator:
             "context_timestamp": datetime.now().timestamp(),
             "abs_root_path": str(self.project_root),
             "folder_structure_diagram": self.collector.folder_structure_diagram(
-                self.full_abs, self.outline_abs, self.settings.no_media
+                self.full_abs, self.outline_abs, descriptor.get_ignore_patterns("diagram")
             ),
             "files": self.collector.files(self.full_rel),
             "highlights": outlines,

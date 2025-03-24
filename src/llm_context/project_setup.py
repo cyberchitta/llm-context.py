@@ -129,9 +129,9 @@ class ProjectSetup:
         user_config = Yaml.load(self.project_layout.config_path)
         new_config = Config.create_default().to_dict()
         new_profiles = new_config["profiles"]
-        new_profiles[DEFAULT_GITIGNORES_PROFILE] = user_config.get("profiles", {}).get(
-            DEFAULT_GITIGNORES_PROFILE, new_profiles[DEFAULT_GITIGNORES_PROFILE]
-        )
+#         new_profiles[DEFAULT_GITIGNORES_PROFILE] = user_config.get("profiles", {}).get(
+#            DEFAULT_GITIGNORES_PROFILE, new_profiles[DEFAULT_GITIGNORES_PROFILE]
+#        )
         custom_profiles = {
             n: c for n, c in user_config.get("profiles", {}).items() if n not in new_profiles
         }
