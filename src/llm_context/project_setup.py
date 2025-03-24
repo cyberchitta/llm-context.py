@@ -6,9 +6,7 @@ from typing import Any
 
 from llm_context import lc_resources
 from llm_context.profile import (
-    DEFAULT_CODE_FILE_PROFILE,
     DEFAULT_CODE_PROFILE,
-    DEFAULT_CODE_PROMPT_PROFILE,
     DEFAULT_GITIGNORES_PROFILE,
     Profile,
     ProjectLayout,
@@ -43,16 +41,6 @@ class Config:
             profiles={
                 DEFAULT_GITIGNORES_PROFILE: Profile.create_code_gitignores().to_dict(),
                 DEFAULT_CODE_PROFILE: Profile.create_code_dict(),
-                DEFAULT_CODE_PROMPT_PROFILE: {
-                    "base": DEFAULT_CODE_PROFILE,
-                    "settings": {"with_prompt": True},
-                    "description": f"Extends '{DEFAULT_CODE_PROFILE}' by including LLM instructions from lc-prompt.md for guided interactions.",
-                },
-                DEFAULT_CODE_FILE_PROFILE: {
-                    "base": DEFAULT_CODE_PROFILE,
-                    "settings": {"context_file": "project-context.md.tmp"},
-                    "description": f"Extends '{DEFAULT_CODE_PROFILE}' by saving the generated context to 'project-context.md.tmp' for external use.",
-                },
             },
         )
 
@@ -154,13 +142,24 @@ class ProjectSetup:
     def _check_legacy_profiles(self):
         try:
             user_config = Yaml.load(self.project_layout.config_path)
-            legacy_profiles = ["code", "code-prompt", "code-file"]
+            basic_legacy = ["code"]
+            specialized_legacy = ["code-prompt", "code-file"]
             profiles = user_config.get("profiles", {})
-            found_legacy = [p for p in legacy_profiles if p in profiles]
-            if found_legacy:
-                log(WARNING, f"Legacy profiles detected: {', '.join(found_legacy)}. These have been replaced by lc-prefixed versions (lc-code, lc-code-prompt, lc-code-file). Please update your references accordingly.")
+            found_basic = [p for p in basic_legacy if p in profiles]
+            found_specialized = [p for p in specialized_legacy if p in profiles]
+            if found_basic:
+                log(
+                    WARNING,
+                    f"Legacy profile detected: {', '.join(found_basic)}. This has been replaced by lc-code. Please update your references accordingly.",
+                )
+            if found_specialized:
+                log(
+                    WARNING,
+                    f"Legacy specialized profiles detected: {', '.join(found_specialized)}. These are no longer supported. Use command-line parameters with lc-code profile instead.",
+                )
         except Exception:
             pass
+
     def _create_config_file(self):
         Yaml.save(self.project_layout.config_path, Config.create_default().to_dict())
 

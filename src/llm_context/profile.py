@@ -78,15 +78,12 @@ INCLUDE_ALL = ["**/*"]
 
 DEFAULT_GITIGNORES_PROFILE = "lc-gitignores"
 DEFAULT_CODE_PROFILE = "lc-code"
-DEFAULT_CODE_PROMPT_PROFILE = "lc-code-prompt"
-DEFAULT_CODE_FILE_PROFILE = "lc-code-file"
 
 
 @dataclass(frozen=True)
 class Profile:
     gitignores: dict[str, list[str]]
     only_includes: dict[str, list[str]]
-    settings: dict[str, Any]
     prompt: str
     description: str
 
@@ -95,7 +92,6 @@ class Profile:
         return Profile.create(
             {"full_files": GIT_IGNORE_DEFAULT, "outline_files": GIT_IGNORE_DEFAULT},
             {"full_files": INCLUDE_ALL, "outline_files": INCLUDE_ALL},
-            {},
             "",
             "Base ignore patterns for code files, customize this for project-specific ignores.",
         )
@@ -105,7 +101,6 @@ class Profile:
         """Creates the default code profile configuration."""
         return {
             "base": DEFAULT_GITIGNORES_PROFILE,
-            "settings": {"no_media": False, "with_user_notes": False, "with_prompt": False},
             "prompt": "lc-prompt.md",
             "description": f"Default profile for software projects, using {DEFAULT_GITIGNORES_PROFILE} base profile.",
         }
@@ -115,26 +110,22 @@ class Profile:
         return Profile.create(
             config["gitignores"],
             config["only-include"],
-            config["settings"],
             config.get("prompt", ""),
             config.get("description", ""),
         )
 
     @staticmethod
-    def create(gitignores, only_include, settings, prompt, description) -> "Profile":
-        return Profile(gitignores, only_include, settings, prompt, description)
+    def create(gitignores, only_include, prompt, description) -> "Profile":
+        return Profile(gitignores, only_include, prompt, description)
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
         return self.gitignores[f"{context_type}_files"]
 
-    def get_settings(self) -> dict[str, Any]:
-        return self.settings
-
     def get_only_includes(self, context_type: str) -> list[str]:
         return self.only_includes[f"{context_type}_files"]
 
-    def get_prompt(self, project_layout: ProjectLayout, with_prompt: bool) -> Optional[str]:
-        if not with_prompt or self.prompt == "":
+    def get_prompt(self, project_layout: ProjectLayout) -> Optional[str]:
+        if not self.prompt:
             return None
         prompt_path = project_layout.project_config_path / self.prompt
         return safe_read_file(str(prompt_path))
@@ -149,7 +140,6 @@ class Profile:
         return {
             "gitignores": self.gitignores,
             "only-include": self.only_includes,
-            "settings": self.settings,
             "prompt": self.prompt,
             "description": self.description,
         }

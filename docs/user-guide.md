@@ -96,10 +96,16 @@
    lc-context
    ```
 
+   Use command-line flags to customize the output:
+
+   ```bash
+   lc-context -p -u -x -f output.md
+   ```
+
 4. Paste the context into your LLM chat interface:
 
    - For Claude Projects/Custom GPTs: Use the knowledge section
-   - For regular chats: Use `lc-set-profile lc-code-prompt` first to include guiding instructions
+   - For regular chats: Use `lc-context -p` to include guiding instructions
 
 5. When the LLM requests additional files:
    - Copy the file list from the LLM
@@ -114,7 +120,11 @@ Core commands you'll use frequently:
 - `lc-set-profile <n>`: Switch between different profile configurations
 - `lc-sel-files`: Select files for full content inclusion
 - `lc-sel-outlines`: Select files for structural outline generation
-- `lc-context`: Generate and copy context to clipboard
+- `lc-context [-p] [-u] [-x] [-f FILE]`: Generate and copy context to clipboard
+  - `-p`: Include prompt instructions
+  - `-u`: Include user notes
+  - `-x`: Exclude media files
+  - `-f FILE`: Write to output file
 - `lc-clip-files`: Process file requests from the LLM
 
 ### Common Use Cases
@@ -124,17 +134,20 @@ Core commands you'll use frequently:
    - Use default "lc-code" profile (or create your own)
    - Run `lc-sel-files` to include source code
    - Optional: Use `lc-sel-outlines` for structural overview
+   - Generate context: `lc-context -p` (with prompt)
 
 2. Documentation Projects:
 
    - Create a custom profile "docs"
    - Switch to documentation focus: `lc-set-profile docs` (after creating it)
    - Select content: `lc-sel-files`
+   - Generate with user notes: `lc-context -u`
    - Good for markdown/text collections
 
 3. Web Projects:
    - Works well with both frontend and backend code
    - Can include HTML, JavaScript, and content files
+   - Generate with media excluded: `lc-context -x`
    - Useful for reviewing site structure and content
 
 ## Core Concepts
@@ -189,25 +202,19 @@ LLM Context maintains state in `curr_ctx.yaml`:
 
 ### Profiles Overview
 
-Profiles control how LLM Context handles your project:
+Profiles now focus specifically on file selection rules:
 
 1. File Selection
 
-   - Which files to include/exclude
+   - Which files to include/exclude via gitignore patterns
    - Full content vs outline selection
-   - Media file handling
+   - Customizable inclusion/exclusion patterns
 
-2. Presentation
-
-   - Template selection
-   - Notes inclusion
-   - Output formatting
-
-3. Built-in Profiles
+2. Built-in Profiles
    - `lc-gitignores`: "Base profile containing default gitignore patterns, customize this for project-specific ignores."
    - `lc-code`: "Default profile for software projects, using lc-gitignores base profile."
-   - `lc-code-prompt`: "Extends 'lc-code' by including LLM instructions from lc-prompt.md for guided interactions."
-   - `lc-code-file`: "Extends 'lc-code' by saving the generated context to 'project-context.md.tmp' for external use."
+
+Behavior options that were previously in profile settings are now controlled via command-line parameters.
 
 ## Configuration
 
@@ -245,9 +252,7 @@ profiles:
         - "**/*"
   lc-code:
     base: "lc-gitignores"
-    settings:
-      no_media: true
-      with_user_notes: false
+    prompt: "lc-prompt.md"
 ```
 
 #### Notes Files
@@ -261,7 +266,7 @@ profiles:
 
 2. User Notes (`~/.llm-context/lc-user-notes.md`)
    - Personal/global notes
-   - Optional inclusion via profile settings
+   - Optional inclusion via the `-u` flag
    - Not project-specific
 
 #### Templates Directory
@@ -280,12 +285,13 @@ Warning: Files prefixed with `lc-` may be overwritten during updates. For custom
 
 ### Profile Configuration
 
-Profiles control how files are selected and context is generated. Each profile combines:
+Profiles now focus exclusively on how files are selected. Each profile combines:
 
 - Repository .gitignore patterns (always active)
 - Additional exclusion patterns from profile's gitignores
 - Optional inclusion patterns to restrict file selection
 - An optional `description` field to document the profile's purpose
+- An optional `prompt` field specifying the prompt file to use
 
 Important: The `.git` directory should always be included in your profile's gitignores patterns since it isn't typically in .gitignore files but should always be excluded from context generation.
 
@@ -314,34 +320,7 @@ profiles:
   lc-code: # Default profile included with LLM Context
     description: "Default profile for software projects, using lc-gitignores base profile."
     base: "lc-gitignores" # Inherits from gitignores profile
-    settings:
-      no_media: true
-      with_user_notes: false
-  lc-code-prompt: # Built-in profile that adds LLM instructions
-    description: "Extends 'lc-code' by including LLM instructions from lc-prompt.md for guided interactions."
-    base: "lc-code" # Inherits from code profile
-    prompt: "lc-prompt.md" # Adds prompt template to output
-    settings:
-      with_prompt: true
-  lc-code-file: # Built-in profile for file output
-    description: "Extends 'lc-code' by saving the generated context to 'project-context.md.tmp' for external use."
-    base: "lc-code"
-    settings:
-      context_file: "project-context.md.tmp"
-```
-
-#### Settings Reference
-
-Profile settings control behavior:
-
-```yaml
-settings:
-  # Exclude binary/media files from folder structure
-  no_media: true
-  # Include user notes from ~/.llm-context/lc-user-notes.md
-  with_user_notes: false
-  # Write lc-context to file (relative to current directory) in addition to clipboard
-  context_file: "context.md.tmp"
+    prompt: "lc-prompt.md" # Specifies prompt file
 ```
 
 #### File Selection Patterns
@@ -368,11 +347,11 @@ gitignores:
 only-include:
   # Only include these in full content
   full_files:
-    - "**/*"  # Include everything not excluded
+    - "**/*" # Include everything not excluded
   # Only include these in outlines
   outline_files:
     - "**/*.py"
-    - "**/*.js"  # Restrict outlines to Python and JS
+    - "**/*.js" # Restrict outlines to Python and JS
 ```
 
 #### Example Custom Profiles
@@ -387,9 +366,6 @@ profiles:
         - ".git"
         - ".llm-context/"
         - "*.lock"
-    settings:
-      no_media: true
-      with_user_notes: true # Include personal notes
     only-include:
       full_files:
         - "**/*.md"
@@ -404,8 +380,6 @@ profiles:
 profiles:
   source: # User-defined profile
     base: "lc-code" # Inherit from lc-code
-    settings:
-      no_media: true
     only-include:
       full_files:
         - "src/**/*.py" # Python source
@@ -426,25 +400,16 @@ profiles:
         - ".git"
         - ".llm-context/"
         - "*.lock"
-    settings:
-      no_media: true
     only-include:
       full_files:
         - "**/*.md"
   docs-with-notes: # User-defined profile
-    settings:
-      no_media: true
-      with_user_notes: true # Add personal notes
-  with-file: # User-defined profile
-    settings:
-      no_media: true
-      with_user_notes: false
-      context_file: "context.md.tmp" # Save to file as well as clipboard
+    base: "base-docs" # Inherit from base-docs profile
 ```
 
 The inheritance system allows you to:
 
-- Create base profiles for common settings
+- Create base profiles for common patterns
 - Override specific fields in derived profiles
 - Mix and match configurations for different use cases
 
@@ -452,7 +417,8 @@ The inheritance system allows you to:
 
 LLM Context distinguishes between system-provided profiles and user-defined profiles:
 
-- **System Profiles**: Prefixed with "lc-" (e.g., `lc-code`, `lc-code-prompt`)
+- **System Profiles**: Prefixed with "lc-" (e.g., `lc-code`)
+
   - Most system profiles are maintained by the system and may be updated during version upgrades
   - **Exception**: The `lc-gitignores` profile is preserved during updates, allowing you to customize project-wide ignore patterns that will be maintained across upgrades
   - System profiles inherit base ignore patterns from the `lc-gitignores` profile
@@ -462,6 +428,7 @@ LLM Context distinguishes between system-provided profiles and user-defined prof
   - Best practice is to create your own profiles that extend system profiles
 
 When customizing gitignore patterns, you have two recommended approaches:
+
 1. Modify the `lc-gitignores` profile for project-wide ignore patterns that should apply to all profiles
 2. Create custom profiles with specific gitignore overrides for specialized use cases
 
@@ -553,7 +520,6 @@ Switches the active profile.
 
 ```bash
 lc-set-profile lc-code         # Switch to default code profile
-lc-set-profile lc-code-prompt  # Switch to code profile with prompt
 lc-set-profile docs            # Switch to a custom user profile (if configured)
 ```
 
@@ -575,18 +541,30 @@ Selects files for structural outline generation.
 
 ### lc-context
 
-Generates context and copies to clipboard.
+Generates context and copies to clipboard with optional parameters.
 
-- Combines full content and outlines
-- Applies active profile's templates
-- Includes file structure diagram
+```bash
+lc-context                      # Basic context generation
+lc-context -p                   # Include prompt instructions
+lc-context -u                   # Include user notes
+lc-context -x                   # Exclude media files from diagram
+lc-context -f output.md         # Write to specified output file
+lc-context -p -u -x -f out.md   # Combine multiple options
+```
+
+The parameters control behavior that was previously defined in profile settings:
+
+- `-p`: Include prompt instructions in context
+- `-u`: Include user notes in context
+- `-x`: Exclude media files from diagram
+- `-f FILE`: Write context to specified output file
 
 ### lc-prompt
 
 Generates project-specific instructions suitable for "System Prompts" or "Custom Instructions" sections in LLM chat interfaces.
 
 - Outputs formatted instructions from your profile's prompt template
-- Includes user notes if enabled in profile settings
+- Includes user notes if the `-u` flag is included
 - Designed for:
   - Claude Projects' "Project Instructions" section
   - Custom GPT "System Prompts"
@@ -715,6 +693,7 @@ If you skip the `lc-sel-outlines` step, your context will not include any code o
 After reviewing code outlines, LLMs may request to see the full implementation of specific definitions (classes, functions, methods, etc.). LLM Context provides a seamless workflow for this:
 
 1. The LLM will request implementations in the format:
+
    ```
    /path/to/file.py:DefinitionName
    /path/to/file.py:another_function_name
@@ -723,6 +702,7 @@ After reviewing code outlines, LLMs may request to see the full implementation o
 2. Copy these requests to your clipboard
 
 3. Run the command:
+
    ```bash
    lc-clip-implementations
    ```
@@ -730,12 +710,14 @@ After reviewing code outlines, LLMs may request to see the full implementation o
 4. Paste the results back to the LLM
 
 This feature:
+
 - Works with all languages supported by the code outliner, except C and C++ (currently not supported)
 - Extracts the complete implementation, not just signatures
 - Helps LLMs understand specific code components without requiring the entire file
 - Enables a two-step exploration workflow: first understand structure, then examine specific implementations
 
 Example workflow:
+
 1. Generate context with outlines: `lc-context`
 2. LLM reviews the code structure and requests specific implementations
 3. Copy the requests, run `lc-clip-implementations`, paste results
@@ -830,16 +812,16 @@ profiles:
 
 3. Available MCP Tools:
 
-   | Tool Name | Description |
-   |-----------|-------------|
-   | lc-project-context | Generates a full repository overview with file contents and outlines |
-   | lc-get-files | Retrieves specific files from the project |
-   | lc-list-modified-files | Lists files modified since a specific timestamp |
-   | lc-code-outlines | Returns smart outlines for all code files in the repository (requires [outline] extra) |
-   | lc-get-implementations | Retrieves complete code implementations of definitions identified in code outlines |
-   
+   | Tool Name              | Description                                                                            |
+   | ---------------------- | -------------------------------------------------------------------------------------- |
+   | lc-project-context     | Generates a full repository overview with file contents and outlines                   |
+   | lc-get-files           | Retrieves specific files from the project                                              |
+   | lc-list-modified-files | Lists files modified since a specific timestamp                                        |
+   | lc-code-outlines       | Returns smart outlines for all code files in the repository (requires [outline] extra) |
+   | lc-get-implementations | Retrieves complete code implementations of definitions identified in code outlines     |
+
    Note: The `lc-code-outlines` and `lc-get-implementations` tools are only available if you have installed llm-context with the [outline] extra:
-   
+
    ```bash
    uv tool install "llm-context[outline]"
    ```
@@ -854,8 +836,7 @@ profiles:
 1. Standard Chat:
 
 ```bash
-lc-set-profile lc-code-prompt  # Include instructions
-lc-context                     # Generate and copy
+lc-context -p                  # Generate context with prompt instructions
 # Paste into chat
 ```
 
@@ -887,7 +868,7 @@ lc-clip-files
 
    - Generate context with `lc-context`
    - Add to GPT knowledge base
-   - Include prompt if needed
+   - Include prompt if needed: `lc-context -p`
 
 2. Ongoing Usage:
    - Update knowledge as needed

@@ -6,7 +6,7 @@ from pathlib import Path
 import pyperclip  # type: ignore
 
 from llm_context.cmd_pipeline import ExecutionResult, create_clipboard_cmd, create_command
-from llm_context.context_generator import ContextGenerator
+from llm_context.context_generator import ContextGenerator, ContextSettings
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
 from llm_context.folder_diagram import get_fsd
@@ -93,15 +93,17 @@ def select_outline_files(env: ExecutionEnvironment) -> ExecutionResult:
 @create_clipboard_cmd
 def files_from_scratch(env: ExecutionEnvironment) -> ExecutionResult:
     profile_feedback(env)
+    settings = ContextSettings.create(False, False, False)
     return ExecutionResult(
-        ContextGenerator.create(env.config, env.state.file_selection).files([]), env
+        ContextGenerator.create(env.config, env.state.file_selection, settings).files([]), env
     )
 
 
 @create_clipboard_cmd
 def files_from_clip(in_files: list[str] = [], *, env: ExecutionEnvironment):
+    settings = ContextSettings.create(False, False, False)
     return ExecutionResult(
-        ContextGenerator.create(env.config, env.state.file_selection).files(
+        ContextGenerator.create(env.config, env.state.file_selection, settings).files(
             pyperclip.paste().strip().split("\n")
         ),
         env,
@@ -111,7 +113,8 @@ def files_from_clip(in_files: list[str] = [], *, env: ExecutionEnvironment):
 @create_clipboard_cmd
 def prompt(env: ExecutionEnvironment) -> ExecutionResult:
     profile_feedback(env)
-    content = ContextGenerator.create(env.config, env.state.file_selection).prompt()
+    settings = ContextSettings.create(False, False, False)
+    content = ContextGenerator.create(env.config, env.state.file_selection, settings).prompt()
     nxt_env = env.with_state(env.state.with_selection(env.state.file_selection.with_now()))
     nxt_env.state.store()
     return ExecutionResult(content, env)
@@ -120,22 +123,30 @@ def prompt(env: ExecutionEnvironment) -> ExecutionResult:
 @create_clipboard_cmd
 def context(env: ExecutionEnvironment) -> ExecutionResult:
     profile_feedback(env)
-    content = ContextGenerator.create(env.config, env.state.file_selection, env.tagger).context()
-    context_file = env.config.profile.get_settings().get("context_file")
+    parser = argparse.ArgumentParser(description="Generate context for LLM")
+    parser.add_argument("-p", action="store_true", help="Include prompt in context")
+    parser.add_argument("-u", action="store_true", help="Include user notes in context")
+    parser.add_argument("-x", action="store_true", help="Exclude media files from diagram")
+    parser.add_argument("-f", type=str, help="Write context to file")
+    args, _ = parser.parse_known_args()
+    settings = ContextSettings.create(args.p, args.u, args.x)
+    generator = ContextGenerator.create(env.config, env.state.file_selection, env.tagger, settings)
+    content = generator.context()
     nxt_env = env.with_state(env.state.with_selection(env.state.file_selection.with_now()))
     nxt_env.state.store()
-    if context_file:
-        Path(context_file).write_text(content)
-        log(INFO, f"Wrote context to {context_file}")
+    if args.f:
+        Path(args.f).write_text(content)
+        log(INFO, f"Wrote context to {args.f}")
     return ExecutionResult(content, env)
 
 
 @create_clipboard_cmd
 def outlines(env: ExecutionEnvironment) -> ExecutionResult:
     profile_feedback(env)
+    settings = ContextSettings.create(False, False, False)
     selector = ContextSelector.create(env.config)
     file_sel_out = selector.select_outline_only(env.state.file_selection)
-    content = ContextGenerator.create(env.config, file_sel_out, env.tagger).outlines()
+    content = ContextGenerator.create(env.config, file_sel_out, settings, env.tagger).outlines()
     return ExecutionResult(content, env)
 
 
@@ -156,9 +167,10 @@ def changed_files(env: ExecutionEnvironment) -> ExecutionResult:
 def implementations_from_clip(env: ExecutionEnvironment) -> ExecutionResult:
     if not ContextSelector.has_outliner(True):
         return ExecutionResult(None, env)
+    settings = ContextSettings.create(False, False, False)
     clip = pyperclip.paste().strip()
     requests = [(w[0], w[1]) for line in clip.splitlines() if len(w := line.split(":", 1)) == 2]
-    content = ContextGenerator.create(env.config, env.state.file_selection, env.tagger).definitions(
-        requests
-    )
+    content = ContextGenerator.create(
+        env.config, env.state.file_selection, settings, env.tagger
+    ).definitions(requests)
     return ExecutionResult(content, env)

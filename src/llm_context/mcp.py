@@ -8,7 +8,7 @@ from mcp.shared.exceptions import McpError
 from mcp.types import INTERNAL_ERROR, INVALID_PARAMS, ErrorData, TextContent, Tool
 from pydantic import BaseModel, Field, ValidationError
 
-from llm_context.context_generator import ContextGenerator
+from llm_context.context_generator import ContextGenerator, ContextSettings
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
 from llm_context.profile import DEFAULT_CODE_PROFILE
@@ -54,9 +54,10 @@ async def project_context(arguments: dict) -> list[TextContent]:
         )
         cur_env = cur_env.with_state(cur_env.state.with_selection(file_sel_out))
         cur_env.state.store()
+        settings = ContextSettings.create(False, False, False)
         context = ContextGenerator.create(
-            cur_env.config, cur_env.state.file_selection, env.tagger
-        ).context("context-mcp")
+            cur_env.config, cur_env.state.file_selection, settings, env.tagger
+        ).context()
         return [TextContent(type="text", text=context)]
 
 
@@ -81,7 +82,10 @@ async def get_files(arguments: dict) -> list[TextContent]:
     request = FilesRequest(**arguments)
     env = ExecutionEnvironment.create(Path(request.root_path))
     with env.activate():
-        context = ContextGenerator.create(env.config, env.state.file_selection).files(request.paths)
+        settings = ContextSettings.create(False, False, False)
+        context = ContextGenerator.create(env.config, env.state.file_selection, settings).files(
+            request.paths
+        )
         return [TextContent(type="text", text=context)]
 
 
@@ -154,7 +158,10 @@ async def code_outlines(arguments: dict) -> list[TextContent]:
     with cur_env.activate():
         selector = ContextSelector.create(cur_env.config)
         file_sel_out = selector.select_outline_only(cur_env.state.file_selection)
-        content = ContextGenerator.create(cur_env.config, file_sel_out, env.tagger).outlines()
+        settings = ContextSettings.create(False, False, False)
+        content = ContextGenerator.create(
+            cur_env.config, file_sel_out, settings, env.tagger
+        ).outlines()
         return [TextContent(type="text", text=content)]
 
 
@@ -179,8 +186,9 @@ async def get_implementations(arguments: dict) -> list[TextContent]:
     request = ImplementationsRequest(**arguments)
     env = ExecutionEnvironment.create(Path(request.root_path))
     with env.activate():
+        settings = ContextSettings.create(False, False, False)
         context = ContextGenerator.create(
-            env.config, env.state.file_selection, env.tagger
+            env.config, env.state.file_selection, settings, env.tagger
         ).definitions(request.queries)
         return [TextContent(type="text", text=context)]
 

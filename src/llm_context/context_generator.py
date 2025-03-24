@@ -112,6 +112,17 @@ class ContextCollector:
 
 
 @dataclass(frozen=True)
+class ContextSettings:
+    with_prompt: bool = False
+    with_user_notes: bool = False
+    no_media: bool = False
+
+    @staticmethod
+    def create(with_prompt: bool, with_user_notes: bool, no_media: bool) -> "ContextSettings":
+        return ContextSettings(with_prompt, with_user_notes, no_media)
+
+
+@dataclass(frozen=True)
 class ContextGenerator:
     collector: ContextCollector
     spec: ContextSpec
@@ -121,11 +132,15 @@ class ContextGenerator:
     full_abs: list[str]
     outline_rel: list[str]
     outline_abs: list[str]
+    settings: ContextSettings
     tagger: Optional[Any]
 
     @staticmethod
     def create(
-        spec: ContextSpec, file_selection: FileSelection, tagger: Optional[Any] = None
+        spec: ContextSpec,
+        file_selection: FileSelection,
+        settings: ContextSettings,
+        tagger: Optional[Any] = None,
     ) -> "ContextGenerator":
         project_root = spec.project_root_path
         collector = ContextCollector.create(project_root)
@@ -135,7 +150,6 @@ class ContextGenerator:
         full_abs = converter.to_absolute(full_rel)
         outline_rel = [f for f in sel_files.outline_files if to_language(f)]
         outline_abs = converter.to_absolute(outline_rel)
-
         return ContextGenerator(
             collector,
             spec,
@@ -145,6 +159,7 @@ class ContextGenerator:
             full_abs,
             outline_rel,
             outline_abs,
+            settings,
             tagger,
         )
 
@@ -164,7 +179,7 @@ class ContextGenerator:
         descriptor = self.spec.profile
         layout = self.spec.project_layout
         context = {
-            "prompt": descriptor.get_prompt(layout, True),
+            "prompt": descriptor.get_prompt(layout),
             "user_notes": descriptor.get_user_notes(layout),
         }
         return self._render(template_id, context)
@@ -172,17 +187,13 @@ class ContextGenerator:
     def context(self, template_id: str = "context") -> str:
         descriptor = self.spec.profile
         layout = self.spec.project_layout
-        ctx_settings = descriptor.get_settings()
-        no_media, with_user_notes, with_prompt = map(
-            lambda x: bool(ctx_settings.get(x)), ("no_media", "with_user_notes", "with_prompt")
-        )
         outlines, sample_definitions = self.collector.outlines(self.tagger, self.outline_rel)
         context = {
             "project_name": self.project_root.name,
             "context_timestamp": datetime.now().timestamp(),
             "abs_root_path": str(self.project_root),
             "folder_structure_diagram": self.collector.folder_structure_diagram(
-                self.full_abs, self.outline_abs, no_media
+                self.full_abs, self.outline_abs, self.settings.no_media
             ),
             "files": self.collector.files(self.full_rel),
             "highlights": outlines,
@@ -190,9 +201,11 @@ class ContextGenerator:
             "sample_requested_files": self.converter.to_relative(
                 self.collector.sample_file_abs(self.full_abs)
             ),
-            "prompt": descriptor.get_prompt(layout, with_prompt),
+            "prompt": descriptor.get_prompt(layout) if self.settings.with_prompt else None,
             "project_notes": descriptor.get_project_notes(layout),
-            "user_notes": descriptor.get_user_notes(layout) if with_user_notes else None,
+            "user_notes": descriptor.get_user_notes(layout)
+            if self.settings.with_user_notes
+            else None,
         }
         return self._render(template_id, context)
 

@@ -8,11 +8,34 @@ LLM Context is a tool that helps developers quickly inject relevant content from
 
 > **Note**: This project was developed in collaboration with several Claude Sonnets - 3.5, 3.6 and 3.7 (and more recently Grok-3 as well), using LLM Context itself to share code during development. All code in the repository is human-curated (by me 😇, @restlessronin).
 
-## Important: Profile Name Change
+## Important: Profile Changes and Command-line Parameters
 
-As of version 0.2.16, all system profiles are now prefixed with "lc-" for clarity. The previous profiles "code", "code-prompt", and "code-file" have been replaced with "lc-code", "lc-code-prompt", and "lc-code-file" respectively. The base gitignore patterns have been extracted to a new "lc-gitignores" profile.
+As of version 0.2.16, we've made significant changes to improve usability:
 
-If you have customized these profiles or have references to them in your workflows, please update them accordingly. Your custom profiles (without the "lc-" prefix) will continue to work as before.
+1. **Profile Simplification**: 
+   - System profiles have been reduced to just "lc-code" and "lc-gitignores"
+   - The old "code-prompt" and "code-file" profiles are no longer needed as their functionality is now handled by command-line parameters
+   - All system profiles are prefixed with "lc-" for clarity
+
+2. **Command Parameters**: Behavior options are now controlled via command-line parameters:
+   - `-p`: Include prompt instructions in context
+   - `-u`: Include user notes in context
+   - `-x`: Exclude media files from diagram
+   - `-f FILE`: Write context to specified output file
+
+Examples:
+```bash
+# Generate context with prompt included
+lc-context -p
+
+# Generate context with user notes and save to file
+lc-context -u -f project-context.md
+
+# Generate context with all options
+lc-context -p -u -x -f project-context.md
+```
+
+If you have customized profiles or have references to them in your workflows, please update them accordingly and migrate any settings to use the appropriate command-line parameters.
 
 ## Important: Configuration File Format Change
 
@@ -90,12 +113,12 @@ Once configured, you can start working with your project in two simple ways:
 3. (Optional) Edit `.llm-context/config.yaml` to customize ignore patterns
 4. Select files: `lc-sel-files`
 5. (Optional) Review selected files in `.llm-context/curr_ctx.yaml`
-6. Generate context: `lc-context`
+6. Generate context: `lc-context` (with optional flags: `-p` for prompt, `-u` for user notes, `-x` to exclude media)
 7. Use with your preferred interface:
 
 - Project Knowledge (Claude Pro): Paste into knowledge section
 - GPT Knowledge (Custom GPTs): Paste into knowledge section
-- Regular chats: Use `lc-set-profile lc-code-prompt` first to include instructions
+- Regular chats: Use `lc-context -p` to include instructions
 
 8. When the LLM requests additional files:
    - Copy the file list from the LLM
@@ -108,7 +131,11 @@ Once configured, you can start working with your project in two simple ways:
 - `lc-set-profile <n>`: Switch profiles (system profiles are prefixed with "lc-")
 - `lc-sel-files`: Select files for inclusion
 - `lc-sel-outlines`: Select files for outline generation (requires installing with `[outline]` extra)
-- `lc-context`: Generate and copy context
+- `lc-context [-p] [-u] [-x] [-f FILE]`: Generate and copy context
+  - `-p`: Include prompt instructions
+  - `-u`: Include user notes
+  - `-x`: Exclude media files
+  - `-f FILE`: Write to output file
 - `lc-prompt`: Generate project instructions for LLMs
 - `lc-clip-files`: Process LLM file requests
 - `lc-changed`: List files modified since last context generation
