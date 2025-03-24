@@ -130,7 +130,7 @@ def context(env: ExecutionEnvironment) -> ExecutionResult:
     parser.add_argument("-f", type=str, help="Write context to file")
     args, _ = parser.parse_known_args()
     settings = ContextSettings.create(args.p, args.u, args.x)
-    generator = ContextGenerator.create(env.config, env.state.file_selection, env.tagger, settings)
+    generator = ContextGenerator.create(env.config, env.state.file_selection, settings, env.tagger)
     content = generator.context()
     nxt_env = env.with_state(env.state.with_selection(env.state.file_selection.with_now()))
     nxt_env.state.store()
