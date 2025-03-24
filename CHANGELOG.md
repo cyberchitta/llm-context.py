@@ -1,6 +1,18 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## [0.2.16] - 2025-03-24
+
+### Features
+- Replace no_media flag with pattern-based diagram_files filtering
+- Reorganize profile structure with system profiles / base gitignore
+
+### Refactor
+- Remove unused folder structure diagram
+- Replace profile settings with command parameters
+- Remove unused highlighter functionality
+
+### Mcp
+- Clarify when to use lc-get-files in templates
 
 ## [0.2.15] - 2025-03-10
 
