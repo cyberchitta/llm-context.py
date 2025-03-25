@@ -1,10 +1,46 @@
 __info__: 'This project uses llm-context. For more information, visit: https://github.com/cyberchitta/llm-context.py
   or https://pypi.org/project/llm-context/'
 profiles:
-  code:
-    description: Default profile for software projects, selecting all code files while
-      excluding media and git-related files.
+  lc-code:
+    base: lc-gitignores
+    description: Default profile for software projects, using lc-gitignores base profile.
+    prompt: lc-prompt.md
+  lc-gitignores:
+    description: Base ignore patterns for code files, customize this for project-specific
+      ignores.
     gitignores:
+      diagram_files:
+      - .git
+      - '*.mkv'
+      - '*.jpeg'
+      - '*.avi'
+      - '*.woff'
+      - '*.mp4'
+      - '*.so'
+      - '*.eot'
+      - '*.mp3'
+      - '*.gif'
+      - '*.map'
+      - '*.svg'
+      - '*.dll'
+      - '*.woff2'
+      - '*.bmp'
+      - '*.wav'
+      - '*.ico'
+      - '*.pdf'
+      - '*.exe'
+      - '*.flac'
+      - '*.otf'
+      - '*.ttf'
+      - '*.zip'
+      - '*.rar'
+      - '*.dylib'
+      - '*.mov'
+      - '*.jpg'
+      - '*.7z'
+      - '*.wmv'
+      - '*.png'
+      - '*.tar'
       full_files:
       - 'tests/'
       - '*.md'
@@ -74,27 +110,13 @@ profiles:
       - '*.ttf'
       - '*.map'
     only-include:
+      diagram_files:
+      - '**/*'
       full_files:
       - '**/*'
       outline_files:
       - '**/*'
-    prompt: lc-prompt.md
-    settings:
-      no_media: false
-      with_prompt: false
-      with_user_notes: false
-  code-file:
-    base: code
-    description: Extends 'code' by saving the generated context to 'project-context.md.tmp'
-      for external use.
-    settings:
-      context_file: project-context.md.tmp
-  code-prompt:
-    base: code
-    description: Extends 'code' by including LLM instructions from lc-prompt.md for
-      guided interactions.
-    settings:
-      with_prompt: true
+    prompt: ''
 templates:
   context: lc-context.j2
   context-mcp: lc-context-mcp.j2

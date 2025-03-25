@@ -6,16 +6,22 @@
 
 **COMPLETE PROJECT CONTEXT PROVIDED - NO NEED TO REQUEST ADDITIONAL CONTEXT**
 
-> Context generation timestamp: {{ context_timestamp }}  
-> For tracking code changes: Use lc-list-modified-files with this timestamp to identify files modified since this context was generated, then lc-get-files to retrieve their contents
-> If tools are unavailable: Ask the user to run the "lc-changed" CLI command, then "lc-get-files" for specific files
+> Generation timestamp: {{ context_timestamp }}  
+> For updates: Use lc-list-modified-files first to identify changes, then lc-get-files for specific files
+> If tools are unavailable, ask the user to run the "lc-changed" CLI command
 
 This context presents a comprehensive view of the _/{{ project_name }}_ repository.
 
 {% if sample_requested_files %}
 ## 📂 How to Request Missing Files 📂
 
-Files marked with "✗" or "○" can be retrieved using either:
+Files marked with "✗" or "○" can be retrieved using one of the following methods:
+
+!!! IMPORTANT - ALWAYS CHECK IF FILES ARE ALREADY IN CONTEXT BEFORE REQUESTING THEM !!!
+Only request files when:
+1. They have been modified since context generation (check with lc-list-modified-files first)
+2. They are marked with "✗" or "○" in the repository structure AND you need them for your analysis
+3. You have confirmed they are not already provided in full below
 
 !!! IMPORTANT - ALWAYS CHECK FOR TOOLS FIRST !!!
 Check if lc-get-files tool is available in your environment before proceeding to option 2.
