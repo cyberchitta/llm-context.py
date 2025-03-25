@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.17] - 2025-03-25
+
+### Features
+- Integrate outline functionality into standard distribution
+- Optimize diagram generation and add .git to default ignores
+
 ## [0.2.16] - 2025-03-24
 
 ### Features
