@@ -94,7 +94,7 @@ class Profile:
             {
                 "full_files": GITIGNORE,
                 "outline_files": GITIGNORE,
-                "diagram_files": media,
+                "diagram_files": IGNORE_NOTHING + media,
             },
             {"full_files": INCLUDE_ALL, "outline_files": INCLUDE_ALL, "diagram_files": INCLUDE_ALL},
             "",

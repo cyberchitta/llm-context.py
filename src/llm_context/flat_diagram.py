@@ -49,8 +49,7 @@ def get_flat_diagram(
     outline_files: list[str],
     diagram_ignores: list[str] = [],
 ) -> str:
-    abs_paths = FileSelector.create_universal(project_root).get_files()
     diagram_ignorer = FileSelector.create_ignorer(project_root, diagram_ignores)
-    abs_filtered = diagram_ignorer.filter_files(abs_paths)
+    abs_paths = diagram_ignorer.get_files()
     diagram = FlatDiagram(str(project_root), set(full_files), set(outline_files))
-    return diagram.generate(abs_filtered)
+    return diagram.generate(abs_paths)
