@@ -47,11 +47,7 @@ async def project_context(arguments: dict) -> list[TextContent]:
     with cur_env.activate():
         selector = ContextSelector.create(cur_env.config)
         file_sel_full = selector.select_full_files(cur_env.state.file_selection)
-        file_sel_out = (
-            selector.select_outline_files(file_sel_full)
-            if selector.has_outliner(False)
-            else file_sel_full
-        )
+        file_sel_out = selector.select_outline_files(file_sel_full)
         cur_env = cur_env.with_state(cur_env.state.with_selection(file_sel_out))
         cur_env.state.store()
         settings = ContextSettings.create(False, False)
@@ -120,11 +116,7 @@ async def list_modified_files(arguments: dict) -> list[TextContent]:
     with cur_env.activate():
         selector = ContextSelector.create(cur_env.config, request.timestamp)
         file_sel_full = selector.select_full_files(cur_env.state.file_selection)
-        file_sel_out = (
-            selector.select_outline_files(file_sel_full)
-            if selector.has_outliner(False)
-            else file_sel_full
-        )
+        file_sel_out = selector.select_outline_files(file_sel_full)
     return [TextContent(type="text", text="\n".join(file_sel_out.files))]
 
 
@@ -198,11 +190,13 @@ async def serve() -> None:
 
     @server.list_tools()
     async def handle_list_tools() -> list[Tool]:
-        base_tools = [project_context_tool, get_files_tool, list_modified_files_tool]
-        optional_tools = (
-            [outlines_tool, get_implementations_tool] if ContextSelector.has_outliner(False) else []
-        )
-        return base_tools + optional_tools
+        return [
+            project_context_tool,
+            get_files_tool,
+            list_modified_files_tool,
+            outlines_tool,
+            get_implementations_tool,
+        ]
 
     @server.call_tool()
     async def handle_call_tool(name: str, arguments: dict) -> list[TextContent]:
@@ -210,10 +204,9 @@ async def serve() -> None:
             "lc-project-context": project_context,
             "lc-get-files": get_files,
             "lc-list-modified-files": list_modified_files,
+            "lc-code-outlines": code_outlines,
+            "lc-get-implementations": get_implementations,
         }
-        if ContextSelector.has_outliner(False):
-            handlers["lc-code-outlines"] = code_outlines
-            handlers["lc-get-implementations"] = get_implementations
         try:
             return await handlers[name](arguments)
         except KeyError:

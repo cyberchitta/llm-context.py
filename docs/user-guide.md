@@ -83,7 +83,7 @@
 
    This uses your `.gitignore` and profile settings to choose relevant files.
 
-2. If using code outlining (with [outline] extra installed), select files for outline generation:
+2. Select files for outline generation:
 
    ```bash
    lc-sel-outlines
@@ -100,7 +100,7 @@
    Use command-line flags to customize the output:
 
    ```bash
-   lc-context -p -u -x -f output.md
+   lc-context -p -u -f output.md
    ```
 
 4. Paste the context into your LLM chat interface:
@@ -121,10 +121,9 @@ Core commands you'll use frequently:
 - `lc-set-profile <n>`: Switch between different profile configurations
 - `lc-sel-files`: Select files for full content inclusion
 - `lc-sel-outlines`: Select files for structural outline generation
-- `lc-context [-p] [-u] [-x] [-f FILE]`: Generate and copy context to clipboard
+- `lc-context [-p] [-u] [-f FILE]`: Generate and copy context to clipboard
   - `-p`: Include prompt instructions
   - `-u`: Include user notes
-  - `-x`: Exclude media files
   - `-f FILE`: Write to output file
 - `lc-clip-files`: Process file requests from the LLM
 
@@ -148,7 +147,6 @@ Core commands you'll use frequently:
 3. Web Projects:
    - Works well with both frontend and backend code
    - Can include HTML, JavaScript, and content files
-   - Generate with media excluded: `lc-context -x`
    - Useful for reviewing site structure and content
 
 ## Core Concepts
@@ -201,6 +199,7 @@ The repository structure diagram is a text-based representation of your project'
 3. **Navigation Aid**: Helps the LLM locate files it might need to examine
 
 Example diagram:
+
 ```
 Status: ✓=Full content, ○=Outline only, ✗=Excluded
 Format: status path bytes (size) age
@@ -211,6 +210,7 @@ Format: status path bytes (size) age
 ```
 
 The diagram includes:
+
 - File status indicators (✓, ○, ✗)
 - Relative paths from project root
 - File sizes (both in bytes and human-readable format)
@@ -339,7 +339,7 @@ profiles:
         - ".gitignore"
         - ".llm-context/"
         - "*.lock"
-      diagram_files:  # Control what files are excluded from diagram
+      diagram_files: # Control what files are excluded from diagram
         - "*.jpg"
         - "*.png"
         - "*.pdf"
@@ -396,8 +396,7 @@ only-include:
     - "**/*" # Include everything not excluded
 ```
 
-The `diagram_files` patterns control which files are displayed in the repository structure diagram. This replaces the previous `-x` flag, giving you more fine-grained control over what files appear in the diagram. By default, common media and binary file types are excluded.
-
+The `diagram_files` patterns control which files are displayed in the repository structure diagram. This gives you fine-grained control over what files appear in the diagram. By default, common media and binary file types are excluded.
 
 #### Example Custom Profiles
 
@@ -580,7 +579,6 @@ Selects files for full content inclusion.
 
 Selects files for structural outline generation.
 
-- Only available with [outline] extra
 - Limited to supported languages
 - Excludes files already selected for full content
 
@@ -592,16 +590,14 @@ Generates context and copies to clipboard with optional parameters.
 lc-context                      # Basic context generation
 lc-context -p                   # Include prompt instructions
 lc-context -u                   # Include user notes
-lc-context -x                   # Exclude media files from diagram
 lc-context -f output.md         # Write to specified output file
-lc-context -p -u -x -f out.md   # Combine multiple options
+lc-context -p -u -f out.md      # Combine multiple options
 ```
 
 The parameters control behavior that was previously defined in profile settings:
 
 - `-p`: Include prompt instructions in context
 - `-u`: Include user notes in context
-- `-x`: Exclude media files from diagram
 - `-f FILE`: Write context to specified output file
 
 ### lc-prompt
@@ -664,7 +660,6 @@ Extract code implementations requested by LLMs.
   /path/to/file.py:another_function_name
   ```
 - Useful when LLMs request to see specific implementation details
-- Requires [outline] extra
 - Note: Currently doesn't support C and C++ files
 
 ## Advanced Features
@@ -677,12 +672,6 @@ LLM Context provides two powerful code navigation features:
 2. Extracting full implementations of specific definitions
 
 These capabilities work together to help LLMs efficiently explore and understand your codebase.
-
-#### Installation
-
-```bash
-uv tool install "llm-context[outline]"
-```
 
 #### Configuration
 
@@ -731,7 +720,6 @@ If you skip the `lc-sel-outlines` step, your context will not include any code o
 #### Limitations
 
 - Implementation extraction doesn't currently support C and C++ files
-- You must have the [outline] extra installed for these features to work
 
 #### Definition Implementation Extraction
 
@@ -857,19 +845,13 @@ profiles:
 
 3. Available MCP Tools:
 
-   | Tool Name              | Description                                                                            |
-   | ---------------------- | -------------------------------------------------------------------------------------- |
-   | lc-project-context     | Generates a full repository overview with file contents and outlines                   |
-   | lc-get-files           | Retrieves specific files from the project                                              |
-   | lc-list-modified-files | Lists files modified since a specific timestamp                                        |
-   | lc-code-outlines       | Returns smart outlines for all code files in the repository (requires [outline] extra) |
-   | lc-get-implementations | Retrieves complete code implementations of definitions identified in code outlines     |
-
-   Note: The `lc-code-outlines` and `lc-get-implementations` tools are only available if you have installed llm-context with the [outline] extra:
-
-   ```bash
-   uv tool install "llm-context[outline]"
-   ```
+   | Tool Name              | Description                                                          |
+   | ---------------------- | -------------------------------------------------------------------- |
+   | lc-project-context     | Generates a full repository overview with file contents and outlines |
+   | lc-get-files           | Retrieves specific files from the project                            |
+   | lc-list-modified-files | Lists files modified since a specific timestamp                      |
+   | lc-code-outlines       | Returns smart outlines for all code files in the repository          |
+   | lc-get-implementations | Retrieves complete code implementations of definitions               |
 
 4. Usage:
    - Files requested via MCP are automatically processed
@@ -978,11 +960,11 @@ lc-clip-files
 
 4. Outline Generation Not Working:
 
-   - Ensure you installed with `uv tool install "llm-context[outline]"`
    - Check if your files are in supported languages
    - Make sure files aren't already selected for full content
 
 5. Context Too Large:
+
    - Review selected files with `cat .llm-context/curr_ctx.yaml`
    - Adjust profile patterns to exclude large files
    - Use outlines instead of full content where possible

@@ -148,18 +148,12 @@ def changed_files(env: ExecutionEnvironment) -> ExecutionResult:
     timestamp = env.state.file_selection.timestamp
     selector = ContextSelector.create(env.config, timestamp)
     file_sel_full = selector.select_full_files(env.state.file_selection)
-    file_sel_out = (
-        selector.select_outline_files(file_sel_full)
-        if selector.has_outliner(False)
-        else file_sel_full
-    )
+    file_sel_out = selector.select_outline_files(file_sel_full)
     return ExecutionResult("\n".join(file_sel_out.files), env)
 
 
 @create_clipboard_cmd
 def implementations_from_clip(env: ExecutionEnvironment) -> ExecutionResult:
-    if not ContextSelector.has_outliner(True):
-        return ExecutionResult(None, env)
     settings = ContextSettings.create(False, False)
     clip = pyperclip.paste().strip()
     requests = [(w[0], w[1]) for line in clip.splitlines() if len(w := line.split(":", 1)) == 2]

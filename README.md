@@ -67,21 +67,13 @@ For an in-depth exploration of the reasoning behind LLM Context and its approach
 Install LLM Context using [uv](https://github.com/astral-sh/uv):
 
 ```bash
-# Basic installation
 uv tool install llm-context
-
-# Or with code outlining support (recommended for developers)
-# uv tool install "llm-context[outline]"
 ```
 
 To upgrade to the latest version:
 
 ```bash
-# Basic upgrade
 uv tool upgrade llm-context
-
-# Or with code outlining support
-# uv tool upgrade "llm-context[outline]"
 ```
 
 > **Warning**: LLM Context is under active development. Updates may overwrite configuration files prefixed with `lc-`. We recommend all configuration files be version controlled for this reason.
@@ -97,10 +89,7 @@ Add to 'claude_desktop_config.json':
   "mcpServers": {
     "CyberChitta": {
       "command": "uvx",
-      // Basic installation:
       "args": ["--from", "llm-context", "lc-mcp"]
-      // With code outlining support (uncomment this line and comment the line above:
-      // "args": ["--from", "llm-context[outline]", "lc-mcp"]
     }
   }
 }
@@ -138,7 +127,7 @@ Once configured, you can start working with your project in two simple ways:
 - `lc-init`: Initialize project configuration
 - `lc-set-profile <n>`: Switch profiles (system profiles are prefixed with "lc-")
 - `lc-sel-files`: Select files for inclusion
-- `lc-sel-outlines`: Select files for outline generation (requires installing with `[outline]` extra)
+- `lc-sel-outlines`: Select files for outline generation
 - `lc-context [-p] [-u] [-f FILE]`: Generate and copy context
   - `-p`: Include prompt instructions
   - `-u`: Include user notes
@@ -146,8 +135,8 @@ Once configured, you can start working with your project in two simple ways:
 - `lc-prompt`: Generate project instructions for LLMs
 - `lc-clip-files`: Process LLM file requests
 - `lc-changed`: List files modified since last context generation
-- `lc-outlines`: Generate outlines for code files (requires installing with `[outline]` extra)
-- `lc-clip-implementations`: Extract code implementations requested by LLMs (requires installing with `[outline]` extra, doesn't support C/C++)
+- `lc-outlines`: Generate outlines for code files
+- `lc-clip-implementations`: Extract code implementations requested by LLMs (doesn't support C/C++)
 
 ## Features & Advanced Usage
 
@@ -158,7 +147,7 @@ LLM Context provides advanced features for customizing how project content is ca
   - System profiles (prefixed with "lc-") provide default functionality
   - User-defined profiles can be created independently or extend existing profiles
 - Code Navigation Features:
-  1. **Smart Code Outlines**: Allows LLMs to view the high-level structure of your codebase with automatically generated outlines highlighting important definitions (requires `[outline]` extra)
+  1. **Smart Code Outlines**: Allows LLMs to view the high-level structure of your codebase with automatically generated outlines highlighting important definitions
   2. **Definition Implementation Extraction**: Paste full implementations of specific definitions that are requested by LLMs after they review the code outlines, using the `lc-clip-implementations` command
 - Customizable templates and prompts
 

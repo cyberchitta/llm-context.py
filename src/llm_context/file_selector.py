@@ -137,20 +137,6 @@ class ContextSelector:
     outline_selector: FileSelector
 
     @staticmethod
-    def has_outliner(do_log: bool) -> bool:
-        try:
-            from llm_context.highlighter.outliner import generate_outlines
-
-            return True
-        except ImportError as e:
-            if do_log:
-                log(
-                    ERROR,
-                    f"Outline dependencies not installed. Install with [outline] extra. Error: {e}",
-                )
-            return False
-
-    @staticmethod
     def create(spec: ContextSpec, since: Optional[float] = None) -> "ContextSelector":
         root_path = spec.project_root_path
         profile = spec.profile
@@ -184,8 +170,6 @@ class ContextSelector:
                 WARNING,
                 "No full files have been selected. Consider running full file selection first.",
             )
-        if not ContextSelector.has_outliner(True):
-            return FileSelection.create(file_selection.profile_name, full_files, [])
         all_outline_files = self.outline_selector.get_relative_files()
         outline_files = [f for f in all_outline_files if f not in set(full_files)]
         return FileSelection._create(
@@ -193,8 +177,6 @@ class ContextSelector:
         )
 
     def select_outline_only(self, file_selection: FileSelection) -> "FileSelection":
-        if not ContextSelector.has_outliner(True):
-            return FileSelection.create(file_selection.profile_name, [], [])
         all_outline_files = self.outline_selector.get_relative_files()
         return FileSelection._create(
             file_selection.profile_name, [], all_outline_files, file_selection.timestamp

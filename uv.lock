@@ -178,10 +178,6 @@ dependencies = [
     { name = "pathspec" },
     { name = "pyperclip" },
     { name = "pyyaml" },
-]
-
-[package.optional-dependencies]
-outline = [
     { name = "tree-sitter" },
     { name = "tree-sitter-language-pack" },
 ]
@@ -205,10 +201,9 @@ requires-dist = [
     { name = "pathspec", specifier = ">=0.12.1,<0.13.0" },
     { name = "pyperclip", specifier = ">=1.9.0,<2.0.0" },
     { name = "pyyaml", specifier = ">=6.0.2" },
-    { name = "tree-sitter", marker = "extra == 'outline'", specifier = ">=0.24" },
-    { name = "tree-sitter-language-pack", marker = "extra == 'outline'", specifier = ">=0.6.0" },
+    { name = "tree-sitter", specifier = ">=0.24" },
+    { name = "tree-sitter-language-pack", specifier = ">=0.6.0" },
 ]
-provides-extras = ["outline"]
 
 [package.metadata.requires-dev]
 dev = [

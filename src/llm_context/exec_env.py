@@ -7,6 +7,8 @@ from typing import Any, ClassVar, Optional
 
 from llm_context.context_spec import ContextSpec
 from llm_context.file_selector import ContextSelector
+from llm_context.highlighter.parser import ASTFactory
+from llm_context.highlighter.tagger import ASTBasedTagger
 from llm_context.profile import ToolConstants
 from llm_context.state import AllSelections, FileSelection, StateStore
 from llm_context.utils import ProjectLayout
@@ -103,13 +105,7 @@ class ExecutionEnvironment:
 
     @staticmethod
     def _tagger(project_root: Path):
-        if ContextSelector.has_outliner(False):
-            from llm_context.highlighter.parser import ASTFactory
-            from llm_context.highlighter.tagger import ASTBasedTagger
-
-            return ASTBasedTagger.create(str(project_root), ASTFactory.create())
-        else:
-            return None
+        return ASTBasedTagger.create(str(project_root), ASTFactory.create())
 
     def with_state(self, new_state: ExecutionState) -> "ExecutionEnvironment":
         return ExecutionEnvironment(
@@ -123,11 +119,7 @@ class ExecutionEnvironment:
         empty_selection = FileSelection.create(profile_name, [], [])
         selector = ContextSelector.create(config)
         file_selection = selector.select_full_files(empty_selection)
-        outline_selection = (
-            selector.select_outline_files(file_selection)
-            if selector.has_outliner(False)
-            else file_selection
-        )
+        outline_selection = selector.select_outline_files(file_selection)
         new_state = self.state.with_selection(outline_selection).with_profile(profile_name)
         return ExecutionEnvironment(config, self.runtime, new_state, self.constants, self.tagger)
 

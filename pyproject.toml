@@ -28,14 +28,13 @@ dependencies = [
   "pathspec>=0.12.1, <0.13.0",
   "pyperclip>=1.9.0, <2.0.0",
   "pyyaml>=6.0.2",
+  "tree-sitter-language-pack>=0.6.0",
+  "tree-sitter>=0.24"
 ]
 
 [project.urls]
 Repository = "https://github.com/cyberchitta/llm-context.py"
 "User Guide" = "https://github.com/cyberchitta/llm-context.py/blob/main/docs/user-guide.md"
-
-[project.optional-dependencies]
-outline = ["tree-sitter-language-pack>=0.6.0", "tree-sitter>=0.24"]
 
 [project.scripts]
 lc-context = "llm_context.cli:context"
