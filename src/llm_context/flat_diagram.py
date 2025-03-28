@@ -35,11 +35,11 @@ class FlatDiagram:
         return f"{status}={STATUS_DESCRIPTIONS[status]}"
 
     @property
-    def _file_info_header():
+    def _file_info_header(self):
         return "status path bytes (size) age"
 
-    def _file_info(self, abs_path: str) -> str:
-        (
+    def _file_info(self, abs_path: str) -> tuple[str, str]:
+        return (
             self._get_status(abs_path),
             f"/{Path(self.root_dir).name}/{Path(abs_path).relative_to(self.root_dir)} "
             f"{os.path.getsize(abs_path)}"
