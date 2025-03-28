@@ -8,7 +8,7 @@ from llm_context.utils import ProjectLayout, Yaml, safe_read_file
 
 CURRENT_CONFIG_VERSION = version.parse("2.8")
 
-MEDIA_EXTENSIONS: set[str] = {
+MEDIA_EXTENSIONS: set[str] = [
     ".jpg",
     ".jpeg",
     ".png",
@@ -39,7 +39,7 @@ MEDIA_EXTENSIONS: set[str] = {
     ".so",
     ".dylib",
     ".map",
-}
+]
 
 GITIGNORE: list[str] = [
     ".git",
@@ -111,15 +111,13 @@ class Profile:
             "base": DEFAULT_GITIGNORES_PROFILE,
             "prompt": "lc-prompt.md",
             "description": f"Default profile for software projects, using {DEFAULT_GITIGNORES_PROFILE} base profile.",
-            "file-references": [],
-            "rule-references": [],
         }
 
     @staticmethod
     def from_config(config: dict[str, Any]) -> "Profile":
         return Profile.create(
-            config["gitignores"],
-            config["only-include"],
+            config.get("gitignores", {}),
+            config.get("only-include", {}),
             config.get("prompt", ""),
             config.get("description", ""),
             config.get("file-references", []),
@@ -154,12 +152,12 @@ class Profile:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "gitignores": self.gitignores,
-            "only-include": self.only_includes,
-            "prompt": self.prompt,
             "description": self.description,
-            "file-references": self.file_references,
-            "rule-references": self.rule_references,
+            **({"gitignores": self.gitignores} if self.gitignores else {}),
+            **({"only-include": self.only_includes} if self.only_includes else {}),
+            **({"prompt": self.prompt} if self.prompt else {}),
+            **({"file-references": self.file_references} if self.file_references else {}),
+            **({"rule-references": self.rule_references} if self.rule_references else {})
         }
 
 
