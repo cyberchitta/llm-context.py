@@ -112,9 +112,13 @@ class ContextCollector:
             return []
 
     def folder_structure_diagram(
-        self, full_abs: list[str], outline_abs: list[str], diagram_ignores: list[str]
+        self,
+        full_abs: list[str],
+        outline_abs: list[str],
+        rule_abs: list[str],
+        diagram_ignores: list[str],
     ) -> str:
-        return get_flat_diagram(self.root_path, full_abs, outline_abs, diagram_ignores)
+        return get_flat_diagram(self.root_path, full_abs, outline_abs, rule_abs, diagram_ignores)
 
 
 @dataclass(frozen=True)
@@ -197,12 +201,16 @@ class ContextGenerator:
         rule_files = self.collector.rule_files(descriptor.file_references)
         files = self.collector.files(self.full_rel)
         file_paths = {item["path"] for item in files}
+        rule_file_paths = [item["path"] for item in rule_files]
         context = {
             "project_name": self.project_root.name,
             "context_timestamp": datetime.now().timestamp(),
             "abs_root_path": str(self.project_root),
             "folder_structure_diagram": self.collector.folder_structure_diagram(
-                self.full_abs, self.outline_abs, descriptor.get_ignore_patterns("diagram")
+                self.full_abs,
+                self.outline_abs,
+                self.converter.to_absolute(rule_file_paths),
+                descriptor.get_ignore_patterns("diagram"),
             ),
             "files": files + [file for file in rule_files if file["path"] not in file_paths],
             "highlights": outlines,
@@ -216,7 +224,7 @@ class ContextGenerator:
             if self.settings.with_user_notes
             else None,
             "rules": self.collector.rules(descriptor.rule_references),
-            "rule_included_paths": set([item["path"] for item in rule_files]),
+            "rule_included_paths": set(rule_file_paths),
         }
         return self._render(template_id, context)
 
