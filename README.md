@@ -47,7 +47,7 @@ If you have customized profiles or have references to them in your workflows, pl
 
 ## Important: Configuration File Format Change
 
-Configuration files were converted from TOML to YAML in v 0.2.9. Existing users **must manually convert** any customizations in `.llm-context/config.yaml` files to the new `.llm-context/config.yaml`.
+Configuration files were converted from TOML to YAML in v 0.2.9. Existing users **must manually convert** any customizations in `.llm-context/config.toml` files to the new `.llm-context/config.yaml`.
 
 ## Why LLM Context?
 
