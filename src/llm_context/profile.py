@@ -86,6 +86,8 @@ class Profile:
     only_includes: dict[str, list[str]]
     prompt: str
     description: str
+    file_references: list[str]
+    rule_references: list[str]
 
     @staticmethod
     def create_code_gitignores() -> "Profile":
@@ -99,15 +101,18 @@ class Profile:
             {"full_files": INCLUDE_ALL, "outline_files": INCLUDE_ALL, "diagram_files": INCLUDE_ALL},
             "",
             "Base ignore patterns for code files, customize this for project-specific ignores.",
+            [],
+            [],
         )
 
     @staticmethod
     def create_code_dict() -> dict[str, Any]:
-        """Creates the default code profile configuration."""
         return {
             "base": DEFAULT_GITIGNORES_PROFILE,
             "prompt": "lc-prompt.md",
             "description": f"Default profile for software projects, using {DEFAULT_GITIGNORES_PROFILE} base profile.",
+            "file-references": [],
+            "rule-references": [],
         }
 
     @staticmethod
@@ -117,11 +122,17 @@ class Profile:
             config["only-include"],
             config.get("prompt", ""),
             config.get("description", ""),
+            config.get("file-references", []),
+            config.get("rule-references", []),
         )
 
     @staticmethod
-    def create(gitignores, only_include, prompt, description) -> "Profile":
-        return Profile(gitignores, only_include, prompt, description)
+    def create(
+        gitignores, only_include, prompt, description, file_references, rule_references
+    ) -> "Profile":
+        return Profile(
+            gitignores, only_include, prompt, description, file_references, rule_references
+        )
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
         return self.gitignores.get(f"{context_type}_files", IGNORE_NOTHING)
@@ -147,6 +158,8 @@ class Profile:
             "only-include": self.only_includes,
             "prompt": self.prompt,
             "description": self.description,
+            "file-references": self.file_references,
+            "rule-references": self.rule_references,
         }
 
 
@@ -237,6 +250,11 @@ class ProfileResolver:
                 continue
             if isinstance(value, dict) and key in merged and isinstance(merged[key], dict):
                 merged[key] = {**merged[key], **value}
+            elif isinstance(value, list) and key in merged and isinstance(merged[key], list):
+                if key in ["file-references", "rule-references"]:
+                    merged[key] = merged[key] + value
+                else:
+                    merged[key] = value
             else:
                 merged[key] = value
         return merged

@@ -1,55 +1,72 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 from llm_context.file_selector import FileSelector
-from llm_context.profile import MEDIA_EXTENSIONS
 from llm_context.utils import _format_size, format_age
+
+STATUSES = ["R✓", "✓", "○", "✗"]
+
+STATUS_DESCRIPTIONS = {
+    "R✓": "Rule-included (full content)",
+    "✓": "Full content",
+    "○": "Outline only",
+    "✗": "Excluded",
+}
 
 
 @dataclass(frozen=True)
 class FlatDiagram:
     root_dir: str
-    full_files: Optional[set[str]] = None
-    outline_files: Optional[set[str]] = None
+    full_files: set[str]
+    outline_files: set[str]
+    rule_files: set[str]
 
     def _get_status(self, path: str) -> str:
+        if self.rule_files and path in self.rule_files:
+            return "R✓"
         if self.full_files and path in self.full_files:
             return "✓"
         if self.outline_files and path in self.outline_files:
             return "○"
         return "✗"
 
-    def _is_media(self, path: str) -> bool:
-        return Path(path).suffix.lower() in MEDIA_EXTENSIONS
+    def _legend(self, status: str) -> str:
+        return f"{status}={STATUS_DESCRIPTIONS[status]}"
+
+    @property
+    def _file_info_header():
+        return "status path bytes (size) age"
+
+    def _file_info(self, abs_path: str) -> str:
+        (
+            self._get_status(abs_path),
+            f"/{Path(self.root_dir).name}/{Path(abs_path).relative_to(self.root_dir)} "
+            f"{os.path.getsize(abs_path)}"
+            f"({_format_size(os.path.getsize(abs_path))})"
+            f"{format_age(os.path.getmtime(abs_path))}",
+        )
 
     def generate(self, abs_paths: list[str]) -> str:
         if not abs_paths:
             return "No files found"
-
-        header = "Status: ✓=Full content, ○=Outline only, ✗=Excluded\n"
-        header += "Format: status path bytes (size) age\n\n"
-
-        entries = []
-        for path in sorted(abs_paths):
-            status = self._get_status(path)
-            rel_path = f"/{Path(self.root_dir).name}/{Path(path).relative_to(self.root_dir)}"
-            size = os.path.getsize(path)
-            age = format_age(os.path.getmtime(path))
-
-            entries.append(f"{status} {rel_path} {size} ({_format_size(size)}) {age}")
-
-        return header + "\n".join(entries)
+        entries = [self._file_info(path) for path in sorted(abs_paths)]
+        used = set(status for status, _ in entries)
+        legends = [self._legend(status) for status in STATUSES if status in used]
+        header = f"Status: {', '.join(legends)}\n"
+        header += f"Format: {self._file_info_header}\n\n"
+        rows = [f"{status} {entry}" for status, entry in entries]
+        return header + "\n".join(rows)
 
 
 def get_flat_diagram(
     project_root: Path,
     full_files: list[str],
     outline_files: list[str],
+    rule_files: list[str],
     diagram_ignores: list[str] = [],
 ) -> str:
     diagram_ignorer = FileSelector.create_ignorer(project_root, diagram_ignores)
     abs_paths = diagram_ignorer.get_files()
-    diagram = FlatDiagram(str(project_root), set(full_files), set(outline_files))
+    diagram = FlatDiagram(str(project_root), set(full_files), set(outline_files), set(rule_files))
     return diagram.generate(abs_paths)

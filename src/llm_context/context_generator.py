@@ -59,6 +59,12 @@ class ContextCollector:
         incomplete_files = sorted(list(all_abs - set(full_abs)))
         return random.sample(incomplete_files, min(2, len(incomplete_files)))
 
+    def rule_files(self, file_references: list[str]) -> list[dict[str, str]]:
+        return self.files(file_references)
+
+    def rules(self, rule_references: list[str]) -> list[dict[str, str]]:
+        return self.files(list(dict.fromkeys(rule_references)))
+
     def files(self, rel_paths: list[str]) -> list[dict[str, str]]:
         abs_paths = self.converter.to_absolute(rel_paths)
         return [
@@ -180,6 +186,7 @@ class ContextGenerator:
         context = {
             "prompt": descriptor.get_prompt(layout),
             "user_notes": descriptor.get_user_notes(layout),
+            "rules": self.collector.rules(descriptor.rule_references),
         }
         return self._render(template_id, context)
 
@@ -187,6 +194,9 @@ class ContextGenerator:
         descriptor = self.spec.profile
         layout = self.spec.project_layout
         outlines, sample_definitions = self.collector.outlines(self.tagger, self.outline_rel)
+        rule_files = self.collector.rule_files(descriptor.file_references)
+        files = self.collector.files(self.full_rel)
+        file_paths = {item["path"] for item in files}
         context = {
             "project_name": self.project_root.name,
             "context_timestamp": datetime.now().timestamp(),
@@ -194,7 +204,7 @@ class ContextGenerator:
             "folder_structure_diagram": self.collector.folder_structure_diagram(
                 self.full_abs, self.outline_abs, descriptor.get_ignore_patterns("diagram")
             ),
-            "files": self.collector.files(self.full_rel),
+            "files": files + [file for file in rule_files if file["path"] not in file_paths],
             "highlights": outlines,
             "sample_definitions": sample_definitions,
             "sample_requested_files": self.converter.to_relative(
@@ -205,6 +215,8 @@ class ContextGenerator:
             "user_notes": descriptor.get_user_notes(layout)
             if self.settings.with_user_notes
             else None,
+            "rules": self.collector.rules(descriptor.rule_references),
+            "rule_included_paths": set([item["path"] for item in rule_files]),
         }
         return self._render(template_id, context)
 
