@@ -45,6 +45,34 @@ lc-context -p -u -f project-context.md
 
 If you have customized profiles or have references to them in your workflows, please update them accordingly.
 
+## New: Rule and File References
+
+As of version 0.2.18, we've added support for rule and file references in profiles:
+
+1. **Rule References**:
+   - Add `rule-references` to profiles to include programming style guides
+   - Rules are included with the prompt to guide code generation
+   - Perfect for incorporating coding standards into your LLM conversations
+
+2. **File References**:
+   - Include `file-references` in profiles to add important files
+   - Referenced files are automatically included in context generation
+   - No need to manually select them with `lc-sel-files`
+
+Example profile with rule references:
+
+```yaml
+profiles:
+  python-style:
+    base: "lc-code"
+    description: "Python code with style guidelines"
+    rule-references:
+      - "rules/python-style.md"    # Programming style guide
+      - "rules/naming-conventions.md"  # Naming conventions
+```
+
+Rules appear in the prompt section, ensuring LLMs follow your coding standards from the beginning of the conversation.
+
 ## Important: Configuration File Format Change
 
 Configuration files were converted from TOML to YAML in v 0.2.9. Existing users **must manually convert** any customizations in `.llm-context/config.toml` files to the new `.llm-context/config.yaml`.

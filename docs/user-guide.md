@@ -39,6 +39,7 @@
 5. [Advanced Features](#advanced-features)
 
    - [Code Outlining](#code-outlining)
+   - [Rule Integration](#rule-integration)
    - [Performance Optimization](#performance-optimization)
 
 6. [Workflows](#workflows)
@@ -398,6 +399,35 @@ only-include:
 
 The `diagram_files` patterns control which files are displayed in the repository structure diagram. This gives you fine-grained control over what files appear in the diagram. By default, common media and binary file types are excluded.
 
+#### Rule and File References
+
+Profiles can now include references to external rules and files:
+
+```yaml
+profiles:
+  python-with-rules:
+    base: "lc-code"
+    description: "Python development with coding standards"
+    rule-references:
+      - "rules/python-style.md" # Programming style guide
+      - "rules/error-handling.md" # Error handling conventions
+    file-references:
+      - "configs/pyproject.toml" # Project configuration
+      - "configs/mypy.ini" # Type checking configuration
+```
+
+1. **Rule References**:
+
+   - Included in the prompt section of the context
+   - Guide LLM behavior for code generation and review
+   - Perfect for defining coding standards, conventions, and best practices
+
+2. **File References**:
+   - Automatically included in full file content
+   - No need to select them with `lc-sel-files`
+   - Useful for important files that should always be included
+   - Eliminates the need to maintain separate lists of essential files
+
 #### Example Custom Profiles
 
 1. Documentation Focus:
@@ -431,6 +461,29 @@ profiles:
         - "pyproject.toml" # Project configuration
     prompt: "lc-prompt.md"
 ```
+
+3. Python with Style Rules:
+
+```yaml
+profiles:
+  python-style:
+    base: "lc-code"
+    description: "Python development with style rules"
+    rule-references:
+      - "rules/python-style.md" # Style guide
+      - "rules/docstring-conventions.md" # Documentation standards
+    only-include:
+      full_files:
+        - "src/**/*.py" # Python source
+        - "tests/**/*.py" # Test files
+```
+
+This profile:
+
+- Inherits from the default code profile
+- Adds Python style and documentation conventions as rules
+- Focuses only on Python source and test files
+- Ensures all code follows consistent style guidelines
 
 #### Profile Inheritance
 
@@ -755,6 +808,37 @@ Example workflow:
 2. LLM reviews the code structure and requests specific implementations
 3. Copy the requests, run `lc-clip-implementations`, paste results
 4. LLM can now analyze the detailed implementations
+
+### Rule Integration
+
+LLM Context supports incorporating programming style guides and best practices directly into your LLM interactions through rule references.
+
+#### Rule Format
+
+Rules should be stored as Markdown files in your project. They're included at the beginning of the context with the prompt, ensuring the LLM is aware of your coding standards from the start.
+
+Example rule file (`rules/python-style.md`):
+
+```markdown
+## Programming Style
+
+When writing Python code, prefer a functional and Pythonic style. Use list comprehensions instead of traditional for loops where appropriate. Leverage conditional expressions and single-pass operations for efficiency. Employ expressive naming and type hinting to enhance code clarity. Prefer stateless methods and concise boolean logic where possible. Make use of Python idioms such as tuple unpacking. In short, write **beautiful** code.
+```
+
+#### Benefits of Rule References
+
+1. **Consistency**: Ensure all generated code follows your team's standards
+2. **Efficiency**: No need to repeatedly explain coding conventions
+3. **Modularity**: Create different rule sets for different languages or projects
+4. **Integration**: Works with various style guide formats
+
+#### Best Practices for Rules
+
+1. Keep rule files concise and focused
+2. Use Markdown for clear formatting
+3. Organize rules by language or concern
+4. Store rules in a central location (e.g., a `rules/` directory)
+5. Use descriptive filenames for easy reference
 
 ### Performance Optimization
 
