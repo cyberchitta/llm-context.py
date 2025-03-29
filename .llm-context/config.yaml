@@ -76,6 +76,10 @@ profiles:
       - '*.ttf'
       - '*.map'
       outline_files:
+      - 'tests/'
+      - '*.md'
+      - '*.scm'
+      - '*.yaml'
       - .git
       - .gitignore
       - .llm-context/
