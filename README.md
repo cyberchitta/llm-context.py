@@ -50,12 +50,12 @@ If you have customized profiles or have references to them in your workflows, pl
 As of version 0.2.18, we've added support for rule and file references in profiles:
 
 1. **Rule References**:
-   - Add `rule-references` to profiles to include programming style guides
+   - Add `rules` to profiles to include programming style guides
    - Rules are included with the prompt to guide code generation
    - Perfect for incorporating coding standards into your LLM conversations
 
 2. **File References**:
-   - Include `file-references` in profiles to add important files
+   - Include `files` in profiles to add important files
    - Referenced files are automatically included in context generation
    - No need to manually select them with `lc-sel-files`
 
@@ -66,9 +66,9 @@ profiles:
   python-style:
     base: "lc-code"
     description: "Python code with style guidelines"
-    rule-references:
-      - "rules/python-style.md"    # Programming style guide
-      - "rules/naming-conventions.md"  # Naming conventions
+    rules:
+      - "python-style.md"    # Programming style guide
+      - "naming-conventions.md"  # Naming conventions
 ```
 
 Rules appear in the prompt section, ensuring LLMs follow your coding standards from the beginning of the conversation.
