@@ -15,6 +15,9 @@ NOTE: Always use lc-get-files as your primary method for examining file contents
 1. Files modified since context generation (use lc-list-modified-files to identify these)
 2. Files marked "✗" or "○" in the repository structure that you need to examine
 
+IMPORTANT: Consider whether you need entire files or just specific functions
+If you only need specific functions or methods, use lc-get-implementations instead of retrieving complete files. This is more efficient for large files where you're only interested in specific parts.
+
 Always check if files are already included in full in this context before retrieving them.
 
 ## Repository Structure

@@ -11,36 +11,36 @@ profiles:
     gitignores:
       diagram_files:
       - .git
-      - '*.mkv'
+      - '*.jpg'
       - '*.jpeg'
-      - '*.avi'
-      - '*.woff'
-      - '*.mp4'
-      - '*.so'
-      - '*.eot'
-      - '*.mp3'
+      - '*.png'
       - '*.gif'
-      - '*.map'
-      - '*.svg'
-      - '*.dll'
-      - '*.woff2'
       - '*.bmp'
+      - '*.svg'
+      - '*.mp4'
+      - '*.mkv'
+      - '*.avi'
+      - '*.mov'
+      - '*.wmv'
+      - '*.mp3'
       - '*.wav'
+      - '*.flac'
+      - '*.ttf'
+      - '*.otf'
+      - '*.woff'
+      - '*.woff2'
+      - '*.eot'
       - '*.ico'
       - '*.pdf'
-      - '*.exe'
-      - '*.flac'
-      - '*.otf'
-      - '*.ttf'
       - '*.zip'
       - '*.rar'
-      - '*.dylib'
-      - '*.mov'
-      - '*.jpg'
       - '*.7z'
-      - '*.wmv'
-      - '*.png'
       - '*.tar'
+      - '*.exe'
+      - '*.dll'
+      - '*.so'
+      - '*.dylib'
+      - '*.map'
       full_files:
       - 'tests/'
       - '*.md'
@@ -76,10 +76,6 @@ profiles:
       - '*.ttf'
       - '*.map'
       outline_files:
-      - 'tests/'
-      - '*.md'
-      - '*.scm'
-      - '*.yaml'
       - .git
       - .gitignore
       - .llm-context/
@@ -116,7 +112,6 @@ profiles:
       - '**/*'
       outline_files:
       - '**/*'
-    prompt: ''
 templates:
   context: lc-context.j2
   context-mcp: lc-context-mcp.j2
