@@ -409,11 +409,11 @@ profiles:
     base: "lc-code"
     description: "Python development with coding standards"
     rule-references:
-      - "rules/python-style.md" # Programming style guide
-      - "rules/error-handling.md" # Error handling conventions
+      - "python-style.md" # Programming style guide
+      - "error-handling.md" # Error handling conventions
     file-references:
-      - "configs/pyproject.toml" # Project configuration
-      - "configs/mypy.ini" # Type checking configuration
+      - "pyproject.toml" # Project configuration
+      - "docs/user-guide.md"
 ```
 
 1. **Rule References**:
@@ -427,6 +427,22 @@ profiles:
    - No need to select them with `lc-sel-files`
    - Useful for important files that should always be included
    - Eliminates the need to maintain separate lists of essential files
+
+#### Path Format for References
+
+- **Rule References**: Simple filenames or paths relative to the rules directory
+  ```yaml
+  rule-references:
+    - "python.md"           # References .llm-context/rules/python.md
+    - "style/naming.md"     # References .llm-context/rules/style/naming.md
+  ```
+
+- **File References**: Paths relative to the project root
+  ```yaml
+  file-references:
+    - "src/main.py"         # References project file at <root>/src/main.py
+    - "config/settings.json"  # References project file at <root>/config/settings.json
+  ```
 
 #### Example Custom Profiles
 
@@ -470,8 +486,8 @@ profiles:
     base: "lc-code"
     description: "Python development with style rules"
     rule-references:
-      - "rules/python-style.md" # Style guide
-      - "rules/docstring-conventions.md" # Documentation standards
+      - "python-style.md" # Style guide
+      - "docstring-conventions.md" # Documentation standards
     only-include:
       full_files:
         - "src/**/*.py" # Python source

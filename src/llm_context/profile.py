@@ -8,7 +8,7 @@ from llm_context.utils import ProjectLayout, Yaml, safe_read_file
 
 CURRENT_CONFIG_VERSION = version.parse("2.8")
 
-MEDIA_EXTENSIONS: set[str] = [
+MEDIA_EXTENSIONS: list[str] = [
     ".jpg",
     ".jpeg",
     ".png",
@@ -86,8 +86,8 @@ class Profile:
     only_includes: dict[str, list[str]]
     prompt: str
     description: str
-    file_references: list[str]
-    rule_references: list[str]
+    files: list[str]
+    rules: list[str]
 
     @staticmethod
     def create_code_gitignores() -> "Profile":
@@ -120,17 +120,13 @@ class Profile:
             config.get("only-include", {}),
             config.get("prompt", ""),
             config.get("description", ""),
-            config.get("file-references", []),
-            config.get("rule-references", []),
+            config.get("files", []),
+            config.get("rules", []),
         )
 
     @staticmethod
-    def create(
-        gitignores, only_include, prompt, description, file_references, rule_references
-    ) -> "Profile":
-        return Profile(
-            gitignores, only_include, prompt, description, file_references, rule_references
-        )
+    def create(gitignores, only_include, prompt, description, files, rules) -> "Profile":
+        return Profile(gitignores, only_include, prompt, description, files, rules)
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
         return self.gitignores.get(f"{context_type}_files", IGNORE_NOTHING)
@@ -156,8 +152,8 @@ class Profile:
             **({"gitignores": self.gitignores} if self.gitignores else {}),
             **({"only-include": self.only_includes} if self.only_includes else {}),
             **({"prompt": self.prompt} if self.prompt else {}),
-            **({"file-references": self.file_references} if self.file_references else {}),
-            **({"rule-references": self.rule_references} if self.rule_references else {})
+            **({"files": self.files} if self.files else {}),
+            **({"rules": self.rules} if self.rules else {}),
         }
 
 

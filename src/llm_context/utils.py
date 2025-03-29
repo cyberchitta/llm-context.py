@@ -60,6 +60,13 @@ class ProjectLayout:
     def get_template_path(self, template_name: str) -> Path:
         return self.templates_path / template_name
 
+    @property
+    def rules_path(self) -> Path:
+        return self.project_config_path / "rules"
+
+    def get_rule_path(self, rule_name: str) -> Path:
+        return self.rules_path / rule_name
+
 
 def _format_size(size_bytes):
     for unit in ["B", "KB", "MB", "GB"]:
