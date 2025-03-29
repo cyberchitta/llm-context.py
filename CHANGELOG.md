@@ -1,5 +1,12 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+## [0.2.18] - 2025-03-29
+
+### Features
+- Make context template instructions conditional on content
+- Implement profile file and rule references
+
 ## [0.2.17] - 2025-03-25
 
 ### Features
