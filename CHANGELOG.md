@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## [0.3.0] - 2025-03-31
+
+### Features
+- Replace profiles with Markdown/YAML-based rules
+
 ## [0.2.18] - 2025-03-29
 
 ### Features
