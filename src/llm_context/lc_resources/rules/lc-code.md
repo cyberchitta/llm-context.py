@@ -1,6 +1,6 @@
 ---
 base: lc-gitignores
-description: Default profile for software projects, using lc-gitignores base profile.
+description: Default rule for software projects, using lc-gitignores base rule.
 name: lc-code
 ---
 

@@ -87,7 +87,7 @@ Once configured, you can start working with your project in two simple ways:
 ## Core Commands
 
 - `lc-init`: Initialize project configuration
-- `lc-set-profile <n>`: Switch profiles (system profiles are prefixed with "lc-")
+- `lc-set-rule <n>`: Switch profiles (system profiles are prefixed with "lc-")
 - `lc-sel-files`: Select files for inclusion
 - `lc-sel-outlines`: Select files for outline generation
 - `lc-context [-p] [-u] [-f FILE]`: Generate and copy context

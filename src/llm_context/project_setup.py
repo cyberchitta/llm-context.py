@@ -5,11 +5,11 @@ from pathlib import Path
 from typing import Any
 
 from llm_context import lc_resources
-from llm_context.profile import (
+from llm_context.rule import (
     DEFAULT_CODE_PROFILE,
     DEFAULT_GITIGNORES_PROFILE,
-    Profile,
     ProjectLayout,
+    Rule,
     ToolConstants,
 )
 from llm_context.utils import Yaml, log
@@ -144,12 +144,12 @@ class ProjectSetup:
             if found_basic:
                 log(
                     WARNING,
-                    f"Legacy profile detected: {', '.join(found_basic)}. This has been replaced by lc-code. Please update your references accordingly.",
+                    f"Legacy rule detected: {', '.join(found_basic)}. This has been replaced by lc-code. Please update your references accordingly.",
                 )
             if found_specialized:
                 log(
                     WARNING,
-                    f"Legacy specialized profiles detected: {', '.join(found_specialized)}. These are no longer supported. Use command-line parameters with lc-code profile instead.",
+                    f"Legacy specialized profiles detected: {', '.join(found_specialized)}. These are no longer supported. Use command-line parameters with lc-code rule instead.",
                 )
         except Exception:
             pass

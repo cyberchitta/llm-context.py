@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field, ValidationError
 from llm_context.context_generator import ContextGenerator, ContextSettings
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
-from llm_context.profile import DEFAULT_CODE_PROFILE
+from llm_context.rule import DEFAULT_CODE_PROFILE
 
 
 class ContextRequest(BaseModel):
@@ -20,7 +20,7 @@ class ContextRequest(BaseModel):
     )
     profile_name: str = Field(
         DEFAULT_CODE_PROFILE,
-        description="Profile to use (e.g. 'code', 'copy', 'full') - defines file inclusion and presentation rules",
+        description="Rule to use (e.g. 'code', 'copy', 'full') - defines file inclusion and presentation rules",
         pattern="^[a-zA-Z0-9_-]+$",
     )
 
@@ -91,7 +91,7 @@ class ListModifiedFilesRequest(BaseModel):
     )
     profile_name: str = Field(
         DEFAULT_CODE_PROFILE,
-        description="Profile to use (e.g. 'code', 'copy', 'full') - defines file inclusion and presentation rules",
+        description="Rule to use (e.g. 'code', 'copy', 'full') - defines file inclusion and presentation rules",
         pattern="^[a-zA-Z0-9_-]+$",
     )
     timestamp: float = Field(..., description="Unix timestamp to check modifications since")
@@ -126,7 +126,7 @@ class OutlinesRequest(BaseModel):
     )
     profile_name: str = Field(
         DEFAULT_CODE_PROFILE,
-        description="Profile to use for file selection rules",
+        description="Rule to use for file selection rules",
         pattern="^[a-zA-Z0-9_-]+$",
     )
 

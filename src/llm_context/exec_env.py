@@ -9,7 +9,7 @@ from llm_context.context_spec import ContextSpec
 from llm_context.file_selector import ContextSelector
 from llm_context.highlighter.parser import ASTFactory
 from llm_context.highlighter.tagger import ASTBasedTagger
-from llm_context.profile import ToolConstants
+from llm_context.rule import ToolConstants
 from llm_context.state import AllSelections, FileSelection, StateStore
 from llm_context.utils import ProjectLayout
 

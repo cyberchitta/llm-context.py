@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from llm_context.profile import DEFAULT_CODE_PROFILE
+from llm_context.rule import DEFAULT_CODE_PROFILE
 from llm_context.utils import Yaml
 
 

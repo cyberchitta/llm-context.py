@@ -82,7 +82,7 @@ DEFAULT_CODE_PROFILE = "lc-code"
 
 
 @dataclass(frozen=True)
-class Profile:
+class Rule:
     name: str
     gitignores: dict[str, list[str]]
     only_includes: dict[str, list[str]]
@@ -91,9 +91,9 @@ class Profile:
     rules: list[str]
 
     @staticmethod
-    def create_code_gitignores(name: str) -> "Profile":
+    def create_code_gitignores(name: str) -> "Rule":
         media = [f"*.{ext.lstrip('.')}" for ext in MEDIA_EXTENSIONS]
-        return Profile.create(
+        return Rule.create(
             name,
             "Base ignore patterns for code files, customize this for project-specific ignores.",
             {
@@ -110,14 +110,14 @@ class Profile:
     def create_code_dict(name: str) -> dict[str, Any]:
         return {
             "name": name,
-            "description": f"Default profile for software projects, using {DEFAULT_GITIGNORES_PROFILE} base profile.",
+            "description": f"Default rule for software projects, using {DEFAULT_GITIGNORES_PROFILE} base rule.",
             "base": DEFAULT_GITIGNORES_PROFILE,
             "prompt": "lc-prompt.md",
         }
 
     @staticmethod
-    def from_config(config: dict[str, Any]) -> "Profile":
-        return Profile.create(
+    def from_config(config: dict[str, Any]) -> "Rule":
+        return Rule.create(
             config.get("name", ""),
             config.get("description", ""),
             config.get("gitignores", {}),
@@ -127,8 +127,8 @@ class Profile:
         )
 
     @staticmethod
-    def create(name, description, gitignores, only_include, files, rules) -> "Profile":
-        return Profile(name, description, gitignores, only_include, files, rules)
+    def create(name, description, gitignores, only_include, files, rules) -> "Rule":
+        return Rule(name, description, gitignores, only_include, files, rules)
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
         return self.gitignores.get(f"{context_type}_files", IGNORE_NOTHING)
@@ -184,7 +184,7 @@ class ToolConstants:
 
     @staticmethod
     def create_default(version: str) -> "ToolConstants":
-        return ToolConstants.create(version, Profile.create_code_dict("default"))
+        return ToolConstants.create(version, Rule.create_code_dict("default"))
 
     @staticmethod
     def create(config_version: str, default_profile: dict[str, Any]) -> "ToolConstants":
@@ -207,7 +207,7 @@ class ToolConstants:
 
 
 @dataclass(frozen=True)
-class ProfileResolver:
+class RuleResolver:
     config: dict[str, Any]
     system_state: ToolConstants
     rule_loader: RuleLoader
@@ -215,8 +215,8 @@ class ProfileResolver:
     @staticmethod
     def create(
         config: dict[str, Any], system_state: ToolConstants, project_layout: ProjectLayout
-    ) -> "ProfileResolver":
-        return ProfileResolver(config, system_state, RuleLoader.create(project_layout))
+    ) -> "RuleResolver":
+        return RuleResolver(config, system_state, RuleLoader.create(project_layout))
 
     def has_profile(self, profile_name: str) -> bool:
         if profile_name == "default":
@@ -225,15 +225,15 @@ class ProfileResolver:
             return True
         return profile_name in self.config["profiles"]
 
-    def get_profile(self, profile_name: str) -> Profile:
+    def get_profile(self, profile_name: str) -> Rule:
         if profile_name == "default":
-            return Profile.from_config(self.system_state.default_profile)
+            return Rule.from_config(self.system_state.default_profile)
         if self.rule_loader:
             rule = self.rule_loader.load_rule(profile_name)
             if rule:
-                return Profile.from_config(rule.to_profile_config())
+                return Rule.from_config(rule.to_profile_config())
         resolved_config = self.resolve_profile(profile_name)
-        return Profile.from_config(resolved_config)
+        return Rule.from_config(resolved_config)
 
     def resolve_profile(self, profile_name: str) -> dict[str, Any]:
         if profile_name == "default":
@@ -241,7 +241,7 @@ class ProfileResolver:
         try:
             profile_config = self.config["profiles"][profile_name]
         except KeyError:
-            raise ValueError(f"Profile '{profile_name}' not found in config")
+            raise ValueError(f"Rule '{profile_name}' not found in config")
         if "base" not in profile_config:
             return cast(dict[str, Any], profile_config)
         base_name = profile_config["base"]
@@ -249,7 +249,7 @@ class ProfileResolver:
             base_profile = self.resolve_profile(base_name)
         except KeyError:
             raise ValueError(
-                f"Base profile '{base_name}' referenced by '{profile_name}' not found in config"
+                f"Base rule '{base_name}' referenced by '{profile_name}' not found in config"
             )
         merged = base_profile.copy()
         for key, value in profile_config.items():

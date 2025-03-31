@@ -13,15 +13,15 @@ from llm_context.utils import log
 
 
 def profile_feedback(env: ExecutionEnvironment):
-    log(INFO, f"Active profile: {env.state.file_selection.profile_name}")
+    log(INFO, f"Active rule: {env.state.file_selection.profile_name}")
 
 
-def set_profile(profile: str, env: ExecutionEnvironment) -> ExecutionResult:
-    if not env.config.has_profile(profile):
-        raise ValueError(f"Profile '{profile}' does not exist.")
-    nxt_env = env.with_profile(profile)
+def set_profile(rule: str, env: ExecutionEnvironment) -> ExecutionResult:
+    if not env.config.has_profile(rule):
+        raise ValueError(f"Rule '{rule}' does not exist.")
+    nxt_env = env.with_profile(rule)
     nxt_env.state.store()
-    log(INFO, f"Active profile set to '{profile}'.")
+    log(INFO, f"Active rule set to '{rule}'.")
     return ExecutionResult(None, nxt_env)
 
 
@@ -44,14 +44,14 @@ def init_project(env: ExecutionEnvironment):
 
 @create_command
 def set_profile_with_args(env: ExecutionEnvironment) -> ExecutionResult:
-    parser = argparse.ArgumentParser(description="Set active profile for LLM context")
+    parser = argparse.ArgumentParser(description="Set active rule for LLM context")
     parser.add_argument(
-        "profile",
+        "rule",
         type=str,
-        help="Profile to set as active",
+        help="Rule to set as active",
     )
     args = parser.parse_args()
-    res = set_profile(args.profile, env)
+    res = set_profile(args.rule, env)
     res.env.state.store()
     return res
 

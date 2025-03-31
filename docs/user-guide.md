@@ -26,7 +26,7 @@
 4. [Command Reference](#command-reference)
 
    - [lc-init](#lc-init)
-   - [lc-set-profile](#lc-set-profile-profile-name)
+   - [lc-set-rule](#lc-set-rule-rule-name)
    - [lc-sel-files](#lc-sel-files)
    - [lc-sel-outlines](#lc-sel-outlines)
    - [lc-context](#lc-context)
@@ -119,7 +119,7 @@
 Core commands you'll use frequently:
 
 - `lc-init`: Set up LLM Context in your project
-- `lc-set-profile <n>`: Switch between different rule configurations
+- `lc-set-rule <n>`: Switch between different rule configurations
 - `lc-sel-files`: Select files for full content inclusion
 - `lc-sel-outlines`: Select files for structural outline generation
 - `lc-context [-p] [-u] [-f FILE]`: Generate and copy context to clipboard
@@ -140,7 +140,7 @@ Core commands you'll use frequently:
 2. Documentation Projects:
 
    - Create a custom rule "docs" in `.llm-context/rules/docs.md`
-   - Switch to documentation focus: `lc-set-profile docs` (after creating it)
+   - Switch to documentation focus: `lc-set-rule docs` (after creating it)
    - Select content: `lc-sel-files`
    - Generate with user notes: `lc-context -u`
    - Good for markdown/text collections
@@ -226,7 +226,7 @@ By default, the diagram excludes common media and binary files to keep the conte
 
 LLM Context maintains state in `curr_ctx.yaml`:
 
-- Tracks selected files per profile
+- Tracks selected files per rule
 - Preserves selections between sessions
 - Updates automatically with commands
 - Records timestamp when context is generated to track file changes
@@ -250,7 +250,7 @@ Rules are now defined as Markdown files with YAML frontmatter:
    - `lc-gitignores.md`: Base rule containing default gitignore patterns
    - `lc-code.md`: Default rule for software projects, using the lc-gitignores base rule
 
-Behavior options that were previously in profile settings are now controlled via command-line parameters.
+Behavior options that were previously in rule settings are now controlled via command-line parameters.
 
 ## Configuration
 
@@ -277,7 +277,7 @@ Rule files are Markdown files with YAML frontmatter, stored in `.llm-context/rul
 ```markdown
 ---
 name: lc-code
-description: "Default profile for software projects, using lc-gitignores base profile."
+description: "Default rule for software projects, using lc-gitignores base rule."
 base: lc-gitignores
 ---
 
@@ -500,7 +500,7 @@ files:
 ```markdown
 ---
 name: docs
-description: "Documentation-focused profile"
+description: "Documentation-focused rule"
 gitignores:
   full_files:
     - ".git"
@@ -701,13 +701,13 @@ Initializes LLM Context in your project.
 - Requires `.gitignore` file in project root
 - Safe to run multiple times
 
-### lc-set-profile profile-name
+### lc-set-rule rule-name
 
 Switches the active rule.
 
 ```bash
-lc-set-profile lc-code         # Switch to default code rule
-lc-set-profile docs            # Switch to a custom user rule (if configured)
+lc-set-rule lc-code         # Switch to default code rule
+lc-set-rule docs            # Switch to a custom user rule (if configured)
 ```
 
 ### lc-sel-files
@@ -1044,7 +1044,7 @@ lc-clip-files
 
 1. Claude Projects:
 
-   - Use `lc-set-profile lc-code`
+   - Use `lc-set-rule lc-code`
    - Generate context with `lc-context`
    - Paste into knowledge section
    - Update as project evolves
@@ -1129,7 +1129,7 @@ lc-clip-files
 
    - Check your rule's gitignores and only-include patterns
    - Review `.gitignore` patterns
-   - Try `lc-set-profile lc-code` to use default rule
+   - Try `lc-set-rule lc-code` to use default rule
 
 4. Outline Generation Not Working:
 
@@ -1146,15 +1146,15 @@ lc-clip-files
 6. Rule Not Found:
 
    - Check that the rule file exists in `.llm-context/rules/`
-   - Ensure the rule filename matches what you're using with `lc-set-profile`
+   - Ensure the rule filename matches what you're using with `lc-set-rule`
    - Make sure the rule file has proper frontmatter with a `name` field
 
 7. Migration from Profiles:
 
-   - When migrating from previous versions, create rule files for each custom profile
-   - Copy profile settings to rule frontmatter
+   - When migrating from previous versions, create rule files for each custom rule
+   - Copy rule settings to rule frontmatter
    - Move prompt content to the body of the rule file
-   - Use the same name for your rule as your previous profile
+   - Use the same name for your rule as your previous rule
 
 ## Migrating from Profiles to Rules (v0.3.0+)
 
@@ -1168,20 +1168,20 @@ In version 0.3.0, LLM Context switched from YAML-based profiles to Markdown-base
 
 2. **Structure Changes**:
    - `config.yaml` now only contains template mappings
-   - Profile settings moved to rule file frontmatter
+   - Rule settings moved to rule file frontmatter
    - Prompt content moved to rule file Markdown body
 
 ### Migration Steps
 
 1. **Create Rule Files**:
    
-   For each custom profile, create a new .md file in `.llm-context/rules/`:
+   For each custom rule, create a new .md file in `.llm-context/rules/`:
    
    ```markdown
    ---
-   name: my-profile-name
-   description: "Description from your profile"
-   base: lc-code  # If your profile inherited from another
+   name: my-rule-name
+   description: "Description from your rule"
+   base: lc-code  # If your rule inherited from another
    gitignores: 
      # Copy your gitignores section here
    only-include:
@@ -1197,19 +1197,19 @@ In version 0.3.0, LLM Context switched from YAML-based profiles to Markdown-base
 
 2. **Move Prompt Content**:
    
-   If your profile had a `prompt` field pointing to a file, copy that file's content to the body of your rule file.
+   If your rule had a `prompt` field pointing to a file, copy that file's content to the body of your rule file.
 
 3. **Switch to the New Rule**:
    
-   Use the same name for your rule as your previous profile to maintain compatibility:
+   Use the same name for your rule as your previous rule to maintain compatibility:
    
    ```bash
-   lc-set-profile my-profile-name
+   lc-set-rule my-rule-name
    ```
 
 ### Example Migration
 
-**Old Profile (in config.yaml):**
+**Old Rule (in config.yaml):**
 ```yaml
 profiles:
   python-dev:

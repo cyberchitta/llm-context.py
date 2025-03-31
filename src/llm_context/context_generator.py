@@ -11,7 +11,7 @@ from llm_context.context_spec import ContextSpec
 from llm_context.file_selector import FileSelector
 from llm_context.flat_diagram import get_flat_diagram
 from llm_context.highlighter.language_mapping import to_language
-from llm_context.profile import IGNORE_NOTHING, INCLUDE_ALL
+from llm_context.rule import IGNORE_NOTHING, INCLUDE_ALL
 from llm_context.state import FileSelection
 from llm_context.utils import PathConverter, ProjectLayout, log, safe_read_file
 
@@ -189,7 +189,7 @@ class ContextGenerator:
         return self._render(template_id, context)
 
     def prompt(self, template_id: str = "prompt") -> str:
-        descriptor = self.spec.profile
+        descriptor = self.spec.rule
         layout = self.spec.project_layout
         context = {
             "prompt": descriptor.get_prompt(layout),
@@ -199,7 +199,7 @@ class ContextGenerator:
         return self._render(template_id, context)
 
     def context(self, template_id: str = "context") -> str:
-        descriptor = self.spec.profile
+        descriptor = self.spec.rule
         layout = self.spec.project_layout
         outlines, sample_definitions = self.collector.outlines(self.tagger, self.outline_rel)
         rule_files = self.collector.rule_files(descriptor.files)
