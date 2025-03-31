@@ -125,4 +125,4 @@ def to_definition(match: tuple[int, dict[str, list[Any]]]) -> dict[str, Any]:
     name_nodes: list[Node] = captures.get("name", [])
     name_node = ASTNode.create(name_nodes[0] if name_nodes else None)
     def_node = ASTNode.create(captures[def_capture][0])
-    return def_node.to_definition(name_node)
+    return cast(dict[str, Any], def_node.to_definition(name_node))
