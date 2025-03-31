@@ -1,18 +1,12 @@
 from dataclasses import dataclass
 from importlib import resources
-from logging import INFO, WARNING
+from logging import INFO
 from pathlib import Path
 from typing import Any
 
 from llm_context import lc_resources
 from llm_context.lc_resources import rules, templates
-from llm_context.rule import (
-    DEFAULT_CODE_RULE,
-    DEFAULT_GITIGNORES_RULE,
-    ProjectLayout,
-    Rule,
-    ToolConstants,
-)
+from llm_context.rule import ProjectLayout, ToolConstants
 from llm_context.utils import Yaml, log
 
 PROJECT_INFO: str = (
@@ -59,7 +53,7 @@ class ProjectSetup:
         start_state = (
             ToolConstants.create_null()
             if not project_layout.state_path.exists()
-            else ToolConstants(**Yaml.load(project_layout.state_path))
+            else ToolConstants.from_dict(Yaml.load(project_layout.state_path))
         )
         return ProjectSetup(project_layout, start_state)
 

@@ -165,7 +165,6 @@ class Rule:
 class ToolConstants:
     __warning__: str
     config_version: str
-    default_profile: dict[str, Any]
 
     @staticmethod
     def load(path: Path) -> "ToolConstants":
@@ -173,6 +172,10 @@ class ToolConstants:
             return ToolConstants(**Yaml.load(path))
         except Exception:
             return ToolConstants.create_null()
+
+    @staticmethod
+    def from_dict(data: dict[str, Any]) -> "ToolConstants":
+        return ToolConstants.create(data.get("config_version", "0"))
 
     @staticmethod
     def create_new() -> "ToolConstants":
@@ -184,26 +187,18 @@ class ToolConstants:
 
     @staticmethod
     def create_default(version: str) -> "ToolConstants":
-        return ToolConstants.create(version, Rule.create_code_dict("default"))
+        return ToolConstants.create(version)
 
     @staticmethod
-    def create(config_version: str, default_profile: dict[str, Any]) -> "ToolConstants":
-        return ToolConstants(
-            "This file is managed by llm-context. DO NOT EDIT.",
-            config_version,
-            default_profile,
-        )
+    def create(config_version: str) -> "ToolConstants":
+        return ToolConstants("This file is managed by llm-context. DO NOT EDIT.", config_version)
 
     @property
     def needs_update(self) -> bool:
         return cast(bool, version.parse(self.config_version) < CURRENT_CONFIG_VERSION)
 
     def to_dict(self) -> dict[str, Any]:
-        return {
-            "__warning__": self.__warning__,
-            "config_version": self.config_version,
-            "default_profile": self.default_profile,
-        }
+        return {"__warning__": self.__warning__, "config_version": self.config_version}
 
 
 @dataclass(frozen=True)
@@ -217,27 +212,18 @@ class RuleResolver:
         return RuleResolver(system_state, rule_loader)
 
     def has_rule(self, rule_name: str) -> bool:
-        if rule_name == "default":
-            return True
         return self.rule_loader.load_rule(rule_name) is not None
 
     def get_rule(self, rule_name: str) -> Rule:
-        if rule_name == "default":
-            return Rule.from_config(self.system_state.default_profile)
         rule = self.rule_loader.load_rule(rule_name)
-        if not rule:
-            raise ValueError(f"Rule '{rule_name}' not found")
         if "base" in rule.frontmatter:
             base_name = rule.frontmatter["base"]
-            try:
-                base_profile = self.get_rule(base_name)
-                base_dict = base_profile.to_dict()
-                rule_dict = {k: v for k, v in rule.frontmatter.items() if k != "base"}
-                merged = self._merge_rule_dicts(base_dict, rule_dict)
-                merged_rule = RuleParser(merged, rule.content, rule.path)
-                return Rule.from_config(merged_rule.to_rule_config())
-            except ValueError:
-                pass
+            base_profile = self.get_rule(base_name)
+            base_dict = base_profile.to_dict()
+            rule_dict = {k: v for k, v in rule.frontmatter.items() if k != "base"}
+            merged = self._merge_rule_dicts(base_dict, rule_dict)
+            merged_rule = RuleParser(merged, rule.content, rule.path)
+            return Rule.from_config(merged_rule.to_rule_config())
         return Rule.from_config(rule.to_rule_config())
 
     def _merge_rule_dicts(

@@ -33,7 +33,7 @@ class FileSelection:
     def files(self) -> list[str]:
         return self.full_files + self.outline_files
 
-    def with_profile(self, rule_name: str) -> "FileSelection":
+    def with_rule(self, rule_name: str) -> "FileSelection":
         return FileSelection.create(rule_name, self.full_files, self.outline_files)
 
     def with_now(self) -> "FileSelection":

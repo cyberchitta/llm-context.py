@@ -12,21 +12,21 @@ from llm_context.file_selector import ContextSelector
 from llm_context.utils import log
 
 
-def profile_feedback(env: ExecutionEnvironment):
+def rule_feedback(env: ExecutionEnvironment):
     log(INFO, f"Active rule: {env.state.file_selection.rule_name}")
 
 
-def set_profile(rule: str, env: ExecutionEnvironment) -> ExecutionResult:
-    if not env.config.has_profile(rule):
+def set_rule(rule: str, env: ExecutionEnvironment) -> ExecutionResult:
+    if not env.config.has_rule(rule):
         raise ValueError(f"Rule '{rule}' does not exist.")
-    nxt_env = env.with_profile(rule)
+    nxt_env = env.with_rule(rule)
     nxt_env.state.store()
     log(INFO, f"Active rule set to '{rule}'.")
     return ExecutionResult(None, nxt_env)
 
 
 def select_all_files(env: ExecutionEnvironment) -> ExecutionResult:
-    profile_feedback(env)
+    rule_feedback(env)
     selector = ContextSelector.create(env.config)
     file_sel_full = selector.select_full_files(env.state.file_selection)
     file_sel_out = selector.select_outline_files(file_sel_full)
@@ -43,7 +43,7 @@ def init_project(env: ExecutionEnvironment):
 
 
 @create_command
-def set_profile_with_args(env: ExecutionEnvironment) -> ExecutionResult:
+def set_rule_with_args(env: ExecutionEnvironment) -> ExecutionResult:
     parser = argparse.ArgumentParser(description="Set active rule for LLM context")
     parser.add_argument(
         "rule",
@@ -51,7 +51,7 @@ def set_profile_with_args(env: ExecutionEnvironment) -> ExecutionResult:
         help="Rule to set as active",
     )
     args = parser.parse_args()
-    res = set_profile(args.rule, env)
+    res = set_rule(args.rule, env)
     res.env.state.store()
     return res
 
@@ -64,7 +64,7 @@ def show_version(*, env: ExecutionEnvironment) -> ExecutionResult:
 
 @create_command
 def select_full_files(env: ExecutionEnvironment):
-    profile_feedback(env)
+    rule_feedback(env)
     selector = ContextSelector.create(env.config)
     file_selection = selector.select_full_files(env.state.file_selection)
     nxt_env = env.with_state(env.state.with_selection(file_selection))
@@ -75,7 +75,7 @@ def select_full_files(env: ExecutionEnvironment):
 
 @create_command
 def select_outline_files(env: ExecutionEnvironment) -> ExecutionResult:
-    profile_feedback(env)
+    rule_feedback(env)
     selector = ContextSelector.create(env.config)
     file_selection = selector.select_outline_files(env.state.file_selection)
     nxt_env = env.with_state(env.state.with_selection(file_selection))
@@ -86,7 +86,7 @@ def select_outline_files(env: ExecutionEnvironment) -> ExecutionResult:
 
 @create_clipboard_cmd
 def files_from_scratch(env: ExecutionEnvironment) -> ExecutionResult:
-    profile_feedback(env)
+    rule_feedback(env)
     settings = ContextSettings.create(False, False)
     return ExecutionResult(
         ContextGenerator.create(env.config, env.state.file_selection, settings).files([]), env
@@ -106,7 +106,7 @@ def files_from_clip(in_files: list[str] = [], *, env: ExecutionEnvironment):
 
 @create_clipboard_cmd
 def prompt(env: ExecutionEnvironment) -> ExecutionResult:
-    profile_feedback(env)
+    rule_feedback(env)
     settings = ContextSettings.create(False, False)
     content = ContextGenerator.create(env.config, env.state.file_selection, settings).prompt()
     nxt_env = env.with_state(env.state.with_selection(env.state.file_selection.with_now()))
@@ -116,7 +116,7 @@ def prompt(env: ExecutionEnvironment) -> ExecutionResult:
 
 @create_clipboard_cmd
 def context(env: ExecutionEnvironment) -> ExecutionResult:
-    profile_feedback(env)
+    rule_feedback(env)
     parser = argparse.ArgumentParser(description="Generate context for LLM")
     parser.add_argument("-p", action="store_true", help="Include prompt in context")
     parser.add_argument("-u", action="store_true", help="Include user notes in context")
@@ -135,7 +135,7 @@ def context(env: ExecutionEnvironment) -> ExecutionResult:
 
 @create_clipboard_cmd
 def outlines(env: ExecutionEnvironment) -> ExecutionResult:
-    profile_feedback(env)
+    rule_feedback(env)
     settings = ContextSettings.create(False, False)
     selector = ContextSelector.create(env.config)
     file_sel_out = selector.select_outline_only(env.state.file_selection)

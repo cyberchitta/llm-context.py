@@ -33,7 +33,7 @@ class ContextSpec:
                 "GITIGNORE_NOT_FOUND",
             )
 
-    def has_profile(self, rule_name: str):
+    def has_rule(self, rule_name: str):
         resolver = RuleResolver.create(self.state, self.project_layout)
         return resolver.has_rule(rule_name)
 

@@ -78,7 +78,7 @@ class ExecutionState:
         new_selections = self.selections.with_selection(file_selection)
         return ExecutionState(self.project_layout, new_selections, self.rule_name)
 
-    def with_profile(self, rule_name: str) -> "ExecutionState":
+    def with_rule(self, rule_name: str) -> "ExecutionState":
         return ExecutionState(self.project_layout, self.selections, rule_name)
 
 
@@ -112,7 +112,7 @@ class ExecutionEnvironment:
             self.config, self.runtime, new_state, self.constants, self.tagger
         )
 
-    def with_profile(self, rule_name: str) -> "ExecutionEnvironment":
+    def with_rule(self, rule_name: str) -> "ExecutionEnvironment":
         if rule_name == self.state.file_selection.rule_name:
             return self
         config = ContextSpec.create(self.config.project_root_path, rule_name, self.constants)
@@ -120,7 +120,7 @@ class ExecutionEnvironment:
         selector = ContextSelector.create(config)
         file_selection = selector.select_full_files(empty_selection)
         outline_selection = selector.select_outline_files(file_selection)
-        new_state = self.state.with_selection(outline_selection).with_profile(rule_name)
+        new_state = self.state.with_selection(outline_selection).with_rule(rule_name)
         return ExecutionEnvironment(config, self.runtime, new_state, self.constants, self.tagger)
 
     @property

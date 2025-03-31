@@ -43,7 +43,7 @@ project_context_tool = Tool(
 async def project_context(arguments: dict) -> list[TextContent]:
     request = ContextRequest(**arguments)
     env = ExecutionEnvironment.create(Path(request.root_path))
-    cur_env = env.with_profile(request.rule_name)
+    cur_env = env.with_rule(request.rule_name)
     with cur_env.activate():
         selector = ContextSelector.create(cur_env.config)
         file_sel_full = selector.select_full_files(cur_env.state.file_selection)
@@ -112,7 +112,7 @@ list_modified_files_tool = Tool(
 async def list_modified_files(arguments: dict) -> list[TextContent]:
     request = ListModifiedFilesRequest(**arguments)
     env = ExecutionEnvironment.create(Path(request.root_path))
-    cur_env = env.with_profile(request.rule_name)
+    cur_env = env.with_rule(request.rule_name)
     with cur_env.activate():
         selector = ContextSelector.create(cur_env.config, request.timestamp)
         file_sel_full = selector.select_full_files(cur_env.state.file_selection)
@@ -146,7 +146,7 @@ outlines_tool = Tool(
 async def code_outlines(arguments: dict) -> list[TextContent]:
     request = OutlinesRequest(**arguments)
     env = ExecutionEnvironment.create(Path(request.root_path))
-    cur_env = env.with_profile(request.rule_name)
+    cur_env = env.with_rule(request.rule_name)
     with cur_env.activate():
         selector = ContextSelector.create(cur_env.config)
         file_sel_out = selector.select_outline_only(cur_env.state.file_selection)

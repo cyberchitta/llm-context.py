@@ -69,8 +69,19 @@ class RuleLoader:
             if (rule := self._load_rule_from_path(path)) is not None
         }
 
-    def load_rule(self, name: str) -> Optional[RuleParser]:
-        return self._load_rule_from_path(self.rules_dir / f"{name}.md")
+    def load_rule(self, name: str) -> RuleParser:
+        path = self.rules_dir / f"{name}.md"
+        if not path.exists():
+            raise ValueError(
+                f"Rule file '{name}.md' not found. Run 'lc-init' to restore default rules."
+            )
+        try:
+            content = path.read_text()
+            return RuleParser.parse(content, path)
+        except Exception as e:
+            raise ValueError(
+                f"Failed to parse rule file '{name}.md': {str(e)}. Run 'lc-init' to restore default rules."
+            )
 
     def save_rule(self, name: str, frontmatter: dict[str, Any], content: str) -> Path:
         path = self.rules_dir / f"{name}.md"
