@@ -4,10 +4,10 @@ from typing import Any, Optional, cast
 
 from packaging import version
 
-from llm_context.rule_parser import RuleLoader
+from llm_context.rule_parser import RuleLoader, RuleParser
 from llm_context.utils import ProjectLayout, Yaml, safe_read_file
 
-CURRENT_CONFIG_VERSION = version.parse("2.8")
+CURRENT_CONFIG_VERSION = version.parse("3.0")
 
 MEDIA_EXTENSIONS: list[str] = [
     ".jpg",
@@ -77,16 +77,16 @@ IGNORE_NOTHING = [".git"]
 INCLUDE_ALL = ["**/*"]
 
 
-DEFAULT_GITIGNORES_PROFILE = "lc-gitignores"
-DEFAULT_CODE_PROFILE = "lc-code"
+DEFAULT_GITIGNORES_RULE = "lc-gitignores"
+DEFAULT_CODE_RULE = "lc-code"
 
 
 @dataclass(frozen=True)
 class Rule:
     name: str
+    description: str
     gitignores: dict[str, list[str]]
     only_includes: dict[str, list[str]]
-    description: str
     files: list[str]
     rules: list[str]
 
@@ -110,8 +110,8 @@ class Rule:
     def create_code_dict(name: str) -> dict[str, Any]:
         return {
             "name": name,
-            "description": f"Default rule for software projects, using {DEFAULT_GITIGNORES_PROFILE} base rule.",
-            "base": DEFAULT_GITIGNORES_PROFILE,
+            "description": f"Default rule for software projects, using {DEFAULT_GITIGNORES_RULE} base rule.",
+            "base": DEFAULT_GITIGNORES_RULE,
             "prompt": "lc-prompt.md",
         }
 
@@ -208,57 +208,49 @@ class ToolConstants:
 
 @dataclass(frozen=True)
 class RuleResolver:
-    config: dict[str, Any]
     system_state: ToolConstants
     rule_loader: RuleLoader
 
     @staticmethod
-    def create(
-        config: dict[str, Any], system_state: ToolConstants, project_layout: ProjectLayout
-    ) -> "RuleResolver":
-        return RuleResolver(config, system_state, RuleLoader.create(project_layout))
+    def create(system_state: ToolConstants, project_layout: ProjectLayout) -> "RuleResolver":
+        rule_loader = RuleLoader.create(project_layout)
+        return RuleResolver(system_state, rule_loader)
 
-    def has_profile(self, profile_name: str) -> bool:
-        if profile_name == "default":
+    def has_rule(self, rule_name: str) -> bool:
+        if rule_name == "default":
             return True
-        if self.rule_loader.load_rule(profile_name):
-            return True
-        return profile_name in self.config["profiles"]
+        return self.rule_loader.load_rule(rule_name) is not None
 
-    def get_profile(self, profile_name: str) -> Rule:
-        if profile_name == "default":
+    def get_rule(self, rule_name: str) -> Rule:
+        if rule_name == "default":
             return Rule.from_config(self.system_state.default_profile)
-        if self.rule_loader:
-            rule = self.rule_loader.load_rule(profile_name)
-            if rule:
-                return Rule.from_config(rule.to_profile_config())
-        resolved_config = self.resolve_profile(profile_name)
-        return Rule.from_config(resolved_config)
+        rule = self.rule_loader.load_rule(rule_name)
+        if not rule:
+            raise ValueError(f"Rule '{rule_name}' not found")
+        if "base" in rule.frontmatter:
+            base_name = rule.frontmatter["base"]
+            try:
+                base_profile = self.get_rule(base_name)
+                base_dict = base_profile.to_dict()
+                rule_dict = {k: v for k, v in rule.frontmatter.items() if k != "base"}
+                merged = self._merge_rule_dicts(base_dict, rule_dict)
+                merged_rule = RuleParser(merged, rule.content, rule.path)
+                return Rule.from_config(merged_rule.to_rule_config())
+            except ValueError:
+                pass
+        return Rule.from_config(rule.to_rule_config())
 
-    def resolve_profile(self, profile_name: str) -> dict[str, Any]:
-        if profile_name == "default":
-            return self.system_state.default_profile
-        try:
-            profile_config = self.config["profiles"][profile_name]
-        except KeyError:
-            raise ValueError(f"Rule '{profile_name}' not found in config")
-        if "base" not in profile_config:
-            return cast(dict[str, Any], profile_config)
-        base_name = profile_config["base"]
-        try:
-            base_profile = self.resolve_profile(base_name)
-        except KeyError:
-            raise ValueError(
-                f"Base rule '{base_name}' referenced by '{profile_name}' not found in config"
-            )
-        merged = base_profile.copy()
-        for key, value in profile_config.items():
+    def _merge_rule_dicts(
+        self, base_dict: dict[str, Any], override_dict: dict[str, Any]
+    ) -> dict[str, Any]:
+        merged = base_dict.copy()
+        for key, value in override_dict.items():
             if key == "base":
                 continue
             if isinstance(value, dict) and key in merged and isinstance(merged[key], dict):
                 merged[key] = {**merged[key], **value}
             elif isinstance(value, list) and key in merged and isinstance(merged[key], list):
-                if key in ["file-references", "rule-references"]:
+                if key in ["files", "rules"]:
                     merged[key] = merged[key] + value
                 else:
                     merged[key] = value

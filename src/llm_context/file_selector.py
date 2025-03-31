@@ -160,7 +160,7 @@ class ContextSelector:
                 "Some files previously in outline selection have been moved to full selection.",
             )
         return FileSelection._create(
-            file_selection.profile_name, full_files, updated_outline_files, file_selection.timestamp
+            file_selection.rule_name, full_files, updated_outline_files, file_selection.timestamp
         )
 
     def select_outline_files(self, file_selection: FileSelection) -> "FileSelection":
@@ -173,11 +173,11 @@ class ContextSelector:
         all_outline_files = self.outline_selector.get_relative_files()
         outline_files = [f for f in all_outline_files if f not in set(full_files)]
         return FileSelection._create(
-            file_selection.profile_name, full_files, outline_files, file_selection.timestamp
+            file_selection.rule_name, full_files, outline_files, file_selection.timestamp
         )
 
     def select_outline_only(self, file_selection: FileSelection) -> "FileSelection":
         all_outline_files = self.outline_selector.get_relative_files()
         return FileSelection._create(
-            file_selection.profile_name, [], all_outline_files, file_selection.timestamp
+            file_selection.rule_name, [], all_outline_files, file_selection.timestamp
         )

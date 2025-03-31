@@ -38,7 +38,7 @@ class RuleParser:
                 return {}, content
         return {}, content
 
-    def to_profile_config(self) -> dict[str, Any]:
+    def to_rule_config(self) -> dict[str, Any]:
         config = dict(self.frontmatter)
         config["name"] = self.name
         return config

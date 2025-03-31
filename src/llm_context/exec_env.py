@@ -53,7 +53,7 @@ class RuntimeContext:
 class ExecutionState:
     project_layout: ProjectLayout
     selections: AllSelections
-    profile_name: str
+    rule_name: str
 
     @staticmethod
     def load(project_layout: ProjectLayout) -> "ExecutionState":
@@ -63,23 +63,23 @@ class ExecutionState:
 
     @staticmethod
     def create(
-        project_layout: ProjectLayout, selections: AllSelections, profile_name: str
+        project_layout: ProjectLayout, selections: AllSelections, rule_name: str
     ) -> "ExecutionState":
-        return ExecutionState(project_layout, selections, profile_name)
+        return ExecutionState(project_layout, selections, rule_name)
 
     @property
     def file_selection(self) -> FileSelection:
-        return self.selections.get_selection(self.profile_name)
+        return self.selections.get_selection(self.rule_name)
 
     def store(self):
-        StateStore(self.project_layout.state_store_path).save(self.selections, self.profile_name)
+        StateStore(self.project_layout.state_store_path).save(self.selections, self.rule_name)
 
     def with_selection(self, file_selection: FileSelection) -> "ExecutionState":
         new_selections = self.selections.with_selection(file_selection)
-        return ExecutionState(self.project_layout, new_selections, self.profile_name)
+        return ExecutionState(self.project_layout, new_selections, self.rule_name)
 
-    def with_profile(self, profile_name: str) -> "ExecutionState":
-        return ExecutionState(self.project_layout, self.selections, profile_name)
+    def with_profile(self, rule_name: str) -> "ExecutionState":
+        return ExecutionState(self.project_layout, self.selections, rule_name)
 
 
 @dataclass(frozen=True)
@@ -99,7 +99,7 @@ class ExecutionEnvironment:
         project_layout = ProjectLayout(project_root)
         state = ExecutionState.load(project_layout)
         constants = ToolConstants.load(project_layout.state_path)
-        config = ContextSpec.create(project_root, state.file_selection.profile_name, constants)
+        config = ContextSpec.create(project_root, state.file_selection.rule_name, constants)
         tagger = ExecutionEnvironment._tagger(project_root)
         return ExecutionEnvironment(config, runtime, state, constants, tagger)
 
@@ -112,15 +112,15 @@ class ExecutionEnvironment:
             self.config, self.runtime, new_state, self.constants, self.tagger
         )
 
-    def with_profile(self, profile_name: str) -> "ExecutionEnvironment":
-        if profile_name == self.state.file_selection.profile_name:
+    def with_profile(self, rule_name: str) -> "ExecutionEnvironment":
+        if rule_name == self.state.file_selection.rule_name:
             return self
-        config = ContextSpec.create(self.config.project_root_path, profile_name, self.constants)
-        empty_selection = FileSelection.create(profile_name, [], [])
+        config = ContextSpec.create(self.config.project_root_path, rule_name, self.constants)
+        empty_selection = FileSelection.create(rule_name, [], [])
         selector = ContextSelector.create(config)
         file_selection = selector.select_full_files(empty_selection)
         outline_selection = selector.select_outline_files(file_selection)
-        new_state = self.state.with_selection(outline_selection).with_profile(profile_name)
+        new_state = self.state.with_selection(outline_selection).with_profile(rule_name)
         return ExecutionEnvironment(config, self.runtime, new_state, self.constants, self.tagger)
 
     @property

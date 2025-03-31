@@ -16,13 +16,13 @@ class ContextSpec:
     state: ToolConstants
 
     @staticmethod
-    def create(project_root: Path, profile_name: str, state: ToolConstants) -> "ContextSpec":
+    def create(project_root: Path, rule_name: str, state: ToolConstants) -> "ContextSpec":
         ContextSpec.ensure_gitignore_exists(project_root)
         project_layout = ProjectLayout(project_root)
         ProjectSetup.create(project_layout).initialize()
         raw_config = Yaml.load(project_layout.config_path)
-        resolver = RuleResolver.create(raw_config, state, project_layout)
-        rule = resolver.get_profile(profile_name)
+        resolver = RuleResolver.create(state, project_layout)
+        rule = resolver.get_rule(rule_name)
         return ContextSpec(project_layout, raw_config["templates"], rule, state)
 
     @staticmethod
@@ -33,10 +33,9 @@ class ContextSpec:
                 "GITIGNORE_NOT_FOUND",
             )
 
-    def has_profile(self, profile_name: str):
-        raw_config = Yaml.load(self.project_layout.config_path)
-        resolver = RuleResolver.create(raw_config, self.state, self.project_layout)
-        return resolver.has_profile(profile_name)
+    def has_profile(self, rule_name: str):
+        resolver = RuleResolver.create(self.state, self.project_layout)
+        return resolver.has_rule(rule_name)
 
     @property
     def state_store(self):
