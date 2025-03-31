@@ -276,7 +276,6 @@ Rule files are Markdown files with YAML frontmatter, stored in `.llm-context/rul
 
 ```markdown
 ---
-name: lc-code
 description: "Default rule for software projects, using lc-gitignores base rule."
 base: lc-gitignores
 ---
@@ -329,7 +328,6 @@ Rules are configured using a combination of YAML frontmatter and Markdown conten
 
 ```yaml
 ---
-name: my-rule-name                    # Rule name (matches filename without .md)
 description: "Description of the rule" # Rule description
 base: lc-gitignores                   # Optional, inherit from another rule
 gitignores:                           # Optional, additional gitignore patterns
@@ -378,7 +376,6 @@ Here's a complete example:
 
 ```markdown
 ---
-name: python-dev
 description: "Python development with coding standards"
 base: lc-code
 gitignores:
@@ -499,7 +496,6 @@ files:
 
 ```markdown
 ---
-name: docs
 description: "Documentation-focused rule"
 gitignores:
   full_files:
@@ -528,7 +524,6 @@ When reviewing documentation in this project:
 
 ```markdown
 ---
-name: source
 description: "Source code focus"
 base: lc-code
 only-include:
@@ -552,7 +547,6 @@ When reviewing the source code:
 
 ```markdown
 ---
-name: python-style
 description: "Python development with style rules"
 base: lc-code
 rules:
@@ -904,7 +898,6 @@ Example rule file (`.llm-context/rules/python-style.md`):
 
 ```markdown
 ---
-name: python-style
 description: "Python coding style guide"
 ---
 
@@ -1147,7 +1140,6 @@ lc-clip-files
 
    - Check that the rule file exists in `.llm-context/rules/`
    - Ensure the rule filename matches what you're using with `lc-set-rule`
-   - Make sure the rule file has proper frontmatter with a `name` field
 
 7. Migration from Profiles:
 
@@ -1179,7 +1171,6 @@ In version 0.3.0, LLM Context switched from YAML-based profiles to Markdown-base
    
    ```markdown
    ---
-   name: my-rule-name
    description: "Description from your rule"
    base: lc-code  # If your rule inherited from another
    gitignores: 
@@ -1240,7 +1231,6 @@ profiles:
 **New Rule File (.llm-context/rules/python-dev.md):**
 ```markdown
 ---
-name: python-dev
 description: "Python development configuration"
 base: lc-code
 gitignores:

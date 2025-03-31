@@ -102,7 +102,6 @@ gitignores:
   - '*.eot'
   - '*.ttf'
   - '*.map'
-name: lc-gitignores
 only-include:
   diagram_files:
   - '**/*'
