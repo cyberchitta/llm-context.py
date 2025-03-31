@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from llm_context.exceptions import LLMContextError
-from llm_context.profile import Profile, ProfileResolver, ToolConstants
 from llm_context.project_setup import ProjectSetup
+from llm_context.rule import Rule, RuleResolver, ToolConstants
 from llm_context.state import StateStore
 from llm_context.utils import ProjectLayout, Yaml
 
@@ -12,17 +12,18 @@ from llm_context.utils import ProjectLayout, Yaml
 class ContextSpec:
     project_layout: ProjectLayout
     templates: dict[str, str]
-    profile: Profile
+    rule: Rule
     state: ToolConstants
 
     @staticmethod
-    def create(project_root: Path, profile_name: str, state: ToolConstants) -> "ContextSpec":
+    def create(project_root: Path, rule_name: str, state: ToolConstants) -> "ContextSpec":
         ContextSpec.ensure_gitignore_exists(project_root)
         project_layout = ProjectLayout(project_root)
         ProjectSetup.create(project_layout).initialize()
         raw_config = Yaml.load(project_layout.config_path)
-        profile = ProfileResolver.create(raw_config, state).get_profile(profile_name)
-        return ContextSpec(project_layout, raw_config["templates"], profile, state)
+        resolver = RuleResolver.create(state, project_layout)
+        rule = resolver.get_rule(rule_name)
+        return ContextSpec(project_layout, raw_config["templates"], rule, state)
 
     @staticmethod
     def ensure_gitignore_exists(root_path: Path) -> None:
@@ -32,9 +33,9 @@ class ContextSpec:
                 "GITIGNORE_NOT_FOUND",
             )
 
-    def has_profile(self, profile_name: str):
-        raw_config = Yaml.load(self.project_layout.config_path)
-        return ProfileResolver.create(raw_config, self.state).has_profile(profile_name)
+    def has_rule(self, rule_name: str):
+        resolver = RuleResolver.create(self.state, self.project_layout)
+        return resolver.has_rule(rule_name)
 
     @property
     def state_store(self):

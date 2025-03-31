@@ -1,3 +1,10 @@
+---
+base: lc-gitignores
+description: Default rule for software projects, using lc-gitignores base rule.
+name: code
+rules: [python.md]
+---
+
 ## Persona
 
 Senior developer with 40 years experience.

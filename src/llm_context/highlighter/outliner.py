@@ -76,7 +76,11 @@ class Outlines:
             if any(t.name and t.name.text for t in tags)
         ]
         sampled = random.sample(files_with_defs, min(max_samples, len(files_with_defs)))
-        return [(d.rel_path, d.name.text) for _, defs in sampled for d in [random.choice(defs)]]
+        return [
+            (d.rel_path, cast(Tag, d.name).text)
+            for _, defs in sampled
+            for d in [random.choice(defs)]
+        ]
 
 
 def generate_outlines(

@@ -1,17 +1,12 @@
 from dataclasses import dataclass
 from importlib import resources
-from logging import INFO, WARNING
+from logging import INFO
 from pathlib import Path
 from typing import Any
 
 from llm_context import lc_resources
-from llm_context.profile import (
-    DEFAULT_CODE_PROFILE,
-    DEFAULT_GITIGNORES_PROFILE,
-    Profile,
-    ProjectLayout,
-    ToolConstants,
-)
+from llm_context.lc_resources import rules, templates
+from llm_context.rule import ProjectLayout, ToolConstants
 from llm_context.utils import Yaml, log
 
 PROJECT_INFO: str = (
@@ -24,7 +19,6 @@ PROJECT_INFO: str = (
 @dataclass(frozen=True)
 class Config:
     templates: dict[str, str]
-    profiles: dict[str, dict[str, Any]]
     __info__: str = PROJECT_INFO
 
     @staticmethod
@@ -38,17 +32,12 @@ class Config:
                 "prompt": "lc-prompt.j2",
                 "definitions": "lc-definitions.j2",
             },
-            profiles={
-                DEFAULT_GITIGNORES_PROFILE: Profile.create_code_gitignores().to_dict(),
-                DEFAULT_CODE_PROFILE: Profile.create_code_dict(),
-            },
         )
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "__info__": self.__info__,
             "templates": self.templates,
-            "profiles": self.profiles,
         }
 
 
@@ -60,10 +49,11 @@ class ProjectSetup:
     @staticmethod
     def create(project_layout: ProjectLayout) -> "ProjectSetup":
         project_layout.templates_path.mkdir(parents=True, exist_ok=True)
+        project_layout.rules_path.mkdir(parents=True, exist_ok=True)
         start_state = (
             ToolConstants.create_null()
             if not project_layout.state_path.exists()
-            else ToolConstants(**Yaml.load(project_layout.state_path))
+            else ToolConstants.from_dict(Yaml.load(project_layout.state_path))
         )
         return ProjectSetup(project_layout, start_state)
 
@@ -75,15 +65,12 @@ class ProjectSetup:
         self._create_or_update_ancillary_files()
         self._create_project_notes_file()
         self._create_user_notes_file()
-        self._check_legacy_profiles()
+        self._setup_default_rules()
 
     def _create_or_update_ancillary_files(self):
         if not self.project_layout.config_path.exists() or self.constants.needs_update:
-            self._copy_template(
+            self._copy_resource(
                 "dotgitignore", self.project_layout.project_config_path / ".gitignore"
-            )
-            self._copy_template(
-                "lc-prompt.md", self.project_layout.project_config_path / "lc-prompt.md"
             )
 
     def _create_or_update_config_file(self):
@@ -126,44 +113,29 @@ class ProjectSetup:
             )
 
     def _update_config_file(self):
-        user_config = Yaml.load(self.project_layout.config_path)
         new_config = Config.create_default().to_dict()
-        new_profiles = new_config["profiles"]
-        #         new_profiles[DEFAULT_GITIGNORES_PROFILE] = user_config.get("profiles", {}).get(
-        #            DEFAULT_GITIGNORES_PROFILE, new_profiles[DEFAULT_GITIGNORES_PROFILE]
-        #        )
-        custom_profiles = {
-            n: c for n, c in user_config.get("profiles", {}).items() if n not in new_profiles
-        }
-        merged_profiles = {**new_profiles, **custom_profiles}
-        merged_config = {**new_config, "profiles": merged_profiles}
-        Yaml.save(self.project_layout.config_path, merged_config)
-
-    def _check_legacy_profiles(self):
-        try:
-            user_config = Yaml.load(self.project_layout.config_path)
-            basic_legacy = ["code"]
-            specialized_legacy = ["code-prompt", "code-file"]
-            profiles = user_config.get("profiles", {})
-            found_basic = [p for p in basic_legacy if p in profiles]
-            found_specialized = [p for p in specialized_legacy if p in profiles]
-            if found_basic:
-                log(
-                    WARNING,
-                    f"Legacy profile detected: {', '.join(found_basic)}. This has been replaced by lc-code. Please update your references accordingly.",
-                )
-            if found_specialized:
-                log(
-                    WARNING,
-                    f"Legacy specialized profiles detected: {', '.join(found_specialized)}. These are no longer supported. Use command-line parameters with lc-code profile instead.",
-                )
-        except Exception:
-            pass
+        Yaml.save(self.project_layout.config_path, new_config)
 
     def _create_config_file(self):
         Yaml.save(self.project_layout.config_path, Config.create_default().to_dict())
 
+    def _copy_resource(self, resource_name: str, dest_path: Path):
+        template_content = resources.read_text(lc_resources, resource_name)
+        dest_path.write_text(template_content)
+        log(INFO, f"Updated resource {resource_name} to {dest_path}")
+
     def _copy_template(self, template_name: str, dest_path: Path):
-        template_content = resources.read_text(lc_resources, template_name)
+        template_content = resources.read_text(templates, template_name)
         dest_path.write_text(template_content)
         log(INFO, f"Updated template {template_name} to {dest_path}")
+
+    def _copy_rule(self, rule_file: str, dest_path: Path):
+        template_content = resources.read_text(rules, rule_file)
+        dest_path.write_text(template_content)
+        log(INFO, f"Updated rule {rule_file} to {dest_path}")
+
+    def _setup_default_rules(self):
+        system_rules = ["lc-code.md", "lc-gitignores.md"]
+        for rule in system_rules:
+            rule_path = self.project_layout.get_rule_path(rule)
+            self._copy_rule(rule, rule_path)

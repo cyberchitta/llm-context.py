@@ -15,18 +15,18 @@
    - [Files and Directories](#files-and-directories)
    - [Repository Structure Diagram](#repository-structure-diagram)
    - [State Management](#state-management)
-   - [Profiles Overview](#profiles-overview)
+   - [Rules Overview](#rules-overview)
 
 3. [Configuration](#configuration)
 
    - [Configuration Files](#configuration-files)
-   - [Profile Configuration](#profile-configuration)
+   - [Rule Configuration](#rule-configuration)
    - [Template System](#template-system)
 
 4. [Command Reference](#command-reference)
 
    - [lc-init](#lc-init)
-   - [lc-set-profile](#lc-set-profile-profile-name)
+   - [lc-set-rule](#lc-set-rule-rule-name)
    - [lc-sel-files](#lc-sel-files)
    - [lc-sel-outlines](#lc-sel-outlines)
    - [lc-context](#lc-context)
@@ -52,7 +52,7 @@
 7. [Best Practices](#best-practices)
 
    - [Project Organization](#project-organization)
-   - [Profile Management](#profile-management)
+   - [Rule Management](#rule-management)
    - [Performance Tips](#performance-tips)
 
 8. [Troubleshooting](#troubleshooting)
@@ -70,9 +70,9 @@
    lc-init
    ```
 
-   This creates the `.llm-context` directory with default configuration files.
+   This creates the `.llm-context` directory with default configuration files and rules.
 
-3. The default "lc-code" profile is ready to use. For specialized needs, you can customize settings in `.llm-context/config.yaml`.
+3. The default "lc-code" rule is ready to use. For specialized needs, you can create custom rules in `.llm-context/rules/`.
 
 ### Basic Workflow
 
@@ -82,7 +82,7 @@
    lc-sel-files
    ```
 
-   This uses your `.gitignore` and profile settings to choose relevant files.
+   This uses your `.gitignore` and rule settings to choose relevant files.
 
 2. Select files for outline generation:
 
@@ -119,7 +119,7 @@
 Core commands you'll use frequently:
 
 - `lc-init`: Set up LLM Context in your project
-- `lc-set-profile <n>`: Switch between different profile configurations
+- `lc-set-rule <n>`: Switch between different rule configurations
 - `lc-sel-files`: Select files for full content inclusion
 - `lc-sel-outlines`: Select files for structural outline generation
 - `lc-context [-p] [-u] [-f FILE]`: Generate and copy context to clipboard
@@ -132,15 +132,15 @@ Core commands you'll use frequently:
 
 1. Code Projects:
 
-   - Use default "lc-code" profile (or create your own)
+   - Use default "lc-code" rule (or create your own)
    - Run `lc-sel-files` to include source code
    - Optional: Use `lc-sel-outlines` for structural overview
    - Generate context: `lc-context -p` (with prompt)
 
 2. Documentation Projects:
 
-   - Create a custom profile "docs"
-   - Switch to documentation focus: `lc-set-profile docs` (after creating it)
+   - Create a custom rule "docs" in `.llm-context/rules/docs.md`
+   - Switch to documentation focus: `lc-set-rule docs` (after creating it)
    - Select content: `lc-sel-files`
    - Generate with user notes: `lc-context -u`
    - Good for markdown/text collections
@@ -163,9 +163,9 @@ LLM Context uses a layered configuration approach:
 
 2. Configuration Directory (`.llm-context/`)
 
-   - `config.yaml`: Main configuration file
+   - `config.yaml`: Main configuration file (templates only)
+   - `rules/`: Directory containing rule files
    - `lc-project-notes.md`: Project-specific notes
-   - `lc-prompt.md`: Prompt
    - `templates/`: Template files
    - `curr_ctx.yaml`: Current context state
 
@@ -179,9 +179,12 @@ Standard project layout:
 ```
 your-project/
 ├── .llm-context/
-│   ├── config.yaml          # Main configuration
+│   ├── config.yaml          # Main configuration (templates)
+│   ├── rules/               # Rule files
+│   │   ├── lc-code.md       # Default code rule
+│   │   ├── lc-gitignores.md # Base gitignore patterns
+│   │   └── custom-rule.md   # Your custom rules
 │   ├── lc-project-notes.md  # Project notes
-│   ├── lc-prompt.md         # LLM Instructions
 │   ├── curr_ctx.yaml        # Current state
 │   └── templates/           # Template files
 │       ├── lc-context.j2
@@ -217,20 +220,20 @@ The diagram includes:
 - File sizes (both in bytes and human-readable format)
 - File age (how recently the file was modified)
 
-By default, the diagram excludes common media and binary files to keep the context focused on code and documentation. You can customize which files appear in the diagram by modifying the `diagram_files` patterns in your profile's configuration.
+By default, the diagram excludes common media and binary files to keep the context focused on code and documentation. You can customize which files appear in the diagram by modifying the `diagram_files` patterns in your rule's configuration.
 
 ### State Management
 
 LLM Context maintains state in `curr_ctx.yaml`:
 
-- Tracks selected files per profile
+- Tracks selected files per rule
 - Preserves selections between sessions
 - Updates automatically with commands
 - Records timestamp when context is generated to track file changes
 
-### Profiles Overview
+### Rules Overview
 
-Profiles now focus specifically on file selection rules:
+Rules are now defined as Markdown files with YAML frontmatter:
 
 1. File Selection
 
@@ -238,11 +241,16 @@ Profiles now focus specifically on file selection rules:
    - Full content vs outline selection
    - Customizable inclusion/exclusion patterns
 
-2. Built-in Profiles
-   - `lc-gitignores`: "Base profile containing default gitignore patterns, customize this for project-specific ignores."
-   - `lc-code`: "Default profile for software projects, using lc-gitignores base profile."
+2. Prompt Content
 
-Behavior options that were previously in profile settings are now controlled via command-line parameters.
+   - Instructions for the LLM in Markdown format
+   - Defined in the body of the rule file
+
+3. Built-in Rules
+   - `lc-gitignores.md`: Base rule containing default gitignore patterns
+   - `lc-code.md`: Default rule for software projects, using the lc-gitignores base rule
+
+Behavior options that were previously in rule settings are now controlled via command-line parameters.
 
 ## Configuration
 
@@ -250,7 +258,7 @@ Behavior options that were previously in profile settings are now controlled via
 
 #### config.yaml
 
-Primary configuration file containing:
+Primary configuration file now contains only template mappings:
 
 ```yaml
 # Template mappings
@@ -258,29 +266,30 @@ templates:
   context: "lc-context.j2"
   files: "lc-files.j2"
   highlights: "lc-highlights.j2"
+  prompt: "lc-prompt.j2"
+  definitions: "lc-definitions.j2"
+```
 
-# Profile definitions
-profiles:
-  lc-gitignores:
-    gitignores:
-      full_files:
-        - ".git"
-        - ".gitignore"
-        - ".llm-context/"
-        - "*.lock"
-      outline_files:
-        - ".git"
-        - ".gitignore"
-        - ".llm-context/"
-        - "*.lock"
-    only-include:
-      full_files:
-        - "**/*"
-      outline_files:
-        - "**/*"
-  lc-code:
-    base: "lc-gitignores"
-    prompt: "lc-prompt.md"
+#### Rule Files
+
+Rule files are Markdown files with YAML frontmatter, stored in `.llm-context/rules/`:
+
+```markdown
+---
+description: "Default rule for software projects, using lc-gitignores base rule."
+base: lc-gitignores
+---
+
+## Persona
+
+Senior developer with 40 years experience.
+
+## Guidelines
+
+1. Assume questions and code snippets relate to this project unless stated otherwise
+2. Follow project's structure, standards and stack
+3. Provide step-by-step guidance for changes
+...
 ```
 
 #### Notes Files
@@ -311,51 +320,92 @@ Warning: Files prefixed with `lc-` may be overwritten during updates. For custom
 2. Update references in `config.yaml`
 3. Keep original files as reference
 
-### Profile Configuration
+### Rule Configuration
 
-Profiles now focus exclusively on how files are selected. Each profile combines:
+Rules are configured using a combination of YAML frontmatter and Markdown content:
 
-- Repository .gitignore patterns (always active)
-- Additional exclusion patterns from profile's gitignores
-- Optional inclusion patterns to restrict file selection
-- An optional `description` field to document the profile's purpose
-- An optional `prompt` field specifying the prompt file to use
+#### Frontmatter Options
 
-Important: The `.git` directory should always be included in your profile's gitignores patterns since it isn't typically in .gitignore files but should always be excluded from context generation.
+```yaml
+---
+description: "Description of the rule" # Rule description
+base: lc-gitignores                   # Optional, inherit from another rule
+gitignores:                           # Optional, additional gitignore patterns
+  full_files:
+    - "node_modules/**"
+    - "*.min.*"
+  outline_files:
+    - "node_modules/**"
+    - "*.min.*" 
+  diagram_files:
+    - "*.jpg"
+    - "*.png"
+only-include:                         # Optional, restrict to specific patterns
+  full_files:
+    - "src/**/*.py"
+  outline_files:
+    - "**/*.py"
+files:                                # Optional, always include these files
+  - "README.md"
+  - "pyproject.toml"
+rules:                                # Optional, include these rule files
+  - "python-style.md"
+---
+```
+
+#### Markdown Content
+
+The Markdown content of the rule file becomes the prompt instructions for the LLM:
+
+```markdown
+## Persona
+
+Senior developer with 40 years experience.
+
+## Guidelines
+
+1. Assume questions and code snippets relate to this project unless stated otherwise
+2. Follow project's structure, standards and stack
+3. Provide step-by-step guidance for changes
+...
+```
+
+Important: The `.git` directory should always be included in your rule's gitignores patterns since it isn't typically in .gitignore files but should always be excluded from context generation.
 
 Here's a complete example:
 
-```yaml
-profiles:
-  lc-gitignores: # Base profile for gitignore patterns
-    description: "Base profile containing default gitignore patterns, customize this for project-specific ignores."
-    gitignores:
-      full_files:
-        - ".git"
-        - ".gitignore"
-        - ".llm-context/"
-        - "*.lock"
-      outline_files:
-        - ".git"
-        - ".gitignore"
-        - ".llm-context/"
-        - "*.lock"
-      diagram_files: # Control what files are excluded from diagram
-        - "*.jpg"
-        - "*.png"
-        - "*.pdf"
-        - "*.exe"
-    only-include:
-      full_files:
-        - "**/*"
-      outline_files:
-        - "**/*"
-      diagram_files:
-        - "**/*"
-  lc-code: # Default profile included with LLM Context
-    description: "Default profile for software projects, using lc-gitignores base profile."
-    base: "lc-gitignores" # Inherits from gitignores profile
-    prompt: "lc-prompt.md" # Specifies prompt file
+```markdown
+---
+description: "Python development with coding standards"
+base: lc-code
+gitignores:
+  full_files:
+    - "__pycache__/"
+    - "*.pyc"
+  outline_files:
+    - "__pycache__/"
+    - "*.pyc"
+only-include:
+  full_files:
+    - "src/**/*.py"
+    - "tests/**/*.py"
+  outline_files:
+    - "**/*.py"
+files:
+  - "pyproject.toml"
+  - "requirements.txt"
+rules:
+  - "python-style.md"
+---
+
+## Python Development
+
+When working with this Python project:
+
+1. Follow PEP 8 style guidelines
+2. Use type hints for all functions
+3. Write comprehensive docstrings
+4. Include unit tests for new functionality
 ```
 
 #### File Selection Patterns
@@ -401,19 +451,15 @@ The `diagram_files` patterns control which files are displayed in the repository
 
 #### Rule and File References
 
-Profiles can now include references to external rules and files:
+Rules can include references to other rules and files:
 
 ```yaml
-profiles:
-  python-with-rules:
-    base: "lc-code"
-    description: "Python development with coding standards"
-    rule-references:
-      - "python-style.md" # Programming style guide
-      - "error-handling.md" # Error handling conventions
-    file-references:
-      - "pyproject.toml" # Project configuration
-      - "docs/user-guide.md"
+rules:
+  - "python-style.md" # Programming style guide
+  - "error-handling.md" # Error handling conventions
+files:
+  - "pyproject.toml" # Project configuration
+  - "docs/user-guide.md"
 ```
 
 1. **Rule References**:
@@ -432,118 +478,135 @@ profiles:
 
 - **Rule References**: Simple filenames or paths relative to the rules directory
   ```yaml
-  rule-references:
+  rules:
     - "python.md"           # References .llm-context/rules/python.md
     - "style/naming.md"     # References .llm-context/rules/style/naming.md
   ```
 
 - **File References**: Paths relative to the project root
   ```yaml
-  file-references:
+  files:
     - "src/main.py"         # References project file at <root>/src/main.py
     - "config/settings.json"  # References project file at <root>/config/settings.json
   ```
 
-#### Example Custom Profiles
+#### Example Custom Rules
 
 1. Documentation Focus:
 
-```yaml
-profiles:
-  docs: # User-defined profile (no lc- prefix)
-    gitignores:
-      full_files:
-        - ".git"
-        - ".llm-context/"
-        - "*.lock"
-    only-include:
-      full_files:
-        - "**/*.md"
-        - "**/*.txt" # Documentation files
-        - "README*" # Project info
-        - "LICENSE*"
+```markdown
+---
+description: "Documentation-focused rule"
+gitignores:
+  full_files:
+    - ".git"
+    - ".llm-context/"
+    - "*.lock"
+only-include:
+  full_files:
+    - "**/*.md"
+    - "**/*.txt" # Documentation files
+    - "README*" # Project info
+    - "LICENSE*"
+---
+
+## Documentation Review
+
+When reviewing documentation in this project:
+
+1. Check for clarity and completeness
+2. Ensure consistent formatting
+3. Verify all links are working
+4. Suggest improvements for readability
 ```
 
 2. Source Files Only:
 
-```yaml
-profiles:
-  source: # User-defined profile
-    base: "lc-code" # Inherit from lc-code
-    only-include:
-      full_files:
-        - "src/**/*.py" # Python source
-        - "tests/**/*.py" # Test files
-        - "pyproject.toml" # Project configuration
-    prompt: "lc-prompt.md"
+```markdown
+---
+description: "Source code focus"
+base: lc-code
+only-include:
+  full_files:
+    - "src/**/*.py" # Python source
+    - "tests/**/*.py" # Test files
+    - "pyproject.toml" # Project configuration
+---
+
+## Code Review
+
+When reviewing the source code:
+
+1. Look for potential bugs and edge cases
+2. Evaluate code structure and organization
+3. Check for appropriate error handling
+4. Consider performance implications
 ```
 
 3. Python with Style Rules:
 
-```yaml
-profiles:
-  python-style:
-    base: "lc-code"
-    description: "Python development with style rules"
-    rule-references:
-      - "python-style.md" # Style guide
-      - "docstring-conventions.md" # Documentation standards
-    only-include:
-      full_files:
-        - "src/**/*.py" # Python source
-        - "tests/**/*.py" # Test files
+```markdown
+---
+description: "Python development with style rules"
+base: lc-code
+rules:
+  - "python-style.md" # Style guide
+  - "docstring-conventions.md" # Documentation standards
+only-include:
+  full_files:
+    - "src/**/*.py" # Python source
+    - "tests/**/*.py" # Test files
+---
+
+## Python Development Guidelines
+
+When working with this Python codebase:
+
+1. Follow PEP 8 style guidelines
+2. Use type hints for all functions
+3. Write comprehensive docstrings
+4. Include unit tests for new functionality
 ```
 
-This profile:
+This rule:
 
-- Inherits from the default code profile
+- Inherits from the default code rule
 - Adds Python style and documentation conventions as rules
 - Focuses only on Python source and test files
 - Ensures all code follows consistent style guidelines
 
-#### Profile Inheritance
+#### Rule Inheritance
 
-Profiles can extend others using the `base` field:
+Rules can extend others using the `base` field in frontmatter:
 
 ```yaml
-profiles:
-  base-docs: # User-defined profile
-    gitignores:
-      full_files:
-        - ".git"
-        - ".llm-context/"
-        - "*.lock"
-    only-include:
-      full_files:
-        - "**/*.md"
-  docs-with-notes: # User-defined profile
-    base: "base-docs" # Inherit from base-docs profile
+base: lc-code # Inherit from lc-code rule
 ```
 
 The inheritance system allows you to:
 
-- Create base profiles for common patterns
-- Override specific fields in derived profiles
+- Create base rules for common patterns
+- Override specific fields in derived rules
 - Mix and match configurations for different use cases
 
-### System Profiles vs User Profiles
+### System Rules vs User Rules
 
-LLM Context distinguishes between system-provided profiles and user-defined profiles:
+LLM Context distinguishes between system-provided rules and user-defined rules:
 
-- **System Profiles**: Prefixed with "lc-" (e.g., `lc-code`)
+- **System Rules**: Prefixed with "lc-" (e.g., `lc-code.md`)
 
-  - Most system profiles are maintained by the system and may be updated during version upgrades
-  - **Exception**: The `lc-gitignores` profile is preserved during updates, allowing you to customize project-wide ignore patterns that will be maintained across upgrades
-  - System profiles inherit base ignore patterns from the `lc-gitignores` profile
+  - Most system rules are maintained by the system and may be updated during version upgrades
+  - **Exception**: The `lc-gitignores.md` rule is preserved during updates, allowing you to customize project-wide ignore patterns that will be maintained across upgrades
+  - System rules inherit base ignore patterns from the `lc-gitignores.md` rule
 
-- **User Profiles**: Any profile without the "lc-" prefix
+- **User Rules**: Any rule without the "lc-" prefix
   - These are always preserved during updates
-  - Best practice is to create your own profiles that extend system profiles
+  - Best practice is to create your own rules that extend system rules
 
 When customizing gitignore patterns, you have two recommended approaches:
 
-1. Modify the `lc-gitignores` profile for project-wide ignore patterns that should apply to all profiles
-2. Create custom profiles with specific gitignore overrides for specialized use cases
+1. Modify the `lc-gitignores.md` rule for project-wide ignore patterns that should apply to all rules
+2. Create custom rules with specific gitignore overrides for specialized use cases
 
 ### Template System
 
@@ -568,21 +631,25 @@ When customizing gitignore patterns, you have two recommended approaches:
 {% endif %}
 ```
 
-2. Prompt Template (`lc-prompt.md`)
-   Sets LLM behavior:
+2. Prompt Template (`lc-prompt.j2`)
+   Renders prompt content:
 
-```markdown
-## Persona
+```jinja
+{%- if prompt -%}
+{{ prompt }}
+{%- endif %}
+{%- if rules %}
 
-[LLM role definition]
+## Additional Rules
 
-## Guidelines
+{% for item in rules -%}
+{{ item.content }}
+{% endfor %}
+{%- endif -%}
+{%- if user_notes %}
 
-[Behavior instructions]
-
-## Response Structure
-
-[Output format]
+{{ user_notes }}
+{%- endif -%}
 ```
 
 #### Customization
@@ -624,23 +691,24 @@ Initializes LLM Context in your project.
 
 - Creates `.llm-context` directory
 - Sets up default configuration files
+- Creates default rules in `.llm-context/rules/`
 - Requires `.gitignore` file in project root
 - Safe to run multiple times
 
-### lc-set-profile profile-name
+### lc-set-rule rule-name
 
-Switches the active profile.
+Switches the active rule.
 
 ```bash
-lc-set-profile lc-code         # Switch to default code profile
-lc-set-profile docs            # Switch to a custom user profile (if configured)
+lc-set-rule lc-code         # Switch to default code rule
+lc-set-rule docs            # Switch to a custom user rule (if configured)
 ```
 
 ### lc-sel-files
 
 Selects files for full content inclusion.
 
-- Uses active profile's configuration
+- Uses active rule's configuration
 - Respects `.gitignore` patterns
 - Updates `curr_ctx.yaml` with selections
 
@@ -663,7 +731,7 @@ lc-context -f output.md         # Write to specified output file
 lc-context -p -u -f out.md      # Combine multiple options
 ```
 
-The parameters control behavior that was previously defined in profile settings:
+The parameters control behavior:
 
 - `-p`: Include prompt instructions in context
 - `-u`: Include user notes in context
@@ -673,7 +741,7 @@ The parameters control behavior that was previously defined in profile settings:
 
 Generates project-specific instructions suitable for "System Prompts" or "Custom Instructions" sections in LLM chat interfaces.
 
-- Outputs formatted instructions from your profile's prompt template
+- Outputs formatted instructions from your rule's Markdown content
 - Includes user notes if the `-u` flag is included
 - Designed for:
   - Claude Projects' "Project Instructions" section
@@ -696,13 +764,13 @@ Lists files that have been modified since the context was generated:
 - Uses timestamp from when context was generated
 - Helps track changes during conversation
 - Useful for reviewing changes before updates
-- Respects current profile's file selection patterns
+- Respects current rule's file selection patterns
 
 ### lc-outlines
 
 Generates smart outlines for all outline-eligible code files and copies to clipboard.
 
-- Uses active profile's configuration for file selection
+- Uses active rule's configuration for file selection
 - Shows important code definitions (classes, functions, methods)
 - Helps understand code structure without full content
 - Useful for:
@@ -744,24 +812,17 @@ These capabilities work together to help LLMs efficiently explore and understand
 
 #### Configuration
 
-Control outline behavior in profiles:
+Control outline behavior in rules:
 
 ```yaml
-profiles:
-  with-outlines: # User-defined profile
-    gitignores:
-      full_files:
-        - ".git"
-        - "*.lock"
-      outline_files:
-        - ".git"
-        - "*.lock"
-    only-include:
-      full_files:
-        - "**/*"
-      outline_files:
-        - "**/*.py"
-        - "**/*.js"
+gitignores:
+  outline_files:
+    - ".git"
+    - "*.lock"
+only-include:
+  outline_files:
+    - "**/*.py"
+    - "**/*.js"
 ```
 
 #### Language Support
@@ -827,15 +888,19 @@ Example workflow:
 
 ### Rule Integration
 
-LLM Context supports incorporating programming style guides and best practices directly into your LLM interactions through rule references.
+LLM Context supports incorporating programming style guides and best practices directly into your LLM interactions through rule references in the frontmatter.
 
 #### Rule Format
 
-Rules should be stored as Markdown files in your project. They're included at the beginning of the context with the prompt, ensuring the LLM is aware of your coding standards from the start.
+Rules should be stored as Markdown files in the `.llm-context/rules/` directory. They're included at the beginning of the context with the prompt, ensuring the LLM is aware of your coding standards from the start.
 
-Example rule file (`rules/python-style.md`):
+Example rule file (`.llm-context/rules/python-style.md`):
 
 ```markdown
+---
+description: "Python coding style guide"
+---
+
 ## Programming Style
 
 When writing Python code, prefer a functional and Pythonic style. Use list comprehensions instead of traditional for loops where appropriate. Leverage conditional expressions and single-pass operations for efficiency. Employ expressive naming and type hinting to enhance code clarity. Prefer stateless methods and concise boolean logic where possible. Make use of Python idioms such as tuple unpacking. In short, write **beautiful** code.
@@ -853,8 +918,8 @@ When writing Python code, prefer a functional and Pythonic style. Use list compr
 1. Keep rule files concise and focused
 2. Use Markdown for clear formatting
 3. Organize rules by language or concern
-4. Store rules in a central location (e.g., a `rules/` directory)
-5. Use descriptive filenames for easy reference
+4. Use descriptive filenames for easy reference
+5. Reference other rules when needed using the `rules` field in frontmatter
 
 ### Performance Optimization
 
@@ -871,51 +936,44 @@ When writing Python code, prefer a functional and Pythonic style. Use list compr
    - Add related files as needed
    - Use outlines for context
 
-#### Profile Optimization
+#### Rule Optimization
 
 1. Efficient Patterns:
 
 ```yaml
 # Optimize pattern matching
-profiles:
-  optimized: # User-defined profile
-    gitignores:
-      full_files:
-        - "node_modules/**"
-        - "*.min.*"
-      outline_files:
-        - "node_modules/**"
+gitignores:
+  full_files:
+    - "node_modules/**"
+    - "*.min.*"
+  outline_files:
+    - "node_modules/**"
 ```
 
-2. Language-Specific Profiles:
+2. Language-Specific Rules:
 
 ```yaml
 # Python project optimization
-profiles:
-  python-opt: # User-defined profile
-    base: "lc-code"
-    only-include:
-      full_files:
-        - "**/main.py"
-        - "**/core/*.py"
-      outline_files:
-        - "**/*.py"
+only-include:
+  full_files:
+    - "**/main.py"
+    - "**/core/*.py"
+  outline_files:
+    - "**/*.py"
 ```
 
 3. Custom Combinations:
 
 ```yaml
 # Mixed content optimization
-profiles:
-  web-opt: # User-defined profile
-    only-include:
-      full_files:
-        - "**/index.html"
-        - "**/main.js"
-        - "**/*.md"
-      outline_files:
-        - "**/*.js"
-        - "**/*.ts"
+only-include:
+  full_files:
+    - "**/index.html"
+    - "**/main.js"
+    - "**/*.md"
+  outline_files:
+    - "**/*.js"
+    - "**/*.ts"
 ```
 
 ## Workflows
@@ -979,14 +1037,14 @@ lc-clip-files
 
 1. Claude Projects:
 
-   - Use `lc-set-profile lc-code`
+   - Use `lc-set-rule lc-code`
    - Generate context with `lc-context`
    - Paste into knowledge section
    - Update as project evolves
 
 2. Knowledge Maintenance:
    - Regular context updates
-   - Consistent profile usage
+   - Consistent rule usage
    - Documentation in project notes
 
 ### Custom GPT Integration
@@ -1007,16 +1065,17 @@ lc-clip-files
 ### Project Organization
 
 - Keep `.llm-context/config.yaml` in version control
+- Keep rule files (`.llm-context/rules/*.md`) in version control
 - Ignore `curr_ctx.yaml` in git
 - Document any custom templates you create
 
-### Profile Management
+### Rule Management
 
-- Start with built-in profiles (prefixed with "lc-"), customize as needed
-- Create your own user profiles (without the "lc-" prefix) for custom configurations
-- Modify the `lc-gitignores` profile to customize project-wide ignore patterns
-- Document profile purposes in a comment in config.yaml
-- Share working profiles with your team
+- Start with built-in rules (prefixed with "lc-"), customize as needed
+- Create your own rules (without the "lc-" prefix) for custom configurations
+- Modify the `lc-gitignores.md` rule to customize project-wide ignore patterns
+- Document rule purposes in the description field
+- Share working rules with your team
 
 ### Performance Tips
 
@@ -1024,7 +1083,7 @@ lc-clip-files
 
    - Review actual selected files after `lc-sel-files`
    - Remove large generated files, logs, etc.
-   - Adjust profile patterns based on what you see
+   - Adjust rule patterns based on what you see
 
 2. Check Context Size:
 
@@ -1035,7 +1094,7 @@ lc-clip-files
 3. Efficient Updates:
    - Use `lc-clip-files` for targeted file access
    - Update context when project structure changes
-   - Switch profiles based on your current task
+   - Switch rules based on your current task
 
 ## Troubleshooting
 
@@ -1054,17 +1113,158 @@ lc-clip-files
 
 3. No Files Selected:
 
-   - Check your profile's gitignores and only-include patterns
+   - Check your rule's gitignores and only-include patterns
    - Review `.gitignore` patterns
-   - Try `lc-set-profile lc-code` to use default profile
+   - TryContinuing the user guide:
+
+```markdown
+3. No Files Selected:
+
+   - Check your rule's gitignores and only-include patterns
+   - Review `.gitignore` patterns
+   - Try `lc-set-rule lc-code` to use default rule
 
 4. Outline Generation Not Working:
 
    - Check if your files are in supported languages
    - Make sure files aren't already selected for full content
+   - Run `lc-sel-outlines` after `lc-sel-files`
 
 5. Context Too Large:
 
    - Review selected files with `cat .llm-context/curr_ctx.yaml`
-   - Adjust profile patterns to exclude large files
+   - Adjust rule patterns to exclude large files
    - Use outlines instead of full content where possible
+
+6. Rule Not Found:
+
+   - Check that the rule file exists in `.llm-context/rules/`
+   - Ensure the rule filename matches what you're using with `lc-set-rule`
+
+7. Migration from Profiles:
+
+   - When migrating from previous versions, create rule files for each custom rule
+   - Copy rule settings to rule frontmatter
+   - Move prompt content to the body of the rule file
+   - Use the same name for your rule as your previous rule
+
+## Migrating from Profiles to Rules (v0.3.0+)
+
+In version 0.3.0, LLM Context switched from YAML-based profiles to Markdown-based rules. This section explains how to migrate your existing configuration.
+
+### Understanding the Changes
+
+1. **Profiles are now Rules**:
+   - Profiles from `config.yaml` are now separate Markdown files in `.llm-context/rules/`
+   - Each rule file contains YAML frontmatter + Markdown content
+
+2. **Structure Changes**:
+   - `config.yaml` now only contains template mappings
+   - Rule settings moved to rule file frontmatter
+   - Prompt content moved to rule file Markdown body
+
+### Migration Steps
+
+1. **Create Rule Files**:
+   
+   For each custom rule, create a new .md file in `.llm-context/rules/`:
+   
+   ```markdown
+   ---
+   description: "Description from your rule"
+   base: lc-code  # If your rule inherited from another
+   gitignores: 
+     # Copy your gitignores section here
+   only-include:
+     # Copy your only-include section here
+   files:
+     # Copy your file-references here if any
+   rules:
+     # Copy your rule-references here if any
+   ---
+
+   <!-- Add your prompt content here -->
+   ```
+
+2. **Move Prompt Content**:
+   
+   If your rule had a `prompt` field pointing to a file, copy that file's content to the body of your rule file.
+
+3. **Switch to the New Rule**:
+   
+   Use the same name for your rule as your previous rule to maintain compatibility:
+   
+   ```bash
+   lc-set-rule my-rule-name
+   ```
+
+### Example Migration
+
+**Old Rule (in config.yaml):**
+```yaml
+profiles:
+  python-dev:
+    description: "Python development configuration"
+    base: "lc-code"
+    gitignores:
+      full_files:
+        - "__pycache__/"
+      outline_files:
+        - "__pycache__/"
+    only-include:
+      full_files:
+        - "src/**/*.py"
+      outline_files:
+        - "**/*.py"
+    prompt: "python-prompt.md"
+```
+
+**Python Prompt File (python-prompt.md):**
+```markdown
+## Python Development Guidelines
+
+1. Follow PEP 8 style guidelines
+2. Use type hints for all functions
+3. Write comprehensive docstrings
+```
+
+**New Rule File (.llm-context/rules/python-dev.md):**
+```markdown
+---
+description: "Python development configuration"
+base: lc-code
+gitignores:
+  full_files:
+    - "__pycache__/"
+  outline_files:
+    - "__pycache__/"
+only-include:
+  full_files:
+    - "src/**/*.py"
+  outline_files:
+    - "**/*.py"
+---
+
+## Python Development Guidelines
+
+1. Follow PEP 8 style guidelines
+2. Use type hints for all functions
+3. Write comprehensive docstrings
+```
+
+### Tips for Successful Migration
+
+1. **Keep Names Consistent**: Use the same rule names as your previous profiles
+2. **Check Configuration**: Verify frontmatter syntax is valid YAML
+3. **Preserve Base Rules**: Don't modify system rules (prefixed with "lc-")
+4. **Test Each Rule**: After migration, test each rule to ensure it works as expected
+5. **Update Scripts**: If you have scripts that reference profiles, update them to use the new rule names
+
+### Default Rules
+
+LLM Context comes with default rules in the `.llm-context/rules/` directory:
+
+1. **lc-gitignores.md**: Base rule containing default gitignore patterns
+2. **lc-code.md**: Default rule for software projects (inherits from lc-gitignores)
+
+You can examine these files to understand the new rule format and use them as templates for your own rules.

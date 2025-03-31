@@ -11,16 +11,16 @@ from pydantic import BaseModel, Field, ValidationError
 from llm_context.context_generator import ContextGenerator, ContextSettings
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
-from llm_context.profile import DEFAULT_CODE_PROFILE
+from llm_context.rule import DEFAULT_CODE_RULE
 
 
 class ContextRequest(BaseModel):
     root_path: Path = Field(
         ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
     )
-    profile_name: str = Field(
-        DEFAULT_CODE_PROFILE,
-        description="Profile to use (e.g. 'code', 'copy', 'full') - defines file inclusion and presentation rules",
+    rule_name: str = Field(
+        DEFAULT_CODE_RULE,
+        description="Rule to use (e.g. 'code', 'copy', 'full') - defines file inclusion and presentation rules",
         pattern="^[a-zA-Z0-9_-]+$",
     )
 
@@ -43,7 +43,7 @@ project_context_tool = Tool(
 async def project_context(arguments: dict) -> list[TextContent]:
     request = ContextRequest(**arguments)
     env = ExecutionEnvironment.create(Path(request.root_path))
-    cur_env = env.with_profile(request.profile_name)
+    cur_env = env.with_rule(request.rule_name)
     with cur_env.activate():
         selector = ContextSelector.create(cur_env.config)
         file_sel_full = selector.select_full_files(cur_env.state.file_selection)
@@ -89,9 +89,9 @@ class ListModifiedFilesRequest(BaseModel):
     root_path: Path = Field(
         ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
     )
-    profile_name: str = Field(
-        DEFAULT_CODE_PROFILE,
-        description="Profile to use (e.g. 'code', 'copy', 'full') - defines file inclusion and presentation rules",
+    rule_name: str = Field(
+        DEFAULT_CODE_RULE,
+        description="Rule to use (e.g. 'code', 'copy', 'full') - defines file inclusion and presentation rules",
         pattern="^[a-zA-Z0-9_-]+$",
     )
     timestamp: float = Field(..., description="Unix timestamp to check modifications since")
@@ -112,7 +112,7 @@ list_modified_files_tool = Tool(
 async def list_modified_files(arguments: dict) -> list[TextContent]:
     request = ListModifiedFilesRequest(**arguments)
     env = ExecutionEnvironment.create(Path(request.root_path))
-    cur_env = env.with_profile(request.profile_name)
+    cur_env = env.with_rule(request.rule_name)
     with cur_env.activate():
         selector = ContextSelector.create(cur_env.config, request.timestamp)
         file_sel_full = selector.select_full_files(cur_env.state.file_selection)
@@ -124,9 +124,9 @@ class OutlinesRequest(BaseModel):
     root_path: Path = Field(
         ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
     )
-    profile_name: str = Field(
-        DEFAULT_CODE_PROFILE,
-        description="Profile to use for file selection rules",
+    rule_name: str = Field(
+        DEFAULT_CODE_RULE,
+        description="Rule to use for file selection rules",
         pattern="^[a-zA-Z0-9_-]+$",
     )
 
@@ -146,7 +146,7 @@ outlines_tool = Tool(
 async def code_outlines(arguments: dict) -> list[TextContent]:
     request = OutlinesRequest(**arguments)
     env = ExecutionEnvironment.create(Path(request.root_path))
-    cur_env = env.with_profile(request.profile_name)
+    cur_env = env.with_rule(request.rule_name)
     with cur_env.activate():
         selector = ContextSelector.create(cur_env.config)
         file_sel_out = selector.select_outline_only(cur_env.state.file_selection)

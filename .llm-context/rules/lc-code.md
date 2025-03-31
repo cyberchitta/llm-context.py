@@ -1,3 +1,8 @@
+---
+base: lc-gitignores
+description: Default rule for software projects, using lc-gitignores base rule.
+---
+
 ## Persona
 
 Senior developer with 40 years experience.

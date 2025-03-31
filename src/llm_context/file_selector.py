@@ -7,7 +7,7 @@ from typing import Optional
 from pathspec import GitIgnoreSpec  # type: ignore
 
 from llm_context.context_spec import ContextSpec
-from llm_context.profile import IGNORE_NOTHING, INCLUDE_ALL
+from llm_context.rule import IGNORE_NOTHING, INCLUDE_ALL
 from llm_context.state import FileSelection
 from llm_context.utils import PathConverter, log, safe_read_file
 
@@ -139,11 +139,11 @@ class ContextSelector:
     @staticmethod
     def create(spec: ContextSpec, since: Optional[float] = None) -> "ContextSelector":
         root_path = spec.project_root_path
-        profile = spec.profile
-        full_pathspecs = profile.get_ignore_patterns("full")
-        outline_pathspecs = profile.get_ignore_patterns("outline")
-        full_includes = profile.get_only_includes("full")
-        outline_includes = profile.get_only_includes("outline")
+        rule = spec.rule
+        full_pathspecs = rule.get_ignore_patterns("full")
+        outline_pathspecs = rule.get_ignore_patterns("outline")
+        full_includes = rule.get_only_includes("full")
+        outline_includes = rule.get_only_includes("outline")
         full_selector = FileSelector.create(root_path, full_pathspecs, full_includes, since)
         outline_selector = FileSelector.create(
             root_path, outline_pathspecs, outline_includes, since
@@ -160,7 +160,7 @@ class ContextSelector:
                 "Some files previously in outline selection have been moved to full selection.",
             )
         return FileSelection._create(
-            file_selection.profile_name, full_files, updated_outline_files, file_selection.timestamp
+            file_selection.rule_name, full_files, updated_outline_files, file_selection.timestamp
         )
 
     def select_outline_files(self, file_selection: FileSelection) -> "FileSelection":
@@ -173,11 +173,11 @@ class ContextSelector:
         all_outline_files = self.outline_selector.get_relative_files()
         outline_files = [f for f in all_outline_files if f not in set(full_files)]
         return FileSelection._create(
-            file_selection.profile_name, full_files, outline_files, file_selection.timestamp
+            file_selection.rule_name, full_files, outline_files, file_selection.timestamp
         )
 
     def select_outline_only(self, file_selection: FileSelection) -> "FileSelection":
         all_outline_files = self.outline_selector.get_relative_files()
         return FileSelection._create(
-            file_selection.profile_name, [], all_outline_files, file_selection.timestamp
+            file_selection.rule_name, [], all_outline_files, file_selection.timestamp
         )
