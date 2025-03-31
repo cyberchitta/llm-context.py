@@ -1,7 +1,7 @@
 ---
 base: lc-gitignores
 description: Default rule for software projects, using lc-gitignores base rule.
-name: lc-code
+name: code
 rules: [python.md]
 ---
 
