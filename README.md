@@ -8,74 +8,9 @@ LLM Context is a tool that helps developers quickly inject relevant content from
 
 > **Note**: This project was developed in collaboration with several Claude Sonnets - 3.5, 3.6 and 3.7 (and more recently Grok-3 as well), using LLM Context itself to share code during development. All code in the repository is human-curated (by me 😇, @restlessronin).
 
-## Important: Profile Changes and Command-line Parameters
+## Breaking Changes in v0.3.0
 
-As of version 0.2.16, we've made some key improvements:
-
-1. **Diagram File Filtering**:
-
-- The `-x` flag (previously `no_media` setting) has been removed
-- Media/Binary files are now automatically filtered from diagram output using pattern-based ignores
-- You can customize which files are excluded from diagram using the `diagram_files` key in your profile's gitignores
-
-2. **Profile Simplification**:
-
-- System profiles have been reduced to just "lc-code" and "lc-gitignores"
-- The old "code-prompt" and "code-file" profiles are no longer needed as their functionality is now handled by command-line parameters
-- All system profiles are prefixed with "lc-" for clarity
-
-3. **Command Parameters**: Behavior options are controlled via command-line parameters:
-
-- `-p`: Include prompt instructions in context
-- `-u`: Include user notes in context
-- `-f FILE`: Write context to specified output file
-
-Examples:
-
-```bash
-# Generate context with prompt included
-lc-context -p
-
-# Generate context with user notes and save to file
-lc-context -u -f project-context.md
-
-# Generate context with all options
-lc-context -p -u -f project-context.md
-```
-
-If you have customized profiles or have references to them in your workflows, please update them accordingly.
-
-## New: Rule and File References
-
-As of version 0.2.18, we've added support for rule and file references in profiles:
-
-1. **Rule References**:
-   - Add `rules` to profiles to include programming style guides
-   - Rules are included with the prompt to guide code generation
-   - Perfect for incorporating coding standards into your LLM conversations
-
-2. **File References**:
-   - Include `files` in profiles to add important files
-   - Referenced files are automatically included in context generation
-   - No need to manually select them with `lc-sel-files`
-
-Example profile with rule references:
-
-```yaml
-profiles:
-  python-style:
-    base: "lc-code"
-    description: "Python code with style guidelines"
-    rules:
-      - "python-style.md"    # Programming style guide
-      - "naming-conventions.md"  # Naming conventions
-```
-
-Rules appear in the prompt section, ensuring LLMs follow your coding standards from the beginning of the conversation.
-
-## Important: Configuration File Format Change
-
-Configuration files were converted from TOML to YAML in v 0.2.9. Existing users **must manually convert** any customizations in `.llm-context/config.toml` files to the new `.llm-context/config.yaml`.
+We've switched to a Markdown-based rules system replacing the previous YAML-based profiles. This is a breaking change that affects configuration. See the [User Guide](docs/user-guide.md) for details on the new rule format and how to use it.
 
 ## Why LLM Context?
 
@@ -135,17 +70,16 @@ Once configured, you can start working with your project in two simple ways:
 
 1. Navigate to your project's root directory
 2. Initialize repository: `lc-init` (only needed once)
-3. (Optional) Edit `.llm-context/config.yaml` to customize ignore patterns
-4. Select files: `lc-sel-files`
-5. (Optional) Review selected files in `.llm-context/curr_ctx.yaml`
-6. Generate context: `lc-context` (with optional flags: `-p` for prompt, `-u` for user notes)
-7. Use with your preferred interface:
+3. Select files: `lc-sel-files`
+4. (Optional) Review selected files in `.llm-context/curr_ctx.yaml`
+5. Generate context: `lc-context` (with optional flags: `-p` for prompt, `-u` for user notes)
+6. Use with your preferred interface:
 
 - Project Knowledge (Claude Pro): Paste into knowledge section
 - GPT Knowledge (Custom GPTs): Paste into knowledge section
 - Regular chats: Use `lc-context -p` to include instructions
 
-8. When the LLM requests additional files:
+7. When the LLM requests additional files:
    - Copy the file list from the LLM
    - Run `lc-clip-files`
    - Paste the contents back to the LLM
@@ -171,9 +105,9 @@ Once configured, you can start working with your project in two simple ways:
 LLM Context provides advanced features for customizing how project content is captured and presented:
 
 - Smart file selection using `.gitignore` patterns
-- Multiple profiles for different use cases
-  - System profiles (prefixed with "lc-") provide default functionality
-  - User-defined profiles can be created independently or extend existing profiles
+- Multiple rule-based profiles for different use cases
+  - System rules (prefixed with "lc-") provide default functionality
+  - User-defined rules can be created independently or extend existing rules
 - Code Navigation Features:
   1. **Smart Code Outlines**: Allows LLMs to view the high-level structure of your codebase with automatically generated outlines highlighting important definitions
   2. **Definition Implementation Extraction**: Paste full implementations of specific definitions that are requested by LLMs after they review the code outlines, using the `lc-clip-implementations` command

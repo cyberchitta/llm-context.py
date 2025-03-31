@@ -21,7 +21,8 @@ class ContextSpec:
         project_layout = ProjectLayout(project_root)
         ProjectSetup.create(project_layout).initialize()
         raw_config = Yaml.load(project_layout.config_path)
-        profile = ProfileResolver.create(raw_config, state).get_profile(profile_name)
+        resolver = ProfileResolver.create(raw_config, state, project_layout)
+        profile = resolver.get_profile(profile_name)
         return ContextSpec(project_layout, raw_config["templates"], profile, state)
 
     @staticmethod
@@ -34,7 +35,8 @@ class ContextSpec:
 
     def has_profile(self, profile_name: str):
         raw_config = Yaml.load(self.project_layout.config_path)
-        return ProfileResolver.create(raw_config, self.state).has_profile(profile_name)
+        resolver = ProfileResolver.create(raw_config, self.state, self.project_layout)
+        return resolver.has_profile(profile_name)
 
     @property
     def state_store(self):

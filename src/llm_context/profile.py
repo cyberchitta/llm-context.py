@@ -4,6 +4,7 @@ from typing import Any, Optional, cast
 
 from packaging import version
 
+from llm_context.rule_parser import RuleLoader
 from llm_context.utils import ProjectLayout, Yaml, safe_read_file
 
 CURRENT_CONFIG_VERSION = version.parse("2.8")
@@ -82,51 +83,52 @@ DEFAULT_CODE_PROFILE = "lc-code"
 
 @dataclass(frozen=True)
 class Profile:
+    name: str
     gitignores: dict[str, list[str]]
     only_includes: dict[str, list[str]]
-    prompt: str
     description: str
     files: list[str]
     rules: list[str]
 
     @staticmethod
-    def create_code_gitignores() -> "Profile":
+    def create_code_gitignores(name: str) -> "Profile":
         media = [f"*.{ext.lstrip('.')}" for ext in MEDIA_EXTENSIONS]
         return Profile.create(
+            name,
+            "Base ignore patterns for code files, customize this for project-specific ignores.",
             {
                 "full_files": GITIGNORE,
                 "outline_files": GITIGNORE,
                 "diagram_files": IGNORE_NOTHING + media,
             },
             {"full_files": INCLUDE_ALL, "outline_files": INCLUDE_ALL, "diagram_files": INCLUDE_ALL},
-            "",
-            "Base ignore patterns for code files, customize this for project-specific ignores.",
             [],
             [],
         )
 
     @staticmethod
-    def create_code_dict() -> dict[str, Any]:
+    def create_code_dict(name: str) -> dict[str, Any]:
         return {
+            "name": name,
+            "description": f"Default profile for software projects, using {DEFAULT_GITIGNORES_PROFILE} base profile.",
             "base": DEFAULT_GITIGNORES_PROFILE,
             "prompt": "lc-prompt.md",
-            "description": f"Default profile for software projects, using {DEFAULT_GITIGNORES_PROFILE} base profile.",
         }
 
     @staticmethod
     def from_config(config: dict[str, Any]) -> "Profile":
         return Profile.create(
+            config.get("name", ""),
+            config.get("description", ""),
             config.get("gitignores", {}),
             config.get("only-include", {}),
-            config.get("prompt", ""),
-            config.get("description", ""),
             config.get("files", []),
             config.get("rules", []),
         )
 
     @staticmethod
-    def create(gitignores, only_include, prompt, description, files, rules) -> "Profile":
-        return Profile(gitignores, only_include, prompt, description, files, rules)
+    def create(name, description, gitignores, only_include, files, rules) -> "Profile":
+        return Profile(name, description, gitignores, only_include, files, rules)
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
         return self.gitignores.get(f"{context_type}_files", IGNORE_NOTHING)
@@ -135,10 +137,12 @@ class Profile:
         return self.only_includes.get(f"{context_type}_files", INCLUDE_ALL)
 
     def get_prompt(self, project_layout: ProjectLayout) -> Optional[str]:
-        if not self.prompt:
+        if not self.name:
             return None
-        prompt_path = project_layout.project_config_path / self.prompt
-        return safe_read_file(str(prompt_path))
+        from llm_context.rule_parser import RuleProvider
+
+        content = RuleProvider.create(project_layout).get_rule_content(self.name)
+        return content if content else None
 
     def get_project_notes(self, project_layout: ProjectLayout) -> Optional[str]:
         return safe_read_file(str(project_layout.project_notes_path))
@@ -148,10 +152,10 @@ class Profile:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "name": self.name,
             "description": self.description,
             **({"gitignores": self.gitignores} if self.gitignores else {}),
             **({"only-include": self.only_includes} if self.only_includes else {}),
-            **({"prompt": self.prompt} if self.prompt else {}),
             **({"files": self.files} if self.files else {}),
             **({"rules": self.rules} if self.rules else {}),
         }
@@ -180,7 +184,7 @@ class ToolConstants:
 
     @staticmethod
     def create_default(version: str) -> "ToolConstants":
-        return ToolConstants.create(version, Profile.create_code_dict())
+        return ToolConstants.create(version, Profile.create_code_dict("default"))
 
     @staticmethod
     def create(config_version: str, default_profile: dict[str, Any]) -> "ToolConstants":
@@ -206,19 +210,28 @@ class ToolConstants:
 class ProfileResolver:
     config: dict[str, Any]
     system_state: ToolConstants
+    rule_loader: RuleLoader
 
     @staticmethod
-    def create(config: dict[str, Any], system_state: ToolConstants) -> "ProfileResolver":
-        return ProfileResolver(config, system_state)
+    def create(
+        config: dict[str, Any], system_state: ToolConstants, project_layout: ProjectLayout
+    ) -> "ProfileResolver":
+        return ProfileResolver(config, system_state, RuleLoader.create(project_layout))
 
     def has_profile(self, profile_name: str) -> bool:
         if profile_name == "default":
+            return True
+        if self.rule_loader.load_rule(profile_name):
             return True
         return profile_name in self.config["profiles"]
 
     def get_profile(self, profile_name: str) -> Profile:
         if profile_name == "default":
             return Profile.from_config(self.system_state.default_profile)
+        if self.rule_loader:
+            rule = self.rule_loader.load_rule(profile_name)
+            if rule:
+                return Profile.from_config(rule.to_profile_config())
         resolved_config = self.resolve_profile(profile_name)
         return Profile.from_config(resolved_config)
 

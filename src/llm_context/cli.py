@@ -161,3 +161,13 @@ def implementations_from_clip(env: ExecutionEnvironment) -> ExecutionResult:
         env.config, env.state.file_selection, settings, env.tagger
     ).definitions(requests)
     return ExecutionResult(content, env)
+
+
+@create_command
+def migrate_to_rules(env: ExecutionEnvironment) -> ExecutionResult:
+    from llm_context.project_setup import ProjectSetup
+
+    setup = ProjectSetup.create(env.config.project_layout)
+    count = setup.migrate_profiles_to_rules()
+    log(INFO, f"Migrated {count} profiles to rule files in .llm-context/rules/")
+    return ExecutionResult(None, env)

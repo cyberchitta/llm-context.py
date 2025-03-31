@@ -24,7 +24,6 @@ PROJECT_INFO: str = (
 @dataclass(frozen=True)
 class Config:
     templates: dict[str, str]
-    profiles: dict[str, dict[str, Any]]
     __info__: str = PROJECT_INFO
 
     @staticmethod
@@ -38,17 +37,12 @@ class Config:
                 "prompt": "lc-prompt.j2",
                 "definitions": "lc-definitions.j2",
             },
-            profiles={
-                DEFAULT_GITIGNORES_PROFILE: Profile.create_code_gitignores().to_dict(),
-                DEFAULT_CODE_PROFILE: Profile.create_code_dict(),
-            },
         )
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "__info__": self.__info__,
             "templates": self.templates,
-            "profiles": self.profiles,
         }
 
 
@@ -167,3 +161,30 @@ class ProjectSetup:
         template_content = resources.read_text(lc_resources, template_name)
         dest_path.write_text(template_content)
         log(INFO, f"Updated template {template_name} to {dest_path}")
+
+    def migrate_profiles_to_rules(self):
+        user_config = Yaml.load(self.project_layout.config_path)
+        profiles = user_config.get("profiles", {})
+        rules_dir = self.project_layout.rules_path
+        rules_dir.mkdir(parents=True, exist_ok=True)
+        from llm_context.rule_parser import RuleLoader
+
+        rule_loader = RuleLoader.create(self.project_layout)
+        migrated_count = 0
+        for profile_name, profile_config in profiles.items():
+            prompt_content = ""
+            prompt_file = profile_config.get("prompt", "")
+            if prompt_file:
+                prompt_path = self.project_layout.project_config_path / prompt_file
+                if prompt_path.exists():
+                    try:
+                        prompt_content = prompt_path.read_text()
+                    except Exception:
+                        pass
+            frontmatter = dict(profile_config)
+            frontmatter["name"] = profile_name
+            if "prompt" in frontmatter:
+                del frontmatter["prompt"]
+            rule_loader.save_rule(profile_name, frontmatter, prompt_content)
+            migrated_count += 1
+        return migrated_count
