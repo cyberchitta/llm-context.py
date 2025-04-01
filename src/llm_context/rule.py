@@ -9,75 +9,10 @@ from llm_context.utils import ProjectLayout, Yaml, safe_read_file
 
 CURRENT_CONFIG_VERSION = version.parse("3.0")
 
-MEDIA_EXTENSIONS: list[str] = [
-    ".jpg",
-    ".jpeg",
-    ".png",
-    ".gif",
-    ".bmp",
-    ".svg",
-    ".mp4",
-    ".mkv",
-    ".avi",
-    ".mov",
-    ".wmv",
-    ".mp3",
-    ".wav",
-    ".flac",
-    ".ttf",
-    ".otf",
-    ".woff",
-    ".woff2",
-    ".eot",
-    ".ico",
-    ".pdf",
-    ".zip",
-    ".rar",
-    ".7z",
-    ".tar",
-    ".exe",
-    ".dll",
-    ".so",
-    ".dylib",
-    ".map",
-]
-
-GITIGNORE: list[str] = [
-    ".git",
-    ".gitignore",
-    ".llm-context/",
-    "*.tmp",
-    "*.lock",
-    "package-lock.json",
-    "yarn.lock",
-    "pnpm-lock.yaml",
-    "go.sum",
-    "elm-stuff",
-    "LICENSE",
-    "CHANGELOG.md",
-    "README.md",
-    ".env",
-    ".dockerignore",
-    "Dockerfile",
-    "docker-compose.yml",
-    "*.log",
-    "*.svg",
-    "*.png",
-    "*.jpg",
-    "*.jpeg",
-    "*.gif",
-    "*.ico",
-    "*.woff",
-    "*.woff2",
-    "*.eot",
-    "*.ttf",
-    "*.map",
-]
 IGNORE_NOTHING = [".git"]
 INCLUDE_ALL = ["**/*"]
 
 
-DEFAULT_GITIGNORES_RULE = "lc-gitignores"
 DEFAULT_CODE_RULE = "lc-code"
 
 
@@ -89,31 +24,6 @@ class Rule:
     only_includes: dict[str, list[str]]
     files: list[str]
     rules: list[str]
-
-    @staticmethod
-    def create_code_gitignores(name: str) -> "Rule":
-        media = [f"*.{ext.lstrip('.')}" for ext in MEDIA_EXTENSIONS]
-        return Rule.create(
-            name,
-            "Base ignore patterns for code files, customize this for project-specific ignores.",
-            {
-                "full_files": GITIGNORE,
-                "outline_files": GITIGNORE,
-                "diagram_files": IGNORE_NOTHING + media,
-            },
-            {"full_files": INCLUDE_ALL, "outline_files": INCLUDE_ALL, "diagram_files": INCLUDE_ALL},
-            [],
-            [],
-        )
-
-    @staticmethod
-    def create_code_dict(name: str) -> dict[str, Any]:
-        return {
-            "name": name,
-            "description": f"Default rule for software projects, using {DEFAULT_GITIGNORES_RULE} base rule.",
-            "base": DEFAULT_GITIGNORES_RULE,
-            "prompt": "lc-prompt.md",
-        }
 
     @staticmethod
     def from_config(config: dict[str, Any]) -> "Rule":
