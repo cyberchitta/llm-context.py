@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] - 2025-04-01
+
+### Bug Fixes
+- Remove unintended gitignores
+
+### Documentation
+- Improve context template instructions to prevent unnecessary file requests
+
+### Refactor
+- Remove hardcoded pattern lists and unused methods
+
 ## [0.3.0] - 2025-03-31
 
 ### Features
