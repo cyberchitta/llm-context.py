@@ -138,4 +138,5 @@ class ProjectSetup:
         system_rules = ["lc-code.md", "lc-gitignores.md"]
         for rule in system_rules:
             rule_path = self.project_layout.get_rule_path(rule)
-            self._copy_rule(rule, rule_path)
+            if not rule_path.exists() or self.constants.needs_update:
+                self._copy_rule(rule, rule_path)
