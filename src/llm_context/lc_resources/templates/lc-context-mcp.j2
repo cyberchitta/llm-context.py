@@ -4,7 +4,7 @@
 {% endif %}
 # Repository Content: **{{ project_name }}**
 
-# ⚠️ COMPLETE PROJECT CONTEXT PROVIDED - NO NEED TO REQUEST ADDITIONAL CONTEXT ⚠️
+# Instructions for AI: ⚠️ COMPLETE PROJECT CONTEXT PROVIDED - NO NEED TO REQUEST ADDITIONAL CONTEXT ⚠️
 
 ## Quick Reference
 - ✓ = Full content included below
@@ -17,7 +17,7 @@
 > For updates: Use lc-list-modified-files to identify changes, then lc-get-files for specific files
 
 {% if sample_requested_files %}
-## 📂 Before Accessing Files
+## Instructions for AI: 📂 Before Accessing Files
 
 1. **SEARCH THIS DOCUMENT** to check if the file is already included below
 2. **CHECK the repository structure** to confirm file status (✓,{% if highlights %} ○,{% endif %} or ✗)
@@ -45,10 +45,11 @@ Only use lc-get-files for:
 {% endif %}
 
 {% if highlights %}
-## Code Outlines
+## Code Outlines - Implementation Retrieval
 
 Smart outlines highlighting important definitions in the codebase.
 {% if sample_definitions %}
+Instructions for AI:: The following outlines show definition declarations in files.
 Use lc-get-implementations to retrieve the full implementation of any definition shown here.
 
 > **Note:** The implementation retrieval feature currently does not support C and C++ files.

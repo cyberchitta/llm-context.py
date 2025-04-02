@@ -4,7 +4,7 @@
 {% endif %}
 # Detailed Repository Content: **{{ project_name }}**
 
-# ⚠️ COMPLETE PROJECT CONTEXT PROVIDED - NO NEED TO REQUEST ADDITIONAL CONTEXT ⚠️
+# Instructions for AI: ⚠️ COMPLETE PROJECT CONTEXT PROVIDED - NO NEED TO REQUEST ADDITIONAL CONTEXT ⚠️
 
 ## Quick Reference
 - ✓ = Full content included below
@@ -20,7 +20,7 @@
 This context presents a comprehensive view of the _/{{ project_name }}_ repository.
 
 {% if sample_requested_files %}
-## 📂 Before Requesting Any Files
+## Instructions for AI: 📂 Before Requesting Any Files
 
 1. **SEARCH THIS DOCUMENT** to check if the file is already included
 2. **CHECK the repository structure** below to confirm file status (✓,{% if highlights %} ○,{% endif %} or ✗)
@@ -72,10 +72,11 @@ Check if lc-get-files tool is available in your environment before proceeding to
 {% endif %}
 
 {% if highlights %}
-## Code Outlines
+## Code Outlines - Implementation Retrieval
 
 Smart outlines highlighting important definitions in the codebase.
 {% if sample_definitions %}
+Instructions for AI:: The following outlines show definition declarations in files. To retrieve full implementations of any function, class, or method shown here:
 
 > **Note:** Implementation retrieval doesn't support C/C++ files.
 
@@ -98,6 +99,8 @@ Smart outlines highlighting important definitions in the codebase.
    {% endfor %}
    ```
    Then ask the human to run `lc-clip-implementations`
+
+NOTE: Prefer requesting specific implementations rather than entire files when possible.
 {% endif %}
 
 {% include 'lc-highlights.j2' %}
