@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.2] - 2025-04-03
+
+### Bug Fixes
+- Installation issue on linux where old versions are being installed
+- Prevent overwriting rule files after state update
+
+### Features
+- Improve AI instructions in context templates
+
+### Refactor
+- Streamline lc-code rule content
+
 ## [0.3.1] - 2025-04-01
 
 ### Bug Fixes
