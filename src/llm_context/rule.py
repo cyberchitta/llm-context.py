@@ -7,7 +7,7 @@ from packaging import version
 from llm_context.rule_parser import RuleLoader, RuleParser
 from llm_context.utils import ProjectLayout, Yaml, safe_read_file
 
-CURRENT_CONFIG_VERSION = version.parse("3.0")
+CURRENT_CONFIG_VERSION = version.parse("3.1")
 
 IGNORE_NOTHING = [".git"]
 INCLUDE_ALL = ["**/*"]
