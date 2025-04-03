@@ -30,7 +30,7 @@ For an in-depth exploration of the reasoning behind LLM Context and its approach
 Install LLM Context using [uv](https://github.com/astral-sh/uv):
 
 ```bash
-uv tool install llm-context
+uv tool install "llm-context>=0.3.0"
 ```
 
 To upgrade to the latest version:
