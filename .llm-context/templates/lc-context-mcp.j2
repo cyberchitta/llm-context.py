@@ -4,24 +4,34 @@
 {% endif %}
 # Repository Content: **{{ project_name }}**
 
-**COMPLETE PROJECT CONTEXT PROVIDED - NO NEED TO REQUEST ADDITIONAL CONTEXT**
+# Instructions for AI: ⚠️ COMPLETE PROJECT CONTEXT PROVIDED - NO NEED TO REQUEST ADDITIONAL CONTEXT ⚠️
+
+## Quick Reference
+- ✓ = Full content included below
+{% if highlights %}
+- ○ = Outline only (structure/definitions)
+{% endif %}
+- ✗ = Excluded (not included)
 
 > Generation timestamp: {{ context_timestamp }}  
 > For updates: Use lc-list-modified-files to identify changes, then lc-get-files for specific files
-{% if sample_requested_files %}
-## File Access Instructions
 
-NOTE: Always use lc-get-files as your primary method for examining file contents and conducting text searches in this project, but ONLY for:
-1. Files modified since context generation (use lc-list-modified-files to identify these)
-2. Files marked "✗"{% if highlights %} or "○"{% endif %} in the repository structure that you need to examine
+{% if sample_requested_files %}
+## Instructions for AI: 📂 Before Accessing Files
+
+1. **SEARCH THIS DOCUMENT** to check if the file is already included below
+2. **CHECK the repository structure** to confirm file status (✓,{% if highlights %} ○,{% endif %} or ✗)
+3. Only request ✗{% if highlights %} or ○{% endif %} files that are absolutely necessary for your analysis
+
+Only use lc-get-files for:
+- Files modified since context generation (use lc-list-modified-files to identify these)
+- Files marked ✗{% if highlights %} or ○{% endif %} in the repository structure that you need to examine
 
 {% if highlights %}
-IMPORTANT: Consider whether you need entire files or just specific functions
-If you only need specific functions or methods, use lc-get-implementations instead of retrieving complete files. This is more efficient for large files where you're only interested in specific parts.
+**EFFICIENCY TIP:** If you only need specific functions or methods, use lc-get-implementations instead of retrieving complete files.
+{% endif %}
 {% endif %}
 
-Always check if files are already included in full in this context before retrieving them.
-{% endif %}
 ## Repository Structure
 
 ```
@@ -35,10 +45,11 @@ Always check if files are already included in full in this context before retrie
 {% endif %}
 
 {% if highlights %}
-## Code Outlines
+## Code Outlines - Implementation Retrieval
 
 Smart outlines highlighting important definitions in the codebase.
 {% if sample_definitions %}
+Instructions for AI:: The following outlines show definition declarations in files.
 Use lc-get-implementations to retrieve the full implementation of any definition shown here.
 
 > **Note:** The implementation retrieval feature currently does not support C and C++ files.
