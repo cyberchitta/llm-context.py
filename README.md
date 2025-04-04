@@ -10,7 +10,7 @@ LLM Context is a tool that helps developers quickly inject relevant content from
 
 ## Breaking Changes in v0.3.0
 
-We've switched to a Markdown-based rules system replacing the previous TOML/YAML-based profiles. This is a breaking change that affects configuration. See the [User Guide](docs/user-guide.md) for details on the new rule format and how to use it.
+We've switched to a Markdown (+ YAML front matter)-based rules system replacing the previous TOML/YAML-based profiles. This is a breaking change that affects configuration. See the [User Guide](docs/user-guide.md) for details on the new rule format and how to use it.
 
 ## Why LLM Context?
 
