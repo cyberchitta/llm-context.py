@@ -16,6 +16,8 @@ We've switched to a Markdown (+ YAML front matter)-based rules system replacing 
 
 For an in-depth exploration of the reasoning behind LLM Context and its approach to AI-assisted development, check out our article: [LLM Context: Harnessing Vanilla AI Chats for Development](https://www.cyberchitta.cc/articles/llm-ctx-why.html)
 
+To see LLM Context in action with real-world examples and workflows, read: [Full Context Magic - When AI Finally Understands Your Entire Project](https://www.cyberchitta.cc/articles/full-context-magic.html)
+
 ## Current Usage Patterns
 
 - **Direct LLM Integration**: Native integration with Claude Desktop via MCP protocol
