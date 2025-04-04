@@ -68,6 +68,10 @@ Once configured, you can start working with your project in two simple ways:
 2. Or directly specify: "I would like to work with my project /path/to/your/project"
    Claude will automatically load the project context.
 
+#### Preferred Workflow: Combining Project UI with MCP
+
+For optimal results, combine initial context through Claude's Project Knowledge UI with dynamic code access via MCP. This provides both comprehensive understanding and access to latest changes. See [Full Context Magic](https://www.cyberchitta.cc/articles/full-context-magic.html) for details and examples.
+
 ### CLI Quick Start and Typical Workflow
 
 1. Navigate to your project's root directory
