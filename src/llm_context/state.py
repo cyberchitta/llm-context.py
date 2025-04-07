@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
+from logging import ERROR, WARNING
 from pathlib import Path
 
 from llm_context.rule import DEFAULT_CODE_RULE
-from llm_context.utils import Yaml
+from llm_context.utils import ProjectLayout, Yaml, log
 
 
 @dataclass(frozen=True)
@@ -60,6 +61,22 @@ class AllSelections:
 @dataclass(frozen=True)
 class StateStore:
     storage_path: Path
+
+    @staticmethod
+    def delete_if_stale_rule(project_layout: ProjectLayout):
+        state_path = project_layout.state_store_path
+        if not state_path.exists():
+            return
+        try:
+            store = StateStore(state_path)
+            selections, current_profile = store.load()
+            rule_path = project_layout.get_rule_path(f"{current_profile}.md")
+            if not rule_path.exists():
+                log(WARNING, f"Rule '{current_profile}' not found. Deleting state file: {state_path}")
+                state_path.unlink(missing_ok=True)
+        except Exception as e:
+            log(ERROR, f"Error checking rule staleness in '{state_path}': {e}")
+            log(WARNING, f"If you're experiencing persistent rule-related errors, you may need to manually delete the state file: {state_path}")
 
     def load(self) -> tuple[AllSelections, str]:
         try:

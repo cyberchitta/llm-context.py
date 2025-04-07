@@ -7,6 +7,7 @@ from typing import Any
 from llm_context import lc_resources
 from llm_context.lc_resources import rules, templates
 from llm_context.rule import ProjectLayout, ToolConstants
+from llm_context.state import StateStore
 from llm_context.utils import Yaml, log
 
 PROJECT_INFO: str = (
@@ -50,6 +51,7 @@ class ProjectSetup:
     def create(project_layout: ProjectLayout) -> "ProjectSetup":
         project_layout.templates_path.mkdir(parents=True, exist_ok=True)
         project_layout.rules_path.mkdir(parents=True, exist_ok=True)
+        StateStore.delete_if_stale_rule(project_layout)
         start_state = (
             ToolConstants.create_null()
             if not project_layout.state_path.exists()
