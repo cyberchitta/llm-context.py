@@ -4,6 +4,7 @@ description: Base ignore patterns for code files, customize this for project-spe
 gitignores:
   diagram_files:
   - .git
+  - '*.webp'
   - '*.jpg'
   - '*.jpeg'
   - '*.png'
@@ -55,6 +56,7 @@ gitignores:
   - '*.log'
   - '*.svg'
   - '*.png'
+  - '*.webp'
   - '*.jpg'
   - '*.jpeg'
   - '*.gif'
@@ -85,6 +87,7 @@ gitignores:
   - '*.log'
   - '*.svg'
   - '*.png'
+  - '*.webp'
   - '*.jpg'
   - '*.jpeg'
   - '*.gif'
