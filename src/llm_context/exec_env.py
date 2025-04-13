@@ -119,7 +119,8 @@ class ExecutionEnvironment:
         empty_selection = FileSelection.create(rule_name, [], [])
         selector = ContextSelector.create(config)
         file_selection = selector.select_full_files(empty_selection)
-        new_state = self.state.with_selection(file_selection).with_rule(rule_name)
+        outline_selection = selector.select_outline_files(file_selection)
+        new_state = self.state.with_selection(outline_selection).with_rule(rule_name)
         return ExecutionEnvironment(config, self.runtime, new_state, self.constants, self.tagger)
 
     @property
