@@ -5,10 +5,10 @@ from pathlib import Path
 from llm_context.file_selector import FileSelector
 from llm_context.utils import _format_size, format_age
 
-STATUSES = ["R✓", "✓", "○", "✗"]
+STATUSES = ["✅", "✓", "○", "✗"]
 
 STATUS_DESCRIPTIONS = {
-    "R✓": "Rule-included (full content)",
+    "✅": "Key files (explicitly selected full content)",
     "✓": "Full content",
     "○": "Outline only",
     "✗": "Excluded",
@@ -24,7 +24,7 @@ class FlatDiagram:
 
     def _get_status(self, path: str) -> str:
         if self.rule_files and path in self.rule_files:
-            return "R✓"
+            return "✅"
         if self.full_files and path in self.full_files:
             return "✓"
         if self.outline_files and path in self.outline_files:
