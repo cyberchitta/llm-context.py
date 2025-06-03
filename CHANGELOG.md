@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.3] - 2025-06-03
+
+### Bug Fixes
+- Ensure UTF-8 encoding on Windows to prevent charmap codec errors
+- Enhance final reminder to discourage unnecessary file requests
+- Delete state store when referencing stale rule
+
+### Documentation
+- Add preferred workflow to README
+- Add new "Full Context Magic" article to README
+- Be precise about new format
+
+### Features
+- Emphasize checking context before requesting files
+- Improve key file visibility in context diagrams
+- Skip automatic outline selection when changing rules
+- Add webp to ignores
+- Improve clarity of context usage instructions
+
 ## [0.3.2] - 2025-04-03
 
 ### Bug Fixes
