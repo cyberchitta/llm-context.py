@@ -1,3 +1,5 @@
+import os
+import sys
 import traceback
 from dataclasses import dataclass
 from functools import wraps
@@ -18,9 +20,15 @@ class ExecutionResult:
     env: ExecutionEnvironment
 
 
+def ensure_utf8_io():
+    if sys.platform.startswith("win"):
+        os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+
+
 def with_env(func: Callable[..., ExecutionResult]) -> Callable[..., ExecutionResult]:
     @wraps(func)
     def wrapper(*args, **kwargs) -> ExecutionResult:
+        ensure_utf8_io()
         env = ExecutionEnvironment.create(Path.cwd())
         with env.activate():
             return func(*args, env=env, **kwargs)
