@@ -4,6 +4,7 @@ description: Base ignore patterns for code files, customize this for project-spe
 gitignores:
   diagram_files:
   - .git
+  - '*.webp'
   - '*.jpg'
   - '*.jpeg'
   - '*.png'
@@ -35,10 +36,6 @@ gitignores:
   - '*.dylib'
   - '*.map'
   full_files:
-  - tests/
-  - '*.md'
-  - '*.scm'
-  - '*.yaml'
   - .git
   - .gitignore
   - .llm-context/
@@ -59,6 +56,7 @@ gitignores:
   - '*.log'
   - '*.svg'
   - '*.png'
+  - '*.webp'
   - '*.jpg'
   - '*.jpeg'
   - '*.gif'
@@ -69,10 +67,6 @@ gitignores:
   - '*.ttf'
   - '*.map'
   outline_files:
-  - tests/
-  - '*.md'
-  - '*.scm'
-  - '*.yaml'
   - .git
   - .gitignore
   - .llm-context/
@@ -93,6 +87,7 @@ gitignores:
   - '*.log'
   - '*.svg'
   - '*.png'
+  - '*.webp'
   - '*.jpg'
   - '*.jpeg'
   - '*.gif'
