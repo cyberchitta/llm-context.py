@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.4] - 2025-06-04
+
+### Bug Fixes
+- Resolve Windows 'charmap' codec error with UTF-8 encoding
+- Revert prior commit
+
 ## [0.3.3] - 2025-06-03
 
 ### Bug Fixes
