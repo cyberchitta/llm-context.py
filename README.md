@@ -8,10 +8,6 @@ LLM Context is a tool that helps developers quickly inject relevant content from
 
 > **Note**: This project was developed in collaboration with several Claude Sonnets - 3.5, 3.6 and 3.7 (and more recently Grok-3 as well), using LLM Context itself to share code during development. All code in the repository is human-curated (by me 😇, @restlessronin).
 
-## Breaking Changes in v0.3.0
-
-We've switched to a Markdown (+ YAML front matter)-based rules system replacing the previous TOML/YAML-based profiles. This is a breaking change that affects configuration. See the [User Guide](docs/user-guide.md) for details on the new rule format and how to use it.
-
 ## Why LLM Context?
 
 For an in-depth exploration of the reasoning behind LLM Context and its approach to AI-assisted development, check out our article: [LLM Context: Harnessing Vanilla AI Chats for Development](https://www.cyberchitta.cc/articles/llm-ctx-why.html)
