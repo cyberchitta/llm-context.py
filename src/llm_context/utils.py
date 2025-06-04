@@ -1,3 +1,4 @@
+import sys
 from dataclasses import dataclass
 from datetime import datetime as dt
 from logging import CRITICAL, DEBUG, ERROR, INFO, WARNING, getLogger
@@ -5,6 +6,19 @@ from pathlib import Path
 from typing import Any, Optional, Union, cast
 
 import yaml
+
+if sys.platform.startswith("win"):
+    _original_write_text = Path.write_text
+    _original_read_text = Path.read_text
+
+    def _write_text_utf8(self, data, encoding="utf-8", **kwargs):
+        return _original_write_text(self, data, encoding=encoding, **kwargs)
+
+    def _read_text_utf8(self, encoding="utf-8", **kwargs):
+        return _original_read_text(self, encoding=encoding, **kwargs)
+
+    Path.write_text = _write_text_utf8
+    Path.read_text = _read_text_utf8
 
 
 class _NoAliasDumper(yaml.SafeDumper):
@@ -16,12 +30,14 @@ class _NoAliasDumper(yaml.SafeDumper):
 class Yaml:
     @staticmethod
     def load(file_path: Path) -> dict[str, Any]:
-        with open(file_path, "r") as f:
+        encoding = "utf-8" if sys.platform.startswith("win") else None
+        with open(file_path, "r", encoding=encoding) as f:
             return cast(dict[str, Any], yaml.safe_load(f))
 
     @staticmethod
     def save(file_path: Path, data: dict[str, Any]):
-        with open(file_path, "w") as f:
+        encoding = "utf-8" if sys.platform.startswith("win") else None
+        with open(file_path, "w", encoding=encoding) as f:
             yaml.dump(data, f, Dumper=_NoAliasDumper, default_flow_style=False)
 
 
