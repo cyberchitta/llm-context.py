@@ -36,6 +36,10 @@ gitignores:
   - '*.dylib'
   - '*.map'
   full_files:
+  - tests/
+  - '*.md'
+  - '*.scm'
+  - '*.yaml'
   - .git
   - .gitignore
   - .llm-context/
@@ -67,6 +71,10 @@ gitignores:
   - '*.ttf'
   - '*.map'
   outline_files:
+  - tests/
+  - '*.md'
+  - '*.scm'
+  - '*.yaml'
   - .git
   - .gitignore
   - .llm-context/
