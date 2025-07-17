@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, cast
 
 from pydantic import BaseModel, Field
 
@@ -19,7 +19,7 @@ class FilesRequest(BaseModel):
     root_path: Path = Field(
         ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
     )
-    paths: List[str] = Field(
+    paths: list[str] = Field(
         ...,
         description="File paths relative to root_path, starting with a forward slash and including the root directory name. For example, if root_path is '/home/user/projects/myproject', then a valid path would be '/myproject/src/main.py'",
     )
@@ -50,12 +50,12 @@ class ImplementationsRequest(BaseModel):
     root_path: Path = Field(
         ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
     )
-    queries: List[tuple[str, str]] = Field(
-        ..., description="List of (file_path, definition_name) tuples to fetch implementations for"
+    queries: list[tuple[str, str]] = Field(
+        ..., description="list of (file_path, definition_name) tuples to fetch implementations for"
     )
 
 
-TOOL_METADATA = {
+TOOL_METADATA: dict[str, dict[str, Any]] = {
     "lc-project-context": {
         "model": ContextRequest,
         "description": (
@@ -113,7 +113,7 @@ TOOL_METADATA = {
 }
 
 
-def pydantic_to_json_schema(model: type[BaseModel]) -> Dict[str, Any]:
+def pydantic_to_json_schema(model: type[BaseModel]) -> dict[str, Any]:
     schema = model.model_json_schema()
     if "$defs" in schema:
         del schema["$defs"]
@@ -128,7 +128,7 @@ def pydantic_to_json_schema(model: type[BaseModel]) -> Dict[str, Any]:
     return schema
 
 
-def get_tool_definitions() -> List[Dict[str, Any]]:
+def get_tool_definitions() -> list[dict[str, Any]]:
     tools = []
     for tool_name, metadata in TOOL_METADATA.items():
         model = metadata["model"]
@@ -140,7 +140,7 @@ def get_tool_definitions() -> List[Dict[str, Any]]:
     return tools
 
 
-def get_tool_definition(name: str) -> Dict[str, Any]:
+def get_tool_definition(name: str) -> dict[str, Any]:
     tools = get_tool_definitions()
     for tool in tools:
         if tool["name"] == name:
@@ -151,10 +151,10 @@ def get_tool_definition(name: str) -> Dict[str, Any]:
 def get_request_model(tool_name: str) -> type[BaseModel]:
     if tool_name not in TOOL_METADATA:
         raise ValueError(f"Tool '{tool_name}' not found")
-    return TOOL_METADATA[tool_name]["model"]
+    return cast(type[BaseModel], TOOL_METADATA[tool_name]["model"])
 
 
-def get_mcp_tools() -> List[Dict[str, Any]]:
+def get_mcp_tools() -> list[dict[str, Any]]:
     tools = get_tool_definitions()
     return [
         {"name": tool["name"], "description": tool["description"], "inputSchema": tool["schema"]}
@@ -162,7 +162,7 @@ def get_mcp_tools() -> List[Dict[str, Any]]:
     ]
 
 
-def get_dxt_capabilities() -> Dict[str, Any]:
+def get_dxt_capabilities() -> dict[str, Any]:
     tools = get_tool_definitions()
     return {
         "tools": [
