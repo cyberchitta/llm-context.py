@@ -32,6 +32,7 @@ class Config:
                 "highlights": "lc-highlights.j2",
                 "prompt": "lc-prompt.j2",
                 "definitions": "lc-definitions.j2",
+                "end-prompt": "lc-end-prompt.j2",
             },
         )
 
