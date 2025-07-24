@@ -9,8 +9,8 @@ from jinja2 import Environment, FileSystemLoader  # type: ignore
 
 from llm_context.context_spec import ContextSpec
 from llm_context.file_selector import FileSelector
-from llm_context.full_overview import get_full_overview
 from llm_context.highlighter.language_mapping import to_language
+from llm_context.overviews import get_full_overview
 from llm_context.rule import IGNORE_NOTHING, INCLUDE_ALL
 from llm_context.state import FileSelection
 from llm_context.utils import PathConverter, ProjectLayout, log, safe_read_file
@@ -217,7 +217,7 @@ class ContextGenerator:
                 self.full_abs,
                 self.outline_abs,
                 self.converter.to_absolute(rule_file_paths),
-                descriptor.get_ignore_patterns("diagram"),
+                descriptor.get_ignore_patterns("overview"),
             ),
             "files": files + [file for file in rule_files if file["path"] not in file_paths],
             "highlights": outlines,
