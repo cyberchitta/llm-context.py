@@ -1,4 +1,11 @@
 {% include 'lc-prompt.j2' %}
+{%- if rules %}
+
+{% for item in rules -%}
+## {{ item.path }}
+{{ item.content }}
+{% endfor %}
+{%- endif -%}
 {% if project_notes %}
 {{ project_notes }}
 {% endif %}

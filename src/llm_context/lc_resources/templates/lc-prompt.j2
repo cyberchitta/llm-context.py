@@ -1,12 +1,5 @@
 {%- if prompt -%}
 {{ prompt }}
-{%- if rules %}
-
-{% for item in rules -%}
-## {{ item.path }}
-{{ item.content }}
-{% endfor %}
-{%- endif -%}
 {%- if user_notes %}
 
 {{ user_notes }}
