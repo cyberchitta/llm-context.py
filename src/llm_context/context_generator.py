@@ -9,7 +9,7 @@ from jinja2 import Environment, FileSystemLoader  # type: ignore
 
 from llm_context.context_spec import ContextSpec
 from llm_context.file_selector import FileSelector
-from llm_context.flat_diagram import get_flat_diagram
+from llm_context.full_overview import get_full_overview
 from llm_context.highlighter.language_mapping import to_language
 from llm_context.rule import IGNORE_NOTHING, INCLUDE_ALL
 from llm_context.state import FileSelection
@@ -115,14 +115,14 @@ class ContextCollector:
         else:
             return []
 
-    def folder_structure_diagram(
+    def overview(
         self,
         full_abs: list[str],
         outline_abs: list[str],
         rule_abs: list[str],
         diagram_ignores: list[str],
     ) -> str:
-        return get_flat_diagram(self.root_path, full_abs, outline_abs, rule_abs, diagram_ignores)
+        return get_full_overview(self.root_path, full_abs, outline_abs, rule_abs, diagram_ignores)
 
 
 @dataclass(frozen=True)
@@ -210,7 +210,7 @@ class ContextGenerator:
             "project_name": self.project_root.name,
             "context_timestamp": datetime.now().timestamp(),
             "abs_root_path": str(self.project_root),
-            "folder_structure_diagram": self.collector.folder_structure_diagram(
+            "overview": self.collector.overview(
                 self.full_abs,
                 self.outline_abs,
                 self.converter.to_absolute(rule_file_paths),

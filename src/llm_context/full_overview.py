@@ -16,7 +16,7 @@ STATUS_DESCRIPTIONS = {
 
 
 @dataclass(frozen=True)
-class FlatDiagram:
+class FullOverview:
     root_dir: str
     full_files: set[str]
     outline_files: set[str]
@@ -59,7 +59,7 @@ class FlatDiagram:
         return header + "\n".join(rows)
 
 
-def get_flat_diagram(
+def get_full_overview(
     project_root: Path,
     full_files: list[str],
     outline_files: list[str],
@@ -68,5 +68,5 @@ def get_flat_diagram(
 ) -> str:
     diagram_ignorer = FileSelector.create_ignorer(project_root, diagram_ignores)
     abs_paths = diagram_ignorer.get_files()
-    diagram = FlatDiagram(str(project_root), set(full_files), set(outline_files), set(rule_files))
+    diagram = FullOverview(str(project_root), set(full_files), set(outline_files), set(rule_files))
     return diagram.generate(abs_paths)
