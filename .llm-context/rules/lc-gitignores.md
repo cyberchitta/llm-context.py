@@ -60,6 +60,10 @@ gitignores:
     - "*.dylib"
     - "*.map"
   full_files:
+    - "*.md"
+    - /tests
+    - tag-qry/
+    - lc_resources/
     - .git
     - .gitignore
     - .llm-context/
