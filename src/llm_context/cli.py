@@ -87,7 +87,7 @@ def select_outline_files(env: ExecutionEnvironment) -> ExecutionResult:
 @create_clipboard_cmd
 def files_from_scratch(env: ExecutionEnvironment) -> ExecutionResult:
     rule_feedback(env)
-    settings = ContextSettings.create(False, False)
+    settings = ContextSettings.create(False, False, False)
     return ExecutionResult(
         ContextGenerator.create(env.config, env.state.file_selection, settings).files([]), env
     )
@@ -95,7 +95,7 @@ def files_from_scratch(env: ExecutionEnvironment) -> ExecutionResult:
 
 @create_clipboard_cmd
 def files_from_clip(in_files: list[str] = [], *, env: ExecutionEnvironment):
-    settings = ContextSettings.create(False, False)
+    settings = ContextSettings.create(False, False, False)
     return ExecutionResult(
         ContextGenerator.create(env.config, env.state.file_selection, settings).files(
             pyperclip.paste().strip().split("\n")
@@ -107,7 +107,7 @@ def files_from_clip(in_files: list[str] = [], *, env: ExecutionEnvironment):
 @create_clipboard_cmd
 def prompt(env: ExecutionEnvironment) -> ExecutionResult:
     rule_feedback(env)
-    settings = ContextSettings.create(False, False)
+    settings = ContextSettings.create(False, False, False)
     content = ContextGenerator.create(env.config, env.state.file_selection, settings).prompt()
     nxt_env = env.with_state(env.state.with_selection(env.state.file_selection.with_now()))
     nxt_env.state.store()
@@ -137,7 +137,7 @@ def context(env: ExecutionEnvironment) -> ExecutionResult:
 @create_clipboard_cmd
 def outlines(env: ExecutionEnvironment) -> ExecutionResult:
     rule_feedback(env)
-    settings = ContextSettings.create(False, False)
+    settings = ContextSettings.create(False, False, False)
     selector = ContextSelector.create(env.config)
     file_sel_out = selector.select_outline_only(env.state.file_selection)
     content = ContextGenerator.create(env.config, file_sel_out, settings, env.tagger).outlines()
@@ -155,7 +155,7 @@ def changed_files(env: ExecutionEnvironment) -> ExecutionResult:
 
 @create_clipboard_cmd
 def implementations_from_clip(env: ExecutionEnvironment) -> ExecutionResult:
-    settings = ContextSettings.create(False, False)
+    settings = ContextSettings.create(False, False, False)
     clip = pyperclip.paste().strip()
     requests = [(w[0], w[1]) for line in clip.splitlines() if len(w := line.split(":", 1)) == 2]
     content = ContextGenerator.create(

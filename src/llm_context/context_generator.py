@@ -12,6 +12,7 @@ from llm_context.file_selector import FileSelector
 from llm_context.highlighter.language_mapping import to_language
 from llm_context.overviews import get_full_overview
 from llm_context.rule import IGNORE_NOTHING, INCLUDE_ALL
+from llm_context.rule_parser import RuleLoader
 from llm_context.state import FileSelection
 from llm_context.utils import PathConverter, ProjectLayout, log, safe_read_file
 
@@ -37,6 +38,7 @@ class ContextCollector:
     root_path: Path
     converter: PathConverter
     project_layout: ProjectLayout
+    rule_loader: RuleLoader
 
     @staticmethod
     def get_outliner():
@@ -53,8 +55,10 @@ class ContextCollector:
 
     @staticmethod
     def create(root_path: Path) -> "ContextCollector":
+        project_layout = ProjectLayout(root_path)
+        rule_loader = RuleLoader.create(project_layout)
         return ContextCollector(
-            root_path, PathConverter.create(root_path), ProjectLayout(root_path)
+            root_path, PathConverter.create(root_path), project_layout, rule_loader
         )
 
     def sample_file_abs(self, full_abs: list[str]) -> list[str]:
@@ -65,9 +69,18 @@ class ContextCollector:
     def rule_files(self, files: list[str]) -> list[dict[str, str]]:
         return self.files([f"/{self.root_path.name}/{path}" for path in files])
 
-    def rules(self, rules: list[str]) -> list[dict[str, str]]:
-        formatted_paths = {f"/{self.root_path.name}/.llm-context/rules/{rule}" for rule in rules}
-        return self.files(list(formatted_paths))
+    def rules(self, rule_names: list[str]) -> list[dict[str, str]]:
+        results = []
+        for rule_name in rule_names:
+            try:
+                rule_parser = self.rule_loader.load_rule(rule_name)
+                results.append({
+                    "path": f"/{self.root_path.name}/.llm-context/rules/{rule_name}.md",
+                    "content": rule_parser.content
+                })
+            except Exception as e:
+                log(ERROR, f"Failed to load rule {rule_name}: {e}")
+        return results
 
     def files(self, rel_paths: list[str]) -> list[dict[str, str]]:
         abs_paths = self.converter.to_absolute(rel_paths)
@@ -162,9 +175,22 @@ class ContextGenerator:
         collector = ContextCollector.create(project_root)
         converter = PathConverter.create(project_root)
         sel_files = file_selection
-        full_rel = sel_files.full_files
+        filter_full_rel = sel_files.full_files
+        filter_outline_rel = [f for f in sel_files.outline_files if to_language(f)]
+        rule = spec.rule
+        explicit_full_rel = rule.files
+        explicit_outline_rel = rule.outlines
+        full_rel = list(dict.fromkeys(filter_full_rel + explicit_full_rel))
+        outline_rel = list(
+            dict.fromkeys(
+                [
+                    f
+                    for f in (filter_outline_rel + explicit_outline_rel)
+                    if f not in set(full_rel) and to_language(f)
+                ]
+            )
+        )
         full_abs = converter.to_absolute(full_rel)
-        outline_rel = [f for f in sel_files.outline_files if to_language(f)]
         outline_abs = converter.to_absolute(outline_rel)
         return ContextGenerator(
             collector,
@@ -197,7 +223,7 @@ class ContextGenerator:
         context = {
             "prompt": descriptor.get_prompt(layout),
             "user_notes": descriptor.get_user_notes(layout),
-            "rules": self.collector.rules(descriptor.rules),
+            "prompts": self.collector.rules(descriptor.rules),
         }
         return self._render(template_id, context)
 
@@ -205,10 +231,12 @@ class ContextGenerator:
         descriptor = self.spec.rule
         layout = self.spec.project_layout
         outlines, sample_definitions = self.collector.outlines(self.tagger, self.outline_rel)
+        implementations = self.collector.definitions(self.tagger, descriptor.implementations)
         rule_files = self.collector.rule_files(descriptor.files)
         files = self.collector.files(self.full_rel)
         file_paths = {item["path"] for item in files}
         rule_file_paths = [item["path"] for item in rule_files]
+        settings = self.settings
         context = {
             "project_name": self.project_root.name,
             "context_timestamp": datetime.now().timestamp(),
@@ -222,15 +250,14 @@ class ContextGenerator:
             "files": files + [file for file in rule_files if file["path"] not in file_paths],
             "highlights": outlines,
             "sample_definitions": sample_definitions,
+            "implementations": implementations,
             "sample_requested_files": self.converter.to_relative(
                 self.collector.sample_file_abs(self.full_abs)
             ),
-            "prompt": descriptor.get_prompt(layout) if self.settings.with_prompt else None,
+            "prompt": descriptor.get_prompt(layout) if settings.with_prompt else None,
             "project_notes": descriptor.get_project_notes(layout),
-            "tools_available": self.settings.tools_available,
-            "user_notes": descriptor.get_user_notes(layout)
-            if self.settings.with_user_notes
-            else None,
+            "tools_available": settings.tools_available,
+            "user_notes": descriptor.get_user_notes(layout) if settings.with_user_notes else None,
             "rules": self.collector.rules(descriptor.rules),
             "rule_included_paths": set(rule_file_paths),
         }

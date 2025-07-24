@@ -17,12 +17,34 @@ DEFAULT_CODE_RULE = "lc-code"
 
 
 @dataclass(frozen=True)
+class RuleComposition:
+    filters: list[str]
+    files: list[str]
+    outlines: list[str]
+    implementations: list[str]
+    rules: list[str]
+
+    @staticmethod
+    def from_config(config: dict[str, Any]) -> "RuleComposition":
+        return RuleComposition(
+            config.get("filters", []),
+            config.get("files", []),
+            config.get("outlines", []),
+            config.get("implementations", []),
+            config.get("rules", []),
+        )
+
+
+@dataclass(frozen=True)
 class Rule:
     name: str
     description: str
+    compose: RuleComposition
     gitignores: dict[str, list[str]]
     only_includes: dict[str, list[str]]
     files: list[str]
+    outlines: list[str]
+    implementations: list[tuple[str, str]]  # (file_path, definition_name)
     rules: list[str]
 
     @staticmethod
@@ -30,15 +52,38 @@ class Rule:
         return Rule.create(
             config.get("name", ""),
             config.get("description", ""),
+            RuleComposition.from_config(config.get("compose", {})),
             config.get("gitignores", {}),
             config.get("only-include", {}),
             config.get("files", []),
+            config.get("outlines", []),
+            [tuple(impl) for impl in config.get("implementations", [])],
             config.get("rules", []),
         )
 
     @staticmethod
-    def create(name, description, gitignores, only_include, files, rules) -> "Rule":
-        return Rule(name, description, gitignores, only_include, files, rules)
+    def create(
+        name,
+        description,
+        compose,
+        gitignores,
+        only_include,
+        files,
+        outlines,
+        implementations,
+        rules,
+    ) -> "Rule":
+        return Rule(
+            name,
+            description,
+            compose,
+            gitignores,
+            only_include,
+            files,
+            outlines,
+            implementations,
+            rules,
+        )
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
         return self.gitignores.get(f"{context_type}_files", IGNORE_NOTHING)
@@ -64,9 +109,28 @@ class Rule:
         return {
             "name": self.name,
             "description": self.description,
+            "compose": {
+                "filters": self.compose.filters,
+                "files": self.compose.files,
+                "outlines": self.compose.outlines,
+                "implementations": self.compose.implementations,
+                "rules": self.compose.rules,
+            }
+            if any(
+                [
+                    self.compose.filters,
+                    self.compose.files,
+                    self.compose.outlines,
+                    self.compose.implementations,
+                    self.compose.rules,
+                ]
+            )
+            else {},
             **({"gitignores": self.gitignores} if self.gitignores else {}),
             **({"only-include": self.only_includes} if self.only_includes else {}),
             **({"files": self.files} if self.files else {}),
+            **({"outlines": self.outlines} if self.outlines else {}),
+            **({"implementations": self.implementations} if self.implementations else {}),
             **({"rules": self.rules} if self.rules else {}),
         }
 
@@ -122,34 +186,67 @@ class RuleResolver:
         return RuleResolver(system_state, rule_loader)
 
     def has_rule(self, rule_name: str) -> bool:
-        return self.rule_loader.load_rule(rule_name) is not None
+        try:
+            self.rule_loader.load_rule(rule_name)
+            return True
+        except:
+            return False
 
     def get_rule(self, rule_name: str) -> Rule:
         rule = self.rule_loader.load_rule(rule_name)
-        if "base" in rule.frontmatter:
-            base_name = rule.frontmatter["base"]
-            base_profile = self.get_rule(base_name)
-            base_dict = base_profile.to_dict()
-            rule_dict = {k: v for k, v in rule.frontmatter.items() if k != "base"}
-            merged = self._merge_rule_dicts(base_dict, rule_dict)
-            merged_rule = RuleParser(merged, rule.content, rule.path)
-            return Rule.from_config(merged_rule.to_rule_config())
-        return Rule.from_config(rule.to_rule_config())
+        composed_rule = self._compose_rule(rule)
+        return Rule.from_config(composed_rule.to_rule_config())
 
-    def _merge_rule_dicts(
-        self, base_dict: dict[str, Any], override_dict: dict[str, Any]
-    ) -> dict[str, Any]:
-        merged = base_dict.copy()
-        for key, value in override_dict.items():
-            if key == "base":
-                continue
-            if isinstance(value, dict) and key in merged and isinstance(merged[key], dict):
-                merged[key] = {**merged[key], **value}
-            elif isinstance(value, list) and key in merged and isinstance(merged[key], list):
-                if key in ["files", "rules"]:
-                    merged[key] = merged[key] + value
+    def _compose_rule(self, rule: RuleParser) -> RuleParser:
+        if not rule.frontmatter.get("compose"):
+            return rule
+        composed_config = {
+            "name": rule.name,
+            "description": rule.frontmatter.get("description", ""),
+            "gitignores": {},
+            "only-include": {},
+            "files": [],
+            "outlines": [],
+            "implementations": [],
+            "rules": [],
+        }
+        compose_config = rule.frontmatter.get("compose", {})
+        for filter_rule_name in compose_config.get("filters", []):
+            filter_rule = self.rule_loader.load_rule(filter_rule_name)
+            filter_config = filter_rule.frontmatter
+            self._merge_gitignores(composed_config, filter_config)
+            self._merge_only_includes(composed_config, filter_config)
+        for rule_name in compose_config.get("rules", []):
+            self.rule_loader.load_rule(rule_name)
+            composed_config["rules"].append(rule_name)
+        for field in [
+            "gitignores",
+            "only-include",
+            "files",
+            "outlines",
+            "implementations",
+            "rules",
+        ]:
+            if field in rule.frontmatter:
+                if field in ["gitignores", "only-include"]:
+                    if field == "gitignores":
+                        self._merge_gitignores(composed_config, rule.frontmatter)
+                    else:
+                        self._merge_only_includes(composed_config, rule.frontmatter)
                 else:
-                    merged[key] = value
-            else:
-                merged[key] = value
-        return merged
+                    composed_config[field].extend(rule.frontmatter[field])
+        return RuleParser(composed_config, rule.content, rule.path)
+
+    def _merge_gitignores(self, target: dict, source: dict):
+        source_gitignores = source.get("gitignores", {})
+        for key, patterns in source_gitignores.items():
+            if key not in target["gitignores"]:
+                target["gitignores"][key] = []
+            target["gitignores"][key].extend(patterns)
+
+    def _merge_only_includes(self, target: dict, source: dict):
+        source_includes = source.get("only-include", {})
+        for key, patterns in source_includes.items():
+            if key not in target["only-include"]:
+                target["only-include"][key] = []
+            target["only-include"][key].extend(patterns)

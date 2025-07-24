@@ -9,14 +9,13 @@
 {% endif %}
 - ✗ = Excluded (not included)
 
-> Generation timestamp: {{ context_timestamp }}  
-> For updates: Use lc-list-modified-files{% if not tools_available %} first{% endif %} to identify changes, then lc-get-files for specific files
-{% if not tools_available %}> If tools are unavailable, ask the user to run the "lc-changed" CLI command{% endif %}
+> Generation timestamp: {{ context_timestamp }}
+> {% if tools_available %}For updates: Use lc-list-modified-files to identify changes, then lc-get-files for specific files{% else %}If tools are unavailable, ask the user to run the "lc-changed" CLI command{% endif %}
 
-{% if not tools_available %}This context presents a comprehensive view of the _/{{ project_name }}_ repository.{% endif %}
+This context presents a comprehensive view of the _/{{ project_name }}_ repository.
 
 {% if sample_requested_files %}
-## Instructions for AI: 📂 Before {% if tools_available %}Accessing{% else %}Requesting Any{% endif %} Files
+## Instructions for AI: 📂 Before {% if tools_available %}Accessing{% else %}Requesting{% endif %} Any Files
 
 1. **SEARCH THIS DOCUMENT** to check if the file is already included below
 2. **CHECK the repository structure** below to confirm file status (✓,{% if highlights %} ○,{% endif %} or ✗)
@@ -30,17 +29,12 @@ Only use lc-get-files for:
 {% if highlights %}
 **EFFICIENCY TIP:** If you only need specific functions or methods, use lc-get-implementations instead of retrieving complete files.
 {% endif %}
-
-{% else %}
-{% if highlights %}
-**EFFICIENCY TIP:** If you only need specific functions or methods, use lc-get-implementations instead of requesting complete files.
 {% endif %}
 
 ### How to Request Missing Files
 
-Check if lc-get-files tool is available in your environment before proceeding to option 2.
-
-1. Using the lc-get-files tool (if available in your environment):
+{% if tools_available %}
+Using the lc-get-files tool (if available in your environment):
    **ROOT PATH must be: {{ abs_root_path }}**
    Example request:
   ```json
@@ -49,8 +43,8 @@ Check if lc-get-files tool is available in your environment before proceeding to
     "paths": [{% for file in sample_requested_files %}"{{ file }}"{% if not loop.last %},{% endif %}{% endfor %}]
   }
   ```
-
-2. Only if lc-get-files is not available, follow these steps (do NOT use the above root_path):
+{% else %}
+Only if lc-get-files is not available, follow these steps (do NOT use the above root_path):
     1. Immediately halt your current response.
     2. Start a new response with a markdown code block (```) on a new line.
     3. List the root-relative paths of the missing files you need, one per line.
@@ -59,9 +53,9 @@ Check if lc-get-files tool is available in your environment before proceeding to
 
     Example file request:
     ```
-    {%- for file in sample_requested_files %}
+{%- for file in sample_requested_files %}
     {{ file }}
-    {%- endfor %}
+{%- endfor %}
     ```
     The human will then provide the requested file contents in the next message.
 {% endif %}
