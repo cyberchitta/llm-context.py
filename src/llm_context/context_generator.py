@@ -129,10 +129,13 @@ class ContextCollector:
 class ContextSettings:
     with_prompt: bool = False
     with_user_notes: bool = False
+    tools_available: bool = True
 
     @staticmethod
-    def create(with_prompt: bool, with_user_notes: bool) -> "ContextSettings":
-        return ContextSettings(with_prompt, with_user_notes)
+    def create(
+        with_prompt: bool, with_user_notes: bool, tools_available: bool
+    ) -> "ContextSettings":
+        return ContextSettings(with_prompt, with_user_notes, tools_available)
 
 
 @dataclass(frozen=True)
@@ -224,6 +227,7 @@ class ContextGenerator:
             ),
             "prompt": descriptor.get_prompt(layout) if self.settings.with_prompt else None,
             "project_notes": descriptor.get_project_notes(layout),
+            "tools_available": self.settings.tools_available,
             "user_notes": descriptor.get_user_notes(layout)
             if self.settings.with_user_notes
             else None,

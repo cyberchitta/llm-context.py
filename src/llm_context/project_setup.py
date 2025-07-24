@@ -27,12 +27,12 @@ class Config:
         return Config(
             templates={
                 "context": "lc-context.j2",
-                "context-mcp": "lc-context-mcp.j2",
-                "files": "lc-files.j2",
-                "highlights": "lc-highlights.j2",
-                "prompt": "lc-prompt.j2",
                 "definitions": "lc-definitions.j2",
                 "end-prompt": "lc-end-prompt.j2",
+                "files": "lc-files.j2",
+                "highlights": "lc-highlights.j2",
+                "overview": "lc-overview.j2",
+                "prompt": "lc-prompt.j2",
             },
         )
 
