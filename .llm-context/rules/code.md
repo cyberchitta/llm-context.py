@@ -1,8 +1,9 @@
 ---
-base: lc-gitignores
-description: Default rule for software projects, using lc-gitignores base rule.
 name: code
-rules: [python.md]
+compose:
+  filters: [lc-filters, filters]
+description: Default rule for software projects, using lc-gitignores base rule.
+rules: [python]
 ---
 
 ## Persona

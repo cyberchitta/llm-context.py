@@ -3,7 +3,7 @@ description:
   Base ignore patterns for code files, customize this for project-specific
   ignores.
 gitignores:
-  diagram_files:
+  overview_files:
     - .git
     - "*.webp"
     - "*.jpg"
@@ -60,10 +60,6 @@ gitignores:
     - "*.dylib"
     - "*.map"
   full_files:
-    - "*.md"
-    - /tests
-    - tag-qry/
-    - lc_resources/
     - .git
     - .gitignore
     - .llm-context/
@@ -188,7 +184,7 @@ gitignores:
     - "*.so"
     - "*.dylib"
 only-include:
-  diagram_files:
+  overview_files:
     - "**/*"
   full_files:
     - "**/*"

@@ -1,6 +1,8 @@
 ---
-base: lc-gitignores
-description: Default rule for software projects, using lc-gitignores base rule
+name: lc-code
+description: "Standard code analysis rule"
+compose:
+  filters: [lc-filters]
 ---
 
 ## Persona

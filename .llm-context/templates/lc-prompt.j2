@@ -2,9 +2,8 @@
 {{ prompt }}
 {%- if rules %}
 
-## Additional Rules
-
 {% for item in rules -%}
+## {{ item.path }}
 {{ item.content }}
 {% endfor %}
 {%- endif -%}
