@@ -1,5 +1,7 @@
 ---
 description: additional repo specific filters.
+compose:
+  filters: [lc-filters]
 gitignores:
   full_files:
     - "*.md"
