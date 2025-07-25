@@ -179,6 +179,7 @@ class ToolConstants:
 class RuleResolver:
     system_state: ToolConstants
     rule_loader: RuleLoader
+    _composition_stack: frozenset[str] = frozenset()
 
     @staticmethod
     def create(system_state: ToolConstants, project_layout: ProjectLayout) -> "RuleResolver":
@@ -193,13 +194,20 @@ class RuleResolver:
             return False
 
     def get_rule(self, rule_name: str) -> Rule:
+        if rule_name in self._composition_stack:
+            raise ValueError(
+                f"Circular composition detected: {' -> '.join(self._composition_stack)} -> {rule_name}"
+            )
         rule = self.rule_loader.load_rule(rule_name)
-        composed_rule = self._compose_rule(rule)
-        return Rule.from_config(composed_rule.to_rule_config())
+        composed_config = self._compose_rule_config(rule, rule_name)
+        return Rule.from_config(composed_config)
 
-    def _compose_rule(self, rule: RuleParser) -> RuleParser:
+    def _compose_rule_config(self, rule: RuleParser, rule_name: str) -> dict[str, Any]:
+        new_resolver = RuleResolver(
+            self.system_state, self.rule_loader, self._composition_stack | {rule_name}
+        )
         if not rule.frontmatter.get("compose"):
-            return rule
+            return rule.to_rule_config()
         composed_config = {
             "name": rule.name,
             "description": rule.frontmatter.get("description", ""),
@@ -212,13 +220,13 @@ class RuleResolver:
         }
         compose_config = rule.frontmatter.get("compose", {})
         for filter_rule_name in compose_config.get("filters", []):
-            filter_rule = self.rule_loader.load_rule(filter_rule_name)
-            filter_config = filter_rule.frontmatter
+            composed_filter_rule = new_resolver.get_rule(filter_rule_name)
+            filter_config = composed_filter_rule.to_dict()
             self._merge_gitignores(composed_config, filter_config)
             self._merge_only_includes(composed_config, filter_config)
-        for rule_name in compose_config.get("rules", []):
-            self.rule_loader.load_rule(rule_name)
-            composed_config["rules"].append(rule_name)
+        for composed_rule_name in compose_config.get("rules", []):
+            new_resolver.rule_loader.load_rule(composed_rule_name)
+            composed_config["rules"].append(composed_rule_name)
         for field in [
             "gitignores",
             "only-include",
@@ -228,25 +236,26 @@ class RuleResolver:
             "rules",
         ]:
             if field in rule.frontmatter:
-                if field in ["gitignores", "only-include"]:
-                    if field == "gitignores":
-                        self._merge_gitignores(composed_config, rule.frontmatter)
-                    else:
-                        self._merge_only_includes(composed_config, rule.frontmatter)
+                if field == "gitignores":
+                    self._merge_gitignores(composed_config, rule.frontmatter)
+                elif field == "only-include":
+                    self._merge_only_includes(composed_config, rule.frontmatter)
                 else:
                     composed_config[field].extend(rule.frontmatter[field])
-        return RuleParser(composed_config, rule.content, rule.path)
+        return composed_config
 
     def _merge_gitignores(self, target: dict, source: dict):
         source_gitignores = source.get("gitignores", {})
         for key, patterns in source_gitignores.items():
             if key not in target["gitignores"]:
                 target["gitignores"][key] = []
-            target["gitignores"][key].extend(patterns)
+            existing = set(target["gitignores"][key])
+            target["gitignores"][key].extend([p for p in patterns if p not in existing])
 
     def _merge_only_includes(self, target: dict, source: dict):
         source_includes = source.get("only-include", {})
         for key, patterns in source_includes.items():
             if key not in target["only-include"]:
                 target["only-include"][key] = []
-            target["only-include"][key].extend(patterns)
+            existing = set(target["only-include"][key])
+            target["only-include"][key].extend([p for p in patterns if p not in existing])
