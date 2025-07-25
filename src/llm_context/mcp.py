@@ -13,6 +13,7 @@ from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
 from llm_context.mcp_tools import (
     ContextRequest,
+    CreateRuleRequest,
     FilesRequest,
     FocusHelpRequest,
     ImplementationsRequest,
@@ -21,6 +22,7 @@ from llm_context.mcp_tools import (
     get_tool_definitions,
 )
 from llm_context.rule import DEFAULT_CODE_RULE
+from llm_context.rule_parser import RuleLoader
 
 TOOL_DEFINITIONS = get_tool_definitions()
 TOOLS = [
@@ -103,6 +105,23 @@ async def get_focus_help(arguments: dict) -> list[TextContent]:
         return [TextContent(type="text", text=content)]
 
 
+async def create_rule(arguments: dict) -> list[TextContent]:
+    request = CreateRuleRequest(**arguments)
+    env = ExecutionEnvironment.create(Path(request.root_path))
+    with env.activate():
+        frontmatter = {"description": request.description, "compose": {"filters": ["lc-block-all"]}}
+        if request.files:
+            frontmatter["files"] = request.files
+        if request.outlines:
+            frontmatter["outlines"] = request.outlines
+        rule_loader = RuleLoader.create(env.config.project_layout)
+        _rule_path = rule_loader.save_rule(request.rule_name, frontmatter, request.content)
+        is_temp = request.rule_name.startswith("tmp-")
+        rule_type = "temporary" if is_temp else "persistent"
+        response = f"Created {rule_type} rule '{request.rule_name}' with {len(request.files)} full files and {len(request.outlines)} outlined files."
+    return [TextContent(type="text", text=response)]
+
+
 async def serve() -> None:
     server: Server = Server("llm-context", pkg_ver("llm-context"))
 
@@ -118,7 +137,8 @@ async def serve() -> None:
             "lc-list-modified-files": list_modified_files,
             "lc-code-outlines": code_outlines,
             "lc-get-implementations": get_implementations,
-            "lc-rule-create-instructions": get_focus_help,
+            "lc-create-rule-instructions": get_focus_help,
+            "lc-create-rule": create_rule,
         }
         try:
             return await handlers[name](arguments)

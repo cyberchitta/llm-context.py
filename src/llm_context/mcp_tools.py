@@ -61,6 +61,25 @@ class FocusHelpRequest(BaseModel):
     )
 
 
+class CreateRuleRequest(BaseModel):
+    root_path: Path = Field(
+        ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
+    )
+    rule_name: str = Field(
+        ...,
+        description="Name for the new rule. Use 'tmp-' prefix for temporary rules.",
+        pattern="^[a-zA-Z0-9_-]+$",
+    )
+    description: str = Field("", description="Brief description of what this rule focuses on")
+    files: list[str] = Field(
+        default_factory=list, description="Files needed with full content for the task"
+    )
+    outlines: list[str] = Field(
+        default_factory=list, description="Files needed as outlined context for the task"
+    )
+    content: str = Field("", description="Rule instructions/context (markdown)")
+
+
 TOOL_METADATA: dict[str, dict[str, Any]] = {
     "lc-project-context": {
         "model": ContextRequest,
@@ -116,12 +135,22 @@ TOOL_METADATA: dict[str, dict[str, Any]] = {
             "This tool works with all supported languages except C and C++."
         ),
     },
-    "lc-rule-create-instructions": {
+    "lc-create-rule-instructions": {
         "model": FocusHelpRequest,
         "description": (
             "Call this tool when asked to create a focused rule, minimize context, or generate context for a specific task. "
             "Provides step-by-step instructions for creating custom rules that include only the minimum necessary files for a given objective. "
             "Use whenever someone requests focused context, targeted rules, or context reduction for a particular purpose."
+        ),
+    },
+    "lc-create-rule": {
+        "model": CreateRuleRequest,
+        "description": (
+            "Creates a new persistent rule for the llm-context system. Rules define which files to include, "
+            "how to present them, and what ignore patterns to use. Rules are saved to the project's "
+            ".llm-context/rules/ directory. Use 'tmp-' prefix for rule names to create temporary rules "
+            "that can be easily identified and cleaned up later. The rule system supports custom ignore "
+            "patterns, file selection, and flexible presentation options."
         ),
     },
 }
