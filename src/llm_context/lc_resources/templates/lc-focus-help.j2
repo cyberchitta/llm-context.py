@@ -1,40 +1,50 @@
 # Focused Context Creation
 
 ## What This Does
-Creates a custom rule that includes ONLY specific files you choose - some with full content, others with just code structure outlines. All other repository files are ignored, giving you a targeted context with just what you need.
 
-## How to Request It
+Creates a custom rule that includes ONLY specific files for a feature/component - some with full content, others with just code structure outlines. All other repository files are ignored, giving you a targeted context with just what you need.
+
+## AI Instructions
+
+When a user requests a focused rule for a specific feature/component, you should:
+
+1. **Analyze the codebase** to identify all relevant files for that feature/component
+2. **Automatically determine** which files should be full vs outline based on:
+   - **Full files**: Core implementation files the user will likely modify, templates, configs directly related to the feature
+   - **Outline files**: Supporting/integration files where structure understanding is sufficient
+3. **Generate the complete rule** with an appropriate name derived from the feature/component
+4. **Use the pattern**: `lc-block-all` filter + explicit files/outlines lists
+
+## User Request Format
+
 ```
-Create focused rule:
-- Name: [rule-name]
-- Description: [brief description]  
-- Full files: [files you need to see completely]
-- Outline files: [files you only need structure from]
+Create focused rule for: [feature/component name]
 ```
 
-## Example
-**Request:**
+or
+
 ```
-Create focused rule:
-- Name: api-auth
-- Description: API authentication
-- Full files: /myproject/src/auth.py, /myproject/config/auth.yaml
-- Outline files: /myproject/src/models/user.py
+Let's generate a focused rule for [feature/component name]
 ```
 
-**Generated YAML to save as `.llm-context/rules/api-auth.md`:**
+## AI Response Pattern
+
+**Analysis**: Based on the codebase, for [feature] I need...
+
+**Generated Rule** (save as `.llm-context/rules/[auto-generated-name].md`):
+
 ```yaml
 ---
-name: "api-auth"
-description: "API authentication"
+name: "[auto-generated-name]"
+description: "[auto-generated description]"
 compose:
   filters: ["lc-block-all"]
 files:
-  - "/myproject/src/auth.py"
-  - "/myproject/config/auth.yaml"
+  - "/{{project_name}}/path/to/core/file.py"
 outlines:
-  - "/myproject/src/models/user.py"
+  - "/{{project_name}}/path/to/supporting/file.py"
 ---
-
-Focused context for API authentication.
+[Brief description of the focused context]
 ```
+
+The AI should provide the complete rule ready to save and use.
