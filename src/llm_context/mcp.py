@@ -118,7 +118,7 @@ async def serve() -> None:
             "lc-list-modified-files": list_modified_files,
             "lc-code-outlines": code_outlines,
             "lc-get-implementations": get_implementations,
-            "lc-focus-help": get_focus_help,
+            "lc-rule-create-instructions": get_focus_help,
         }
         try:
             return await handlers[name](arguments)

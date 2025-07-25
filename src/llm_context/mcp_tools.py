@@ -116,7 +116,7 @@ TOOL_METADATA: dict[str, dict[str, Any]] = {
             "This tool works with all supported languages except C and C++."
         ),
     },
-    "lc-focus-help": {
+    "lc-rule-create-instructions": {
         "model": FocusHelpRequest,
         "description": (
             "Call this tool when asked to create a focused rule, minimize context, or generate context for a specific task. "
