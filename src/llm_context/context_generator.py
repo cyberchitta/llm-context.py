@@ -213,7 +213,7 @@ class ContextGenerator:
         rule_loader = RuleLoader.create(project_layout)
         rule_parser = rule_loader.load_rule(rule_name)
         updated_frontmatter = dict(rule_parser.frontmatter)
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        now = datetime.now().strftime("%Y-%m-%d")
         if "created" not in updated_frontmatter:
             updated_frontmatter["created"] = now
         updated_frontmatter["last_used"] = now
