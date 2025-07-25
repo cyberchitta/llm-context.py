@@ -119,8 +119,9 @@ TOOL_METADATA: dict[str, dict[str, Any]] = {
     "lc-focus-help": {
         "model": FocusHelpRequest,
         "description": (
-            "Get instructions for creating focused context descriptors. "
-            "Returns methodology for generating focused rules from file lists."
+            "Call this tool when asked to create a focused rule, minimize context, or generate context for a specific task. "
+            "Provides step-by-step instructions for creating custom rules that include only the minimum necessary files for a given objective. "
+            "Use whenever someone requests focused context, targeted rules, or context reduction for a particular purpose."
         ),
     },
 }
