@@ -29,6 +29,12 @@ class _NoAliasDumper(yaml.SafeDumper):
 @dataclass(frozen=True)
 class Yaml:
     @staticmethod
+    def dump(data: dict[str, Any]) -> str:
+        return yaml.dump(
+            data, Dumper=_NoAliasDumper, default_flow_style=None, sort_keys=False, width=100
+        )
+
+    @staticmethod
     def load(file_path: Path) -> dict[str, Any]:
         encoding = "utf-8" if sys.platform.startswith("win") else None
         with open(file_path, "r", encoding=encoding) as f:
@@ -38,7 +44,7 @@ class Yaml:
     def save(file_path: Path, data: dict[str, Any]):
         encoding = "utf-8" if sys.platform.startswith("win") else None
         with open(file_path, "w", encoding=encoding) as f:
-            yaml.dump(data, f, Dumper=_NoAliasDumper, default_flow_style=False)
+            f.write(Yaml.dump(data))
 
 
 @dataclass(frozen=True)

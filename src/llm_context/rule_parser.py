@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 import yaml
 
-from llm_context.utils import ProjectLayout, log
+from llm_context.utils import ProjectLayout, Yaml, log
 
 
 @dataclass(frozen=True)
@@ -85,10 +85,23 @@ class RuleLoader:
 
     def save_rule(self, name: str, frontmatter: dict[str, Any], content: str) -> Path:
         path = self.rules_dir / f"{name}.md"
-        yaml_str = yaml.dump(frontmatter, default_flow_style=False)
+        yaml_str = Yaml.dump(self._order_frontmatter(frontmatter))
         full_content = f"---\n{yaml_str}---\n\n{content}"
         path.write_text(full_content)
         return path
+
+    def _order_frontmatter(self, frontmatter: dict[str, Any]) -> dict[str, Any]:
+        field_groups = [
+            ["name", "description"],
+            ["created", "last_used"],
+            ["compose", "gitignores", "only-include"],
+            ["files", "outlines", "implementations", "rules"],
+        ]
+        ordered_fields = [
+            field for group in field_groups for field in group if field in frontmatter
+        ]
+        remaining_fields = [field for field in frontmatter if field not in ordered_fields]
+        return {field: frontmatter[field] for field in ordered_fields + remaining_fields}
 
 
 @dataclass(frozen=True)
