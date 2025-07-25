@@ -1,7 +1,7 @@
 # Focused Context Creation
 
 ## What This Does
-Creates a custom rule that includes only specific files you choose - some with full content, others with just code structure outlines. This gives you a targeted context instead of the entire repository.
+Creates a custom rule that includes ONLY specific files you choose - some with full content, others with just code structure outlines. All other repository files are ignored, giving you a targeted context with just what you need.
 
 ## How to Request It
 ```
@@ -28,7 +28,7 @@ Create focused rule:
 name: "api-auth"
 description: "API authentication"
 compose:
-  filters: ["lc-filters"]
+  filters: ["lc-block-all"]
 files:
   - "/myproject/src/auth.py"
   - "/myproject/config/auth.yaml"
@@ -38,5 +38,3 @@ outlines:
 
 Focused context for API authentication.
 ```
-
-**Then:** `lc-set-rule api-auth` → `lc-context`

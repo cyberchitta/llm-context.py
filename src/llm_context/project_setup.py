@@ -139,7 +139,7 @@ class ProjectSetup:
         log(INFO, f"Updated rule {rule_file} to {dest_path}")
 
     def _setup_default_rules(self):
-        system_rules = ["lc-code.md", "lc-filters.md"]
+        system_rules = ["lc-code.md", "lc-filters.md", "lc-block-all.md"]
         for rule in system_rules:
             rule_path = self.project_layout.get_rule_path(rule)
             if not rule_path.exists() or self.constants.needs_update:
