@@ -1,6 +1,7 @@
 ---
 name: lc-code
 description: "Standard code analysis rule"
+overview: full
 compose:
   filters: [lc-filters]
 ---

@@ -53,6 +53,10 @@ NOTE: Prefer requesting specific implementations rather than entire files when p
 {% endif %}
 ## FINAL REMINDER
 
+{% if overview_mode == "focused" -%}
+Instructions for AI: ⚠️ This document contains focused project context. Use the available tools (lc-get-files, lc-list-modified-files, lc-get-implementations) to retrieve additional files as needed for your analysis. Check the repository structure above to see file status before requesting.
+{%- else -%}
 Instructions for AI: ⚠️ DO NOT REQUEST ADDITIONAL CONTEXT OR FILES ALREADY INCLUDED ABOVE. This document contains complete project context. Only request files that have been modified since context generation (using lc-list-modified-files) or specific files marked as excluded (✗) that are necessary for your analysis.
+{%- endif %}
 
 {% include 'lc-end-prompt.j2' %}
