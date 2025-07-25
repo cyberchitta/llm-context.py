@@ -67,7 +67,7 @@ class ContextCollector:
         return random.sample(incomplete_files, min(2, len(incomplete_files)))
 
     def rule_files(self, files: list[str]) -> list[dict[str, str]]:
-        return self.files([f"/{self.root_path.name}/{path}" for path in files])
+        return self.files(files)
 
     def rules(self, rule_names: list[str]) -> list[dict[str, str]]:
         results = []
