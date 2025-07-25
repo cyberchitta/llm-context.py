@@ -44,7 +44,7 @@ class Yaml:
     def save(file_path: Path, data: dict[str, Any]):
         encoding = "utf-8" if sys.platform.startswith("win") else None
         with open(file_path, "w", encoding=encoding) as f:
-            f.write(Yaml.dump(data))
+            yaml.dump(data, f, Dumper=_NoAliasDumper, default_flow_style=False)
 
 
 @dataclass(frozen=True)
