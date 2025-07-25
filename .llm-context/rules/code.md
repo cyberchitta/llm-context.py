@@ -1,8 +1,8 @@
 ---
 name: code
 description: Default rule for software projects, using lc-gitignores base rule.
-created: '2025-07-25 12:02:00'
-last_used: '2025-07-25 13:15:27'
+created: '2025-07-25'
+last_used: '2025-07-25'
 compose:
   filters: [filters]
 rules: [python]
