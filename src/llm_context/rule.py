@@ -14,6 +14,7 @@ INCLUDE_ALL = ["**/*"]
 
 
 DEFAULT_CODE_RULE = "lc-code"
+DEFAULT_OVERVIEW_MODE = "full"
 
 
 @dataclass(frozen=True)
@@ -39,6 +40,7 @@ class RuleComposition:
 class Rule:
     name: str
     description: str
+    overview: str
     compose: RuleComposition
     gitignores: dict[str, list[str]]
     only_includes: dict[str, list[str]]
@@ -52,6 +54,7 @@ class Rule:
         return Rule.create(
             config.get("name", ""),
             config.get("description", ""),
+            config.get("overview", DEFAULT_OVERVIEW_MODE),
             RuleComposition.from_config(config.get("compose", {})),
             config.get("gitignores", {}),
             config.get("only-include", {}),
@@ -65,6 +68,7 @@ class Rule:
     def create(
         name,
         description,
+        overview,
         compose,
         gitignores,
         only_include,
@@ -76,6 +80,7 @@ class Rule:
         return Rule(
             name,
             description,
+            overview,
             compose,
             gitignores,
             only_include,
@@ -109,6 +114,7 @@ class Rule:
         return {
             "name": self.name,
             "description": self.description,
+            "overview": self.overview,
             "compose": {
                 "filters": self.compose.filters,
                 "files": self.compose.files,
@@ -211,6 +217,7 @@ class RuleResolver:
         composed_config = {
             "name": rule.name,
             "description": rule.frontmatter.get("description", ""),
+            "overview": rule.frontmatter.get("overview", DEFAULT_OVERVIEW_MODE),
             "gitignores": {},
             "only-include": {},
             "files": [],

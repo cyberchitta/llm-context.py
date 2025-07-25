@@ -10,7 +10,7 @@ from jinja2 import Environment, FileSystemLoader  # type: ignore
 from llm_context.context_spec import ContextSpec
 from llm_context.file_selector import FileSelector
 from llm_context.highlighter.language_mapping import to_language
-from llm_context.overviews import get_full_overview
+from llm_context.overviews import get_focused_overview, get_full_overview
 from llm_context.rule import IGNORE_NOTHING, INCLUDE_ALL
 from llm_context.rule_parser import RuleLoader
 from llm_context.state import FileSelection
@@ -132,12 +132,19 @@ class ContextCollector:
 
     def overview(
         self,
+        overview_mode: str,
         full_abs: list[str],
         outline_abs: list[str],
         rule_abs: list[str],
         diagram_ignores: list[str],
     ) -> str:
-        return get_full_overview(self.root_path, full_abs, outline_abs, rule_abs, diagram_ignores)
+        return (
+            get_full_overview(self.root_path, full_abs, outline_abs, rule_abs, diagram_ignores)
+            if overview_mode == "full"
+            else get_focused_overview(
+                self.root_path, full_abs, outline_abs, rule_abs, diagram_ignores
+            )
+        )
 
 
 @dataclass(frozen=True)
@@ -262,11 +269,13 @@ class ContextGenerator:
             "context_timestamp": datetime.now().timestamp(),
             "abs_root_path": str(self.project_root),
             "overview": self.collector.overview(
+                descriptor.overview,
                 self.full_abs,
                 self.outline_abs,
                 self.converter.to_absolute(rule_file_paths),
                 descriptor.get_ignore_patterns("overview"),
             ),
+            "overview_mode": descriptor.overview,
             "files": files + [file for file in rule_files if file["path"] not in file_paths],
             "highlights": outlines,
             "sample_definitions": sample_definitions,

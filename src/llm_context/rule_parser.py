@@ -92,7 +92,7 @@ class RuleLoader:
 
     def _order_frontmatter(self, frontmatter: dict[str, Any]) -> dict[str, Any]:
         field_groups = [
-            ["name", "description"],
+            ["name", "description", "overview"],
             ["created", "last_used"],
             ["compose", "gitignores", "only-include"],
             ["files", "outlines", "implementations", "rules"],
