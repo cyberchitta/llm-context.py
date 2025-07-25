@@ -14,6 +14,7 @@ from llm_context.file_selector import ContextSelector
 from llm_context.mcp_tools import (
     ContextRequest,
     FilesRequest,
+    FocusHelpRequest,
     ImplementationsRequest,
     ListModifiedFilesRequest,
     OutlinesRequest,
@@ -92,6 +93,16 @@ async def get_implementations(arguments: dict) -> list[TextContent]:
         return [TextContent(type="text", text=context)]
 
 
+async def get_focus_help(arguments: dict) -> list[TextContent]:
+    request = FocusHelpRequest(**arguments)
+    env = ExecutionEnvironment.create(Path(request.root_path))
+    with env.activate():
+        settings = ContextSettings.create(False, False, True)
+        generator = ContextGenerator.create(env.config, env.state.file_selection, settings)
+        content = generator.focus_help()
+        return [TextContent(type="text", text=content)]
+
+
 async def serve() -> None:
     server: Server = Server("llm-context", pkg_ver("llm-context"))
 
@@ -107,6 +118,7 @@ async def serve() -> None:
             "lc-list-modified-files": list_modified_files,
             "lc-code-outlines": code_outlines,
             "lc-get-implementations": get_implementations,
+            "lc-focus-help": get_focus_help,
         }
         try:
             return await handlers[name](arguments)

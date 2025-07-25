@@ -74,10 +74,12 @@ class ContextCollector:
         for rule_name in rule_names:
             try:
                 rule_parser = self.rule_loader.load_rule(rule_name)
-                results.append({
-                    "path": f"/{self.root_path.name}/.llm-context/rules/{rule_name}.md",
-                    "content": rule_parser.content
-                })
+                results.append(
+                    {
+                        "path": f"/{self.root_path.name}/.llm-context/rules/{rule_name}.md",
+                        "content": rule_parser.content,
+                    }
+                )
             except Exception as e:
                 log(ERROR, f"Failed to load rule {rule_name}: {e}")
         return results
@@ -204,6 +206,12 @@ class ContextGenerator:
             settings,
             tagger,
         )
+
+    def focus_help(self) -> str:
+        context = {
+            "project_name": self.project_root.name,
+        }
+        return self._render("focus-help", context)
 
     def files(self, in_files: list[str] = []) -> str:
         rel_paths = in_files if in_files else self.full_rel

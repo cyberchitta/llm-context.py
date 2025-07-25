@@ -1,0 +1,42 @@
+# Focused Context Creation
+
+## What This Does
+Creates a custom rule that includes only specific files you choose - some with full content, others with just code structure outlines. This gives you a targeted context instead of the entire repository.
+
+## How to Request It
+```
+Create focused rule:
+- Name: [rule-name]
+- Description: [brief description]  
+- Full files: [files you need to see completely]
+- Outline files: [files you only need structure from]
+```
+
+## Example
+**Request:**
+```
+Create focused rule:
+- Name: api-auth
+- Description: API authentication
+- Full files: /myproject/src/auth.py, /myproject/config/auth.yaml
+- Outline files: /myproject/src/models/user.py
+```
+
+**Generated YAML to save as `.llm-context/rules/api-auth.md`:**
+```yaml
+---
+name: "api-auth"
+description: "API authentication"
+compose:
+  filters: ["lc-filters"]
+files:
+  - "/myproject/src/auth.py"
+  - "/myproject/config/auth.yaml"
+outlines:
+  - "/myproject/src/models/user.py"
+---
+
+Focused context for API authentication.
+```
+
+**Then:** `lc-set-rule api-auth` → `lc-context`

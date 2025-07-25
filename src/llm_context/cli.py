@@ -105,6 +105,14 @@ def files_from_clip(in_files: list[str] = [], *, env: ExecutionEnvironment):
 
 
 @create_clipboard_cmd
+def focus_help(env: ExecutionEnvironment) -> ExecutionResult:
+    settings = ContextSettings.create(False, False, False)
+    generator = ContextGenerator.create(env.config, env.state.file_selection, settings)
+    content = generator.focus_help()
+    return ExecutionResult(content, env)
+
+
+@create_clipboard_cmd
 def prompt(env: ExecutionEnvironment) -> ExecutionResult:
     rule_feedback(env)
     settings = ContextSettings.create(False, False, False)

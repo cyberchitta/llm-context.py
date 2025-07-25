@@ -55,6 +55,12 @@ class ImplementationsRequest(BaseModel):
     )
 
 
+class FocusHelpRequest(BaseModel):
+    root_path: Path = Field(
+        ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
+    )
+
+
 TOOL_METADATA: dict[str, dict[str, Any]] = {
     "lc-project-context": {
         "model": ContextRequest,
@@ -108,6 +114,13 @@ TOOL_METADATA: dict[str, dict[str, Any]] = {
             "Retrieves complete code implementations of definitions identified in code outlines. "
             "Provide a list of file paths and definition names to get their full implementations. "
             "This tool works with all supported languages except C and C++."
+        ),
+    },
+    "lc-focus-help": {
+        "model": FocusHelpRequest,
+        "description": (
+            "Get instructions for creating focused context descriptors. "
+            "Returns methodology for generating focused rules from file lists."
         ),
     },
 }
