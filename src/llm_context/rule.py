@@ -189,7 +189,7 @@ class RuleResolver:
         try:
             self.rule_loader.load_rule(rule_name)
             return True
-        except:
+        except Exception:
             return False
 
     def get_rule(self, rule_name: str) -> Rule:
