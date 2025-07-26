@@ -45,7 +45,7 @@ cat > .llm-context/rules/tmp-fix-auth-bug.md << 'EOF'
 ---
 description: "Fix authentication validation bug"
 compose:
-  filters: ["lc-block-all"]
+  filters: ["lc-overview-only"]
 files:
   - "/{{ project_name }}/src/auth/validator.py"
   - "/{{ project_name }}/tests/test_validator.py"
