@@ -14,7 +14,7 @@ from llm_context.overviews import get_focused_overview, get_full_overview
 from llm_context.rule import IGNORE_NOTHING, INCLUDE_ALL
 from llm_context.rule_parser import RuleLoader
 from llm_context.state import FileSelection
-from llm_context.utils import PathConverter, ProjectLayout, log, safe_read_file
+from llm_context.utils import PathConverter, ProjectLayout, _format_size, log, safe_read_file
 
 
 @dataclass(frozen=True)
@@ -291,6 +291,65 @@ class ContextGenerator:
             "rule_included_paths": set(rule_file_paths),
         }
         return self._render(template_id, context)
+
+    def context_size(self) -> dict[str, str]:
+        descriptor = self.spec.rule
+        layout = self.spec.project_layout
+        overview_bytes = len(
+            self.collector.overview(
+                descriptor.overview,
+                self.full_abs,
+                self.outline_abs,
+                self.converter.to_absolute(
+                    [item["path"] for item in self.collector.rule_files(descriptor.files)]
+                ),
+                descriptor.get_ignore_patterns("overview"),
+            ).encode("utf-8")
+        )
+        files_content = self.collector.files(self.full_rel) + self.collector.rule_files(
+            descriptor.files
+        )
+        files_bytes = sum(len(item["content"].encode("utf-8")) for item in files_content)
+        outlines_content, _ = self.collector.outlines(self.tagger, self.outline_rel)
+        outlines_bytes = sum(len(item["highlights"].encode("utf-8")) for item in outlines_content)
+        implementations_content = self.collector.definitions(
+            self.tagger, descriptor.implementations
+        )
+        implementations_bytes = sum(
+            len(item["code"].encode("utf-8")) for item in implementations_content if "code" in item
+        )
+        prompt_bytes = 0
+        if descriptor.get_prompt(layout):
+            prompt_bytes = len(descriptor.get_prompt(layout).encode("utf-8"))
+        project_notes_bytes = 0
+        if descriptor.get_project_notes(layout):
+            project_notes_bytes = len(descriptor.get_project_notes(layout).encode("utf-8"))
+        user_notes_bytes = 0
+        if self.settings.with_user_notes and descriptor.get_user_notes(layout):
+            user_notes_bytes = len(descriptor.get_user_notes(layout).encode("utf-8"))
+        rules_content = self.collector.rules(descriptor.rules)
+        rules_bytes = sum(len(item["content"].encode("utf-8")) for item in rules_content)
+        total_bytes = (
+            overview_bytes
+            + files_bytes
+            + outlines_bytes
+            + implementations_bytes
+            + prompt_bytes
+            + project_notes_bytes
+            + user_notes_bytes
+            + rules_bytes
+        )
+        return {
+            "overview": _format_size(overview_bytes),
+            "files": _format_size(files_bytes),
+            "outlines": _format_size(outlines_bytes),
+            "implementations": _format_size(implementations_bytes),
+            "prompt": _format_size(prompt_bytes),
+            "project_notes": _format_size(project_notes_bytes),
+            "user_notes": _format_size(user_notes_bytes),
+            "rules": _format_size(rules_bytes),
+            "total": _format_size(total_bytes),
+        }
 
     def _render(self, template_id: str, context: dict) -> str:
         template_name = self.spec.templates[template_id]

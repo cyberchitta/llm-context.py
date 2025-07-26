@@ -116,9 +116,22 @@ async def create_rule(arguments: dict) -> list[TextContent]:
             frontmatter["outlines"] = request.outlines
         rule_loader = RuleLoader.create(env.config.project_layout)
         _rule_path = rule_loader.save_rule(request.rule_name, frontmatter, request.content)
-        is_temp = request.rule_name.startswith("tmp-")
-        rule_type = "temporary" if is_temp else "persistent"
-        response = f"Created {rule_type} rule '{request.rule_name}' with {len(request.files)} full files and {len(request.outlines)} outlined files."
+        cur_env = env.with_rule(request.rule_name)
+        selector = ContextSelector.create(cur_env.config)
+        file_sel_full = selector.select_full_files(cur_env.state.file_selection)
+        file_sel_out = selector.select_outline_files(file_sel_full)
+        settings = ContextSettings.create(False, False, True)
+        generator = ContextGenerator.create(cur_env.config, file_sel_out, settings, env.tagger)
+        sizes = generator.context_size()
+    is_temp = request.rule_name.startswith("tmp-")
+    rule_type = "temporary" if is_temp else "persistent"
+    response = (
+        f"Created {rule_type} rule '{request.rule_name}' with:\n"
+        f"- {len(request.files)} full files ({sizes['files']})\n"
+        f"- {len(request.outlines)} outlined files ({sizes['outlines']})\n"
+        f"- Overview: {sizes['overview']}\n"
+        f"- Total estimated: {sizes['total']}"
+    )
     return [TextContent(type="text", text=response)]
 
 
