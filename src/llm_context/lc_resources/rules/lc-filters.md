@@ -1,4 +1,5 @@
 ---
+name: lc-filters
 description:
   Base ignore patterns for code files, customize this for project-specific
   ignores.
