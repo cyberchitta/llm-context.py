@@ -31,23 +31,48 @@ Create task-focused rules by deciding what you need to see to complete the task:
 - Is it small enough that full content doesn't add noise? → Full
 - Is it large where outline gives me what I need? → Outline
 
-## Implementation Options
+## Rule System Semantics
 
-### Option A: Using MCP Tools (if available)
+### File Selection
+- `files: [...]` - Include complete file contents
+- `outlines: [...]` - Include code structure/definitions only (for supported languages)
+- `implementations: [[file, definition], ...]` - Extract specific functions/classes
 
-Use the `lc-create-rule` tool:
+### Filtering (gitignore-style patterns)
+- `gitignores: {full_files: [...], outline_files: [...], overview_files: [...]}` - Exclude patterns
+- `only-include: {full_files: [...], outline_files: [...], overview_files: [...]}` - Include patterns
+- Patterns work like `.gitignore` - use `**/*.test.js` for recursive, `src/` for directories
 
-```json
-{
-  "name": "tmp-descriptive-task-name",
-  "description": "Brief description of what this focuses on",
-  "files": ["/project-name/path/to/file1.ext", "/project-name/path/to/file2.ext"],
-  "outlines": ["/project-name/path/to/outline1.ext"],
-  "content": "Optional: Additional context or instructions for this rule."
-}
+### Composition
+- `compose: {filters: [...], rules: [...]}` - Build from other rules
+- `filters` - Merge gitignore/only-include patterns (e.g., `lc-no-files`, `lc-filters`)
+- `rules` - Concatenate content from other rules
+
+### Presentation  
+- `overview: "full"` - Complete directory tree
+- `overview: "focused"` - Grouped by directory, showing all files in folders that contain any included files
+
+### Example Advanced Rule
+```yaml
+---
+description: "API debugging with test exclusions"
+overview: "focused"
+compose:
+  filters: ["lc-filters"]  # Base filtering
+gitignores:
+  full_files: ["**/test/**", "**/*.test.*"]  # Exclude most tests
+only-include:
+  outline_files: ["src/api/**", "src/types/**"]  # Limit outline scope
+files:
+  - "/project/src/api/auth.js"  # Specific files override filters
+implementations:
+  - ["/project/src/utils/helpers.js", "validateToken"]  # Just one function
+---
 ```
 
-### Option B: Manual Creation
+This creates reusable, composable rules that can be precisely tuned for different scenarios.
+
+## Implementation
 
 Generate the complete rule and save it using shell commands:
 
