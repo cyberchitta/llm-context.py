@@ -2,7 +2,7 @@
 name: code
 description: Default rule for software projects, using lc-gitignores base rule.
 created: '2025-07-25'
-last_used: '2025-07-25'
+last_used: '2025-07-26'
 compose:
   filters: [filters]
 rules: [python]
