@@ -16,6 +16,8 @@ PROJECT_INFO: str = (
     "https://pypi.org/project/llm-context/"
 )
 
+SYSTEM_RULES = ["lc-code.md", "lc-filters.md", "lc-no-files.md", "lc-focus.md"]
+
 
 @dataclass(frozen=True)
 class Config:
@@ -139,8 +141,7 @@ class ProjectSetup:
         log(INFO, f"Updated rule {rule_file} to {dest_path}")
 
     def _setup_default_rules(self):
-        system_rules = ["lc-code.md", "lc-filters.md", "lc-no-files.md"]
-        for rule in system_rules:
+        for rule in SYSTEM_RULES:
             rule_path = self.project_layout.get_rule_path(rule)
             if not rule_path.exists() or self.constants.needs_update:
                 self._copy_rule(rule, rule_path)
