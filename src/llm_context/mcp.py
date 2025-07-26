@@ -109,7 +109,7 @@ async def create_rule(arguments: dict) -> list[TextContent]:
     request = CreateRuleRequest(**arguments)
     env = ExecutionEnvironment.create(Path(request.root_path))
     with env.activate():
-        frontmatter = {"description": request.description, "compose": {"filters": ["lc-overview-only"]}}
+        frontmatter = {"description": request.description, "compose": {"filters": ["lc-no-files"]}}
         if request.files:
             frontmatter["files"] = request.files
         if request.outlines:
