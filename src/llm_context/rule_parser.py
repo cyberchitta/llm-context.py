@@ -92,10 +92,10 @@ class RuleLoader:
 
     def _order_frontmatter(self, frontmatter: dict[str, Any]) -> dict[str, Any]:
         field_groups = [
-            ["name", "description", "overview"],
-            ["created", "last_used"],
-            ["compose", "gitignores", "only-include"],
-            ["files", "outlines", "implementations", "rules"],
+            ["name", "description", "instructions", "overview"],
+            ["last_used"],
+            ["compose", "gitignores", "limit-to", "also-include"],
+            ["implementations", "rules"],
         ]
         ordered_fields = [
             field for group in field_groups for field in group if field in frontmatter
