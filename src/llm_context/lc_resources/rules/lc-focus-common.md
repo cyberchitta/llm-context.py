@@ -28,12 +28,14 @@ Create task-focused rules by deciding what you need to see to complete the task:
 
 - `gitignores: {full_files: [...], outline_files: [...], overview_files: [...]}` - Exclude patterns
 - `limit-to: {full_files: [...], outline_files: [...], overview_files: [...]}` - Restrict to patterns
-- Patterns work like `.gitignore` - use `**/*.test.js` for recursive, `src/` for directories
+- **All items are pathspecs** - Use `.gitignore` syntax: `**/*.test.js` for recursive patterns, `src/` for directories, `/path/file.ext` for specific files
 
 ### Composition
 
 - `compose: {filters: [...], rules: [...]}` - Build from other rules
-- `filters` - Merge gitignore/limit-to/also-include patterns (e.g., `lc-filters`)
+- `filters` - Merge gitignore/limit-to/also-include patterns
+  - Use `lc-filters` when you want to add to the default inclusion set
+  - Use `lc-no-files` when you want precise control (only specified files included)
 - `rules` - Concatenate content from other rules
 
 ### Presentation
@@ -45,18 +47,19 @@ Create task-focused rules by deciding what you need to see to complete the task:
 
 ```yaml
 ---
+name: api-debugging
 description: "API debugging with test exclusions"
 overview: "focused"
 compose:
-  filters: ["lc-filters"] # Base filtering
+  filters: ["lc-filters"]
 gitignores:
-  full_files: ["**/test/**", "**/*.test.*"] # Exclude most tests
+  full_files: ["**/test/**", "**/*.test.*"]
 limit-to:
-  outline_files: ["src/api/**", "src/types/**"] # Limit outline scope
+  outline_files: ["src/api/**", "src/types/**"]
 also-include:
-  full_files: ["/project/src/api/auth.js"] # Force include specific files
+  full_files: ["/src/api/auth.js"]
 implementations:
-  - ["/project/src/utils/helpers.js", "validateToken"] # Just one function
+  - ["/src/utils/helpers.js", "validateToken"]
 ---
 ```
 
@@ -64,29 +67,28 @@ This creates reusable, composable rules that can be precisely tuned for differen
 
 ## Implementation
 
-Generate the complete rule and save it using shell commands:
+Generate the complete rule and save it using shell commands.
 
 ```bash
-# Create the rule file
 cat > .llm-context/rules/tmp-task-name.md << 'EOF'
 ---
+name: tmp-task-name
 description: "Brief description of what this focuses on"
 overview: "focused"
 compose:
-  filters: ["lc-filters"]
+  filters: ["lc-no-files"]
 also-include:
   full_files:
-    - "/project-name/path/to/file1.ext"
-    - "/project-name/path/to/file2.ext"
+    - "/path/to/file1.ext"
+    - "/path/to/file2.ext"
   outline_files:
-    - "/project-name/path/to/outline1.ext"
+    - "/path/to/outline1.ext"
 ---
 
 ## Task-Specific Context
 Optional: Additional context or instructions for this rule.
 EOF
 
-# Activate the rule and generate context
 lc-set-rule tmp-task-name
 lc-context
 ```
