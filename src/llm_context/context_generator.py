@@ -62,7 +62,9 @@ class ContextCollector:
         )
 
     def sample_file_abs(self, full_abs: list[str]) -> list[str]:
-        all_abs = set(FileSelector.create(self.root_path, IGNORE_NOTHING, INCLUDE_ALL).get_files())
+        all_abs = set(
+            FileSelector.create(self.root_path, IGNORE_NOTHING, INCLUDE_ALL, []).get_files()
+        )
         incomplete_files = sorted(list(all_abs - set(full_abs)))
         return random.sample(incomplete_files, min(2, len(incomplete_files)))
 
@@ -184,21 +186,8 @@ class ContextGenerator:
         collector = ContextCollector.create(project_root)
         converter = PathConverter.create(project_root)
         sel_files = file_selection
-        filter_full_rel = sel_files.full_files
-        filter_outline_rel = [f for f in sel_files.outline_files if to_language(f)]
-        rule = spec.rule
-        explicit_full_rel = rule.files
-        explicit_outline_rel = rule.outlines
-        full_rel = list(dict.fromkeys(filter_full_rel + explicit_full_rel))
-        outline_rel = list(
-            dict.fromkeys(
-                [
-                    f
-                    for f in (filter_outline_rel + explicit_outline_rel)
-                    if f not in set(full_rel) and to_language(f)
-                ]
-            )
-        )
+        full_rel = sel_files.full_files
+        outline_rel = [f for f in sel_files.outline_files if to_language(f)]
         full_abs = converter.to_absolute(full_rel)
         outline_abs = converter.to_absolute(outline_rel)
         ContextGenerator._update_rule_timestamp(spec.project_layout, file_selection.rule_name)
@@ -259,10 +248,7 @@ class ContextGenerator:
         layout = self.spec.project_layout
         outlines, sample_definitions = self.collector.outlines(self.tagger, self.outline_rel)
         implementations = self.collector.definitions(self.tagger, descriptor.implementations)
-        rule_files = self.collector.rule_files(descriptor.files)
         files = self.collector.files(self.full_rel)
-        file_paths = {item["path"] for item in files}
-        rule_file_paths = [item["path"] for item in rule_files]
         settings = self.settings
         context = {
             "project_name": self.project_root.name,
@@ -272,11 +258,11 @@ class ContextGenerator:
                 descriptor.overview,
                 self.full_abs,
                 self.outline_abs,
-                self.converter.to_absolute(rule_file_paths),
+                [],
                 descriptor.get_ignore_patterns("overview"),
             ),
             "overview_mode": descriptor.overview,
-            "files": files + [file for file in rule_files if file["path"] not in file_paths],
+            "files": files,
             "highlights": outlines,
             "sample_definitions": sample_definitions,
             "implementations": implementations,
@@ -288,7 +274,7 @@ class ContextGenerator:
             "tools_available": settings.tools_available,
             "user_notes": descriptor.get_user_notes(layout) if settings.with_user_notes else None,
             "rules": self.collector.rules(descriptor.rules),
-            "rule_included_paths": set(rule_file_paths),
+            "rule_included_paths": set(),
         }
         return self._render(template_id, context)
 
@@ -300,15 +286,11 @@ class ContextGenerator:
                 descriptor.overview,
                 self.full_abs,
                 self.outline_abs,
-                self.converter.to_absolute(
-                    [item["path"] for item in self.collector.rule_files(descriptor.files)]
-                ),
+                [],
                 descriptor.get_ignore_patterns("overview"),
             ).encode("utf-8")
         )
-        files_content = self.collector.files(self.full_rel) + self.collector.rule_files(
-            descriptor.files
-        )
+        files_content = self.collector.files(self.full_rel)
         files_bytes = sum(len(item["content"].encode("utf-8")) for item in files_content)
         outlines_content, _ = self.collector.outlines(self.tagger, self.outline_rel)
         outlines_bytes = sum(len(item["highlights"].encode("utf-8")) for item in outlines_content)

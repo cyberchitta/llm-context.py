@@ -12,7 +12,6 @@ CURRENT_CONFIG_VERSION = version.parse("3.4")
 IGNORE_NOTHING = [".git"]
 INCLUDE_ALL = ["**/*"]
 
-
 DEFAULT_CODE_RULE = "lc-code"
 DEFAULT_OVERVIEW_MODE = "full"
 
@@ -20,18 +19,12 @@ DEFAULT_OVERVIEW_MODE = "full"
 @dataclass(frozen=True)
 class RuleComposition:
     filters: list[str]
-    files: list[str]
-    outlines: list[str]
-    implementations: list[str]
     rules: list[str]
 
     @staticmethod
     def from_config(config: dict[str, Any]) -> "RuleComposition":
         return RuleComposition(
             config.get("filters", []),
-            config.get("files", []),
-            config.get("outlines", []),
-            config.get("implementations", []),
             config.get("rules", []),
         )
 
@@ -43,9 +36,8 @@ class Rule:
     overview: str
     compose: RuleComposition
     gitignores: dict[str, list[str]]
-    only_includes: dict[str, list[str]]
-    files: list[str]
-    outlines: list[str]
+    limit_to: dict[str, list[str]]
+    also_include: dict[str, list[str]]
     implementations: list[tuple[str, str]]  # (file_path, definition_name)
     rules: list[str]
 
@@ -57,9 +49,8 @@ class Rule:
             config.get("overview", DEFAULT_OVERVIEW_MODE),
             RuleComposition.from_config(config.get("compose", {})),
             config.get("gitignores", {}),
-            config.get("only-include", {}),
-            config.get("files", []),
-            config.get("outlines", []),
+            config.get("limit-to", {}),
+            config.get("also-include", {}),
             [tuple(impl) for impl in config.get("implementations", [])],
             config.get("rules", []),
         )
@@ -71,9 +62,8 @@ class Rule:
         overview,
         compose,
         gitignores,
-        only_include,
-        files,
-        outlines,
+        limit_to,
+        also_include,
         implementations,
         rules,
     ) -> "Rule":
@@ -83,9 +73,8 @@ class Rule:
             overview,
             compose,
             gitignores,
-            only_include,
-            files,
-            outlines,
+            limit_to,
+            also_include,
             implementations,
             rules,
         )
@@ -93,8 +82,11 @@ class Rule:
     def get_ignore_patterns(self, context_type: str) -> list[str]:
         return self.gitignores.get(f"{context_type}_files", IGNORE_NOTHING)
 
-    def get_only_includes(self, context_type: str) -> list[str]:
-        return self.only_includes.get(f"{context_type}_files", INCLUDE_ALL)
+    def get_limit_to_patterns(self, context_type: str) -> list[str]:
+        return self.limit_to.get(f"{context_type}_files", INCLUDE_ALL)
+
+    def get_also_include_patterns(self, context_type: str) -> list[str]:
+        return self.also_include.get(f"{context_type}_files", [])
 
     def get_prompt(self, project_layout: ProjectLayout) -> Optional[str]:
         if not self.name:
@@ -117,25 +109,13 @@ class Rule:
             "overview": self.overview,
             "compose": {
                 "filters": self.compose.filters,
-                "files": self.compose.files,
-                "outlines": self.compose.outlines,
-                "implementations": self.compose.implementations,
                 "rules": self.compose.rules,
             }
-            if any(
-                [
-                    self.compose.filters,
-                    self.compose.files,
-                    self.compose.outlines,
-                    self.compose.implementations,
-                    self.compose.rules,
-                ]
-            )
+            if any([self.compose.filters, self.compose.rules])
             else {},
             **({"gitignores": self.gitignores} if self.gitignores else {}),
-            **({"only-include": self.only_includes} if self.only_includes else {}),
-            **({"files": self.files} if self.files else {}),
-            **({"outlines": self.outlines} if self.outlines else {}),
+            **({"limit-to": self.limit_to} if self.limit_to else {}),
+            **({"also-include": self.also_include} if self.also_include else {}),
             **({"implementations": self.implementations} if self.implementations else {}),
             **({"rules": self.rules} if self.rules else {}),
         }
@@ -219,9 +199,8 @@ class RuleResolver:
             "description": rule.frontmatter.get("description", ""),
             "overview": rule.frontmatter.get("overview", DEFAULT_OVERVIEW_MODE),
             "gitignores": {},
-            "only-include": {},
-            "files": [],
-            "outlines": [],
+            "limit-to": {},
+            "also-include": {},
             "implementations": [],
             "rules": [],
         }
@@ -230,23 +209,19 @@ class RuleResolver:
             composed_filter_rule = new_resolver.get_rule(filter_rule_name)
             filter_config = composed_filter_rule.to_dict()
             self._merge_gitignores(composed_config, filter_config)
-            self._merge_only_includes(composed_config, filter_config)
+            self._merge_limit_to(composed_config, filter_config)
+            self._merge_also_include(composed_config, filter_config)
         for composed_rule_name in compose_config.get("rules", []):
             new_resolver.rule_loader.load_rule(composed_rule_name)
             composed_config["rules"].append(composed_rule_name)
-        for field in [
-            "gitignores",
-            "only-include",
-            "files",
-            "outlines",
-            "implementations",
-            "rules",
-        ]:
+        for field in ["gitignores", "limit-to", "also-include", "implementations", "rules"]:
             if field in rule.frontmatter:
                 if field == "gitignores":
                     self._merge_gitignores(composed_config, rule.frontmatter)
-                elif field == "only-include":
-                    self._merge_only_includes(composed_config, rule.frontmatter)
+                elif field == "limit-to":
+                    self._merge_limit_to(composed_config, rule.frontmatter)
+                elif field == "also-include":
+                    self._merge_also_include(composed_config, rule.frontmatter)
                 else:
                     composed_config[field].extend(rule.frontmatter[field])
         return composed_config
@@ -259,10 +234,18 @@ class RuleResolver:
             existing = set(target["gitignores"][key])
             target["gitignores"][key].extend([p for p in patterns if p not in existing])
 
-    def _merge_only_includes(self, target: dict, source: dict):
-        source_includes = source.get("only-include", {})
+    def _merge_limit_to(self, target: dict, source: dict):
+        source_includes = source.get("limit-to", {})
         for key, patterns in source_includes.items():
-            if key not in target["only-include"]:
-                target["only-include"][key] = []
-            existing = set(target["only-include"][key])
-            target["only-include"][key].extend([p for p in patterns if p not in existing])
+            if key not in target["limit-to"]:
+                target["limit-to"][key] = []
+            existing = set(target["limit-to"][key])
+            target["limit-to"][key].extend([p for p in patterns if p not in existing])
+
+    def _merge_also_include(self, target: dict, source: dict):
+        source_includes = source.get("also-include", {})
+        for key, patterns in source_includes.items():
+            if key not in target["also-include"]:
+                target["also-include"][key] = []
+            existing = set(target["also-include"][key])
+            target["also-include"][key].extend([p for p in patterns if p not in existing])

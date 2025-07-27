@@ -1,8 +1,6 @@
 ---
 name: lc-filters
-description:
-  Base ignore patterns for code files, customize this for project-specific
-  ignores.
+description: Base ignore patterns for code files, customize this for project-specific ignores.
 gitignores:
   overview_files:
     - .git
@@ -184,7 +182,7 @@ gitignores:
     - "*.dll"
     - "*.so"
     - "*.dylib"
-only-include:
+limit-to:
   overview_files:
     - "**/*"
   full_files:

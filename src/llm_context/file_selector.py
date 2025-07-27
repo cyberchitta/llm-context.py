@@ -79,7 +79,8 @@ class FileSelector:
     root_path: str
     ignorer: GitIgnorer
     converter: PathConverter
-    include_filter: IncludeFilter
+    limit_filter: IncludeFilter
+    also_include_filter: IncludeFilter
     since: Optional[float]
 
     @staticmethod
@@ -88,16 +89,23 @@ class FileSelector:
 
     @staticmethod
     def create_ignorer(root_path: Path, pathspecs: list[str]) -> "FileSelector":
-        return FileSelector.create(root_path, pathspecs, INCLUDE_ALL)
+        return FileSelector.create(root_path, pathspecs, INCLUDE_ALL, [])
 
     @staticmethod
     def create(
-        root_path: Path, pathspecs: list[str], includspecs: list[str], since: Optional[float] = None
+        root_path: Path,
+        ignore_pathspecs: list[str],
+        limit_to_pathspecs: list[str],
+        also_include_pathspecs: list[str],
+        since: Optional[float] = None,
     ) -> "FileSelector":
-        ignorer = GitIgnorer.from_git_root(str(root_path), pathspecs)
+        ignorer = GitIgnorer.from_git_root(str(root_path), ignore_pathspecs)
         converter = PathConverter.create(root_path)
-        include_filter = IncludeFilter.create(includspecs)
-        return FileSelector(str(root_path), ignorer, converter, include_filter, since)
+        limit_filter = IncludeFilter.create(limit_to_pathspecs)
+        also_include_filter = IncludeFilter.create(also_include_pathspecs)
+        return FileSelector(
+            str(root_path), ignorer, converter, limit_filter, also_include_filter, since
+        )
 
     def filter_files(self, files: list[str]) -> list[str]:
         return [f for f in files if f in set(self.get_files())]
@@ -117,18 +125,25 @@ class FileSelector:
             for e in entries
             if (e_path := os.path.join(current_dir, e))
             and os.path.isdir(e_path)
-            and not self.ignorer.ignore(f"/{os.path.join(relative_current_dir, e)}/")
+            and self._should_include_file(f"/{os.path.join(relative_current_dir, e)}/")
         ]
         files = [
             e_path
             for e in entries
             if (e_path := os.path.join(current_dir, e))
             and not os.path.isdir(e_path)
-            and not self.ignorer.ignore(f"/{os.path.join(relative_current_dir, e)}")
-            and self.include_filter.include(f"/{os.path.join(relative_current_dir, e)}")
+            and self._should_include_file(f"/{os.path.join(relative_current_dir, e)}")
         ]
         subdir_files = [file for d in dirs for file in self.traverse(d)]
         return files + subdir_files
+
+    def _should_include_file(self, path: str) -> bool:
+        assert path not in ("/", ""), "Root directory cannot be an input for filtering"
+        if self.also_include_filter.include(path):
+            return True
+        if self.ignorer.ignore(path):
+            return False
+        return self.limit_filter.include(path)
 
 
 @dataclass(frozen=True)
@@ -140,13 +155,25 @@ class ContextSelector:
     def create(spec: ContextSpec, since: Optional[float] = None) -> "ContextSelector":
         root_path = spec.project_root_path
         rule = spec.rule
-        full_pathspecs = rule.get_ignore_patterns("full")
-        outline_pathspecs = rule.get_ignore_patterns("outline")
-        full_includes = rule.get_only_includes("full")
-        outline_includes = rule.get_only_includes("outline")
-        full_selector = FileSelector.create(root_path, full_pathspecs, full_includes, since)
+        full_ignore_pathspecs = rule.get_ignore_patterns("full")
+        outline_ignore_pathspecs = rule.get_ignore_patterns("outline")
+        full_limit_to_pathspecs = rule.get_limit_to_patterns("full")
+        outline_limit_to_pathspecs = rule.get_limit_to_patterns("outline")
+        full_also_include_pathspecs = rule.get_also_include_patterns("full")
+        outline_also_include_pathspecs = rule.get_also_include_patterns("outline")
+        full_selector = FileSelector.create(
+            root_path,
+            full_ignore_pathspecs,
+            full_limit_to_pathspecs,
+            full_also_include_pathspecs,
+            since,
+        )
         outline_selector = FileSelector.create(
-            root_path, outline_pathspecs, outline_includes, since
+            root_path,
+            outline_ignore_pathspecs,
+            outline_limit_to_pathspecs,
+            outline_also_include_pathspecs,
+            since,
         )
         return ContextSelector(full_selector, outline_selector)
 

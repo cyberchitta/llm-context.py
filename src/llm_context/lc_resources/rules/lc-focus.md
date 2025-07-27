@@ -4,6 +4,9 @@ description: "Complete project context with comprehensive focus creation instruc
 overview: full
 compose:
   filters: ["lc-filters"]
+also-include:
+  full_files:
+    - "/.llm-context/rules/**"
 ---
 
 # Project Focus Creation Guide
@@ -34,18 +37,17 @@ Create task-focused rules by deciding what you need to see to complete the task:
 ## Rule System Semantics
 
 ### File Selection
-- `files: [...]` - Include complete file contents
-- `outlines: [...]` - Include code structure/definitions only (for supported languages)
+- `also-include: {full_files: [...], outline_files: [...]}` - Include complete or outlined content
 - `implementations: [[file, definition], ...]` - Extract specific functions/classes
 
 ### Filtering (gitignore-style patterns)
 - `gitignores: {full_files: [...], outline_files: [...], overview_files: [...]}` - Exclude patterns
-- `only-include: {full_files: [...], outline_files: [...], overview_files: [...]}` - Include patterns
+- `limit-to: {full_files: [...], outline_files: [...], overview_files: [...]}` - Restrict to patterns
 - Patterns work like `.gitignore` - use `**/*.test.js` for recursive, `src/` for directories
 
 ### Composition
 - `compose: {filters: [...], rules: [...]}` - Build from other rules
-- `filters` - Merge gitignore/only-include patterns (e.g., `lc-no-files`, `lc-filters`)
+- `filters` - Merge gitignore/limit-to/also-include patterns (e.g., `lc-filters`)
 - `rules` - Concatenate content from other rules
 
 ### Presentation  
@@ -61,10 +63,10 @@ compose:
   filters: ["lc-filters"]  # Base filtering
 gitignores:
   full_files: ["**/test/**", "**/*.test.*"]  # Exclude most tests
-only-include:
+limit-to:
   outline_files: ["src/api/**", "src/types/**"]  # Limit outline scope
-files:
-  - "/project/src/api/auth.js"  # Specific files override filters
+also-include:
+  full_files: ["/project/src/api/auth.js"]  # Force include specific files
 implementations:
   - ["/project/src/utils/helpers.js", "validateToken"]  # Just one function
 ---
@@ -83,12 +85,13 @@ cat > .llm-context/rules/tmp-task-name.md << 'EOF'
 description: "Brief description of what this focuses on"
 overview: "focused"
 compose:
-  filters: ["lc-no-files"]
-files:
-  - "/project-name/path/to/file1.ext"
-  - "/project-name/path/to/file2.ext"
-outlines:
-  - "/project-name/path/to/outline1.ext"
+  filters: ["lc-filters"]
+also-include:
+  full_files:
+    - "/project-name/path/to/file1.ext"
+    - "/project-name/path/to/file2.ext"
+  outline_files:
+    - "/project-name/path/to/outline1.ext"
 ---
 
 ## Task-Specific Context
