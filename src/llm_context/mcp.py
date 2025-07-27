@@ -13,7 +13,6 @@ from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
 from llm_context.mcp_tools import (
     ContextRequest,
-    CreateRuleRequest,
     FilesRequest,
     FocusHelpRequest,
     ImplementationsRequest,
