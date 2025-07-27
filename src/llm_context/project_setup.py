@@ -16,7 +16,14 @@ PROJECT_INFO: str = (
     "https://pypi.org/project/llm-context/"
 )
 
-SYSTEM_RULES = ["lc-code.md", "lc-filters.md", "lc-no-files.md", "lc-focus.md"]
+SYSTEM_RULES = [
+    "lc-code.md",
+    "lc-filters.md",
+    "lc-no-full-files.md",
+    "lc-no-outline-files.md",
+    "lc-no-files.md",
+    "lc-focus.md",
+]
 
 
 @dataclass(frozen=True)
