@@ -105,36 +105,6 @@ async def get_focus_help(arguments: dict) -> list[TextContent]:
         return [TextContent(type="text", text=content)]
 
 
-async def create_rule(arguments: dict) -> list[TextContent]:
-    request = CreateRuleRequest(**arguments)
-    env = ExecutionEnvironment.create(Path(request.root_path))
-    with env.activate():
-        frontmatter = {"description": request.description, "compose": {"filters": ["lc-no-files"]}}
-        if request.files:
-            frontmatter["files"] = request.files
-        if request.outlines:
-            frontmatter["outlines"] = request.outlines
-        rule_loader = RuleLoader.create(env.config.project_layout)
-        _rule_path = rule_loader.save_rule(request.rule_name, frontmatter, request.content)
-        cur_env = env.with_rule(request.rule_name)
-        selector = ContextSelector.create(cur_env.config)
-        file_sel_full = selector.select_full_files(cur_env.state.file_selection)
-        file_sel_out = selector.select_outline_files(file_sel_full)
-        settings = ContextSettings.create(False, False, True)
-        generator = ContextGenerator.create(cur_env.config, file_sel_out, settings, env.tagger)
-        sizes = generator.context_size()
-    is_temp = request.rule_name.startswith("tmp-")
-    rule_type = "temporary" if is_temp else "persistent"
-    response = (
-        f"Created {rule_type} rule '{request.rule_name}' with:\n"
-        f"- {len(request.files)} full files ({sizes['files']})\n"
-        f"- {len(request.outlines)} outlined files ({sizes['outlines']})\n"
-        f"- Overview: {sizes['overview']}\n"
-        f"- Total estimated: {sizes['total']}"
-    )
-    return [TextContent(type="text", text=response)]
-
-
 async def serve() -> None:
     server: Server = Server("llm-context", pkg_ver("llm-context"))
 

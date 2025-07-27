@@ -12,7 +12,7 @@ from llm_context.file_selector import FileSelector
 from llm_context.highlighter.language_mapping import to_language
 from llm_context.overviews import get_focused_overview, get_full_overview
 from llm_context.rule import IGNORE_NOTHING, INCLUDE_ALL
-from llm_context.rule_parser import RuleLoader
+from llm_context.rule_parser import RuleLoader, RuleProvider
 from llm_context.state import FileSelection
 from llm_context.utils import PathConverter, ProjectLayout, _format_size, log, safe_read_file
 
@@ -216,10 +216,8 @@ class ContextGenerator:
         rule_loader.save_rule(rule_name, updated_frontmatter, rule_parser.content)
 
     def focus_help(self) -> str:
-        context = {
-            "project_name": self.project_root.name,
-        }
-        return self._render("focus-help", context)
+        rule_provider = RuleProvider.create(self.spec.project_layout)
+        return rule_provider.get_rule_content("lc-focus-common") or ""
 
     def files(self, in_files: list[str] = []) -> str:
         rel_paths = in_files if in_files else self.full_rel

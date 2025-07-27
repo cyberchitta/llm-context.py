@@ -1,0 +1,103 @@
+---
+name: lc-focus-common
+description: Core reusable instructions for creating focused rules
+---
+
+## Decision Framework
+
+Create task-focused rules by deciding what you need to see to complete the task:
+
+**Full content:** Files you need to read/modify/understand in detail
+**Outlined:** Files where you just need to know structure/what's available
+
+### Quick Decision Guide:
+
+- Will I need to see the actual implementation? → Full
+- Do I just need to know what functions/classes exist? → Outline
+- Is it small enough that full content doesn't add noise? → Full
+- Is it large where outline gives me what I need? → Outline
+
+## Rule System Semantics
+
+### File Selection
+
+- `also-include: {full_files: [...], outline_files: [...]}` - Include complete or outlined content
+- `implementations: [[file, definition], ...]` - Extract specific functions/classes
+
+### Filtering (gitignore-style patterns)
+
+- `gitignores: {full_files: [...], outline_files: [...], overview_files: [...]}` - Exclude patterns
+- `limit-to: {full_files: [...], outline_files: [...], overview_files: [...]}` - Restrict to patterns
+- Patterns work like `.gitignore` - use `**/*.test.js` for recursive, `src/` for directories
+
+### Composition
+
+- `compose: {filters: [...], rules: [...]}` - Build from other rules
+- `filters` - Merge gitignore/limit-to/also-include patterns (e.g., `lc-filters`)
+- `rules` - Concatenate content from other rules
+
+### Presentation
+
+- `overview: "full"` - Complete directory tree
+- `overview: "focused"` - Grouped by directory, showing all files in folders that contain any included files
+
+### Example Advanced Rule
+
+```yaml
+---
+description: "API debugging with test exclusions"
+overview: "focused"
+compose:
+  filters: ["lc-filters"] # Base filtering
+gitignores:
+  full_files: ["**/test/**", "**/*.test.*"] # Exclude most tests
+limit-to:
+  outline_files: ["src/api/**", "src/types/**"] # Limit outline scope
+also-include:
+  full_files: ["/project/src/api/auth.js"] # Force include specific files
+implementations:
+  - ["/project/src/utils/helpers.js", "validateToken"] # Just one function
+---
+```
+
+This creates reusable, composable rules that can be precisely tuned for different scenarios.
+
+## Implementation
+
+Generate the complete rule and save it using shell commands:
+
+```bash
+# Create the rule file
+cat > .llm-context/rules/tmp-task-name.md << 'EOF'
+---
+description: "Brief description of what this focuses on"
+overview: "focused"
+compose:
+  filters: ["lc-filters"]
+also-include:
+  full_files:
+    - "/project-name/path/to/file1.ext"
+    - "/project-name/path/to/file2.ext"
+  outline_files:
+    - "/project-name/path/to/outline1.ext"
+---
+
+## Task-Specific Context
+Optional: Additional context or instructions for this rule.
+EOF
+
+# Activate the rule and generate context
+lc-set-rule tmp-task-name
+lc-context
+```
+
+## Best Practices
+
+- Start minimal and add only when necessary
+- Use descriptive rule names (`tmp-` prefix for temporary rules)
+- Document why each file was included
+- Aim for 10-50% of full project context size
+- Consider iterative refinement in follow-up conversations
+- Use `overview: "focused"` for compact directory listings
+
+The goal is creating the most efficient context for the specific task while maintaining comprehension.
