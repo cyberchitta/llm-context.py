@@ -30,6 +30,13 @@ Create task-focused rules by deciding what you need to see to complete the task:
 - `limit-to: {full_files: [...], outline_files: [...], overview_files: [...]}` - Restrict to patterns
 - **All items are pathspecs** - Use `.gitignore` syntax: `**/*.test.js` for recursive patterns, `src/` for directories, `/path/file.ext` for specific files
 
+**Important:** Both `limit-to` and `also-include` patterns must match **file paths**, not directory names:
+- ✅ `"src/**"` - matches all files in src directory (only at project root)
+- ✅ `"**/tests/**"` - matches files in any tests directory  
+- ✅ `"**/*.js"` - matches JavaScript files anywhere
+- ✅ `".llm-context/rules/**"` - matches files in nested .llm-context/rules directory
+- ❌ `"src/"` - directory pattern, won't match files inside
+
 ### Composition
 
 - `compose: {filters: [...], rules: [...]}` - Build from other rules
