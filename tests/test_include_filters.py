@@ -330,15 +330,17 @@ class TestPathFormatNormalization(unittest.TestCase):
 
     def test_directory_vs_file_patterns(self):
         """Test directory patterns vs file patterns"""
-        filter = IncludeFilter.create([
-            "src/file.py",  # Specific file pattern
-        ])
-        
+        filter = IncludeFilter.create(
+            [
+                "src/file.py",  # Specific file pattern
+            ]
+        )
+
         # Specific file should match
         self.assertTrue(filter.include("src/file.py"))
         # Other files should not match
         self.assertFalse(filter.include("src/other.py"))
-        
+
         # Test directory pattern separately
         dir_filter = IncludeFilter.create(["src/"])
         self.assertTrue(dir_filter.include("src/"))
@@ -389,6 +391,124 @@ class TestPerformanceAndRegression(unittest.TestCase):
             self.assertIn("app.py", filenames)
             self.assertIn("test.py", filenames)
             self.assertNotIn("readme.md", filenames)
+
+
+class TestRulesDirectoryAlsoInclude(unittest.TestCase):
+    """Test also-include patterns for .llm-context/rules/ directory to debug the real issue"""
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+        self.root_path = Path(self.temp_dir)
+
+        # Create .llm-context/rules structure like in the real project
+        (self.root_path / ".llm-context" / "rules").mkdir(parents=True)
+        (self.root_path / ".llm-context" / "rules" / "lc-code.md").write_text("# lc-code rule")
+        (self.root_path / ".llm-context" / "rules" / "with-rules.md").write_text(
+            "# with-rules rule"
+        )
+        (self.root_path / ".llm-context" / "rules" / "custom.md").write_text("# custom rule")
+
+        # Create other files to ensure they're not included
+        (self.root_path / "src").mkdir()
+        (self.root_path / "src" / "main.py").write_text("# main")
+
+    def tearDown(self):
+        import shutil
+
+        shutil.rmtree(self.temp_dir)
+
+    def test_debug_relative_path_format(self):
+        """Debug what path format _relative_path actually creates"""
+        selector = FileSelector.create(
+            self.root_path,
+            ignore_pathspecs=[],
+            limit_to_pathspecs=["**/*"],
+            also_include_pathspecs=[],
+        )
+
+        # Test the internal _relative_path method
+        path1 = selector._relative_path(".", "test.md")
+        path2 = selector._relative_path(".llm-context", "config.yaml")
+        path3 = selector._relative_path(".llm-context/rules", "lc-code.md")
+
+        print(f"Root file path format: '{path1}'")
+        print(f"Config file path format: '{path2}'")
+        print(f"Rules file path format: '{path3}'")
+
+    def test_rules_directory_patterns(self):
+        """Test various patterns that might work for rules directory"""
+        patterns_to_test = [
+            ".llm-context/rules/**",  # Most likely correct
+            "/.llm-context/rules/**",  # With leading slash
+            ".llm-context/rules/*",  # Single level
+            "/.llm-context/rules/*",  # Single level with slash
+            ".llm-context/rules/*.md",  # Specific extension
+            "/.llm-context/rules/*.md",  # Extension with slash
+            "**/.llm-context/rules/**",  # Match anywhere
+            "**/rules/**",  # Just rules directory name
+        ]
+
+        for pattern in patterns_to_test:
+            with self.subTest(pattern=pattern):
+                selector = FileSelector.create(
+                    self.root_path,
+                    ignore_pathspecs=["**/*"],  # Ignore everything
+                    limit_to_pathspecs=["**/*"],
+                    also_include_pathspecs=[pattern],
+                )
+                files = selector.get_relative_files()
+                rules_files = [f for f in files if "rules/" in f and f.endswith(".md")]
+
+                print(f"Pattern '{pattern}': found {len(rules_files)} rules files")
+                if rules_files:
+                    print(f"  Files: {[f.split('/')[-1] for f in rules_files]}")
+
+    def test_working_pattern_verification(self):
+        """Once we find the working pattern, verify it works correctly"""
+        # Test the pattern that should work based on _relative_path logic
+        working_pattern = ".llm-context/rules/**"
+
+        selector = FileSelector.create(
+            self.root_path,
+            ignore_pathspecs=["**/*"],  # Ignore everything
+            limit_to_pathspecs=["**/*"],
+            also_include_pathspecs=[working_pattern],
+        )
+        files = selector.get_relative_files()
+
+        # Should find exactly 3 rules files and nothing else
+        self.assertEqual(len(files), 3, f"Expected 3 files, got {len(files)}: {files}")
+
+        # All files should be .md files in rules directory
+        for file in files:
+            self.assertTrue(file.endswith(".md"), f"File should be .md: {file}")
+            self.assertIn("/rules/", file, f"File should be in rules directory: {file}")
+
+
+    def test_pathspec_matching_behavior(self):
+        """Test exactly why rules/** doesn't match /.llm-context/rules/file.md"""
+        from pathspec import GitIgnoreSpec
+
+        test_path = "/.llm-context/rules/test.md"
+
+        # Test individual patterns
+        patterns = {
+            "rules/**": GitIgnoreSpec.from_lines(["rules/**"]),
+            "**rules/**": GitIgnoreSpec.from_lines(["**rules/**"]),
+            "**/rules/**": GitIgnoreSpec.from_lines(["**/rules/**"]),
+            ".llm-context/rules/**": GitIgnoreSpec.from_lines([".llm-context/rules/**"]),
+        }
+
+        for pattern_name, spec in patterns.items():
+            result = spec.match_file(test_path)
+            print(f"'{pattern_name}' matches '{test_path}': {result}")
+
+            # Also test alternate paths that should definitely match
+            if pattern_name == "rules/**":
+                alt_paths = ["rules/test.md", "something/rules/test.md"]
+                for alt_path in alt_paths:
+                    alt_result = spec.match_file(alt_path)
+                    print(f"  '{pattern_name}' matches '{alt_path}': {alt_result}")
 
 
 if __name__ == "__main__":
