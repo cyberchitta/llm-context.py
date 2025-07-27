@@ -22,6 +22,8 @@ SYSTEM_RULES = [
     "lc-no-full-files.md",
     "lc-no-outline-files.md",
     "lc-no-files.md",
+    "lc-focus-common.md",
+    "lc-focus-new-chat-prefix.md",
     "lc-focus.md",
 ]
 
