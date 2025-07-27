@@ -237,9 +237,9 @@ class ContextGenerator:
         descriptor = self.spec.rule
         layout = self.spec.project_layout
         context = {
-            "prompt": descriptor.get_prompt(layout),
+            "prompt": descriptor.get_instructions(),
             "user_notes": descriptor.get_user_notes(layout),
-            "prompts": self.collector.rules(descriptor.rules),
+            "rules": self.collector.rules(descriptor.rules),
         }
         return self._render(template_id, context)
 
@@ -269,7 +269,7 @@ class ContextGenerator:
             "sample_requested_files": self.converter.to_relative(
                 self.collector.sample_file_abs(self.full_abs)
             ),
-            "prompt": descriptor.get_prompt(layout) if settings.with_prompt else None,
+            "prompt": descriptor.get_instructions() if settings.with_prompt else None,
             "project_notes": descriptor.get_project_notes(layout),
             "tools_available": settings.tools_available,
             "user_notes": descriptor.get_user_notes(layout) if settings.with_user_notes else None,
@@ -301,8 +301,8 @@ class ContextGenerator:
             len(item["code"].encode("utf-8")) for item in implementations_content if "code" in item
         )
         prompt_bytes = 0
-        if descriptor.get_prompt(layout):
-            prompt_bytes = len(descriptor.get_prompt(layout).encode("utf-8"))
+        if descriptor.get_instructions():
+            prompt_bytes = len(descriptor.get_instructions().encode("utf-8"))
         project_notes_bytes = 0
         if descriptor.get_project_notes(layout):
             project_notes_bytes = len(descriptor.get_project_notes(layout).encode("utf-8"))

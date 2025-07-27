@@ -1,11 +1,12 @@
 from dataclasses import dataclass
+from logging import WARNING
 from pathlib import Path
 from typing import Any, Optional, cast
 
 from packaging import version
 
 from llm_context.rule_parser import RuleLoader, RuleParser
-from llm_context.utils import ProjectLayout, Yaml, safe_read_file
+from llm_context.utils import ProjectLayout, Yaml, log, safe_read_file
 
 CURRENT_CONFIG_VERSION = version.parse("3.4")
 
@@ -34,6 +35,7 @@ class Rule:
     name: str
     description: str
     overview: str
+    instructions: str
     compose: RuleComposition
     gitignores: dict[str, list[str]]
     limit_to: dict[str, list[str]]
@@ -47,6 +49,7 @@ class Rule:
             config.get("name", ""),
             config.get("description", ""),
             config.get("overview", DEFAULT_OVERVIEW_MODE),
+            config.get("instructions", ""),
             RuleComposition.from_config(config.get("compose", {})),
             config.get("gitignores", {}),
             config.get("limit-to", {}),
@@ -60,6 +63,7 @@ class Rule:
         name,
         description,
         overview,
+        instructions,
         compose,
         gitignores,
         limit_to,
@@ -71,6 +75,7 @@ class Rule:
             name,
             description,
             overview,
+            instructions,
             compose,
             gitignores,
             limit_to,
@@ -88,13 +93,8 @@ class Rule:
     def get_also_include_patterns(self, context_type: str) -> list[str]:
         return self.also_include.get(f"{context_type}_files", [])
 
-    def get_prompt(self, project_layout: ProjectLayout) -> Optional[str]:
-        if not self.name:
-            return None
-        from llm_context.rule_parser import RuleProvider
-
-        content = RuleProvider.create(project_layout).get_rule_content(self.name)
-        return content if content else None
+    def get_instructions(self) -> Optional[str]:
+        return self.instructions if self.instructions else None
 
     def get_project_notes(self, project_layout: ProjectLayout) -> Optional[str]:
         return safe_read_file(str(project_layout.project_notes_path))
@@ -107,6 +107,7 @@ class Rule:
             "name": self.name,
             "description": self.description,
             "overview": self.overview,
+            "instructions": self.instructions,
             "compose": {
                 "filters": self.compose.filters,
                 "rules": self.compose.rules,
@@ -192,12 +193,30 @@ class RuleResolver:
         new_resolver = RuleResolver(
             self.system_state, self.rule_loader, self._composition_stack | {rule_name}
         )
+        resolved_instructions = ""
+        if "instructions" in rule.frontmatter:
+            if rule.content.strip():
+                log(
+                    WARNING,
+                    f"Rule '{rule_name}' has both 'instructions' field and markdown content. The markdown content will be ignored.",
+                )
+            instruction_contents = []
+            for instruction_rule_name in rule.frontmatter["instructions"]:
+                instruction_rule = new_resolver.get_rule(instruction_rule_name)
+                if instruction_rule.instructions:
+                    instruction_contents.append(instruction_rule.instructions)
+            resolved_instructions = "\n\n".join(instruction_contents)
+        else:
+            resolved_instructions = rule.content
         if not rule.frontmatter.get("compose"):
-            return rule.to_rule_config()
+            config = rule.to_rule_config()
+            config["instructions"] = resolved_instructions
+            return config
         composed_config = {
             "name": rule.name,
             "description": rule.frontmatter.get("description", ""),
             "overview": rule.frontmatter.get("overview", DEFAULT_OVERVIEW_MODE),
+            "instructions": resolved_instructions,
             "gitignores": {},
             "limit-to": {},
             "also-include": {},
