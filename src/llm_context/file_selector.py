@@ -111,7 +111,7 @@ class FileSelector:
         return [f for f in files if f in set(self.get_files())]
 
     def get_files(self) -> list[str]:
-        files = self.traverse(self.root_path)
+        files = list(set(self.traverse(self.root_path) + self.also_traverse(self.root_path)))
         return [f for f in files if Path(f).stat().st_mtime > self.since] if self.since else files
 
     def get_relative_files(self) -> list[str]:
@@ -125,25 +125,46 @@ class FileSelector:
             for e in entries
             if (e_path := os.path.join(current_dir, e))
             and os.path.isdir(e_path)
-            and self._should_include_file(f"/{os.path.join(relative_current_dir, e)}/")
+            and (not self.ignorer.ignore(self._relative_path(relative_current_dir, e)))
         ]
         files = [
             e_path
             for e in entries
             if (e_path := os.path.join(current_dir, e))
             and not os.path.isdir(e_path)
-            and self._should_include_file(f"/{os.path.join(relative_current_dir, e)}")
+            and self._should_include_file(self._relative_path(relative_current_dir, e))
         ]
         subdir_files = [file for d in dirs for file in self.traverse(d)]
         return files + subdir_files
 
     def _should_include_file(self, path: str) -> bool:
         assert path not in ("/", ""), "Root directory cannot be an input for filtering"
-        if self.also_include_filter.include(path):
-            return True
         if self.ignorer.ignore(path):
             return False
         return self.limit_filter.include(path)
+
+    def also_traverse(self, current_dir: str) -> list[str]:
+        if not self.also_include_filter.pathspec.patterns:
+            return []
+        entries = os.listdir(current_dir)
+        relative_current_dir = os.path.relpath(current_dir, self.root_path)
+        dirs = [
+            e_path
+            for e in entries
+            if (e_path := os.path.join(current_dir, e)) and os.path.isdir(e_path)
+        ]
+        files = [
+            e_path
+            for e in entries
+            if (e_path := os.path.join(current_dir, e))
+            and not os.path.isdir(e_path)
+            and self.also_include_filter.include(self._relative_path(relative_current_dir, e))
+        ]
+        subdir_files = [file for d in dirs for file in self.also_traverse(d)]
+        return files + subdir_files
+
+    def _relative_path(self, dir: str, filename: str) -> str:
+        return f"/{os.path.normpath(os.path.join(dir, filename))}"
 
 
 @dataclass(frozen=True)
