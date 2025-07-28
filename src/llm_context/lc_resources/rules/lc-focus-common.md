@@ -17,6 +17,26 @@ Create task-focused rules by deciding what you need to see to complete the task:
 - Is it small enough that full content doesn't add noise? → Full
 - Is it large where outline gives me what I need? → Outline
 
+### Outline-Supported File Extensions
+
+The following file extensions support smart outlining (showing function/class definitions):
+
+- **C/C++**: `.c`, `.cc`, `.cpp`
+- **C#**: `.cs`
+- **Elisp**: `.el`
+- **Elixir**: `.ex`
+- **Elm**: `.elm`
+- **Go**: `.go`
+- **Java**: `.java`
+- **JavaScript**: `.js`, `.mjs`
+- **PHP**: `.php`
+- **Python**: `.py`
+- **Ruby**: `.rb`
+- **Rust**: `.rs`
+- **TypeScript**: `.ts`
+
+Files with these extensions are good candidates for outline_files when you only need to see structure/available definitions rather than full implementation.
+
 ## Rule System Semantics
 
 ### File Selection
@@ -30,9 +50,17 @@ Create task-focused rules by deciding what you need to see to complete the task:
 - `limit-to: {full_files: [...], outline_files: [...], overview_files: [...]}` - Restrict to patterns
 - **All items are pathspecs** - Use `.gitignore` syntax: `**/*.test.js` for recursive patterns, `src/` for directories, `/path/file.ext` for specific files
 
+**Path Format**: All pathspecs must be relative to the project root, starting with `/` but NOT including the project directory name:
+
+- ✅ `"/src/components/**"` - correct relative path
+- ❌ `"/myproject/src/components/**"` - includes project name
+- ✅ `"/.llm-context/rules/lc-code.md"` - correct for root-level directories
+- ❌ `"/myproject/.llm-context/rules/lc-code.md"` - includes project name
+
 **Important:** Both `limit-to` and `also-include` patterns must match **file paths**, not directory names:
+
 - ✅ `"src/**"` - matches all files in src directory (only at project root)
-- ✅ `"**/tests/**"` - matches files in any tests directory  
+- ✅ `"**/tests/**"` - matches files in any tests directory
 - ✅ `"**/*.js"` - matches JavaScript files anywhere
 - ✅ `".llm-context/rules/**"` - matches files in nested .llm-context/rules directory
 - ❌ `"src/"` - directory pattern, won't match files inside
@@ -97,6 +125,7 @@ Optional: Additional context or instructions for this rule.
 EOF
 
 lc-set-rule tmp-task-name
+lc-sel-files
 lc-context
 ```
 
