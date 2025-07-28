@@ -19,7 +19,7 @@ Create task-focused rules by deciding what you need to see to complete the task:
 
 **Outline support:** `.c`, `.cc`, `.cpp`, `.cs`, `.el`, `.ex`, `.elm`, `.go`, `.java`, `.js`, `.mjs`, `.php`, `.py`, `.rb`, `.rs`, `.ts`
 
-Files with these extensions are good candidates for outline_files when you only need to see structure/available definitions rather than full implementation.
+Files with these extensions are the only candidates for outline_files. Other file types will be ignored in outline selection.
 
 ## Rule System Semantics
 
