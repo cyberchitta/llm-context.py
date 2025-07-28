@@ -17,23 +17,7 @@ Create task-focused rules by deciding what you need to see to complete the task:
 - Is it small enough that full content doesn't add noise? → Full
 - Is it large where outline gives me what I need? → Outline
 
-### Outline-Supported File Extensions
-
-The following file extensions support smart outlining (showing function/class definitions):
-
-- **C/C++**: `.c`, `.cc`, `.cpp`
-- **C#**: `.cs`
-- **Elisp**: `.el`
-- **Elixir**: `.ex`
-- **Elm**: `.elm`
-- **Go**: `.go`
-- **Java**: `.java`
-- **JavaScript**: `.js`, `.mjs`
-- **PHP**: `.php`
-- **Python**: `.py`
-- **Ruby**: `.rb`
-- **Rust**: `.rs`
-- **TypeScript**: `.ts`
+**Outline support:** `.c`, `.cc`, `.cpp`, `.cs`, `.el`, `.ex`, `.elm`, `.go`, `.java`, `.js`, `.mjs`, `.php`, `.py`, `.rb`, `.rs`, `.ts`
 
 Files with these extensions are good candidates for outline_files when you only need to see structure/available definitions rather than full implementation.
 
