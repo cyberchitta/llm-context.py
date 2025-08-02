@@ -1,5 +1,5 @@
 ---
-name: lc-focus-common
+name: lc-create-rule-common
 description: Core reusable instructions for creating focused rules
 ---
 

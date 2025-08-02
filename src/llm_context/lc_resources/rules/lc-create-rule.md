@@ -1,7 +1,7 @@
 ---
-name: lc-focus
+name: lc-create-rule
 description: Complete project context with comprehensive focus creation instructions for efficient rule creation
-instructions: ["lc-focus-new-chat-prefix", "lc-focus-common"]
+instructions: ["lc-create-rule-new-chat-prefix", "lc-create-rule-common"]
 overview: full
 compose:
   filters: [lc-filters]

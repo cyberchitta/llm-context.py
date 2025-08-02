@@ -1,5 +1,5 @@
 ---
-name: lc-focus-new-chat-prefix
+name: lc-create-rule-new-chat-prefix
 description: Introduction for fresh chat context when creating focused rules
 ---
 
