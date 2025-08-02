@@ -86,7 +86,7 @@ class RuleLoader:
     def save_rule(self, name: str, frontmatter: dict[str, Any], content: str) -> Path:
         path = self.rules_dir / f"{name}.md"
         yaml_str = Yaml.dump(self._order_frontmatter(frontmatter))
-        full_content = f"---\n{yaml_str}---\n\n{content}"
+        full_content = f"---\n{yaml_str}---\n{content}"
         path.write_text(full_content)
         return path
 
