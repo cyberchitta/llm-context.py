@@ -22,9 +22,9 @@ SYSTEM_RULES = [
     "lc-no-full-files.md",
     "lc-no-outline-files.md",
     "lc-no-files.md",
-    "lc-focus-common.md",
-    "lc-focus-new-chat-prefix.md",
-    "lc-focus.md",
+    "lc-create-rule-common.md",
+    "lc-create-rule-new-chat-prefix.md",
+    "lc-create-rule.md",
 ]
 
 
