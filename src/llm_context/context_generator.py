@@ -190,7 +190,6 @@ class ContextGenerator:
         outline_rel = [f for f in sel_files.outline_files if to_language(f)]
         full_abs = converter.to_absolute(full_rel)
         outline_abs = converter.to_absolute(outline_rel)
-        ContextGenerator._update_rule_timestamp(spec.project_layout, file_selection.rule_name)
         return ContextGenerator(
             collector,
             spec,
@@ -203,15 +202,6 @@ class ContextGenerator:
             settings,
             tagger,
         )
-
-    @staticmethod
-    def _update_rule_timestamp(project_layout: ProjectLayout, rule_name: str):
-        rule_loader = RuleLoader.create(project_layout)
-        rule_parser = rule_loader.load_rule(rule_name)
-        updated_frontmatter = dict(rule_parser.frontmatter)
-        now = datetime.now().strftime("%Y-%m-%d")
-        updated_frontmatter["last_used"] = now
-        rule_loader.save_rule(rule_name, updated_frontmatter, rule_parser.content)
 
     def focus_help(self) -> str:
         rule_provider = RuleProvider.create(self.spec.project_layout)

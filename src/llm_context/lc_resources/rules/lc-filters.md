@@ -2,7 +2,7 @@
 name: lc-filters
 description: Base ignore patterns for code files, customize this for project-specific ignores.
 gitignores:
-  overview_files:
+  overview-files:
     - .git
     - "*.webp"
     - "*.jpg"
@@ -58,7 +58,7 @@ gitignores:
     - "*.so"
     - "*.dylib"
     - "*.map"
-  full_files:
+  full-files:
     - .git
     - .gitignore
     - .llm-context/
@@ -120,7 +120,7 @@ gitignores:
     - "*.dll"
     - "*.so"
     - "*.dylib"
-  outline_files:
+  outline-files:
     - .git
     - .gitignore
     - .llm-context/
@@ -183,10 +183,10 @@ gitignores:
     - "*.so"
     - "*.dylib"
 limit-to:
-  overview_files:
+  overview-files:
     - "**/*"
-  full_files:
+  full-files:
     - "**/*"
-  outline_files:
+  outline-files:
     - "**/*"
 ---

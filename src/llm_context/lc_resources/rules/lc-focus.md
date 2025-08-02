@@ -6,5 +6,5 @@ overview: full
 compose:
   filters: [lc-filters]
 also-include:
-  full_files: [/.llm-context/rules/**]
+  full-files: [/.llm-context/rules/**]
 ---

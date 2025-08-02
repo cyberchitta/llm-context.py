@@ -8,7 +8,7 @@ from packaging import version
 from llm_context.rule_parser import RuleLoader, RuleParser
 from llm_context.utils import ProjectLayout, Yaml, log, safe_read_file
 
-CURRENT_CONFIG_VERSION = version.parse("3.4")
+CURRENT_CONFIG_VERSION = version.parse("3.5")
 
 IGNORE_NOTHING = [".git"]
 INCLUDE_ALL = ["**/*"]
@@ -85,13 +85,13 @@ class Rule:
         )
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
-        return self.gitignores.get(f"{context_type}_files", IGNORE_NOTHING)
+        return self.gitignores.get(f"{context_type}-files", IGNORE_NOTHING)
 
     def get_limit_to_patterns(self, context_type: str) -> list[str]:
-        return self.limit_to.get(f"{context_type}_files", INCLUDE_ALL)
+        return self.limit_to.get(f"{context_type}-files", INCLUDE_ALL)
 
     def get_also_include_patterns(self, context_type: str) -> list[str]:
-        return self.also_include.get(f"{context_type}_files", [])
+        return self.also_include.get(f"{context_type}-files", [])
 
     def get_instructions(self) -> Optional[str]:
         return self.instructions if self.instructions else None

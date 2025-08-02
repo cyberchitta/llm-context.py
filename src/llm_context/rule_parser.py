@@ -95,7 +95,6 @@ class RuleLoader:
             ["name", "description", "instructions", "overview"],
             ["compose", "gitignores", "limit-to", "also-include"],
             ["implementations", "rules"],
-            ["last_used"],
         ]
         ordered_fields = [
             field for group in field_groups for field in group if field in frontmatter

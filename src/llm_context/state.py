@@ -91,21 +91,21 @@ class StateStore:
             for rule_name, sel_data in data.get("selections", {}).items():
                 selections[rule_name] = FileSelection._create(
                     rule_name,
-                    sel_data.get("full_files", []),
-                    sel_data.get("outline_files", []),
+                    sel_data.get("full-files", []),
+                    sel_data.get("outline-files", []),
                     sel_data.get("timestamp", datetime.now().timestamp()),
                 )
-            return AllSelections(selections), data.get("current_profile", DEFAULT_CODE_RULE)
+            return AllSelections(selections), data.get("current-profile", DEFAULT_CODE_RULE)
         except Exception:
             return AllSelections.create_empty(), DEFAULT_CODE_RULE
 
     def save(self, store: AllSelections, current_profile: str):
         data = {
-            "current_profile": current_profile,
+            "current-profile": current_profile,
             "selections": {
                 rule_name: {
-                    "full_files": sel.full_files,
-                    "outline_files": sel.outline_files,
+                    "full-files": sel.full_files,
+                    "outline-files": sel.outline_files,
                     "timestamp": sel.timestamp,
                 }
                 for rule_name, sel in store.selections.items()
