@@ -19,19 +19,19 @@ Create task-focused rules by deciding what you need to see to complete the task:
 
 **Outline support:** `.c`, `.cc`, `.cpp`, `.cs`, `.el`, `.ex`, `.elm`, `.go`, `.java`, `.js`, `.mjs`, `.php`, `.py`, `.rb`, `.rs`, `.ts`
 
-Files with these extensions are the only candidates for outline_files. Other file types will be ignored in outline selection.
+Files with these extensions are the only candidates for outline-files. Other file types will be ignored in outline selection.
 
 ## Rule System Semantics
 
 ### File Selection
 
-- `also-include: {full_files: [...], outline_files: [...]}` - Include complete or outlined content
+- `also-include: {full-files: [...], outline-files: [...]}` - Include complete or outlined content
 - `implementations: [[file, definition], ...]` - Extract specific functions/classes
 
 ### Filtering (gitignore-style patterns)
 
-- `gitignores: {full_files: [...], outline_files: [...], overview_files: [...]}` - Exclude patterns
-- `limit-to: {full_files: [...], outline_files: [...], overview_files: [...]}` - Restrict to patterns
+- `gitignores: {full-files: [...], outline-files: [...], overview_files: [...]}` - Exclude patterns
+- `limit-to: {full-files: [...], outline-files: [...], overview_files: [...]}` - Restrict to patterns
 - **All items are pathspecs** - Use `.gitignore` syntax: `**/*.test.js` for recursive patterns, `src/` for directories, `/path/file.ext` for specific files
 
 **Path Format**: All pathspecs must be relative to the project root, starting with `/` but NOT including the project directory name:
@@ -72,11 +72,11 @@ overview: "focused"
 compose:
   filters: ["lc-filters"]
 gitignores:
-  full_files: ["**/test/**", "**/*.test.*"]
+  full-files: ["**/test/**", "**/*.test.*"]
 limit-to:
-  outline_files: ["src/api/**", "src/types/**"]
+  outline-files: ["src/api/**", "src/types/**"]
 also-include:
-  full_files: ["/src/api/auth.js"]
+  full-files: ["/src/api/auth.js"]
 implementations:
   - ["/src/utils/helpers.js", "validateToken"]
 ---
@@ -97,10 +97,10 @@ overview: "focused"
 compose:
   filters: ["lc-no-files"]
 also-include:
-  full_files:
+  full-files:
     - "/path/to/file1.ext"
     - "/path/to/file2.ext"
-  outline_files:
+  outline-files:
     - "/path/to/outline1.ext"
 ---
 
@@ -110,6 +110,7 @@ EOF
 
 lc-set-rule tmp-task-name
 lc-sel-files
+lc-sel-outlines
 lc-context
 ```
 
