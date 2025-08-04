@@ -57,10 +57,14 @@ Files with these extensions are the only candidates for outline-files. Other fil
   - Use `lc-no-files` when you want precise control (only specified files included)
 - `rules` - Concatenate content from other rules
 
-### Presentation
+### Overview Modes
 
-- `overview: "full"` - Complete directory tree
-- `overview: "focused"` - Grouped by directory, showing all files in folders that contain any included files
+- `overview: "full"` - **Default choice** - Complete directory tree showing all files
+  - Provides visibility into entire codebase for informed file selection
+  - Essential when you might need files outside the initial focused context
+- `overview: "focused"` - **Large repos only** - Grouped view showing only relevant directories
+  - Use only when full overview would be too verbose (1000+ files)
+  - Limits visibility but reduces context size significantly
 
 ### Example Advanced Rule
 
@@ -68,7 +72,7 @@ Files with these extensions are the only candidates for outline-files. Other fil
 ---
 name: api-debugging
 description: "API debugging with test exclusions"
-overview: "focused"
+overview: "full"
 compose:
   filters: ["lc-filters"]
 gitignores:
@@ -93,7 +97,7 @@ cat > .llm-context/rules/tmp-task-name.md << 'EOF'
 ---
 name: tmp-task-name
 description: "Brief description of what this focuses on"
-overview: "focused"
+overview: "full"
 compose:
   filters: ["lc-no-files"]
 also-include:
@@ -121,6 +125,6 @@ lc-context
 - Document why each file was included
 - Aim for 10-50% of full project context size
 - Consider iterative refinement in follow-up conversations
-- Use `overview: "focused"` for compact directory listings
+- Use `overview: "full"` by default; only switch to `"focused"` for very large repositories
 
 The goal is creating the most efficient context for the specific task while maintaining comprehension.
