@@ -236,9 +236,10 @@ class ContextGenerator:
         implementations = self.collector.definitions(self.tagger, descriptor.implementations)
         files = self.collector.files(self.full_rel)
         settings = self.settings
+        context_timestamp = datetime.now().timestamp()
         context = {
             "project_name": self.project_root.name,
-            "context_timestamp": datetime.now().timestamp(),
+            "context_timestamp": context_timestamp,
             "abs_root_path": str(self.project_root),
             "overview": self.collector.overview(
                 descriptor.overview,
@@ -262,7 +263,7 @@ class ContextGenerator:
             "rules": self.collector.rules(descriptor.rules),
             "rule_included_paths": set(),
         }
-        return self._render(template_id, context)
+        return self._render(template_id, context), context_timestamp
 
     def _render(self, template_id: str, context: dict) -> str:
         template_name = self.spec.templates[template_id]

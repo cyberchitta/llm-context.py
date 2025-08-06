@@ -40,12 +40,12 @@ async def project_context(arguments: dict) -> list[TextContent]:
         selector = ContextSelector.create(cur_env.config)
         file_sel_full = selector.select_full_files(cur_env.state.file_selection)
         file_sel_out = selector.select_outline_files(file_sel_full)
-        cur_env = cur_env.with_state(cur_env.state.with_selection(file_sel_out))
-        cur_env.state.store()
         settings = ContextSettings.create(False, False, True)
-        context = ContextGenerator.create(
-            cur_env.config, cur_env.state.file_selection, settings, env.tagger
-        ).context()
+        generator = ContextGenerator.create(cur_env.config, file_sel_out, settings, env.tagger)
+        context, context_timestamp = generator.context()
+        updated_selection = file_sel_out.with_timestamp(context_timestamp)
+        updated_env = cur_env.with_state(cur_env.state.with_selection(updated_selection))
+        updated_env.state.store()
         return [TextContent(type="text", text=context)]
 
 

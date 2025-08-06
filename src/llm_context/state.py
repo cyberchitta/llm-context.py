@@ -35,11 +35,8 @@ class FileSelection:
     def files(self) -> list[str]:
         return self.full_files + self.outline_files
 
-    def with_rule(self, rule_name: str) -> "FileSelection":
-        return FileSelection.create(rule_name, self.full_files, self.outline_files)
-
-    def with_now(self) -> "FileSelection":
-        return FileSelection.create(self.rule_name, self.full_files, self.outline_files)
+    def with_timestamp(self, timestamp: float) -> "FileSelection":
+        return FileSelection._create(self.rule_name, self.full_files, self.outline_files, timestamp)
 
 
 @dataclass(frozen=True)
@@ -54,9 +51,15 @@ class AllSelections:
         return self.selections.get(rule_name, FileSelection.create(rule_name, [], []))
 
     def get_selection_by_timestamp(self, timestamp: float) -> Optional[FileSelection]:
-        return next((selection for selection in self.selections.values() 
-                    if selection.timestamp == timestamp), None)
-   
+        return next(
+            (
+                selection
+                for selection in self.selections.values()
+                if selection.timestamp == timestamp
+            ),
+            None,
+        )
+
     def with_selection(self, selection: FileSelection) -> "AllSelections":
         new_selections = dict(self.selections)
         new_selections[selection.rule_name] = selection

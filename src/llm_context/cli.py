@@ -131,8 +131,9 @@ def context(env: ExecutionEnvironment) -> ExecutionResult:
     args, _ = parser.parse_known_args()
     settings = ContextSettings.create(args.p, args.u, not args.nt)
     generator = ContextGenerator.create(env.config, env.state.file_selection, settings, env.tagger)
-    content = generator.context()
-    nxt_env = env.with_state(env.state.with_selection(env.state.file_selection.with_now()))
+    content, context_timestamp = generator.context()
+    updated_selection = env.state.file_selection.with_timestamp(context_timestamp)
+    nxt_env = env.with_state(env.state.with_selection(updated_selection))
     nxt_env.state.store()
     if args.f:
         Path(args.f).write_text(content)
