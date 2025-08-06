@@ -23,6 +23,9 @@ class FilesRequest(BaseModel):
         ...,
         description="File paths relative to root_path, starting with a forward slash and including the root directory name. For example, if root_path is '/home/user/projects/myproject', then a valid path would be '/myproject/src/main.py'",
     )
+    timestamp: float = Field(
+        ..., description="Context generation timestamp to check against existing selections"
+    )
 
 
 class ListModifiedFilesRequest(BaseModel):
@@ -43,6 +46,9 @@ class OutlinesRequest(BaseModel):
     )
     rule_name: str = Field(
         "lc-code", description="Rule to use for file selection rules", pattern="^[a-zA-Z0-9_-]+$"
+    )
+    timestamp: float = Field(
+        ..., description="Context generation timestamp to check against existing selections"
     )
 
 
@@ -82,12 +88,11 @@ TOOL_METADATA: dict[str, dict[str, Any]] = {
         "model": FilesRequest,
         "description": (
             "⚠️ ALWAYS SEARCH THE ENTIRE CONVERSATION CONTEXT FIRST! DO NOT request files "
-            "that have already been provided. IMPORTANT: Check previously retrieved file "
-            "contents before making new requests. Retrieves (read-only) complete contents "
-            "of specified files from the project. For this project, this is the preferred "
-            "method for all file content analysis and text searches - simply retrieve the "
-            "relevant files and examine their contents. The assistant cannot modify files "
-            "with this tool - it only reads their contents."
+            "that have already been provided. Retrieves (read-only) complete contents "
+            "of specified files from the project. Requires the context generation timestamp "
+            "to check against existing file selections. Files already included with full content "
+            "will return a message instead of duplicate content. Files included as outlines "
+            "will be upgraded to full content."
         ),
     },
     "lc-list-modified-files": {
@@ -103,9 +108,11 @@ TOOL_METADATA: dict[str, dict[str, Any]] = {
         "model": OutlinesRequest,
         "description": (
             "Returns smart outlines highlighting important definitions in all supported code files. "
-            "This provides a high-level overview of code structure without retrieving full file contents. "
-            "Outlines show key definitions (classes, functions, methods) in the codebase. "
-            "Use lc-get-implementations to retrieve the full implementation of any definition shown in these outlines."
+            "Requires the context generation timestamp to check against existing selections. "
+            "If outlines are already included in the current context, returns a message instead "
+            "of duplicate content. This provides a high-level overview of code structure without "
+            "retrieving full file contents. Use lc-get-implementations to retrieve the full "
+            "implementation of any definition shown in these outlines."
         ),
     },
     "lc-get-implementations": {

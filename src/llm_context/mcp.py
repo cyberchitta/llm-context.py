@@ -50,12 +50,46 @@ async def project_context(arguments: dict) -> list[TextContent]:
 async def get_files(arguments: dict) -> list[TextContent]:
     request = FilesRequest(**arguments)
     env = ExecutionEnvironment.create(Path(request.root_path))
+
     with env.activate():
-        settings = ContextSettings.create(False, False, True)
-        context = ContextGenerator.create(env.config, env.state.file_selection, settings).files(
-            request.paths
+        current_selection = env.state.file_selection
+        if current_selection.timestamp != request.timestamp:
+            raise McpError(
+                ErrorData(
+                    code=INVALID_PARAMS,
+                    message=f"Context timestamp mismatch. Expected {current_selection.timestamp}, got {request.timestamp}. Please regenerate project context.",
+                )
+            )
+        full_files_set = set(current_selection.full_files)
+        outline_files_set = set(current_selection.outline_files)
+        messages = []
+        files_to_fetch = []
+        for path in request.paths:
+            if path in full_files_set:
+                messages.append(
+                    f"File {path} is already included with full content in the current context."
+                )
+            elif path in outline_files_set:
+                files_to_fetch.append(path)
+                messages.append(
+                    f"File {path} was outlined in context, now retrieving full content."
+                )
+            else:
+                files_to_fetch.append(path)
+        response_parts = []
+        if messages:
+            response_parts.append("\n".join(messages))
+        if files_to_fetch:
+            settings = ContextSettings.create(False, False, True)
+            content = ContextGenerator.create(env.config, env.state.file_selection, settings).files(
+                files_to_fetch
+            )
+            if content.strip():
+                response_parts.append(content)
+        final_response = (
+            "\n\n".join(response_parts) if response_parts else "No new files to retrieve."
         )
-        return [TextContent(type="text", text=context)]
+        return [TextContent(type="text", text=final_response)]
 
 
 async def list_modified_files(arguments: dict) -> list[TextContent]:
@@ -74,6 +108,18 @@ async def code_outlines(arguments: dict) -> list[TextContent]:
     env = ExecutionEnvironment.create(Path(request.root_path))
     cur_env = env.with_rule(request.rule_name)
     with cur_env.activate():
+        current_selection = cur_env.state.file_selection
+        if current_selection.timestamp != request.timestamp:
+            raise McpError(ErrorData(
+                code=INVALID_PARAMS,
+                message=f"Context timestamp mismatch. Expected {current_selection.timestamp}, got {request.timestamp}. Please regenerate project context."
+            ))
+        if current_selection.timestamp == request.timestamp and current_selection.outline_files:
+            return [
+                TextContent(
+                    type="text", text="Code outlines are already included in the current context."
+                )
+            ]
         selector = ContextSelector.create(cur_env.config)
         file_sel_out = selector.select_outline_only(cur_env.state.file_selection)
         settings = ContextSettings.create(False, False, True)
