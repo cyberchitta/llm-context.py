@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from logging import ERROR, WARNING
 from pathlib import Path
+from typing import Optional
 
 from llm_context.rule import DEFAULT_CODE_RULE
 from llm_context.utils import ProjectLayout, Yaml, log
@@ -52,6 +53,10 @@ class AllSelections:
     def get_selection(self, rule_name: str) -> FileSelection:
         return self.selections.get(rule_name, FileSelection.create(rule_name, [], []))
 
+    def get_selection_by_timestamp(self, timestamp: float) -> Optional[FileSelection]:
+        return next((selection for selection in self.selections.values() 
+                    if selection.timestamp == timestamp), None)
+   
     def with_selection(self, selection: FileSelection) -> "AllSelections":
         new_selections = dict(self.selections)
         new_selections[selection.rule_name] = selection

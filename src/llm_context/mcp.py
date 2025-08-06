@@ -51,11 +51,11 @@ async def get_files(arguments: dict) -> list[TextContent]:
     request = FilesRequest(**arguments)
     env = ExecutionEnvironment.create(Path(request.root_path))
     with env.activate():
-        current_selection = env.state.file_selection
-        if current_selection.timestamp != request.timestamp:
-            message = f"Context timestamp mismatch. Expected {current_selection.timestamp}, got {request.timestamp}."
+        matching_selection = env.state.selections.get_selection_by_timestamp(request.timestamp)
+        if matching_selection is None:
+            message = f"No context found with timestamp {request.timestamp}. Warn the user that the context is stale."
             raise McpError(ErrorData(code=INVALID_PARAMS, message=message))
-        full_files_set = set(current_selection.full_files)
+        full_files_set = set(matching_selection.full_files)
         already_included = [path for path in request.paths if path in full_files_set]
         files_to_fetch = [path for path in request.paths if path not in full_files_set]
         response_parts = []
@@ -93,11 +93,11 @@ async def code_outlines(arguments: dict) -> list[TextContent]:
     env = ExecutionEnvironment.create(Path(request.root_path))
     cur_env = env.with_rule(request.rule_name)
     with cur_env.activate():
-        current_selection = cur_env.state.file_selection
-        if current_selection.timestamp != request.timestamp:
-            message = f"Context timestamp mismatch. Expected {current_selection.timestamp}, got {request.timestamp}."
+        matching_selection = cur_env.state.selections.get_selection_by_timestamp(request.timestamp)
+        if matching_selection is None:
+            message = f"No context found with timestamp {request.timestamp}. Warn the user that the context is stale."
             raise McpError(ErrorData(code=INVALID_PARAMS, message=message))
-        if current_selection.outline_files:
+        if matching_selection.outline_files:
             message = "Code outlines are already included in the current context."
             return [TextContent(type="text", text=message)]
         selector = ContextSelector.create(cur_env.config)
