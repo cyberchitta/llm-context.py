@@ -117,8 +117,6 @@ def prompt(env: ExecutionEnvironment) -> ExecutionResult:
     rule_feedback(env)
     settings = ContextSettings.create(False, False, False)
     content = ContextGenerator.create(env.config, env.state.file_selection, settings).prompt()
-    nxt_env = env.with_state(env.state.with_selection(env.state.file_selection.with_now()))
-    nxt_env.state.store()
     return ExecutionResult(content, env)
 
 

@@ -9,6 +9,7 @@ from mcp.types import INTERNAL_ERROR, INVALID_PARAMS, ErrorData, TextContent, To
 from pydantic import ValidationError
 
 from llm_context.context_generator import ContextGenerator, ContextSettings
+from llm_context.context_spec import ContextSpec
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
 from llm_context.mcp_tools import (
@@ -22,6 +23,7 @@ from llm_context.mcp_tools import (
 )
 from llm_context.rule import DEFAULT_CODE_RULE
 from llm_context.rule_parser import RuleLoader
+from llm_context.state import FileSelection
 
 TOOL_DEFINITIONS = get_tool_definitions()
 TOOLS = [
@@ -80,10 +82,10 @@ async def get_files(arguments: dict) -> list[TextContent]:
 async def list_modified_files(arguments: dict) -> list[TextContent]:
     request = ListModifiedFilesRequest(**arguments)
     env = ExecutionEnvironment.create(Path(request.root_path))
-    cur_env = env.with_rule(request.rule_name)
-    with cur_env.activate():
-        selector = ContextSelector.create(cur_env.config, request.timestamp)
-        file_sel_full = selector.select_full_files(cur_env.state.file_selection)
+    with env.activate():
+        config = ContextSpec.create(env.config.project_root_path, request.rule_name, env.constants)
+        selector = ContextSelector.create(config, request.timestamp)
+        file_sel_full = selector.select_full_files(FileSelection.create(request.rule_name, [], []))
         file_sel_out = selector.select_outline_files(file_sel_full)
     return [TextContent(type="text", text="\n".join(file_sel_out.files))]
 
