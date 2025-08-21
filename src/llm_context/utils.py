@@ -176,3 +176,7 @@ def log(level: int, msg: str) -> None:
         logger.debug(msg)
     elif level == CRITICAL:
         logger.critical(msg)
+
+
+def is_newer(abs_path: str, timestamp: float) -> bool:
+    return Path(abs_path).exists() and Path(abs_path).stat().st_mtime > timestamp

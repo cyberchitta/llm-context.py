@@ -24,6 +24,7 @@ from llm_context.mcp_tools import (
 from llm_context.rule import DEFAULT_CODE_RULE
 from llm_context.rule_parser import RuleLoader
 from llm_context.state import FileSelection
+from llm_context.utils import PathConverter, is_newer
 
 TOOL_DEFINITIONS = get_tool_definitions()
 TOOLS = [
@@ -57,12 +58,11 @@ async def get_files(arguments: dict) -> list[TextContent]:
         if matching_selection is None:
             message = f"No context found with timestamp {request.timestamp}. Warn the user that the context is stale."
             raise McpError(ErrorData(code=INVALID_PARAMS, message=message))
-        orig_files = set(matching_selection.full_files)
-        selector = ContextSelector.create(env.config, request.timestamp)
-        modified_files_selection = selector.select_full_files(env.state.file_selection)
-        mod_files = set(modified_files_selection.full_files)
-        already_included = [p for p in request.paths if p in orig_files and p not in mod_files]
-        files_to_fetch = [p for p in request.paths if p not in orig_files or p in mod_files]
+        orig = set(matching_selection.full_files)
+        converter = PathConverter.create(env.config.project_root_path)
+        paths = list(zip(request.paths, converter.to_absolute(request.paths)))
+        files_to_fetch = {r for r, a in paths if r not in orig or is_newer(a, request.timestamp)}
+        already_included = set(request.paths) - files_to_fetch
         response_parts = []
         if already_included:
             response_parts.append(
