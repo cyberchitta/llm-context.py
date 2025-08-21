@@ -57,9 +57,12 @@ async def get_files(arguments: dict) -> list[TextContent]:
         if matching_selection is None:
             message = f"No context found with timestamp {request.timestamp}. Warn the user that the context is stale."
             raise McpError(ErrorData(code=INVALID_PARAMS, message=message))
-        full_files_set = set(matching_selection.full_files)
-        already_included = [path for path in request.paths if path in full_files_set]
-        files_to_fetch = [path for path in request.paths if path not in full_files_set]
+        orig_files = set(matching_selection.full_files)
+        selector = ContextSelector.create(env.config, request.timestamp)
+        modified_files_selection = selector.select_full_files(env.state.file_selection)
+        mod_files = set(modified_files_selection.full_files)
+        already_included = [p for p in request.paths if p in orig_files and p not in mod_files]
+        files_to_fetch = [p for p in request.paths if p not in orig_files or p in mod_files]
         response_parts = []
         if already_included:
             response_parts.append(
