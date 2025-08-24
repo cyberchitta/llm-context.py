@@ -144,8 +144,10 @@ class ProjectSetup:
         log(INFO, f"Updated template {template_name} to {dest_path}")
 
     def _copy_rule(self, rule_file: str, dest_path: Path):
-        template_content = resources.read_text(rules, rule_file)
-        dest_path.write_text(template_content)
+        rules_path = resources.files(rules)
+        rule_path = rules_path / rule_file
+        rule_content = rule_path.read_text()
+        dest_path.write_text(rule_content)
         log(INFO, f"Updated rule {rule_file} to {dest_path}")
 
     def _setup_default_rules(self):
