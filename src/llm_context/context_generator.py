@@ -205,7 +205,7 @@ class ContextGenerator:
 
     def focus_help(self) -> str:
         rule_provider = RuleProvider.create(self.spec.project_layout)
-        return rule_provider.get_rule_content("lc-focus-common") or ""
+        return rule_provider.get_rule_content("lc/focus-common") or ""
 
     def files(self, in_files: list[str] = []) -> str:
         rel_paths = in_files if in_files else self.full_rel

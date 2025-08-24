@@ -13,7 +13,7 @@ CURRENT_CONFIG_VERSION = version.parse("3.5")
 IGNORE_NOTHING = [".git"]
 INCLUDE_ALL = ["**/*"]
 
-DEFAULT_CODE_RULE = "lc-code"
+DEFAULT_CODE_RULE = "lc/code"
 DEFAULT_OVERVIEW_MODE = "full"
 
 

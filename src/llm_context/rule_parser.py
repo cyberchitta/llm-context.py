@@ -62,13 +62,6 @@ class RuleLoader:
             log(ERROR, f"Failed to parse rule {path}: {str(e)}")
             return None
 
-    def load_all_rules(self) -> dict[str, RuleParser]:
-        return {
-            rule.name: rule
-            for path in self.rules_dir.glob("*.md")
-            if (rule := self._load_rule_from_path(path)) is not None
-        }
-
     def load_rule(self, name: str) -> RuleParser:
         path = self.rules_dir / f"{name}.md"
         if not path.exists():

@@ -17,14 +17,14 @@ PROJECT_INFO: str = (
 )
 
 SYSTEM_RULES = [
-    "lc-code.md",
-    "lc-filters.md",
-    "lc-no-full-files.md",
-    "lc-no-outline-files.md",
-    "lc-no-files.md",
-    "lc-create-rule-common.md",
-    "lc-create-rule-new-chat-prefix.md",
-    "lc-create-rule.md",
+    "lc/code.md",
+    "lc/filters.md",
+    "lc/no-full-files.md",
+    "lc/no-outline-files.md",
+    "lc/no-files.md",
+    "lc/create-rule-common.md",
+    "lc/create-rule-new-chat-prefix.md",
+    "lc/create-rule.md",
 ]
 
 
@@ -149,7 +149,10 @@ class ProjectSetup:
         log(INFO, f"Updated rule {rule_file} to {dest_path}")
 
     def _setup_default_rules(self):
+        lc_rules_path = self.project_layout.rules_path / "lc"
+        lc_rules_path.mkdir(exist_ok=True)
         for rule in SYSTEM_RULES:
             rule_path = self.project_layout.get_rule_path(rule)
+            rule_path.parent.mkdir(parents=True, exist_ok=True)
             if not rule_path.exists() or self.constants.needs_update:
                 self._copy_rule(rule, rule_path)

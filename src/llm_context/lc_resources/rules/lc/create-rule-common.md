@@ -1,5 +1,5 @@
 ---
-name: lc-create-rule-common
+name: lc/create-rule-common
 description: Core reusable instructions for creating focused rules
 ---
 
@@ -38,8 +38,8 @@ Files with these extensions are the only candidates for outline-files. Other fil
 
 - ✅ `"/src/components/**"` - correct relative path
 - ❌ `"/myproject/src/components/**"` - includes project name
-- ✅ `"/.llm-context/rules/lc-code.md"` - correct for root-level directories
-- ❌ `"/myproject/.llm-context/rules/lc-code.md"` - includes project name
+- ✅ `"/.llm-context/rules/lc/code.md"` - correct for root-level directories
+- ❌ `"/myproject/.llm-context/rules/lc/code.md"` - includes project name
 
 **Important:** Both `limit-to` and `also-include` patterns must match **file paths**, not directory names:
 
@@ -53,8 +53,8 @@ Files with these extensions are the only candidates for outline-files. Other fil
 
 - `compose: {filters: [...], rules: [...]}` - Build from other rules
 - `filters` - Merge gitignore/limit-to/also-include patterns
-  - Use `lc-filters` when you want to add to the default inclusion set
-  - Use `lc-no-files` when you want precise control (only specified files included)
+  - Use `lc/filters` when you want to add to the default inclusion set
+  - Use `lc/no-files` when you want precise control (only specified files included)
 - `rules` - Concatenate content from other rules
 
 ### Overview Modes
@@ -74,7 +74,7 @@ name: api-debugging
 description: "API debugging with test exclusions"
 overview: "full"
 compose:
-  filters: ["lc-filters"]
+  filters: ["lc/filters"]
 gitignores:
   full-files: ["**/test/**", "**/*.test.*"]
 limit-to:
@@ -99,7 +99,7 @@ name: tmp-task-name
 description: "Brief description of what this focuses on"
 overview: "full"
 compose:
-  filters: ["lc-no-files"]
+  filters: ["lc/no-files"]
 also-include:
   full-files:
     - "/path/to/file1.ext"
@@ -112,10 +112,10 @@ also-include:
 Optional: Additional context or instructions for this rule.
 EOF
 
-lc-set-rule tmp-task-name
-lc-sel-files
-lc-sel-outlines
-lc-context
+lc/set-rule tmp-task-name
+lc/sel-files
+lc/sel-outlines
+lc/context
 ```
 
 ## Best Practices

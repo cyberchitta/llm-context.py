@@ -1,9 +1,9 @@
 ---
-name: lc-code
+name: lc/code
 description: "Standard code analysis rule"
 overview: full
 compose:
-  filters: [lc-filters]
+  filters: [lc/filters]
 ---
 
 ## Persona

@@ -401,8 +401,8 @@ class TestRulesDirectoryAlsoInclude(unittest.TestCase):
         self.root_path = Path(self.temp_dir)
 
         # Create .llm-context/rules structure like in the real project
-        (self.root_path / ".llm-context" / "rules").mkdir(parents=True)
-        (self.root_path / ".llm-context" / "rules" / "lc-code.md").write_text("# lc-code rule")
+        (self.root_path / ".llm-context" / "rules" / "lc").mkdir(parents=True)
+        (self.root_path / ".llm-context" / "rules" / "lc" / "code.md").write_text("# lc/code rule")
         (self.root_path / ".llm-context" / "rules" / "with-rules.md").write_text(
             "# with-rules rule"
         )
@@ -429,7 +429,7 @@ class TestRulesDirectoryAlsoInclude(unittest.TestCase):
         # Test the internal _relative_path method
         path1 = selector._relative_path(".", "test.md")
         path2 = selector._relative_path(".llm-context", "config.yaml")
-        path3 = selector._relative_path(".llm-context/rules", "lc-code.md")
+        path3 = selector._relative_path(".llm-context/rules", "lc/code.md")
 
         print(f"Root file path format: '{path1}'")
         print(f"Config file path format: '{path2}'")
@@ -483,7 +483,6 @@ class TestRulesDirectoryAlsoInclude(unittest.TestCase):
         for file in files:
             self.assertTrue(file.endswith(".md"), f"File should be .md: {file}")
             self.assertIn("/rules/", file, f"File should be in rules directory: {file}")
-
 
     def test_pathspec_matching_behavior(self):
         """Test exactly why rules/** doesn't match /.llm-context/rules/file.md"""
