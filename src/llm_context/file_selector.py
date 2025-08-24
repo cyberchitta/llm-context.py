@@ -32,10 +32,18 @@ class GitIgnorer:
 
     @staticmethod
     def from_git_root(root_dir: str, xtra_root_patterns: list[str] = []) -> "GitIgnorer":
-        ignorer_data = [("/", PathspecIgnorer.create(xtra_root_patterns))]
+        ignorer_data = []
+        if xtra_root_patterns:
+            ignorer_data.append(("/", PathspecIgnorer.create(xtra_root_patterns)))
         gitignores = GitIgnorer._collect_gitignores(root_dir)
         for relative_path, patterns in gitignores:
             ignorer_data.append((relative_path, PathspecIgnorer.create(patterns)))
+        start_idx = 1 if xtra_root_patterns else 0
+        if len(ignorer_data) > start_idx:
+            prefix_data = ignorer_data[:start_idx]
+            gitignore_data = ignorer_data[start_idx:]
+            gitignore_data.sort(key=lambda x: (-x[0].count("/"), x[0]))
+            ignorer_data = prefix_data + gitignore_data
         return GitIgnorer(ignorer_data)
 
     @staticmethod
@@ -55,7 +63,11 @@ class GitIgnorer:
         assert path not in ("/", ""), "Root directory cannot be an input for ignore method"
         for prefix, ignorer in self.ignorer_data:
             if path.startswith(prefix):
-                if ignorer.ignore(path):
+                if prefix == "/":
+                    test_path = path[1:]
+                else:
+                    test_path = path[len(prefix) :].lstrip("/")
+                if test_path and ignorer.ignore(test_path):
                     return True
         return False
 
