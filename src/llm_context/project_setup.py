@@ -18,6 +18,10 @@ PROJECT_INFO: str = (
 
 SYSTEM_RULES = [
     "lc/code.md",
+    "lc/code-style.md",
+    "lc/javascript-style.md",
+    "lc/jupyter-style.md",
+    "lc/python-style.md",
     "lc/filters.md",
     "lc/no-full-files.md",
     "lc/no-outline-files.md",

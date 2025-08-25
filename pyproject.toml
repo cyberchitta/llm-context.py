@@ -23,12 +23,12 @@ classifiers = [
 
 dependencies = [
   "jinja2>=3.1.6, <4.0",
-  "mcp>=1.11.0",
+  "mcp>=1.12.0",
   "packaging>=24.1, <25.0",
   "pathspec>=0.12.1, <0.13.0",
   "pyperclip>=1.9.0, <2.0.0",
   "pyyaml>=6.0.2",
-  "tree-sitter>=0.24",
+  "tree-sitter>=0.24, <0.25",
   "tree-sitter-language-pack>=0.9.0",
 ]
 
