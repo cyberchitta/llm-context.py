@@ -38,7 +38,7 @@ def select_all_files(env: ExecutionEnvironment) -> ExecutionResult:
 @create_command
 def init_project(env: ExecutionEnvironment):
     log(INFO, f"LLM Context initialized for project: {env.config.project_root}")
-    log(INFO, "You can now edit .llm-context/config.yaml to customize ignore patterns.")
+    log(INFO, "See the user guide for setup and customization: https://github.com/cyberchitta/llm-context.py/blob/main/docs/user-guide.md")
     return ExecutionResult(None, env)
 
 
