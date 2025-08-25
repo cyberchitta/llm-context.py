@@ -196,15 +196,12 @@ class RuleResolver:
         resolved_instructions = ""
         if "instructions" in rule.frontmatter:
             if rule.content.strip():
-                log(
-                    WARNING,
-                    f"Rule '{rule_name}' has both 'instructions' field and markdown content. The markdown content will be ignored.",
-                )
+                log(WARNING, f"Rule '{rule_name}' has both 'instructions' field and markdown content. The markdown content will be ignored.")
             instruction_contents = []
             for instruction_rule_name in rule.frontmatter["instructions"]:
-                instruction_rule = new_resolver.get_rule(instruction_rule_name)
-                if instruction_rule.instructions:
-                    instruction_contents.append(instruction_rule.instructions)
+                instruction_rule_parser = new_resolver.rule_loader.load_rule(instruction_rule_name)
+                if instruction_rule_parser.content.strip():
+                    instruction_contents.append(instruction_rule_parser.content)
             resolved_instructions = "\n\n".join(instruction_contents)
         else:
             resolved_instructions = rule.content
