@@ -5,7 +5,12 @@ from pathlib import Path
 
 import pyperclip  # type: ignore
 
-from llm_context.cmd_pipeline import ExecutionResult, create_clipboard_cmd, create_command
+from llm_context.cmd_pipeline import (
+    ExecutionResult,
+    create_clipboard_cmd,
+    create_command,
+    create_init_command,
+)
 from llm_context.context_generator import ContextGenerator, ContextSettings
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
@@ -35,10 +40,13 @@ def select_all_files(env: ExecutionEnvironment) -> ExecutionResult:
     return ExecutionResult(None, nxt_env)
 
 
-@create_command
+@create_init_command
 def init_project(env: ExecutionEnvironment):
     log(INFO, f"LLM Context initialized for project: {env.config.project_root}")
-    log(INFO, "See the user guide for setup and customization: https://github.com/cyberchitta/llm-context.py/blob/main/docs/user-guide.md")
+    log(
+        INFO,
+        "See the user guide for setup and customization: https://github.com/cyberchitta/llm-context.py/blob/main/docs/user-guide.md",
+    )
     return ExecutionResult(None, env)
 
 

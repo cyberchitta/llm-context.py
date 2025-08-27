@@ -30,6 +30,16 @@ def with_env(func: Callable[..., ExecutionResult]) -> Callable[..., ExecutionRes
     return wrapper
 
 
+def with_init_env(func: Callable[..., ExecutionResult]) -> Callable[..., ExecutionResult]:
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> ExecutionResult:
+        env = ExecutionEnvironment.create_init(Path.cwd())
+        with env.activate():
+            return func(*args, env=env, **kwargs)
+
+    return wrapper
+
+
 def with_clipboard(func: Callable[..., ExecutionResult]) -> Callable[..., ExecutionResult]:
     @wraps(func)
     def wrapper(*args, **kwargs) -> ExecutionResult:
@@ -74,3 +84,7 @@ def create_clipboard_cmd(func: Callable[..., ExecutionResult]) -> Callable[..., 
 
 def create_command(func: Callable[..., ExecutionResult]) -> Callable[..., None]:
     return with_error(with_print(with_env(func)))
+
+
+def create_init_command(func: Callable[..., ExecutionResult]) -> Callable[..., None]:
+    return with_error(with_print(with_init_env(func)))

@@ -9,7 +9,7 @@ from llm_context.context_spec import ContextSpec
 from llm_context.file_selector import ContextSelector
 from llm_context.highlighter.parser import ASTFactory
 from llm_context.highlighter.tagger import ASTBasedTagger
-from llm_context.rule import ToolConstants
+from llm_context.rule import DEFAULT_CODE_RULE, ToolConstants
 from llm_context.state import AllSelections, FileSelection, StateStore
 from llm_context.utils import ProjectLayout
 
@@ -92,6 +92,21 @@ class ExecutionEnvironment:
     state: ExecutionState
     constants: ToolConstants
     tagger: Optional[Any]
+
+    @staticmethod
+    def create_init(project_root: Path) -> "ExecutionEnvironment":
+        runtime = RuntimeContext.create()
+        project_layout = ProjectLayout(project_root)
+        constants = (
+            ToolConstants.load(project_layout.state_path)
+            if project_layout.state_path.exists()
+            else ToolConstants.create_null()
+        )
+        config = ContextSpec.create(project_root, DEFAULT_CODE_RULE, constants)
+        empty_selections = AllSelections.create_empty()
+        state = ExecutionState.create(project_layout, empty_selections, DEFAULT_CODE_RULE)
+        tagger = ExecutionEnvironment._tagger(project_root)
+        return ExecutionEnvironment(config, runtime, state, constants, tagger)
 
     @staticmethod
     def create(project_root: Path) -> "ExecutionEnvironment":

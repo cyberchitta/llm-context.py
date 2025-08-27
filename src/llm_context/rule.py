@@ -5,7 +5,8 @@ from typing import Any, Optional, cast
 
 from packaging import version
 
-from llm_context.rule_parser import RuleLoader, RuleParser
+from llm_context.exceptions import RuleResolutionError
+from llm_context.rule_parser import DEFAULT_CODE_RULE, RuleLoader, RuleParser
 from llm_context.utils import ProjectLayout, Yaml, log, safe_read_file
 
 CURRENT_CONFIG_VERSION = version.parse("4.0")
@@ -13,7 +14,6 @@ CURRENT_CONFIG_VERSION = version.parse("4.0")
 IGNORE_NOTHING = [".git"]
 INCLUDE_ALL = ["**/*"]
 
-DEFAULT_CODE_RULE = "lc/prm-developer"
 DEFAULT_OVERVIEW_MODE = "full"
 
 
@@ -186,8 +186,17 @@ class RuleResolver:
                 f"Circular composition detected: {' -> '.join(self._composition_stack)} -> {rule_name}"
             )
         rule = self.rule_loader.load_rule(rule_name)
-        composed_config = self._compose_rule_config(rule, rule_name)
-        return Rule.from_config(composed_config)
+        try:
+            composed_config = self._compose_rule_config(rule, rule_name)
+            return Rule.from_config(composed_config)
+        except RuleResolutionError:
+            raise
+        except Exception as e:
+            raise RuleResolutionError(
+                f"Failed to resolve rule '{rule_name}': {str(e)}. "
+                f"This may indicate outdated rule syntax or missing dependencies. "
+                f"Consider updating the rule or switching to '{DEFAULT_CODE_RULE}' with: lc-set-rule {DEFAULT_CODE_RULE}"
+            )
 
     def _compose_rule_config(self, rule: RuleParser, rule_name: str) -> dict[str, Any]:
         new_resolver = RuleResolver(
@@ -196,7 +205,10 @@ class RuleResolver:
         resolved_instructions = ""
         if "instructions" in rule.frontmatter:
             if rule.content.strip():
-                log(WARNING, f"Rule '{rule_name}' has both 'instructions' field and markdown content. The markdown content will be ignored.")
+                log(
+                    WARNING,
+                    f"Rule '{rule_name}' has both 'instructions' field and markdown content. The markdown content will be ignored.",
+                )
             instruction_contents = []
             for instruction_rule_name in rule.frontmatter["instructions"]:
                 instruction_rule_parser = new_resolver.rule_loader.load_rule(instruction_rule_name)

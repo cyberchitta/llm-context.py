@@ -4,7 +4,7 @@ from logging import ERROR, WARNING
 from pathlib import Path
 from typing import Optional
 
-from llm_context.rule import DEFAULT_CODE_RULE
+from llm_context.rule_parser import DEFAULT_CODE_RULE
 from llm_context.utils import ProjectLayout, Yaml, log
 
 

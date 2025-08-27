@@ -6,7 +6,10 @@ from typing import Any, Optional
 
 import yaml
 
+from llm_context.exceptions import RuleResolutionError
 from llm_context.utils import ProjectLayout, Yaml, log
+
+DEFAULT_CODE_RULE = "lc/prm-developer"
 
 
 @dataclass(frozen=True)
@@ -72,8 +75,9 @@ class RuleLoader:
             content = path.read_text()
             return RuleParser.parse(content, path)
         except Exception as e:
-            raise ValueError(
-                f"Failed to parse rule file '{name}.md': {str(e)}. Run 'lc-init' to restore default rules."
+            raise RuleResolutionError(
+                f"Failed to parse rule file '{name}.md': {str(e)}. This may indicate outdated rule syntax. "
+                f"Consider updating the rule or switching to '{DEFAULT_CODE_RULE}' with: lc-set-rule {DEFAULT_CODE_RULE}"
             )
 
     def save_rule(self, name: str, frontmatter: dict[str, Any], content: str) -> Path:
