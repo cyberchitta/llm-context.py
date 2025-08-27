@@ -1,3 +1,4 @@
+import shutil
 from dataclasses import dataclass
 from importlib import resources
 from logging import INFO
@@ -157,9 +158,13 @@ class ProjectSetup:
 
     def _setup_default_rules(self):
         lc_rules_path = self.project_layout.rules_path / "lc"
-        lc_rules_path.mkdir(exist_ok=True)
+        if not self.constants.needs_update and lc_rules_path.exists():
+            return
+        if lc_rules_path.exists():
+            shutil.rmtree(lc_rules_path)
+            log(INFO, "Refreshing system rules")
+        lc_rules_path.mkdir(parents=True, exist_ok=True)
         for rule in SYSTEM_RULES:
             rule_path = self.project_layout.get_rule_path(rule)
             rule_path.parent.mkdir(parents=True, exist_ok=True)
-            if not rule_path.exists() or self.constants.needs_update:
-                self._copy_rule(rule, rule_path)
+            self._copy_rule(rule, rule_path)
