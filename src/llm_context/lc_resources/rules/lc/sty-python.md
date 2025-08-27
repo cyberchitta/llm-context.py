@@ -1,5 +1,5 @@
 ---
-name: lc/sty-jupyter
+name: lc/sty-python
 description: Provides Python-specific style guidelines, including Pythonic patterns, type system usage, class design, import organization, and idioms. Use for Python projects to ensure consistent, readable, and maintainable code.
 ---
 
@@ -10,13 +10,13 @@ description: Provides Python-specific style guidelines, including Pythonic patte
 - Use list/dict comprehensions over traditional loops
 - Leverage tuple unpacking and multiple assignment
 - Use conditional expressions for simple conditional logic
-- Prefer single-pass operations for efficiency
+- Prefer single-pass operations: `sum(x for x in items if condition)` over separate filter+sum
 
 ### Type System
 
 - Use comprehensive type hints throughout
 - Import types from `typing` module as needed
-- Type hints should enhance code readability and IDE support
+- Use specific types: `list[str]` not `list`, `dict[str, int]` not `dict`
 
 ### Class Design
 

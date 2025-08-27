@@ -30,7 +30,7 @@ description: Details JavaScript-specific style guidelines, covering modern featu
 
 - Use `async/await` over Promise chains for better readability
 - Handle errors with proper try/catch blocks
-- Provide meaningful error messages
+- Error messages must include: what failed, why it failed, and suggested action
 
 ### Naming Conventions
 
@@ -41,6 +41,5 @@ description: Details JavaScript-specific style guidelines, covering modern featu
 
 ### Documentation
 
-- Use JSDoc comments for complex functions and public APIs
-- Document parameter and return types
-- Include usage examples for non-obvious functions
+- Use JSDoc comments for public APIs and complex business logic
+- Document parameter and return types with JSDoc tags
