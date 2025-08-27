@@ -2,6 +2,114 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2025-08-27
+
+### Bug Fixes
+- Sort file lists for consistent output and state storage
+- Handle rule loading errors gracefully without stack traces
+- Remove tool references when -nt flag is used
+- Remove tool references when -nt flag is used
+- Update rule name
+- Bad character in tool name
+- Use markdown content for instructions field instead of full rule processing
+- Update obsolete init message to reference user guide
+- Add tif to globs
+- Use resources.files() API for subfolder resource access
+- Check file modification time in lc-get-files
+- Ensure context timestamps match between content and state storage
+- Only update timestamps on actual context generation
+- Search all rule selections for timestamp match in MCP tools
+- Update rule creator to latest yaml
+- Remove extra newline in rule serialization
+- Clarify text
+- Outline-supported file extensions replace language list
+- Correct pathspec examples in lc-focus-common rule documentation
+- Repair also-include patterns with proper traversal logic
+- Remove deleted import
+- Update handlers to remove deleted tool
+- Update sort order with current fields
+- Yaml updates to rules
+- Revert formatting of yaml only files
+- Remove incorrect path prefixing in rule_files method
+- Improve focus help tool description
+- Implement recursive rule composition with cycle detection
+- Timestamp should be date only
+- Eliminate bare exception
+- Remove rule path from context
+- Improve end prompt
+- Resolve mypy type errors in mcp_tools.py
+- Resolve Windows 'charmap' codec error with UTF-8 encoding
+- Revert prior commit
+- Ensure UTF-8 encoding on Windows to prevent charmap codec errors
+- Enhance final reminder to discourage unnecessary file requests
+- Revert to old behaviour
+- Delete state store when referencing stale rule
+
+### Documentation
+- Complete rewrite to reflect systematic rule organization and actual usage patterns
+
+### Features
+- Clean up stale system rules during updates
+- Improve rule resolution error handling and init process
+- New rule for working with templates
+- Add AI co-author attribution to commit message format
+- Add coding style guidelines to base prompt
+- Add explicit code generation gate to developer prompt
+- Add section on imports
+- Add modular code style guidelines
+- Sort glob patterns
+- Add .icns to filters
+- Add nested .gitignore support with comprehensive tests
+- Organize system rules in lc/ subfolder
+- Add context-aware file retrieval to MCP tools
+- Default to full overview in rule creation for better file discoverability
+- Enhance focus instructions with file extensions and path format
+- Remove context size functionality
+- Remove created timestamp
+- Add instructions field for composable rule instructions
+- Replace files/outlines with unified filtering system
+- Finer grained file exclusion filters
+- Add lc-focus to config
+- Add comprehensive rule semantics to lc-focus content
+- Add lc-focus rule for comprehensive context reduction guidance
+- Add context_size() method and improve lc-create-rule feedback
+- Add cli for focus help
+- Add lc-create-rule MCP tool with unified focus help instructions
+- Add configurable overview modes (focused/full) to rules
+- Rename lc-focus-help to lc-rule-create-instructions in MCP
+- Simplify focus-help template to be fully autonomous
+- Add lc-block-all filter rule for explicit file selection
+- Standardize YAML formatting and add rule timestamp support
+- Add focused context creation instructions
+- Replace rule inheritance with composition system
+- Add focused overview with hierarchical file display
+- Add comprehensive archive format ignores to default gitignores
+- Add user message indicator to context output
+- Emphasize checking context before requesting files
+- Improve key file visibility in context diagrams
+- Skip automatic outline selection when changing rules
+- Add webp to ignores
+- Improve clarity of context usage instructions
+
+### Refactor
+- Clean up vague instructions in style rules
+- Reorganize rules into systematic categories with kebab-case prefixes
+- Simplify file modification check in lc-get-files
+- Refine for clarity
+- Update SYSTEM_RULES
+- Rename lc-focus to lc-create-rule for clarity
+- Standardize YAML keys to kebab-case and remove last-used serialization
+- Eliminate duplication in focus help instructions and remove MCP create-rule tool
+- Rename lc-overview-only to lc-no-files for clarity
+- Rename lc-block-all to lc-overview-only for clarity
+- Move rules to project context
+- Unify context templates with tools_available flag
+- Rename FlatDiagram to FullOverview for clarity
+- Extract MCP tool definitions to centralized module
+
+### Testing
+- Add pathspec pattern tests for also-include functionality
+
 ## [0.3.4] - 2025-06-04
 
 ### Bug Fixes
