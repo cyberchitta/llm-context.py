@@ -8,15 +8,14 @@ description: Outlines universal code style principles for modern programming lan
 ### Functional Programming Approach
 
 - Prefer functional over imperative patterns
-- Use modern language features over traditional loops and constructs
 - Favor pure functions and immutable data structures
 - Design for method chaining through immutable transformations
+- Prefer conditional expressions over conditional statements when possible
 
 ### Code Clarity
 
 - Write self-documenting code through expressive naming
 - Good names should make comments superfluous
-- Use modern language idioms and syntax features
 - Compose complex operations through small, focused functions
 
 ### Object Design
@@ -36,7 +35,7 @@ description: Outlines universal code style principles for modern programming lan
 ### Architecture
 
 - Favor composition over inheritance
-- Design for testability through small, focused units
+- Avoid static dependencies - use dependency injection for testability
 - Maintain clear separation between pure logic and side effects
 
 **Goal: Write beautiful code that is readable, maintainable, and robust.**
