@@ -45,7 +45,9 @@ class OutlinesRequest(BaseModel):
         ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
     )
     rule_name: str = Field(
-        "lc/prm-developer", description="Rule to use for file selection rules", pattern="^[a-zA-Z0-9_-]+$"
+        "lc/prm-developer",
+        description="Rule to use for file selection rules",
+        pattern="^[a-zA-Z0-9_-]+$",
     )
     timestamp: float = Field(
         ..., description="Context generation timestamp to check against existing selections"

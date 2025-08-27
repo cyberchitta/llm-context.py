@@ -402,7 +402,9 @@ class TestRulesDirectoryAlsoInclude(unittest.TestCase):
 
         # Create .llm-context/rules structure like in the real project
         (self.root_path / ".llm-context" / "rules" / "lc").mkdir(parents=True)
-        (self.root_path / ".llm-context" / "rules" / "lc" / "prm-developer.md").write_text("# lc/prm-developer rule")
+        (self.root_path / ".llm-context" / "rules" / "lc" / "prm-developer.md").write_text(
+            "# lc/prm-developer rule"
+        )
         (self.root_path / ".llm-context" / "rules" / "flt-with-rules.md").write_text(
             "# with-rules rule"
         )
