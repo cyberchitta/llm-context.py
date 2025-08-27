@@ -185,8 +185,8 @@ class RuleResolver:
             raise ValueError(
                 f"Circular composition detected: {' -> '.join(self._composition_stack)} -> {rule_name}"
             )
-        rule = self.rule_loader.load_rule(rule_name)
         try:
+            rule = self.rule_loader.load_rule(rule_name)
             composed_config = self._compose_rule_config(rule, rule_name)
             return Rule.from_config(composed_config)
         except RuleResolutionError:
