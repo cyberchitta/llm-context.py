@@ -26,25 +26,27 @@ Instructions for AI:: The following outlines show definition declarations in fil
 
 > **Note:** Implementation retrieval doesn't support C/C++ files.
 
-1. Using the lc-get-implementations tool:
-   ```json
-   {
-     "root_path": "{{ abs_root_path }}",
-     "queries": [
-       {% for path, name in sample_definitions %}
-       ["{{ path }}", "{{ name }}"]{% if not loop.last %},{% endif %}
-       {% endfor %}
-     ]
-   }
-   ```
-
-2. Without tools: Copy these references to clipboard:
-   ```
-   {% for path, name in sample_definitions %}
-   {{ path }}:{{ name }}
-   {% endfor %}
-   ```
-   Then ask the human to run `lc-clip-implementations`
+{% if tools_available %}
+Using the lc-get-implementations tool:
+```json
+{
+  "root_path": "{{ abs_root_path }}",
+  "queries": [
+    {% for path, name in sample_definitions %}
+    ["{{ path }}", "{{ name }}"]{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+```
+{% else %}
+Copy these references to clipboard:
+```
+{% for path, name in sample_definitions %}
+{{ path }}:{{ name }}
+{% endfor %}
+```
+Then ask the human to run `lc-clip-implementations`
+{% endif %}
 
 NOTE: Prefer requesting specific implementations rather than entire files when possible.
 {% endif %}
@@ -54,9 +56,17 @@ NOTE: Prefer requesting specific implementations rather than entire files when p
 ## FINAL REMINDER
 
 {% if overview_mode == "focused" -%}
+{% if tools_available -%}
 Instructions for AI: ⚠️ This document contains focused project context. Use the available tools (lc-get-files, lc-list-modified-files, lc-get-implementations) to retrieve additional files as needed for your analysis. Check the repository structure above to see file status before requesting.
 {%- else -%}
+Instructions for AI: ⚠️ This document contains focused project context. Additional files can be requested by following the file request instructions in the repository structure section above.
+{%- endif %}
+{%- else -%}
+{% if tools_available -%}
 Instructions for AI: ⚠️ DO NOT REQUEST ADDITIONAL CONTEXT OR FILES ALREADY INCLUDED ABOVE. This document contains complete project context. Only request files that have been modified since context generation (using lc-list-modified-files) or specific files marked as excluded (✗) that are necessary for your analysis.
+{%- else -%}
+Instructions for AI: ⚠️ DO NOT REQUEST ADDITIONAL CONTEXT OR FILES ALREADY INCLUDED ABOVE. This document contains complete project context. Additional files can be requested by following the file request instructions in the repository structure section above.
+{%- endif %}
 {%- endif %}
 
 {% include 'lc-end-prompt.j2' %}
