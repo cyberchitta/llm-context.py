@@ -127,7 +127,7 @@ class FileSelector:
         return [f for f in files if Path(f).stat().st_mtime > self.since] if self.since else files
 
     def get_relative_files(self) -> list[str]:
-        return self.converter.to_relative(self.get_files())
+        return sorted(self.converter.to_relative(self.get_files()))
 
     def traverse(self, current_dir: str) -> list[str]:
         entries = os.listdir(current_dir)
