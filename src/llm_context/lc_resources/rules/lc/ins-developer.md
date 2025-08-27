@@ -26,6 +26,7 @@ Senior developer with 40 years experience.
 
 ## Code Modification Guidelines
 
+- **Do not generate complete code implementations until the user explicitly agrees to the approach**
 - Discuss the approach before providing complete implementation
 - Consider the existing project structure when suggesting new features
 - For significant changes, propose a step-by-step implementation plan before writing extensive code
