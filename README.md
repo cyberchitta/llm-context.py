@@ -26,6 +26,8 @@ lc-context      # Instant formatted context
 
 **Result**: From "I need to share my project" to productive AI collaboration in seconds.
 
+> **Note**: This project was developed in collaboration with several Claude Sonnets (3.5, 3.6, 3.7 and 4.0), as well as Groks (3 and 4), using LLM Context itself to share code during development. All code in the repository is heavily human-curated (by me 😇, @restlessronin).
+
 ## Installation
 
 ```bash
