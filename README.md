@@ -4,51 +4,54 @@
 [![PyPI version](https://img.shields.io/pypi/v/llm-context.svg)](https://pypi.org/project/llm-context/)
 [![Downloads](https://static.pepy.tech/badge/llm-context/week)](https://pepy.tech/project/llm-context)
 
-LLM Context is a tool that helps developers quickly inject relevant content from code/text projects into Large Language Model chat interfaces. It leverages `.gitignore` patterns for smart file selection and provides both a streamlined clipboard workflow using the command line and direct LLM integration through the Model Context Protocol (MCP).
+**Reduce friction when providing context to LLMs.** Share relevant project files instantly through smart selection and rule-based filtering.
 
-> **Note**: This project was developed in collaboration with several Claude Sonnets - 3.5, 3.6 and 3.7 (and more recently Grok-3 as well), using LLM Context itself to share code during development. All code in the repository is human-curated (by me 😇, @restlessronin).
+## The Problem
 
-## Why LLM Context?
+Getting project context into LLM chats is tedious:
 
-For an in-depth exploration of the reasoning behind LLM Context and its approach to AI-assisted development, check out our article: [LLM Context: Harnessing Vanilla AI Chats for Development](https://www.cyberchitta.cc/articles/llm-ctx-why.html)
+- Manually copying/pasting files takes forever
+- Hard to identify which files are relevant
+- Including too much hits context limits, too little misses important details
+- AI requests for additional files require manual fetching
+- Repeating this process for every conversation
 
-To see LLM Context in action with real-world examples and workflows, read: [Full Context Magic - When AI Finally Understands Your Entire Project](https://www.cyberchitta.cc/articles/full-context-magic.html)
+## The Solution
 
-## Current Usage Patterns
+```bash
+lc-sel-files    # Smart file selection
+lc-context      # Instant formatted context
+# Paste and work - AI can access additional files seamlessly
+```
 
-- **Direct LLM Integration**: Native integration with Claude Desktop via MCP protocol
-- **Chat Interface Support**: Works with any LLM chat interface via CLI/clipboard
-  - Optimized for interfaces with persistent context like Claude Projects and Custom GPTs
-  - Works equally well with standard chat interfaces
-- **Project Types**: Suitable for code repositories and collections of text/markdown/html documents
-- **Project Size**: Optimized for projects that fit within an LLM's context window. Large project support is in development
+**Result**: From "I need to share my project" to productive AI collaboration in seconds.
 
 ## Installation
 
-Install LLM Context using [uv](https://github.com/astral-sh/uv):
-
 ```bash
-uv tool install "llm-context>=0.3.0"
+uv tool install "llm-context>=0.4.0"
 ```
 
-To upgrade to the latest version:
+## Quick Start
+
+### Basic Usage
 
 ```bash
-uv tool upgrade llm-context
+# One-time setup
+cd your-project
+lc-init
+
+# Daily usage
+lc-sel-files
+lc-context
 ```
 
-> **Warning**: LLM Context is under active development. Updates may overwrite configuration files prefixed with `lc-`. We recommend all configuration files be version controlled for this reason.
-
-## Quickstart
-
-### MCP with Claude Desktop
-
-Add to 'claude_desktop_config.json':
+### MCP Integration (Recommended)
 
 ```jsonc
 {
   "mcpServers": {
-    "CyberChitta": {
+    "llm-context": {
       "command": "uvx",
       "args": ["--from", "llm-context", "lc-mcp"]
     }
@@ -56,85 +59,108 @@ Add to 'claude_desktop_config.json':
 }
 ```
 
-Once configured, you can start working with your project in two simple ways:
+With MCP, AI can access additional files directly during conversations.
 
-1. Say: "I would like to work with my project"
-   Claude will ask you for the project root path.
+### Project Customization
 
-2. Or directly specify: "I would like to work with my project /path/to/your/project"
-   Claude will automatically load the project context.
+```bash
+# Create project-specific filters
+cat > .llm-context/rules/flt-repo-base.md << 'EOF'
+---
+name: flt-repo-base
+compose:
+  filters: [lc/flt-base]
+gitignores:
+  full-files: ["*.md", "/tests", "/node_modules"]
+---
+EOF
 
-#### Preferred Workflow: Combining Project UI with MCP
-
-For optimal results, combine initial context through Claude's Project Knowledge UI with dynamic code access via MCP. This provides both comprehensive understanding and access to latest changes. See [Full Context Magic](https://www.cyberchitta.cc/articles/full-context-magic.html) for details and examples.
-
-### CLI Quick Start and Typical Workflow
-
-1. Navigate to your project's root directory
-2. Initialize repository: `lc-init` (only needed once)
-3. Select files: `lc-sel-files`
-4. (Optional) Review selected files in `.llm-context/curr_ctx.yaml`
-5. Generate context: `lc-context` (with optional flags: `-p` for prompt, `-u` for user notes)
-6. Use with your preferred interface:
-
-- Project Knowledge (Claude Pro): Paste into knowledge section
-- GPT Knowledge (Custom GPTs): Paste into knowledge section
-- Regular chats: Use `lc-context -p` to include instructions
-
-7. When the LLM requests additional files:
-   - Copy the file list from the LLM
-   - Run `lc-clip-files`
-   - Paste the contents back to the LLM
+# Customize main development rule
+cat > .llm-context/rules/prm-code.md << 'EOF'
+---
+name: code
+instructions: [lc/ins-developer, lc/sty-python]
+compose:
+  filters: [flt-repo-base]
+---
+EOF
+```
 
 ## Core Commands
 
-- `lc-init`: Initialize project configuration
-- `lc-set-rule <n>`: Switch rules (system rules are prefixed with "lc-")
-- `lc-sel-files`: Select files for inclusion
-- `lc-sel-outlines`: Select files for outline generation
-- `lc-context [-p] [-u] [-f FILE]`: Generate and copy context
-  - `-p`: Include prompt instructions
-  - `-u`: Include user notes
-  - `-f FILE`: Write to output file
-- `lc-prompt`: Generate project instructions for LLMs
-- `lc-clip-files`: Process LLM file requests
-- `lc-changed`: List files modified since last context generation
-- `lc-outlines`: Generate outlines for code files
-- `lc-clip-implementations`: Extract code implementations requested by LLMs (doesn't support C/C++)
+| Command              | Purpose                                   |
+| -------------------- | ----------------------------------------- |
+| `lc-init`            | Initialize project configuration          |
+| `lc-sel-files`       | Select files based on current rule        |
+| `lc-context`         | Generate and copy context                 |
+| `lc-context -nt`     | Generate context for non-MCP environments |
+| `lc-set-rule <name>` | Switch between rules                      |
+| `lc-clip-files`      | Handle file requests (non-MCP)            |
 
-## Features & Advanced Usage
+## Rule System
 
-LLM Context provides advanced features for customizing how project content is captured and presented:
+Rules use a systematic four-category structure:
 
-- Smart file selection using `.gitignore` patterns
-- Multiple rule-based profiles for different use cases
-  - System rules (prefixed with "lc-") provide default functionality
-  - User-defined rules can be created independently or extend existing rules
-- Code Navigation Features:
-  1. **Smart Code Outlines**: Allows LLMs to view the high-level structure of your codebase with automatically generated outlines highlighting important definitions
-  2. **Definition Implementation Extraction**: Paste full implementations of specific definitions that are requested by LLMs after they review the code outlines, using the `lc-clip-implementations` command
-- Customizable templates and prompts
+- **Prompt Rules (`prm-`)**: Generate project contexts (e.g., `lc/prm-developer`, `lc/prm-rule-create`)
+- **Filter Rules (`flt-`)**: Control file inclusion (e.g., `lc/flt-base`, `lc/flt-no-files`)
+- **Instruction Rules (`ins-`)**: Provide guidelines (e.g., `lc/ins-developer`, `lc/ins-rule-framework`)
+- **Style Rules (`sty-`)**: Enforce coding standards (e.g., `lc/sty-python`, `lc/sty-code`)
 
-See our [User Guide](docs/user-guide.md) for detailed documentation of these features.
+### Example Rule
 
-## Similar Tools
+```yaml
+---
+name: tmp-prm-api-debug
+description: "Debug API authentication issues"
+compose:
+  filters: [lc/flt-no-files]
+also-include:
+  full-files: ["/src/auth/**", "/tests/auth/**"]
+---
+Focus on authentication system and related tests.
+```
 
-Check out our [comprehensive list of alternatives](https://www.cyberchitta.cc/articles/lc-alternatives.html) - the sheer number of tools tackling this problem demonstrates its importance to the developer community.
+## Workflow Patterns
 
-## Acknowledgments
+### Daily Development
 
-LLM Context evolves from a lineage of AI-assisted development tools:
+```bash
+lc-set-rule lc/prm-developer
+lc-sel-files
+lc-context
+# AI can review changes, access additional files as needed
+```
 
-- This project succeeds [LLM Code Highlighter](https://github.com/restlessronin/llm-code-highlighter), a TypeScript library I developed for IDE integration.
-- The concept originated from my work on [RubberDuck](https://github.com/rubberduck-ai/rubberduck-vscode) and continued with later contributions to [Continue](https://github.com/continuedev/continuedev).
-- LLM Code Highlighter was heavily inspired by [Aider Chat](https://github.com/paul-gauthier/aider). I worked with GPT-4 to translate several Aider Chat Python modules into TypeScript, maintaining functionality while restructuring the code.
-- This project uses tree-sitter [tag query files](src/llm_context/highlighter/tag-qry/) from Aider Chat.
-- LLM Context exemplifies the power of AI-assisted development, transitioning from Python to TypeScript and back to Python with the help of GPT-4 and Claude-3.5-Sonnet.
+### Focused Tasks
 
-I am grateful for the open-source community's innovations and the AI assistance that have shaped this project's evolution.
+```bash
+# Let AI help create minimal context
+lc-set-rule lc/prm-rule-create
+lc-context -nt
+# Work with AI to create task-specific rule using tmp-prm- prefix
+```
 
-I am grateful for the help of Claude-3.5-Sonnet in the development of this project.
+### MCP Benefits
+
+- **Code review**: AI examines your changes for completeness/correctness
+- **Additional files**: AI accesses initially excluded files when needed
+- **Change tracking**: See what's been modified during conversations
+- **Zero friction**: No manual file operations during development discussions
+
+## Key Features
+
+**Smart File Selection**: Rules automatically include/exclude appropriate files
+**Instant Context Generation**: Formatted context copied to clipboard in seconds
+**MCP Integration**: AI can access additional files without manual intervention
+**Systematic Rule Organization**: Four-category system for clear rule composition
+**AI-Assisted Rule Creation**: Let AI help create minimal context for specific tasks
+
+## Learn More
+
+- [User Guide](docs/user-guide.md) - Complete documentation
+- [Design Philosophy](https://www.cyberchitta.cc/articles/llm-ctx-why.html)
+- [Real-world Examples](https://www.cyberchitta.cc/articles/full-context-magic.html)
 
 ## License
 
-This project is licensed under the Apache License, Version 2.0. See the [LICENSE](LICENSE) file for details.
+Apache License, Version 2.0. See [LICENSE](LICENSE) for details.
