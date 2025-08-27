@@ -1,6 +1,6 @@
 ---
 name: prm-code
-description: Default rule for software projects, using lc-gitignores base rule.
+description: default coding rule for this repo.
 instructions: [lc/ins-developer, lc/sty-code, lc/sty-python]
 compose:
   filters: [flt-repo-base, flt-no-highlighter]
