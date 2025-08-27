@@ -1,6 +1,6 @@
 # {% if tools_available %}Repository{% else %}Detailed Repository{% endif %} Content: **{{ project_name }}**
 
-## Instructions for AI: {% if overview_mode == "focused" %}⚠️ FOCUSED PROJECT CONTEXT PROVIDED - USE TOOLS FOR ADDITIONAL FILES ⚠️{% else %}⚠️ COMPLETE PROJECT CONTEXT PROVIDED - NO NEED TO REQUEST ADDITIONAL CONTEXT ⚠️{% endif %}
+## Instructions for AI: {% if overview_mode == "focused" %}⚠️ FOCUSED PROJECT CONTEXT PROVIDED - {% if tools_available %}USE TOOLS FOR ADDITIONAL FILES{% else %}REQUEST FILES VIA CLIPBOARD{% endif %} ⚠️{% else %}⚠️ COMPLETE PROJECT CONTEXT PROVIDED - NO NEED TO REQUEST ADDITIONAL CONTEXT ⚠️{% endif %}
 
 ## Quick Reference
 - ✓ = Full content included below
@@ -13,7 +13,7 @@
 > {% if tools_available %}For updates: Use lc-list-modified-files to identify changes, then lc-get-files for specific files{% else %}If tools are unavailable, ask the user to run the "lc-changed" CLI command{% endif %}
 
 {% if overview_mode == "focused" -%}
-This context presents a focused view of the _/{{ project_name }}_ repository, including complete contents for key files and smart outlines for important code definitions. Additional files can be retrieved using the available tools.
+This context presents a focused view of the _/{{ project_name }}_ repository, including complete contents for key files and smart outlines for important code definitions. {% if tools_available %}Additional files can be retrieved using the available tools.{% else %}Additional files can be requested using the clipboard method described below.{% endif %}
 {%- else -%}
 This context presents a comprehensive view of the _/{{ project_name }}_ repository.
 {%- endif %}
@@ -23,7 +23,7 @@ This context presents a comprehensive view of the _/{{ project_name }}_ reposito
 
 1. **SEARCH THIS DOCUMENT** to check if the file is already included below
 2. **CHECK the repository structure** below to confirm file status (✓,{% if highlights %} ○,{% endif %} or ✗)
-3. {% if overview_mode == "focused" %}Use lc-get-files for ✗{% if highlights %} or ○{% endif %} files that are needed for your analysis{% else %}Only request ✗{% if highlights %} or ○{% endif %} files that are absolutely necessary for your analysis{% endif %}
+3. {% if overview_mode == "focused" %}{% if tools_available %}Use lc-get-files for ✗{% if highlights %} or ○{% endif %} files that are needed for your analysis{% else %}Request ✗{% if highlights %} or ○{% endif %} files using the clipboard method below{% endif %}{% else %}Only request ✗{% if highlights %} or ○{% endif %} files that are absolutely necessary for your analysis{% endif %}
 
 {% if tools_available %}
 {% if overview_mode == "focused" -%}
@@ -54,7 +54,7 @@ Using the lc-get-files tool (if available in your environment):
   }
   ```
 {% else %}
-Only if lc-get-files is not available, follow these steps (do NOT use the above root_path):
+Follow these steps to request files:
     1. Immediately halt your current response.
     2. Start a new response with a markdown code block (```) on a new line.
     3. List the root-relative paths of the missing files you need, one per line.
