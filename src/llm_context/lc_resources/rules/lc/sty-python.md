@@ -1,3 +1,8 @@
+---
+name: lc/sty-jupyter
+description: Provides Python-specific style guidelines, including Pythonic patterns, type system usage, class design, import organization, and idioms. Use for Python projects to ensure consistent, readable, and maintainable code.
+---
+
 ## Python-Specific Guidelines
 
 ### Pythonic Patterns

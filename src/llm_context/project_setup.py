@@ -17,18 +17,19 @@ PROJECT_INFO: str = (
 )
 
 SYSTEM_RULES = [
-    "lc/code.md",
-    "lc/code-style.md",
-    "lc/javascript-style.md",
-    "lc/jupyter-style.md",
-    "lc/python-style.md",
-    "lc/filters.md",
-    "lc/no-full-files.md",
-    "lc/no-outline-files.md",
-    "lc/no-files.md",
-    "lc/create-rule-common.md",
-    "lc/create-rule-new-chat-prefix.md",
-    "lc/create-rule.md",
+    "lc/flt-base.md",
+    "lc/flt-no-files.md",
+    "lc/flt-no-full.md",
+    "lc/flt-no-outline.md",
+    "lc/ins-developer.md",
+    "lc/ins-rule-framework.md",
+    "lc/ins-rule-intro.md",
+    "lc/prm-developer.md",
+    "lc/prm-rule-create.md",
+    "lc/sty-code.md",
+    "lc/sty-javascript.md",
+    "lc/sty-jupyter.md",
+    "lc/sty-python.md",
 ]
 
 

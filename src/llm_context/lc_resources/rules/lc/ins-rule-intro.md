@@ -1,6 +1,6 @@
 ---
-name: lc/create-rule-new-chat-prefix
-description: Introduction for fresh chat context when creating focused rules
+name: lc/ins-rule-intro
+description: Introduces the project focus creation guide for new chat sessions, emphasizing minimal file inclusion and multi-project coordination. Use to initiate rule creation in conversational workflows with LLMs.
 ---
 
 # Project Focus Creation Guide

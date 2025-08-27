@@ -402,8 +402,8 @@ class TestRulesDirectoryAlsoInclude(unittest.TestCase):
 
         # Create .llm-context/rules structure like in the real project
         (self.root_path / ".llm-context" / "rules" / "lc").mkdir(parents=True)
-        (self.root_path / ".llm-context" / "rules" / "lc" / "code.md").write_text("# lc/code rule")
-        (self.root_path / ".llm-context" / "rules" / "with-rules.md").write_text(
+        (self.root_path / ".llm-context" / "rules" / "lc" / "prm-developer.md").write_text("# lc/prm-developer rule")
+        (self.root_path / ".llm-context" / "rules" / "flt-with-rules.md").write_text(
             "# with-rules rule"
         )
         (self.root_path / ".llm-context" / "rules" / "custom.md").write_text("# custom rule")
@@ -429,7 +429,7 @@ class TestRulesDirectoryAlsoInclude(unittest.TestCase):
         # Test the internal _relative_path method
         path1 = selector._relative_path(".", "test.md")
         path2 = selector._relative_path(".llm-context", "config.yaml")
-        path3 = selector._relative_path(".llm-context/rules", "lc/code.md")
+        path3 = selector._relative_path(".llm-context/rules", "lc/flt-developer.md")
 
         print(f"Root file path format: '{path1}'")
         print(f"Config file path format: '{path2}'")

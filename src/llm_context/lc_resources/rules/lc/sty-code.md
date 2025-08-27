@@ -1,6 +1,6 @@
 ---
-name: lc/code-style
-description: "Universal code style principles for modern programming languages"
+name: lc/sty-code
+description: Outlines universal code style principles for modern programming languages, emphasizing functional patterns, clarity, immutability, and robust architecture. Use as a foundation for language-agnostic coding.
 ---
 
 ## Universal Code Style Principles

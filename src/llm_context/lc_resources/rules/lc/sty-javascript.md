@@ -1,6 +1,6 @@
 ---
-name: lc/javascript-style
-description: "JavaScript-specific style guidelines building on universal code principles"
+name: lc/sty-javascript
+description: Details JavaScript-specific style guidelines, covering modern features, module systems, object design, asynchronous code, naming conventions, and documentation. Use for JavaScript projects to ensure consistent code style.
 ---
 
 ## JavaScript-Specific Guidelines

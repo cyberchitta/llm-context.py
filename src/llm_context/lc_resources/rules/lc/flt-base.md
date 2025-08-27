@@ -1,6 +1,6 @@
 ---
-name: lc/filters
-description: Base ignore patterns for code files, customize this for project-specific ignores.
+name: lc/flt-base
+description: Establishes base gitignore patterns to exclude non-code files (e.g., binaries, archives, logs) from overview, full, and outline selections. Use as a foundation for project-specific file filtering in context generation.
 gitignores:
   overview-files:
     - .git

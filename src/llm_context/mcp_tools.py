@@ -9,8 +9,8 @@ class ContextRequest(BaseModel):
         ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
     )
     rule_name: str = Field(
-        "lc/code",
-        description="Rule to use (e.g. 'lc/code', 'copy', 'full') - defines file inclusion and presentation rules",
+        "lc/prm-developer",
+        description="Rule to use (e.g. 'lc/prm-developer', 'prm-copy') - defines file inclusion and presentation rules",
         pattern="^[a-zA-Z0-9_-]+$",
     )
 
@@ -33,8 +33,8 @@ class ListModifiedFilesRequest(BaseModel):
         ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
     )
     rule_name: str = Field(
-        "lc/code",
-        description="Rule to use (e.g. 'lc/code', 'copy', 'full') - defines file inclusion and presentation rules",
+        "lc/prm-developer",
+        description="Rule to use (e.g. 'lc/prm-developer', 'prm-copy') - defines file inclusion and presentation rules",
         pattern="^[a-zA-Z0-9_-]+$",
     )
     timestamp: float = Field(..., description="Unix timestamp to check modifications since")
@@ -45,7 +45,7 @@ class OutlinesRequest(BaseModel):
         ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
     )
     rule_name: str = Field(
-        "lc/code", description="Rule to use for file selection rules", pattern="^[a-zA-Z0-9_-]+$"
+        "lc/prm-developer", description="Rule to use for file selection rules", pattern="^[a-zA-Z0-9_-]+$"
     )
     timestamp: float = Field(
         ..., description="Context generation timestamp to check against existing selections"

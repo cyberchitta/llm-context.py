@@ -1,6 +1,6 @@
 ---
-name: lc/jupyter-style
-description: "Jupyter notebook style guidelines for AI-assisted development"
+name: lc/sty-jupyter
+description: Specifies style guidelines for Jupyter notebooks (.ipynb), focusing on cell structure, documentation, type annotations, AI-assisted development, and output management. Use for Jupyter-based projects to ensure clear, executable notebooks.
 ---
 
 ## Jupyter Notebook Guidelines
