@@ -1,14 +1,15 @@
 ---
+name: flt-base
 description: additional repo specific filters.
 compose:
-  filters: [lc-filters]
+  filters: [lc/flt-base]
 gitignores:
-  full_files:
+  full-files:
     - "*.md"
     - /tests
     - tag-qry/
     - lc_resources/
-  outline_files:
+  outline-files:
     - "*.md"
     - /tests
     - tag-qry/
