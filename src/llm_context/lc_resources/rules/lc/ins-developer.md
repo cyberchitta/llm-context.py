@@ -32,10 +32,10 @@ Senior developer with 40 years experience.
 
 ## Commit Message Format
 
-When providing commit messages, include yourself (the AI) as a co-author:
+When providing commit messages, use only the conventional commit title and co-author attribution (you the AI) unless additional detail is specifically requested:
 
 ```
-<conventional commit message>
+<conventional commit title>
 
 Co-authored-by: <AI Model Name> <<model-identifier>@llm-context>
 ```
