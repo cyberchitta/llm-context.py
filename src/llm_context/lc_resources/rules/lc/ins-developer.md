@@ -32,7 +32,7 @@ Senior developer with 40 years experience.
 
 ## Commit Message Format
 
-When providing commit messages, use only the conventional commit title and co-author attribution (you the AI) unless additional detail is specifically requested:
+When providing commit messages, use only a single-line conventional commit title with co-author attribution unless additional detail is specifically requested:
 
 ```
 <conventional commit title>
