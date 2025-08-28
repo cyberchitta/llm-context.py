@@ -58,7 +58,6 @@ Most users create customized permanent rules:
 # Project-specific filters
 cat > .llm-context/rules/flt-repo.md << 'EOF'
 ---
-name: flt-repo
 description: "Repository-specific exclusions"
 compose:
   filters: [lc/flt-base]
@@ -76,7 +75,6 @@ EOF
 # Main development rule
 cat > .llm-context/rules/prm-code.md << 'EOF'
 ---
-name: prm-code
 description: "Main development rule"
 instructions: [lc/ins-developer, lc/sty-python]
 compose:
@@ -114,7 +112,6 @@ Rules are Markdown files with YAML frontmatter:
 
 ```yaml
 ---
-name: rule-name # Must match filename
 description: "Brief description"
 instructions: [lc/ins-developer, lc/sty-python] # Compose instructions
 compose:
@@ -162,7 +159,6 @@ Markdown content providing additional context for the AI.
 
 ```yaml
 ---
-name: lc/prm-developer
 description: "Main development rule"
 instructions: [lc/ins-developer, lc/sty-python]
 compose:
@@ -174,7 +170,6 @@ compose:
 
 ```yaml
 ---
-name: tmp-prm-auth-debug
 description: "Debug authentication issues"
 compose:
   filters: [lc/flt-no-files]
@@ -187,7 +182,6 @@ also-include:
 
 ```yaml
 ---
-name: tmp-prm-code-review
 description: "Review code structure"
 compose:
   filters: [lc/flt-no-full]
@@ -311,7 +305,6 @@ The AI follows the systematic framework from `lc/ins-rule-framework`:
 
 ```yaml
 ---
-name: tmp-prm-oauth-integration
 description: "Add OAuth support to authentication system"
 overview: full
 compose:

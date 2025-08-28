@@ -69,7 +69,6 @@ With MCP, AI can access additional files directly during conversations.
 # Create project-specific filters
 cat > .llm-context/rules/flt-repo-base.md << 'EOF'
 ---
-name: flt-repo-base
 compose:
   filters: [lc/flt-base]
 gitignores:
@@ -80,7 +79,6 @@ EOF
 # Customize main development rule
 cat > .llm-context/rules/prm-code.md << 'EOF'
 ---
-name: code
 instructions: [lc/ins-developer, lc/sty-python]
 compose:
   filters: [flt-repo-base]
@@ -112,7 +110,6 @@ Rules use a systematic four-category structure:
 
 ```yaml
 ---
-name: tmp-prm-api-debug
 description: "Debug API authentication issues"
 compose:
   filters: [lc/flt-no-files]

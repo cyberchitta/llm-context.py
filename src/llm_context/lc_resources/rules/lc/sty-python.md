@@ -1,5 +1,4 @@
 ---
-name: lc/sty-python
 description: Provides Python-specific style guidelines, including Pythonic patterns, type system usage, class design, import organization, and idioms. Use for Python projects to ensure consistent, readable, and maintainable code.
 ---
 

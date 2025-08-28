@@ -1,5 +1,4 @@
 ---
-name: lc/ins-developer
 description: Defines the guidelines for coding tasks. It is typically the beginning of the prompt.
 ---
 

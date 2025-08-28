@@ -1,5 +1,4 @@
 ---
-name: lc/ins-rule-framework
 description: Provides a decision framework, semantics, and best practices for creating task-focused rules, including file selection patterns and composition guidelines. Use as core guidance for building custom rules for context generation.
 ---
 
@@ -67,7 +66,6 @@ Create task-focused rules by selecting the minimal set of files needed for your 
 
 ```yaml
 ---
-name: tmp-prm-api-debugging
 description: Focused context for debugging API-related code, excluding tests
 overview: full
 compose:
@@ -97,7 +95,6 @@ Create a new user rule in `.llm-context/rules/` using shell commands:
 ```bash
 cat > .llm-context/rules/tmp-prm-task-name.md << 'EOF'
 ---
-name: tmp-prm-task-name
 description: Brief description of the task focus
 overview: full
 compose:
