@@ -37,7 +37,10 @@ Create task-focused rules by selecting the minimal set of files needed for your 
   - Use `lc/flt-base` for standard exclusions (e.g., binaries, logs).
   - Use `lc/flt-no-full` or `lc/flt-no-outline` to exclude all full or outline files.
 - **`limit-to: {full-files: [...], outline-files: [...], overview-files: [...]}`**: Restrict selections to specific patterns.
+  - **Important**: When composing rules, only the first `limit-to` clause for each key (e.g., `full-files`, `outline-files`) is used. Subsequent clauses are ignored, and a warning is logged specifying the rule and patterns kept versus dropped.
   - Example: `["src/api/**"]` to limit to API-related files.
+- **`also-include: {full-files: [...], outline-files: [...]}`**: Specify files for full content or outlines using the same path format as other patterns (root-relative, excluding project name).
+  - Example: `["/nbs/03_clustering.md", "/src/**/*.py"]` to include specific files or patterns.
 
 **Path Format**: All patterns (`gitignores`, `limit-to`, `also-include`) must be relative to the project root, starting with `/` but excluding the project name:
 
