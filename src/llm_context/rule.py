@@ -9,7 +9,7 @@ from llm_context.exceptions import RuleResolutionError
 from llm_context.rule_parser import DEFAULT_CODE_RULE, RuleLoader, RuleParser
 from llm_context.utils import ProjectLayout, Yaml, log, safe_read_file
 
-CURRENT_CONFIG_VERSION = version.parse("4.0")
+CURRENT_CONFIG_VERSION = version.parse("4.1")
 
 IGNORE_NOTHING = [".git"]
 INCLUDE_ALL = ["**/*"]
@@ -265,10 +265,15 @@ class RuleResolver:
     def _merge_limit_to(self, target: dict, source: dict):
         source_includes = source.get("limit-to", {})
         for key, patterns in source_includes.items():
-            if key not in target["limit-to"]:
-                target["limit-to"][key] = []
-            existing = set(target["limit-to"][key])
-            target["limit-to"][key].extend([p for p in patterns if p not in existing])
+            if key in target["limit-to"] and target["limit-to"][key]:
+                log(
+                    WARNING,
+                    f"Multiple 'limit-to' clauses for '{key}' detected. "
+                    f"Keeping patterns: {target['limit-to'][key]}. "
+                    f"Dropping patterns: {patterns}."
+                )
+                continue
+            target["limit-to"][key] = list(patterns)
 
     def _merge_also_include(self, target: dict, source: dict):
         source_includes = source.get("also-include", {})
