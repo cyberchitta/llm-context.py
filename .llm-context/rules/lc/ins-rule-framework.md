@@ -1,5 +1,4 @@
 ---
-name: lc/ins-rule-framework
 description: Provides a decision framework, semantics, and best practices for creating task-focused rules, including file selection patterns and composition guidelines. Use as core guidance for building custom rules for context generation.
 ---
 
@@ -18,6 +17,7 @@ Create task-focused rules by selecting the minimal set of files needed for your 
 - **Need only code structure?** → Use `lc/flt-no-full` with `also-include` for outline files.
 - **Need coding style guidelines?** → Include `lc/sty-code`, `lc/sty-python`, etc., for relevant languages.
 - **Need minimal context (metadata/notes)?** → Use `lc/flt-no-files`.
+- **Need precise file control over a small set?** → Use `lc/flt-no-files` with explicit `also-include` patterns.
 - **Need rule creation guidance?** → Compose with `lc/ins-rule-intro` or this rule (`lc/ins-rule-framework`).
 
 **Outline Support**: Only files with extensions `.c`, `.cc`, `.cpp`, `.cs`, `.el`, `.ex`, `.elm`, `.go`, `.java`, `.js`, `.mjs`, `.php`, `.py`, `.rb`, `.rs`, `.ts` are eligible for outline selection. Other file types are ignored in outline-files.
@@ -26,8 +26,8 @@ Create task-focused rules by selecting the minimal set of files needed for your 
 
 ### File Selection
 
-- **`also-include: {full-files: [...], outline-files: [...]}`**: Specify files for full content or outlines.
-  - Example: Include specific files in full content or outlines for targeted tasks.
+- **`also-include: {full-files: [...], outline-files: [...]}`**: Specify files for full content or outlines using the same path format as other patterns (root-relative, excluding project name).
+  - Example: `["/nbs/03_clustering.md", "/src/**/*.py"]` to include specific files or patterns.
 - **`implementations: [[file, definition], ...]`**: Extract specific function/class implementations (not supported for C/C++).
   - Example: `["/src/utils/helpers.js", "validateToken"]` to retrieve a specific function.
 
@@ -37,19 +37,24 @@ Create task-focused rules by selecting the minimal set of files needed for your 
   - Use `lc/flt-base` for standard exclusions (e.g., binaries, logs).
   - Use `lc/flt-no-full` or `lc/flt-no-outline` to exclude all full or outline files.
 - **`limit-to: {full-files: [...], outline-files: [...], overview-files: [...]}`**: Restrict selections to specific patterns.
+  - **Important**: When composing rules, only the first `limit-to` clause for each key (e.g., `full-files`, `outline-files`) is used. Subsequent clauses are ignored, and a warning is logged specifying the rule and patterns kept versus dropped.
   - Example: `["src/api/**"]` to limit to API-related files.
+- **`also-include: {full-files: [...], outline-files: [...]}`**: Specify files for full content or outlines using the same path format as other patterns (root-relative, excluding project name).
+  - Example: `["/nbs/03_clustering.md", "/src/**/*.py"]` to include specific files or patterns.
 
-**Path Format**: Patterns must be relative to the project root, starting with `/` but excluding the project name:
+**Path Format**: All patterns (`gitignores`, `limit-to`, `also-include`) must be relative to the project root, starting with `/` but excluding the project name:
 
 - ✅ `"/src/components/**"` (correct relative path)
 - ❌ `"/myproject/src/components/**"` (includes project name)
 - ✅ `"/.llm-context/rules/**"` (correct for rule files)
+- ✅ `also-include: {full-files: ["/nbs/*.md"]}` (correct relative path)
+- ❌ `also-include: {full-files: ["/alpha-bhu/nbs/*.md"]}` (includes project name)
 - Valid patterns: `**/*.js` (all JavaScript files), `/src/main.py` (specific file), `**/tests/**` (all test files).
 
 **Important**: `limit-to` and `also-include` must match file paths, not directories:
 
 - ✅ `"src/**"` (matches all files in src)
-- ❌ `"src/"` (directory pattern, won’t match files)
+- ❌ `"src/"` (directory pattern, won't match files)
 
 ### Composition
 
@@ -67,7 +72,6 @@ Create task-focused rules by selecting the minimal set of files needed for your 
 
 ```yaml
 ---
-name: tmp-prm-api-debugging
 description: Focused context for debugging API-related code, excluding tests
 overview: full
 compose:
@@ -97,7 +101,6 @@ Create a new user rule in `.llm-context/rules/` using shell commands:
 ```bash
 cat > .llm-context/rules/tmp-prm-task-name.md << 'EOF'
 ---
-name: tmp-prm-task-name
 description: Brief description of the task focus
 overview: full
 compose:
@@ -120,14 +123,14 @@ lc/context
 
 ## Best Practices
 
-- **Start Minimal**: Use `lc/flt-no-files` or `lc/flt-no-full` to include only essential files.
+- **Start Minimal**: For precise control over a small set of files, use `lc/flt-no-files` with explicit `also-include`. For broader file patterns, use `lc/flt-no-full` or compose with `lc/flt-base` to include only essential files.
 - **Use Descriptive Names**: Prefix temporary user prompt rules with `tmp-prm-` (e.g., `tmp-prm-api-debug`) to indicate temporary contexts.
 - **Leverage Categories**:
   - Use `prm-` rules (e.g., `lc/prm-developer`, `lc/prm-rule-create`) for task-specific contexts.
   - Use `flt-` rules (e.g., `lc/flt-base`) for precise file control.
   - Include `ins-` rules (e.g., `lc/ins-developer`) for developer guidelines.
   - Reference `sty-` rules (e.g., `lc/sty-python`) for style enforcement.
-- **Document Choices**: Explain why files are included in the rule’s content section.
+- **Document Choices**: Explain why files are included in the rule's content section.
 - **Iterate**: Refine rules in follow-up conversations based on task needs.
 - **Prefer Full Overview**: Use `overview: "full"` unless the repository is very large (1000+ files).
 - **Aim for Efficiency**: Target 10-50% of full project context size for optimal LLM performance.

@@ -1,5 +1,4 @@
 ---
-name: lc/ins-rule-intro
 description: Introduces the project focus creation guide for new chat sessions, emphasizing minimal file inclusion and multi-project coordination. Use to initiate rule creation in conversational workflows with LLMs.
 ---
 

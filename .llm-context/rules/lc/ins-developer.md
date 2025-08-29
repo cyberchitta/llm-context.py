@@ -1,5 +1,4 @@
 ---
-name: lc/ins-developer
 description: Defines the guidelines for coding tasks. It is typically the beginning of the prompt.
 ---
 
@@ -33,10 +32,10 @@ Senior developer with 40 years experience.
 
 ## Commit Message Format
 
-When providing commit messages, include yourself (the AI) as a co-author:
+When providing commit messages, use only a single-line conventional commit title with co-author attribution unless additional detail is specifically requested:
 
 ```
-<conventional commit message>
+<conventional commit title>
 
 Co-authored-by: <AI Model Name> <<model-identifier>@llm-context>
 ```

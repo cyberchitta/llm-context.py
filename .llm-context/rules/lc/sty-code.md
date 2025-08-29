@@ -1,5 +1,4 @@
 ---
-name: lc/sty-code
 description: Outlines universal code style principles for modern programming languages, emphasizing functional patterns, clarity, immutability, and robust architecture. Use as a foundation for language-agnostic coding.
 ---
 
@@ -39,3 +38,23 @@ description: Outlines universal code style principles for modern programming lan
 - Maintain clear separation between pure logic and side effects
 
 **Goal: Write beautiful code that is readable, maintainable, and robust.**
+
+## Code Quality Enforcement
+
+**CRITICAL: Follow all style guidelines rigorously in every code response.**
+
+Before writing any code:
+1. **Check functional patterns** - Are functions pure? Do they return new data instead of mutating?
+2. **Review naming** - Are names concise but expressive? Avoid verbose parameter names.
+3. **Verify immutability** - Are data structures immutable? Can operations be chained?
+4. **Simplify logic** - Can this be written more elegantly with comprehensions, functional patterns?
+5. **Type hints** - Are all parameters and returns properly typed?
+
+**Red flags that indicate style violations:**
+- Functions that mutate input parameters
+- Verbose parameter names like `coverage_threshold` vs `threshold`
+- Imperative loops instead of functional patterns
+- Missing type hints or vague types like `Any`
+- Complex nested conditionals instead of guard clauses
+
+**When in doubt, prioritize elegance and functional patterns over apparent convenience.**

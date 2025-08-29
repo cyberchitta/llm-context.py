@@ -1,5 +1,4 @@
 ---
-name: lc/flt-base
 description: Establishes base gitignore patterns to exclude non-code files (e.g., binaries, archives, logs) from overview, full, and outline selections. Use as a foundation for project-specific file filtering in context generation.
 gitignores:
   overview-files:
@@ -188,11 +187,4 @@ gitignores:
     - "*.xz"
     - "*.Z"
     - "*.zip"
-limit-to:
-  overview-files:
-    - "**/*"
-  full-files:
-    - "**/*"
-  outline-files:
-    - "**/*"
 ---
