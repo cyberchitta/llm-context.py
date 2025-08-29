@@ -2,9 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.1] - 2025-08-29
+
+### Bug Fixes
+
+- Warn on multiple limit-to clauses, keep first patterns only
+- Remove limit-to from lc/flt-base to prevent composition override
+
+### Features
+
+- Update ins-rule-framework to document limit-to composition behavior
+- Emphasize short commits
+- Clarify path format rules and improve minimal context guidance
+- Short commit messages by default
+- Explicit instruction to follow style guides
+
+### Refactor
+
+- Remove redundant name field from rule YAML frontmatter
+
 ## [0.4.0] - 2025-08-27
 
 ### Bug Fixes
+
 - Sort file lists for consistent output and state storage
 - Handle rule loading errors gracefully without stack traces
 - Remove tool references when -nt flag is used
@@ -46,9 +66,11 @@ All notable changes to this project will be documented in this file.
 - Delete state store when referencing stale rule
 
 ### Documentation
+
 - Complete rewrite to reflect systematic rule organization and actual usage patterns
 
 ### Features
+
 - Clean up stale system rules during updates
 - Improve rule resolution error handling and init process
 - New rule for working with templates
@@ -92,6 +114,7 @@ All notable changes to this project will be documented in this file.
 - Improve clarity of context usage instructions
 
 ### Refactor
+
 - Clean up vague instructions in style rules
 - Reorganize rules into systematic categories with kebab-case prefixes
 - Simplify file modification check in lc-get-files
@@ -108,27 +131,32 @@ All notable changes to this project will be documented in this file.
 - Extract MCP tool definitions to centralized module
 
 ### Testing
+
 - Add pathspec pattern tests for also-include functionality
 
 ## [0.3.4] - 2025-06-04
 
 ### Bug Fixes
+
 - Resolve Windows 'charmap' codec error with UTF-8 encoding
 - Revert prior commit
 
 ## [0.3.3] - 2025-06-03
 
 ### Bug Fixes
+
 - Ensure UTF-8 encoding on Windows to prevent charmap codec errors
 - Enhance final reminder to discourage unnecessary file requests
 - Delete state store when referencing stale rule
 
 ### Documentation
+
 - Add preferred workflow to README
 - Add new "Full Context Magic" article to README
 - Be precise about new format
 
 ### Features
+
 - Emphasize checking context before requesting files
 - Improve key file visibility in context diagrams
 - Skip automatic outline selection when changing rules
@@ -138,68 +166,83 @@ All notable changes to this project will be documented in this file.
 ## [0.3.2] - 2025-04-03
 
 ### Bug Fixes
+
 - Installation issue on linux where old versions are being installed
 - Prevent overwriting rule files after state update
 
 ### Features
+
 - Improve AI instructions in context templates
 
 ### Refactor
+
 - Streamline lc-code rule content
 
 ## [0.3.1] - 2025-04-01
 
 ### Bug Fixes
+
 - Remove unintended gitignores
 
 ### Documentation
+
 - Improve context template instructions to prevent unnecessary file requests
 
 ### Refactor
+
 - Remove hardcoded pattern lists and unused methods
 
 ## [0.3.0] - 2025-03-31
 
 ### Features
+
 - Replace profiles with Markdown/YAML-based rules
 
 ## [0.2.18] - 2025-03-29
 
 ### Features
+
 - Make context template instructions conditional on content
 - Implement profile file and rule references
 
 ## [0.2.17] - 2025-03-25
 
 ### Features
+
 - Integrate outline functionality into standard distribution
 - Optimize diagram generation and add .git to default ignores
 
 ## [0.2.16] - 2025-03-24
 
 ### Features
+
 - Replace no_media flag with pattern-based diagram_files filtering
 - Reorganize profile structure with system profiles / base gitignore
 
 ### Refactor
+
 - Remove unused folder structure diagram
 - Replace profile settings with command parameters
 - Remove unused highlighter functionality
 
 ### Mcp
+
 - Clarify when to use lc-get-files in templates
 
 ## [0.2.15] - 2025-03-10
 
 ### Bug Fixes
+
 - Clarify C/C++ implementation retrieval limitation in tool description
 
 ### Features
+
 - Preserve custom profiles during config updates
 
 ## [0.2.14] - 2025-03-09
 
 ### Features
+
 - Expose (MCP & CLI) definition implementation extraction capabilities
 - Add explicit markers to prevent redundant context requests
 - Use name line for outlines and highlights
@@ -207,76 +250,91 @@ All notable changes to this project will be documented in this file.
 ## [0.2.13] - 2025-02-28
 
 ### Bug Fixes
+
 - Fix hatch build problems
 
 ## [0.2.11] - 2025-02-27
 
 ### Bug Fixes
+
 - Broken build updated
 
 ### Features
+
 - Improve parser performance with caching
 - Add code outlines command
 
 ## [0.2.10] - 2025-02-25
 
 ### Bug Fixes
+
 - Broken resource update
 
 ## [0.2.9] - 2025-02-24
 
 ### BREAKING
+
 - Switch configuration from TOML to YAML (customization in toml files has to be manually re-applied)
 
 ## [0.2.9] - 2025-02-24
 
 ### Bug Fixes
+
 - Ensure profile switch updates file selection correctly
 
 ### Features
+
 - Add profile descriptions for better usability
 - Add .gitignore creation in .llm_context during init
 
 ## [0.2.8] - 2025-02-09
 
 ### Features
+
 - Migrate to tree-sitter-language-pack
 
 ## [0.2.7] - 2025-02-01
 
 ### Features
+
 - Add lc-prompt command to generate standalone prompts
 
 ## [0.2.6] - 2025-01-15
 
 ### Bug Fixes
+
 - Don't update timestamps on selection
 - Update list tools
 
 ### Features
+
 - Add generation timestamp instructions in templates
 - Add file modification tracking
 - Prefix MCP tools with lc- for namespacing
 - Try to avoid redundant use of project_context
 
 ### Refactor
+
 - Refine MCP related instructions
 
 ## [0.2.2] - 2024-12-25
 
 ### Features
+
 - Add absolute root path for get_files tool (for project / MCP interop)
 - Replace folder structure diagram with flat diagram
 
 ## [0.2.1] - 2024-12-17
 
 ### Bug Fixes
+
 - Remove templates key
 - Use system default profile in resolver
 
 ### Features
+
 - Ensure file selection before context generation in MCP
-- Add "*.tmp" to ignored files
+- Add "\*.tmp" to ignored files
 - Add sample code-file profile
 - Add file output support via profile settings
 
