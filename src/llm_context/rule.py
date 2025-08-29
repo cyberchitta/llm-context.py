@@ -270,7 +270,7 @@ class RuleResolver:
                     WARNING,
                     f"Multiple 'limit-to' clauses for '{key}' detected. "
                     f"Keeping patterns: {target['limit-to'][key]}. "
-                    f"Dropping patterns: {patterns}."
+                    f"Dropping patterns: {patterns}.",
                 )
                 continue
             target["limit-to"][key] = list(patterns)

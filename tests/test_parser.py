@@ -50,7 +50,6 @@ def test_ast_creation(sample_ast):
 def test_ast_captures(sample_ast):
     captures = sample_ast.tag_matches()
     assert len(captures) > 0
-    # Each capture should be a tuple with structure expected by the parser
 
 
 def test_defref_creation(sample_defref):
@@ -60,29 +59,22 @@ def test_defref_creation(sample_defref):
 
 def test_defref_contents(sample_defref):
     defs = sample_defref.definitions
-    assert len(defs) >= 2  # At least TestClass and test_function
-
+    assert len(defs) >= 2
     class_def = next((d for d in defs if d.name and d.name.text == "TestClass"), None)
     func_def = next((d for d in defs if d.name and d.name.text == "test_function"), None)
-
     assert class_def is not None, "TestClass definition not found"
     assert func_def is not None, "test_function definition not found"
-
     assert class_def.name is not None
     assert class_def.name.text == "TestClass"
-
     if func_def.name:
         assert func_def.name.text == "test_function"
 
 
 def test_defref_positions(sample_defref):
     defs = sample_defref.definitions
-
-    # Positions should be properly captured
     for defn in defs:
         assert defn.begin.ln >= 0
         assert defn.begin.col >= 0
         assert defn.end.ln >= defn.begin.ln
-        # Check that start/finish byte positions are valid
         assert defn.start >= 0
         assert defn.finish > defn.start
