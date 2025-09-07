@@ -4,17 +4,6 @@ from typing import Any, cast
 from pydantic import BaseModel, Field
 
 
-class ContextRequest(BaseModel):
-    root_path: Path = Field(
-        ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
-    )
-    rule_name: str = Field(
-        "lc/prm-developer",
-        description="Rule to use (e.g. 'lc/prm-developer', 'prm-copy') - defines file inclusion and presentation rules",
-        pattern="^[a-zA-Z0-9_-]+$",
-    )
-
-
 class FilesRequest(BaseModel):
     root_path: Path = Field(
         ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
@@ -70,22 +59,6 @@ class FocusHelpRequest(BaseModel):
 
 
 TOOL_METADATA: dict[str, dict[str, Any]] = {
-    "lc-project-context": {
-        "model": ContextRequest,
-        "description": (
-            "⛔️ DO NOT USE this tool when you already have the project context. "
-            "First check if project context is already available in the conversation "
-            "before making any new requests. Use lc-get-files for retrieving specific files, "
-            "and only use this tool when a broad repository overview is needed.\n\n"
-            "Generates a structured repository overview including: "
-            "1) Directory tree with file status (✓ full, ○ outline, ✗ excluded) "
-            "2) Complete contents of key files "
-            "3) Smart outlines highlighting important definitions in supported languages. "
-            "The output is customizable via profiles that control file inclusion rules "
-            "and presentation format. The assistant tracks previously retrieved project "
-            "context in the conversation and checks this history before making new requests."
-        ),
-    },
     "lc-get-files": {
         "model": FilesRequest,
         "description": (
@@ -200,7 +173,6 @@ def get_dxt_capabilities() -> dict[str, Any]:
 
 
 __all__ = [
-    "ContextRequest",
     "FilesRequest",
     "ListModifiedFilesRequest",
     "OutlinesRequest",

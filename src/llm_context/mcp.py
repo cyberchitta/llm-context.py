@@ -13,7 +13,6 @@ from llm_context.context_spec import ContextSpec
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
 from llm_context.mcp_tools import (
-    ContextRequest,
     FilesRequest,
     FocusHelpRequest,
     ImplementationsRequest,
@@ -31,23 +30,6 @@ TOOLS = [
     Tool(name=tool_def["name"], description=tool_def["description"], inputSchema=tool_def["schema"])
     for tool_def in TOOL_DEFINITIONS
 ]
-
-
-async def project_context(arguments: dict) -> list[TextContent]:
-    request = ContextRequest(**arguments)
-    env = ExecutionEnvironment.create(Path(request.root_path))
-    cur_env = env.with_rule(request.rule_name)
-    with cur_env.activate():
-        selector = ContextSelector.create(cur_env.config)
-        file_sel_full = selector.select_full_files(cur_env.state.file_selection)
-        file_sel_out = selector.select_outline_files(file_sel_full)
-        settings = ContextSettings.create(False, False, True)
-        generator = ContextGenerator.create(cur_env.config, file_sel_out, settings, env.tagger)
-        context, context_timestamp = generator.context()
-        updated_selection = file_sel_out.with_timestamp(context_timestamp)
-        updated_env = cur_env.with_state(cur_env.state.with_selection(updated_selection))
-        updated_env.state.store()
-        return [TextContent(type="text", text=context)]
 
 
 async def get_files(arguments: dict) -> list[TextContent]:
@@ -145,7 +127,6 @@ async def serve() -> None:
     @server.call_tool()
     async def handle_call_tool(name: str, arguments: dict) -> list[TextContent]:
         handlers = {
-            "lc-project-context": project_context,
             "lc-get-files": get_files,
             "lc-list-modified-files": list_modified_files,
             "lc-code-outlines": code_outlines,
