@@ -66,7 +66,7 @@ async def get_files(arguments: dict) -> list[TextContent]:
         response_parts = []
         if already_included:
             response_parts.append(
-                "The following full files are already included in the current context:\n"
+                "The latest version of the following full files are already included in the current context:\n"
                 + "\n".join(already_included)
             )
         if files_to_fetch:
