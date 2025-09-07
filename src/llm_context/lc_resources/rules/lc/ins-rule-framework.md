@@ -115,10 +115,10 @@ also-include:
 ## Task-Specific Context
 Add optional task-specific instructions here.
 EOF
-lc/set-rule tmp-prm-task-name
-lc/sel-files
-lc/sel-outlines
-lc/context
+lc-set-rule tmp-prm-task-name
+lc-sel-files
+lc-sel-outlines
+lc-context
 ```
 
 ## Best Practices
