@@ -123,7 +123,7 @@ gitignores:
     - "*.xz"
     - "*.Z"
     - "*.zip"
-  outline-files:
+  excerpted-files:
     - .git
     - .dockerignore
     - .env

@@ -9,7 +9,7 @@ gitignores:
     - /tests
     - tag-qry/
     - lc_resources/
-  outline-files:
+  excerpted-files:
     - "*.md"
     - /tests
     - tag-qry/
