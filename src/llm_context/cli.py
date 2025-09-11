@@ -34,8 +34,8 @@ def select_all_files(env: ExecutionEnvironment) -> ExecutionResult:
     rule_feedback(env)
     selector = ContextSelector.create(env.config)
     file_sel_full = selector.select_full_files(env.state.file_selection)
-    file_sel_out = selector.select_outline_files(file_sel_full)
-    nxt_env = env.with_state(env.state.with_selection(file_sel_out))
+    file_sel_excerpted = selector.select_excerpted_files(file_sel_full)
+    nxt_env = env.with_state(env.state.with_selection(file_sel_excerpted))
     nxt_env.state.store()
     return ExecutionResult(None, nxt_env)
 
@@ -82,13 +82,13 @@ def select_full_files(env: ExecutionEnvironment):
 
 
 @create_command
-def select_outline_files(env: ExecutionEnvironment) -> ExecutionResult:
+def select_excerpted_files(env: ExecutionEnvironment) -> ExecutionResult:
     rule_feedback(env)
     selector = ContextSelector.create(env.config)
-    file_selection = selector.select_outline_files(env.state.file_selection)
+    file_selection = selector.select_excerpted_files(env.state.file_selection)
     nxt_env = env.with_state(env.state.with_selection(file_selection))
     nxt_env.state.store()
-    log(INFO, f"Selected {len(file_selection.outline_files)} outline files.")
+    log(INFO, f"Selected {len(file_selection.excerpted_files)} excerpted files.")
     return ExecutionResult(None, nxt_env)
 
 
@@ -150,12 +150,14 @@ def context(env: ExecutionEnvironment) -> ExecutionResult:
 
 
 @create_clipboard_cmd
-def outlines(env: ExecutionEnvironment) -> ExecutionResult:
+def excerpts(env: ExecutionEnvironment) -> ExecutionResult:
     rule_feedback(env)
     settings = ContextSettings.create(False, False, False)
     selector = ContextSelector.create(env.config)
-    file_sel_out = selector.select_outline_only(env.state.file_selection)
-    content = ContextGenerator.create(env.config, file_sel_out, settings, env.tagger).outlines()
+    file_sel_excerpted = selector.select_excerpted_only(env.state.file_selection)
+    content = ContextGenerator.create(
+        env.config, file_sel_excerpted, settings, env.tagger
+    ).excerpts()
     return ExecutionResult(content, env)
 
 
@@ -164,8 +166,8 @@ def changed_files(env: ExecutionEnvironment) -> ExecutionResult:
     timestamp = env.state.file_selection.timestamp
     selector = ContextSelector.create(env.config, timestamp)
     file_sel_full = selector.select_full_files(env.state.file_selection)
-    file_sel_out = selector.select_outline_files(file_sel_full)
-    return ExecutionResult("\n".join(file_sel_out.files), env)
+    file_sel_excerpted = selector.select_excerpted_files(file_sel_full)
+    return ExecutionResult("\n".join(file_sel_excerpted.files), env)
 
 
 @create_clipboard_cmd

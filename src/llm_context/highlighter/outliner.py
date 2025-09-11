@@ -47,7 +47,7 @@ class Outliner:
             show_lines=sorted(set(self.lines_of_interest)),
         )
         highlights = highlighter.to_formatted_string()
-        return {"rel_path": self.source.rel_path, "highlights": highlights}
+        return {"rel_path": self.source.rel_path, "excerpts": highlights}
 
 
 @dataclass(frozen=True)

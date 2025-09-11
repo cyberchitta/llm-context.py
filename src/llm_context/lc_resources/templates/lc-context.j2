@@ -17,7 +17,7 @@
 {% include 'lc-files.j2' %}
 {% endif %}
 
-{% if highlights %}
+{% if excerpts %}
 ## Code Outlines - Implementation Retrieval
 
 Smart outlines highlighting important definitions in the codebase.
@@ -51,7 +51,7 @@ Then ask the human to run `lc-clip-implementations`
 NOTE: Prefer requesting specific implementations rather than entire files when possible.
 {% endif %}
 
-{% include 'lc-highlights.j2' %}
+{% include 'lc-excerpts.j2' %}
 {% endif %}
 ## FINAL REMINDER
 

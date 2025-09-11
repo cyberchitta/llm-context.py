@@ -13,11 +13,12 @@ from llm_context.context_spec import ContextSpec
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
 from llm_context.mcp_tools import (
+    ExcerptsRequest,
     FilesRequest,
     FocusHelpRequest,
+    GetExcludedRequest,
     ImplementationsRequest,
     ListModifiedFilesRequest,
-    OutlinesRequest,
     get_tool_definitions,
 )
 from llm_context.rule import DEFAULT_CODE_RULE
@@ -40,21 +41,30 @@ async def get_files(arguments: dict) -> list[TextContent]:
         if matching_selection is None:
             message = f"No context found with timestamp {request.timestamp}. Warn the user that the context is stale."
             raise McpError(ErrorData(code=INVALID_PARAMS, message=message))
-        orig = set(matching_selection.full_files)
+        orig_full = set(matching_selection.full_files)
+        orig_excerpted = set(matching_selection.excerpted_files)
         converter = PathConverter.create(env.config.project_root_path)
         paths = list(zip(request.paths, converter.to_absolute(request.paths)))
-        files_to_fetch = {r for r, a in paths if r not in orig or is_newer(a, request.timestamp)}
-        already_included = set(request.paths) - files_to_fetch
+        files_to_fetch = {
+            r for r, a in paths if r not in orig_full or is_newer(a, request.timestamp)
+        }
+        already_included = set(request.paths) - files_to_fetch - orig_excerpted
+        in_excerpted = set(request.paths) & orig_excerpted
         response_parts = []
         if already_included:
             response_parts.append(
                 "The latest version of the following full files are already included in the current context:\n"
                 + "\n".join(already_included)
             )
+        if in_excerpted:
+            response_parts.append(
+                "The following files are included as excerpts. Use lc-get-excluded if you need excluded sections:\n"
+                + "\n".join(in_excerpted)
+            )
         if files_to_fetch:
             settings = ContextSettings.create(False, False, True)
             content = ContextGenerator.create(env.config, env.state.file_selection, settings).files(
-                files_to_fetch
+                list(files_to_fetch)
             )
             if content.strip():
                 response_parts.append(content)
@@ -71,12 +81,12 @@ async def list_modified_files(arguments: dict) -> list[TextContent]:
         config = ContextSpec.create(env.config.project_root_path, request.rule_name, env.constants)
         selector = ContextSelector.create(config, request.timestamp)
         file_sel_full = selector.select_full_files(FileSelection.create(request.rule_name, [], []))
-        file_sel_out = selector.select_outline_files(file_sel_full)
-    return [TextContent(type="text", text="\n".join(file_sel_out.files))]
+        file_sel_excerpted = selector.select_excerpted_files(file_sel_full)  # Updated
+    return [TextContent(type="text", text="\n".join(file_sel_excerpted.files))]
 
 
-async def code_outlines(arguments: dict) -> list[TextContent]:
-    request = OutlinesRequest(**arguments)
+async def excerpts(arguments: dict) -> list[TextContent]:
+    request = ExcerptsRequest(**arguments)
     env = ExecutionEnvironment.create(Path(request.root_path))
     cur_env = env.with_rule(request.rule_name)
     with cur_env.activate():
@@ -84,15 +94,15 @@ async def code_outlines(arguments: dict) -> list[TextContent]:
         if matching_selection is None:
             message = f"No context found with timestamp {request.timestamp}. Warn the user that the context is stale."
             raise McpError(ErrorData(code=INVALID_PARAMS, message=message))
-        if matching_selection.outline_files:
-            message = "Code outlines are already included in the current context."
+        if matching_selection.excerpted_files:
+            message = "Excerpts are already included in the current context."
             return [TextContent(type="text", text=message)]
         selector = ContextSelector.create(cur_env.config)
-        file_sel_out = selector.select_outline_only(cur_env.state.file_selection)
+        file_sel_excerpted = selector.select_excerpted_only(cur_env.state.file_selection)  # Updated
         settings = ContextSettings.create(False, False, True)
         content = ContextGenerator.create(
-            cur_env.config, file_sel_out, settings, env.tagger
-        ).outlines()
+            cur_env.config, file_sel_excerpted, settings, env.tagger
+        ).excerpts()
         return [TextContent(type="text", text=content)]
 
 
@@ -117,6 +127,18 @@ async def get_focus_help(arguments: dict) -> list[TextContent]:
         return [TextContent(type="text", text=content)]
 
 
+async def get_excluded(arguments: dict) -> list[TextContent]:
+    request = GetExcludedRequest(**arguments)
+    env = ExecutionEnvironment.create(Path(request.root_path))
+    with env.activate():
+        return [
+            TextContent(
+                type="text",
+                text="No excluded sections available yet for tree-sitter-outline processors.",
+            )
+        ]
+
+
 async def serve() -> None:
     server: Server = Server("llm-context", pkg_ver("llm-context"))
 
@@ -129,9 +151,10 @@ async def serve() -> None:
         handlers = {
             "lc-get-files": get_files,
             "lc-list-modified-files": list_modified_files,
-            "lc-code-outlines": code_outlines,
+            "lc-excerpts": excerpts,
             "lc-get-implementations": get_implementations,
             "lc-create-rule-instructions": get_focus_help,
+            "lc-get-excluded": get_excluded,
         }
         try:
             return await handlers[name](arguments)

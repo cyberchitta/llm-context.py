@@ -19,8 +19,8 @@ def test_outliner_line_numbering():
     outliner = Outliner(source, lines_of_interest)
 
     result = outliner.to_highlights()
-    assert "█line2" in result["highlights"]
-    assert "█line4" in result["highlights"]
+    assert "█line2" in result["excerpts"]
+    assert "█line4" in result["excerpts"]
 
 
 def test_outliner_first_line_highlighting():
@@ -30,7 +30,7 @@ def test_outliner_first_line_highlighting():
     outliner = Outliner(source, lines_of_interest)
 
     result = outliner.to_highlights()
-    assert "█line1" in result["highlights"]
+    assert "█line1" in result["excerpts"]
 
 
 @pytest.fixture
@@ -82,8 +82,8 @@ def test_outliner_highlights(sample_source, sample_definitions):
     highlights = outliner.to_highlights()
 
     assert highlights["rel_path"] == "test.py"
-    assert "█class TestClass" in highlights["highlights"]
-    assert "█    def test_method" in highlights["highlights"]
+    assert "█class TestClass" in highlights["excerpts"]
+    assert "█    def test_method" in highlights["excerpts"]
 
 
 def test_generate_highlights(sample_source, tagger):
@@ -93,4 +93,4 @@ def test_generate_highlights(sample_source, tagger):
     outlines, _ = generate_outlines(tagger, [sample_source])
     assert len(outlines) == 1
     assert outlines[0]["rel_path"] == "test.py"
-    assert "class TestClass" in outlines[0]["highlights"]
+    assert "class TestClass" in outlines[0]["excerpts"]

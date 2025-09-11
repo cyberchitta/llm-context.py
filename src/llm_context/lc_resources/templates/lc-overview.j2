@@ -4,8 +4,8 @@
 
 ## Quick Reference
 - ✓ = Full content included below
-{% if highlights %}
-- ○ = Outline only (structure/definitions)
+{% if excerpts %}
+- E = Excerpted content (focused sections/definitions))
 {% endif %}
 - ✗ = Excluded (not included)
 
@@ -13,7 +13,7 @@
 > {% if tools_available %}For updates: Use lc-list-modified-files to identify changes, then lc-get-files for specific files{% else %}If tools are unavailable, ask the user to run the "lc-changed" CLI command{% endif %}
 
 {% if overview_mode == "focused" -%}
-This context presents a focused view of the _/{{ project_name }}_ repository, including complete contents for key files and smart outlines for important code definitions. {% if tools_available %}Additional files can be retrieved using the available tools.{% else %}Additional files can be requested using the clipboard method described below.{% endif %}
+This context presents a focused view of the _/{{ project_name }}_ repository, including complete contents for key files and excerpted content for important code sections. {% if tools_available %}Additional files can be retrieved using the available tools.{% else %}Additional files can be requested using the clipboard method described below.{% endif %}
 {%- else -%}
 This context presents a comprehensive view of the _/{{ project_name }}_ repository.
 {%- endif %}
@@ -22,21 +22,21 @@ This context presents a comprehensive view of the _/{{ project_name }}_ reposito
 ## Instructions for AI: 📂 Before {% if tools_available %}Accessing{% else %}Requesting{% endif %} Any Files
 
 1. **SEARCH THIS DOCUMENT** to check if the file is already included below
-2. **CHECK the repository structure** below to confirm file status (✓,{% if highlights %} ○,{% endif %} or ✗)
-3. {% if overview_mode == "focused" %}{% if tools_available %}Use lc-get-files for ✗{% if highlights %} or ○{% endif %} files that are needed for your analysis{% else %}Request ✗{% if highlights %} or ○{% endif %} files using the clipboard method below{% endif %}{% else %}Only request ✗{% if highlights %} or ○{% endif %} files that are absolutely necessary for your analysis{% endif %}
+2. **CHECK the repository structure** below to confirm file status (✓,{% if excerpts %} E,{% endif %} or ✗)
+3. {% if overview_mode == "focused" %}{% if tools_available %}Use lc-get-files for ✗{% if excerpts %} or E{% endif %} files that are needed for your analysis{% else %}Request ✗{% if excerpts %} or E{% endif %} files using the clipboard method below{% endif %}{% else %}Only request ✗{% if excerpts %} or E{% endif %} files that are absolutely necessary for your analysis{% endif %}
 
 {% if tools_available %}
 {% if overview_mode == "focused" -%}
 Use lc-get-files for:
-- Any ✗{% if highlights %} or ○{% endif %} files you need to examine
+- Any ✗{% if excerpts %} or E{% endif %} files you need to examine
 - Files modified since context generation (use lc-list-modified-files to identify these)
 {%- else -%}
 Only use lc-get-files for:
 - Files modified since context generation (use lc-list-modified-files to identify these)
-- Files marked ✗{% if highlights %} or ○{% endif %} in the repository structure that you need to examine
+- Files marked ✗{% if excerpts %} or E{% endif %} in the repository structure that you need to examine
 {%- endif %}
 
-{% if highlights %}
+{% if excerpts %}
 **EFFICIENCY TIP:** If you only need specific functions or methods, use lc-get-implementations instead of retrieving complete files.
 {% endif %}
 {% endif %}
@@ -77,7 +77,7 @@ Follow these steps to request files:
 This focused view shows complete file details for directories containing included files, and folder summaries for directories with only excluded files.
 {%- else -%}
 ```
-Status: ✓=Full content, ○=Outline only, ✗=Excluded
+Status: ✓=Full content, E=Excerpted content, ✗=Excluded
 Format: status path bytes (size) age
 ```
 {%- endif %}

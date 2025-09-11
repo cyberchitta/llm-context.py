@@ -8,10 +8,12 @@ from typing import Any, Optional, cast
 from jinja2 import Environment, FileSystemLoader  # type: ignore
 
 from llm_context.context_spec import ContextSpec
+from llm_context.excerpt_processor import ExcerptProcessorRegistry
 from llm_context.file_selector import FileSelector
 from llm_context.highlighter.language_mapping import to_language
+from llm_context.highlighter.parser import Source
 from llm_context.overviews import get_focused_overview, get_full_overview
-from llm_context.rule import IGNORE_NOTHING, INCLUDE_ALL
+from llm_context.rule import IGNORE_NOTHING, INCLUDE_ALL, Rule
 from llm_context.rule_parser import RuleLoader, RuleProvider
 from llm_context.state import FileSelection
 from llm_context.utils import PathConverter, ProjectLayout, _format_size, log, safe_read_file
@@ -41,17 +43,8 @@ class ContextCollector:
     rule_loader: RuleLoader
 
     @staticmethod
-    def get_outliner():
-        try:
-            from llm_context.highlighter.outliner import generate_outlines
-
-            return generate_outlines
-        except ImportError as e:
-            log(
-                ERROR,
-                f"Outline dependencies not installed. Install with [outline] extra. Error: {e}",
-            )
-            return None
+    def get_excerpter() -> ExcerptProcessorRegistry:
+        return ExcerptProcessorRegistry.create()
 
     @staticmethod
     def create(root_path: Path) -> "ContextCollector":
@@ -94,26 +87,23 @@ class ContextCollector:
             if (content := safe_read_file(abs_path)) is not None
         ]
 
-    def outlines(
-        self, tagger: Any, rel_paths: list[str]
+    def excerpts(
+        self, tagger: Any, rel_paths: list[str], rule: Rule
     ) -> tuple[list[dict[str, str]], list[tuple[str, str]]]:
         abs_paths = self.converter.to_absolute(rel_paths)
-        if rel_paths and (outliner := ContextCollector.get_outliner()):
-            from llm_context.highlighter.parser import Source
-
-            source_set = [
+        excerpter = self.get_excerpter()
+        if rel_paths:
+            sources = [
                 Source(rel, content)
                 for rel, abs_path in zip(rel_paths, abs_paths)
                 if (content := safe_read_file(abs_path)) is not None
             ]
-            return cast(
-                tuple[list[dict[str, str]], list[tuple[str, str]]], outliner(tagger, source_set)
-            )
+            return excerpter.excerpt(sources, rule, tagger)
         else:
             return ([], [])
 
     def definitions(self, tagger: Any, requests: list[tuple[str, str]]) -> list[dict[str, Any]]:
-        if requests and ContextCollector.get_outliner():
+        if requests and ContextCollector.get_excerpter():
             from llm_context.highlighter.parser import Source
             from llm_context.highlighter.tagger import find_definition
 
@@ -136,15 +126,15 @@ class ContextCollector:
         self,
         overview_mode: str,
         full_abs: list[str],
-        outline_abs: list[str],
+        excerpted_abs: list[str],
         rule_abs: list[str],
         diagram_ignores: list[str],
     ) -> str:
         return (
-            get_full_overview(self.root_path, full_abs, outline_abs, rule_abs, diagram_ignores)
+            get_full_overview(self.root_path, full_abs, excerpted_abs, rule_abs, diagram_ignores)
             if overview_mode == "full"
             else get_focused_overview(
-                self.root_path, full_abs, outline_abs, rule_abs, diagram_ignores
+                self.root_path, full_abs, excerpted_abs, rule_abs, diagram_ignores
             )
         )
 
@@ -170,8 +160,8 @@ class ContextGenerator:
     converter: PathConverter
     full_rel: list[str]
     full_abs: list[str]
-    outline_rel: list[str]
-    outline_abs: list[str]
+    excerpted_rel: list[str]
+    excerpted_abs: list[str]
     settings: ContextSettings
     tagger: Optional[Any]
 
@@ -187,9 +177,9 @@ class ContextGenerator:
         converter = PathConverter.create(project_root)
         sel_files = file_selection
         full_rel = sel_files.full_files
-        outline_rel = [f for f in sel_files.outline_files if to_language(f)]
+        excerpted_rel = [f for f in sel_files.excerpted_files if to_language(f)]
         full_abs = converter.to_absolute(full_rel)
-        outline_abs = converter.to_absolute(outline_rel)
+        excerpted_abs = converter.to_absolute(excerpted_rel)
         return ContextGenerator(
             collector,
             spec,
@@ -197,8 +187,8 @@ class ContextGenerator:
             converter,
             full_rel,
             full_abs,
-            outline_rel,
-            outline_abs,
+            excerpted_rel,
+            excerpted_abs,
             settings,
             tagger,
         )
@@ -211,8 +201,9 @@ class ContextGenerator:
         rel_paths = in_files if in_files else self.full_rel
         return self._render("files", {"files": self.collector.files(rel_paths)})
 
-    def outlines(self, template_id: str = "highlights") -> str:
-        context = {"highlights": self.collector.outlines(self.tagger, self.outline_rel)}
+    def excerpts(self, template_id: str = "excerpts") -> str:
+        excerpts, _ = self.collector.excerpts(self.tagger, self.excerpted_rel, self.spec.rule)
+        context = {"excerpts": excerpts}
         return self._render(template_id, context)
 
     def definitions(self, requests, template_id: str = "definitions") -> str:
@@ -229,10 +220,12 @@ class ContextGenerator:
         }
         return self._render(template_id, context)
 
-    def context(self, template_id: str = "context") -> str:
+    def context(self, template_id: str = "context") -> tuple[str, float]:
         descriptor = self.spec.rule
         layout = self.spec.project_layout
-        outlines, sample_definitions = self.collector.outlines(self.tagger, self.outline_rel)
+        excerpts, sample_definitions = self.collector.excerpts(
+            self.tagger, self.excerpted_rel, descriptor
+        )
         implementations = self.collector.definitions(self.tagger, descriptor.implementations)
         files = self.collector.files(self.full_rel)
         settings = self.settings
@@ -244,13 +237,13 @@ class ContextGenerator:
             "overview": self.collector.overview(
                 descriptor.overview,
                 self.full_abs,
-                self.outline_abs,
+                self.excerpted_abs,
                 [],
                 descriptor.get_ignore_patterns("overview"),
             ),
             "overview_mode": descriptor.overview,
             "files": files,
-            "highlights": outlines,
+            "excerpts": excerpts,
             "sample_definitions": sample_definitions,
             "implementations": implementations,
             "sample_requested_files": self.converter.to_relative(

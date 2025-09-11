@@ -29,7 +29,7 @@ class ListModifiedFilesRequest(BaseModel):
     timestamp: float = Field(..., description="Unix timestamp to check modifications since")
 
 
-class OutlinesRequest(BaseModel):
+class ExcerptsRequest(BaseModel):
     root_path: Path = Field(
         ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
     )
@@ -58,6 +58,18 @@ class FocusHelpRequest(BaseModel):
     )
 
 
+class GetExcludedRequest(BaseModel):
+    root_path: Path = Field(
+        ..., description="Root directory path (e.g. '/home/user/projects/myproject')"
+    )
+    paths: list[str] = Field(
+        ..., description="File paths that are included as excerpts in the current context"
+    )
+    timestamp: float = Field(
+        ..., description="Context generation timestamp to check against existing selections"
+    )
+
+
 TOOL_METADATA: dict[str, dict[str, Any]] = {
     "lc-get-files": {
         "model": FilesRequest,
@@ -66,8 +78,7 @@ TOOL_METADATA: dict[str, dict[str, Any]] = {
             "that have already been provided. Retrieves (read-only) complete contents "
             "of specified files from the project. Requires the context generation timestamp "
             "to check against existing file selections. Files already included with full content "
-            "will return a message instead of duplicate content. Files included as outlines "
-            "will be upgraded to full content."
+            "will return a message instead of duplicate content. Files included as excerpts will return a message suggesting lc-get-excluded."
         ),
     },
     "lc-list-modified-files": {
@@ -79,21 +90,19 @@ TOOL_METADATA: dict[str, dict[str, Any]] = {
             "After getting the list, use lc-get-files to examine the contents of any modified files of interest."
         ),
     },
-    "lc-code-outlines": {
-        "model": OutlinesRequest,
+    "lc-excerpts": {
+        "model": ExcerptsRequest,
         "description": (
-            "Returns smart outlines highlighting important definitions in all supported code files. "
+            "Returns excerpted content highlighting important sections in all supported files. "
             "Requires the context generation timestamp to check against existing selections. "
-            "If outlines are already included in the current context, returns a message instead "
-            "of duplicate content. This provides a high-level overview of code structure without "
-            "retrieving full file contents. Use lc-get-implementations to retrieve the full "
-            "implementation of any definition shown in these outlines."
+            "If excerpts are already included in the current context, returns a message instead "
+            "of duplicate content. This provides focused content without retrieving full files. "
         ),
     },
     "lc-get-implementations": {
         "model": ImplementationsRequest,
         "description": (
-            "Retrieves complete code implementations of definitions identified in code outlines. "
+            "Retrieves complete code implementations of definitions identified in code outline excerpts. "
             "Provide a list of file paths and definition names to get their full implementations. "
             "This tool works with all supported languages except C and C++."
         ),
@@ -104,6 +113,13 @@ TOOL_METADATA: dict[str, dict[str, Any]] = {
             "Call this tool when asked to create a focused rule, minimize context, or generate context for a specific task. "
             "Provides step-by-step instructions for creating custom rules that include only the minimum necessary files for a given objective. "
             "Use whenever someone requests focused context, targeted rules, or context reduction for a particular purpose."
+        ),
+    },
+    "lc-get-excluded": {
+        "model": GetExcludedRequest,
+        "description": (
+            "Retrieves sections that were excluded from excerpted files (e.g., styles and templates from Svelte files, prose from Markdown files). "
+            "Use this when you need the parts of files that weren't included in the excerpted content."
         ),
     },
 }
@@ -175,8 +191,10 @@ def get_dxt_capabilities() -> dict[str, Any]:
 __all__ = [
     "FilesRequest",
     "ListModifiedFilesRequest",
-    "OutlinesRequest",
+    "ExcerptsRequest",
     "ImplementationsRequest",
+    "FocusHelpRequest",
+    "GetExcludedRequest",
     "get_tool_definitions",
     "get_tool_definition",
     "get_request_model",

@@ -20,26 +20,26 @@ Create task-focused rules by selecting the minimal set of files needed for your 
 - **Need precise file control over a small set?** → Use `lc/flt-no-files` with explicit `also-include` patterns.
 - **Need rule creation guidance?** → Compose with `lc/ins-rule-intro` or this rule (`lc/ins-rule-framework`).
 
-**Outline Support**: Only files with extensions `.c`, `.cc`, `.cpp`, `.cs`, `.el`, `.ex`, `.elm`, `.go`, `.java`, `.js`, `.mjs`, `.php`, `.py`, `.rb`, `.rs`, `.ts` are eligible for outline selection. Other file types are ignored in outline-files.
+**Excerpt Support**: Only files with extensions `.c`, `.cc`, `.cpp`, `.cs`, `.el`, `.ex`, `.elm`, `.go`, `.java`, `.js`, `.mjs`, `.php`, `.py`, `.rb`, `.rs`, `.ts` are eligible for outline selection. Other file types are ignored in excerpted-files.
 
 ## Rule System Semantics
 
 ### File Selection
 
-- **`also-include: {full-files: [...], outline-files: [...]}`**: Specify files for full content or outlines using the same path format as other patterns (root-relative, excluding project name).
+- **`also-include: {full-files: [...], excerpted-files: [...]}`**: Specify files for full content or outlines using the same path format as other patterns (root-relative, excluding project name).
   - Example: `["/nbs/03_clustering.md", "/src/**/*.py"]` to include specific files or patterns.
 - **`implementations: [[file, definition], ...]`**: Extract specific function/class implementations (not supported for C/C++).
   - Example: `["/src/utils/helpers.js", "validateToken"]` to retrieve a specific function.
 
 ### Filtering (gitignore-style patterns)
 
-- **`gitignores: {full-files: [...], outline-files: [...], overview-files: [...]}`**: Exclude files using patterns.
+- **`gitignores: {full-files: [...], excerpted-files: [...], overview-files: [...]}`**: Exclude files using patterns.
   - Use `lc/flt-base` for standard exclusions (e.g., binaries, logs).
   - Use `lc/flt-no-full` or `lc/flt-no-outline` to exclude all full or outline files.
-- **`limit-to: {full-files: [...], outline-files: [...], overview-files: [...]}`**: Restrict selections to specific patterns.
-  - **Important**: When composing rules, only the first `limit-to` clause for each key (e.g., `full-files`, `outline-files`) is used. Subsequent clauses are ignored, and a warning is logged specifying the rule and patterns kept versus dropped.
+- **`limit-to: {full-files: [...], excerpted-files: [...], overview-files: [...]}`**: Restrict selections to specific patterns.
+  - **Important**: When composing rules, only the first `limit-to` clause for each key (e.g., `full-files`, `excerpted-files`) is used. Subsequent clauses are ignored, and a warning is logged specifying the rule and patterns kept versus dropped.
   - Example: `["src/api/**"]` to limit to API-related files.
-- **`also-include: {full-files: [...], outline-files: [...]}`**: Specify files for full content or outlines using the same path format as other patterns (root-relative, excluding project name).
+- **`also-include: {full-files: [...], excerpted-files: [...]}`**: Specify files for full content or outlines using the same path format as other patterns (root-relative, excluding project name).
   - Example: `["/nbs/03_clustering.md", "/src/**/*.py"]` to include specific files or patterns.
 
 **Path Format**: All patterns (`gitignores`, `limit-to`, `also-include`) must be relative to the project root, starting with `/` but excluding the project name:
@@ -65,7 +65,7 @@ Create task-focused rules by selecting the minimal set of files needed for your 
 
 ### Overview Modes
 
-- **`overview: "full"`**: Default. Shows a complete directory tree with all files (✓ full, ○ outline, ✗ excluded). Use for comprehensive visibility.
+- **`overview: "full"`**: Default. Shows a complete directory tree with all files (✓ full, E excerpted, ✗ excluded). Use for comprehensive visibility.
 - **`overview: "focused"`**: Groups directories, showing details only for those with included files. Use for large repositories (1000+ files) to reduce context size.
 
 ## Example Advanced Rule
@@ -79,7 +79,7 @@ compose:
 gitignores:
   full-files: ["**/test/**", "**/*.test.*"]
 limit-to:
-  outline-files: ["/src/api/**", "/src/types/**"]
+  excerpted-files: ["/src/api/**", "/src/types/**"]
 also-include:
   full-files: ["/src/api/auth.js"]
 implementations:
@@ -109,7 +109,7 @@ also-include:
   full-files:
     - "/path/to/file1.ext"
     - "/path/to/file2.ext"
-  outline-files:
+  excerpted-files:
     - "/path/to/outline1.ext"
 ---
 ## Task-Specific Context

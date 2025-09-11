@@ -9,7 +9,7 @@ from llm_context.exceptions import RuleResolutionError
 from llm_context.rule_parser import DEFAULT_CODE_RULE, RuleLoader, RuleParser
 from llm_context.utils import ProjectLayout, Yaml, log, safe_read_file
 
-CURRENT_CONFIG_VERSION = version.parse("4.1")
+CURRENT_CONFIG_VERSION = version.parse("4.2")
 
 IGNORE_NOTHING = [".git"]
 INCLUDE_ALL = ["**/*"]
@@ -42,6 +42,7 @@ class Rule:
     also_include: dict[str, list[str]]
     implementations: list[tuple[str, str]]  # (file_path, definition_name)
     rules: list[str]
+    excerpt_modes: dict[str, str]
 
     @staticmethod
     def from_config(config: dict[str, Any]) -> "Rule":
@@ -56,6 +57,7 @@ class Rule:
             config.get("also-include", {}),
             [tuple(impl) for impl in config.get("implementations", [])],
             config.get("rules", []),
+            config.get("excerpt-modes", {}),
         )
 
     @staticmethod
@@ -70,6 +72,7 @@ class Rule:
         also_include,
         implementations,
         rules,
+        excerpt_modes,
     ) -> "Rule":
         return Rule(
             name,
@@ -82,7 +85,16 @@ class Rule:
             also_include,
             implementations,
             rules,
+            excerpt_modes,
         )
+
+    def get_excerpt_mode(self, rel_path: str) -> Optional[str]:
+        import fnmatch
+
+        for pattern, mode in self.excerpt_modes.items():
+            if fnmatch.fnmatch(rel_path, pattern):
+                return mode
+        return None
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
         return self.gitignores.get(f"{context_type}-files", IGNORE_NOTHING)
@@ -119,6 +131,7 @@ class Rule:
             **({"also-include": self.also_include} if self.also_include else {}),
             **({"implementations": self.implementations} if self.implementations else {}),
             **({"rules": self.rules} if self.rules else {}),
+            **({"excerpt-modes": self.excerpt_modes} if self.excerpt_modes else {}),
         }
 
 
@@ -231,6 +244,7 @@ class RuleResolver:
             "also-include": {},
             "implementations": [],
             "rules": [],
+            "excerpt-modes": {},
         }
         compose_config = rule.frontmatter.get("compose", {})
         for filter_rule_name in compose_config.get("filters", []):
@@ -242,7 +256,14 @@ class RuleResolver:
         for composed_rule_name in compose_config.get("rules", []):
             new_resolver.rule_loader.load_rule(composed_rule_name)
             composed_config["rules"].append(composed_rule_name)
-        for field in ["gitignores", "limit-to", "also-include", "implementations", "rules"]:
+        for field in [
+            "gitignores",
+            "limit-to",
+            "also-include",
+            "implementations",
+            "rules",
+            "excerpt-modes",
+        ]:
             if field in rule.frontmatter:
                 if field == "gitignores":
                     self._merge_gitignores(composed_config, rule.frontmatter)
@@ -250,6 +271,8 @@ class RuleResolver:
                     self._merge_limit_to(composed_config, rule.frontmatter)
                 elif field == "also-include":
                     self._merge_also_include(composed_config, rule.frontmatter)
+                elif field == "excerpt-modes":
+                    self._merge_excerpt_modes(composed_config, rule.frontmatter)
                 else:
                     composed_config[field].extend(rule.frontmatter[field])
         return composed_config
@@ -282,3 +305,9 @@ class RuleResolver:
                 target["also-include"][key] = []
             existing = set(target["also-include"][key])
             target["also-include"][key].extend([p for p in patterns if p not in existing])
+
+    def _merge_excerpt_modes(self, target: dict, source: dict):
+        source_modes = source.get("excerpt-modes", {})
+        for pattern, mode in source_modes.items():
+            if pattern not in target["excerpt-modes"]:
+                target["excerpt-modes"][pattern] = mode

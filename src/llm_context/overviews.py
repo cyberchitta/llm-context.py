@@ -6,12 +6,12 @@ from typing import Dict
 from llm_context.file_selector import FileSelector
 from llm_context.utils import _format_size, format_age
 
-STATUSES = ["✅", "✓", "○", "✗"]
+STATUSES = ["✅", "✓", "E", "✗"]
 
 STATUS_DESCRIPTIONS = {
     "✅": "Key files (explicitly selected full content)",
     "✓": "Full content",
-    "○": "Outline only",
+    "E": "Excerpt only",
     "✗": "Excluded",
 }
 
@@ -20,7 +20,7 @@ STATUS_DESCRIPTIONS = {
 class OverviewHelper:
     root_dir: str
     full_files: set[str]
-    outline_files: set[str]
+    excerpted_files: set[str]
     rule_files: set[str]
 
     def get_status(self, path: str) -> str:
@@ -28,8 +28,8 @@ class OverviewHelper:
             return "✅"
         if self.full_files and path in self.full_files:
             return "✓"
-        if self.outline_files and path in self.outline_files:
-            return "○"
+        if self.excerpted_files and path in self.excerpted_files:
+            return "E"
         return "✗"
 
     def get_legend(self, status: str) -> str:
@@ -60,9 +60,9 @@ class FullOverview:
 
     @staticmethod
     def create(
-        root_dir: str, full_files: set[str], outline_files: set[str], rule_files: set[str]
+        root_dir: str, full_files: set[str], excerpted_files: set[str], rule_files: set[str]
     ) -> "FullOverview":
-        helper = OverviewHelper(root_dir, full_files, outline_files, rule_files)
+        helper = OverviewHelper(root_dir, full_files, excerpted_files, rule_files)
         return FullOverview(helper)
 
     def generate(self, abs_paths: list[str]) -> str:
@@ -80,20 +80,18 @@ class FocusedOverview:
 
     @staticmethod
     def create(
-        root_dir: str, full_files: set[str], outline_files: set[str], rule_files: set[str]
+        root_dir: str, full_files: set[str], excerpted_files: set[str], rule_files: set[str]
     ) -> "FocusedOverview":
-        helper = OverviewHelper(root_dir, full_files, outline_files, rule_files)
+        helper = OverviewHelper(root_dir, full_files, excerpted_files, rule_files)
         return FocusedOverview(helper)
 
     def _group_files_by_immediate_parent(self, abs_paths: list[str]) -> Dict[str, list[str]]:
         folders: Dict[str, list[str]] = {}
-
         for abs_path in abs_paths:
             parent_path = str(Path(abs_path).parent)
             if parent_path not in folders:
                 folders[parent_path] = []
             folders[parent_path].append(abs_path)
-
         return folders
 
     def _folder_has_included_files(self, files_in_folder: list[str]) -> bool:
@@ -142,14 +140,14 @@ class FocusedOverview:
 def get_full_overview(
     project_root: Path,
     full_files: list[str],
-    outline_files: list[str],
+    excerpted_files: list[str],
     rule_files: list[str],
     overview_ignores: list[str] = [],
 ) -> str:
     overview_ignorer = FileSelector.create_ignorer(project_root, overview_ignores)
     abs_paths = overview_ignorer.get_files()
     overview = FullOverview.create(
-        str(project_root), set(full_files), set(outline_files), set(rule_files)
+        str(project_root), set(full_files), set(excerpted_files), set(rule_files)
     )
     return overview.generate(abs_paths)
 
@@ -157,13 +155,13 @@ def get_full_overview(
 def get_focused_overview(
     project_root: Path,
     full_files: list[str],
-    outline_files: list[str],
+    excerpted_files: list[str],
     rule_files: list[str],
     overview_ignores: list[str] = [],
 ) -> str:
     overview_ignorer = FileSelector.create_ignorer(project_root, overview_ignores)
     abs_paths = overview_ignorer.get_files()
     overview = FocusedOverview.create(
-        str(project_root), set(full_files), set(outline_files), set(rule_files)
+        str(project_root), set(full_files), set(excerpted_files), set(rule_files)
     )
     return overview.generate(abs_paths)

@@ -458,7 +458,7 @@ compose:
 **Selection Strategy**:
 
 - **Full content**: Files you'll modify, small configs, key business logic
-- **Outline content**: Large files where you need structure understanding
+- **Excerpt content**: Large files where you need structure understanding
 - **Exclude**: Documentation (unless relevant), tests (unless debugging), build artifacts
 
 ### Workflow Integration

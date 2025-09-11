@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime as dt
 from logging import ERROR, WARNING
 from pathlib import Path
 from typing import Optional
@@ -12,7 +12,7 @@ from llm_context.utils import ProjectLayout, Yaml, log
 class FileSelection:
     rule_name: str
     full_files: list[str]
-    outline_files: list[str]
+    excerpted_files: list[str]
     timestamp: float
 
     @staticmethod
@@ -20,23 +20,25 @@ class FileSelection:
         return FileSelection.create(DEFAULT_CODE_RULE, [], [])
 
     @staticmethod
-    def create(rule_name: str, full_files: list[str], outline_files: list[str]) -> "FileSelection":
-        return FileSelection._create(
-            rule_name, full_files, outline_files, datetime.now().timestamp()
-        )
+    def create(
+        rule_name: str, full_files: list[str], excerpted_files: list[str]
+    ) -> "FileSelection":
+        return FileSelection._create(rule_name, full_files, excerpted_files, dt.now().timestamp())
 
     @staticmethod
     def _create(
-        rule_name: str, full_files: list[str], outline_files: list[str], timestamp: float
+        rule_name: str, full_files: list[str], excerpted_files: list[str], timestamp: float
     ) -> "FileSelection":
-        return FileSelection(rule_name, full_files, outline_files, timestamp)
+        return FileSelection(rule_name, full_files, excerpted_files, timestamp)
 
     @property
     def files(self) -> list[str]:
-        return self.full_files + self.outline_files
+        return self.full_files + self.excerpted_files
 
     def with_timestamp(self, timestamp: float) -> "FileSelection":
-        return FileSelection._create(self.rule_name, self.full_files, self.outline_files, timestamp)
+        return FileSelection._create(
+            self.rule_name, self.full_files, self.excerpted_files, timestamp
+        )
 
 
 @dataclass(frozen=True)
@@ -100,8 +102,8 @@ class StateStore:
                 selections[rule_name] = FileSelection._create(
                     rule_name,
                     sel_data.get("full-files", []),
-                    sel_data.get("outline-files", []),
-                    sel_data.get("timestamp", datetime.now().timestamp()),
+                    sel_data.get("excerpted-files", []),
+                    sel_data.get("timestamp", dt.now().timestamp()),
                 )
             return AllSelections(selections), data.get("current-profile", DEFAULT_CODE_RULE)
         except Exception:
@@ -113,7 +115,7 @@ class StateStore:
             "selections": {
                 rule_name: {
                     "full-files": sel.full_files,
-                    "outline-files": sel.outline_files,
+                    "excerpted-files": sel.excerpted_files,
                     "timestamp": sel.timestamp,
                 }
                 for rule_name, sel in store.selections.items()

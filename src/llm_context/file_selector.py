@@ -7,7 +7,7 @@ from typing import Optional
 from pathspec import GitIgnoreSpec  # type: ignore
 
 from llm_context.context_spec import ContextSpec
-from llm_context.rule import IGNORE_NOTHING, INCLUDE_ALL
+from llm_context.rule import IGNORE_NOTHING, INCLUDE_ALL, Rule
 from llm_context.state import FileSelection
 from llm_context.utils import PathConverter, log, safe_read_file
 
@@ -182,18 +182,19 @@ class FileSelector:
 @dataclass(frozen=True)
 class ContextSelector:
     full_selector: FileSelector
-    outline_selector: FileSelector
+    excerpted_selector: FileSelector
+    rule: Rule
 
     @staticmethod
     def create(spec: ContextSpec, since: Optional[float] = None) -> "ContextSelector":
         root_path = spec.project_root_path
         rule = spec.rule
         full_ignore_pathspecs = rule.get_ignore_patterns("full")
-        outline_ignore_pathspecs = rule.get_ignore_patterns("outline")
+        excerpted_ignore_pathspecs = rule.get_ignore_patterns("excerpted")
         full_limit_to_pathspecs = rule.get_limit_to_patterns("full")
-        outline_limit_to_pathspecs = rule.get_limit_to_patterns("outline")
+        excerpted_limit_to_pathspecs = rule.get_limit_to_patterns("excerpted")
         full_also_include_pathspecs = rule.get_also_include_patterns("full")
-        outline_also_include_pathspecs = rule.get_also_include_patterns("outline")
+        excerpted_also_include_pathspecs = rule.get_also_include_patterns("excerpted")
         full_selector = FileSelector.create(
             root_path,
             full_ignore_pathspecs,
@@ -201,43 +202,44 @@ class ContextSelector:
             full_also_include_pathspecs,
             since,
         )
-        outline_selector = FileSelector.create(
+        excerpted_selector = FileSelector.create(
             root_path,
-            outline_ignore_pathspecs,
-            outline_limit_to_pathspecs,
-            outline_also_include_pathspecs,
+            excerpted_ignore_pathspecs,
+            excerpted_limit_to_pathspecs,
+            excerpted_also_include_pathspecs,
             since,
         )
-        return ContextSelector(full_selector, outline_selector)
+        return ContextSelector(full_selector, excerpted_selector, rule)
 
     def select_full_files(self, file_selection: FileSelection) -> "FileSelection":
         full_files = self.full_selector.get_relative_files()
-        outline_files = file_selection.outline_files
-        updated_outline_files = [f for f in outline_files if f not in set(full_files)]
-        if len(outline_files) != len(updated_outline_files):
+        excerpted_files = file_selection.excerpted_files
+        updated_excerpted_files = [f for f in excerpted_files if f not in set(full_files)]
+        if len(excerpted_files) != len(updated_excerpted_files):
             log(
                 WARNING,
-                "Some files previously in outline selection have been moved to full selection.",
+                "Some files previously in excerpted selection have been moved to full selection.",
             )
         return FileSelection._create(
-            file_selection.rule_name, full_files, updated_outline_files, file_selection.timestamp
+            file_selection.rule_name, full_files, updated_excerpted_files, file_selection.timestamp
         )
 
-    def select_outline_files(self, file_selection: FileSelection) -> "FileSelection":
+    def select_excerpted_files(self, file_selection: FileSelection) -> "FileSelection":
         full_files = file_selection.full_files
         if not full_files:
             log(
                 WARNING,
                 "No full files have been selected. Consider running full file selection first.",
             )
-        all_outline_files = self.outline_selector.get_relative_files()
-        outline_files = [f for f in all_outline_files if f not in set(full_files)]
+        all_excerpted_files = self.excerpted_selector.get_relative_files()
+        excerpted_files = [f for f in all_excerpted_files if f not in set(full_files)]
         return FileSelection._create(
-            file_selection.rule_name, full_files, outline_files, file_selection.timestamp
+            file_selection.rule_name, full_files, excerpted_files, file_selection.timestamp
         )
 
-    def select_outline_only(self, file_selection: FileSelection) -> "FileSelection":
-        all_outline_files = self.outline_selector.get_relative_files()
+    def select_excerpted_only(self, file_selection: FileSelection) -> "FileSelection":
+        all_excerpted_files = self.excerpted_selector.get_relative_files()
+        supported_excerpted = [f for f in all_excerpted_files if self.rule.get_excerpt_mode(f)]
         return FileSelection._create(
-            file_selection.rule_name, [], all_outline_files, file_selection.timestamp
+            file_selection.rule_name, [], supported_excerpted, file_selection.timestamp
         )
