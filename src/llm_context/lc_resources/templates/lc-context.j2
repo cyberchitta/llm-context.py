@@ -12,58 +12,24 @@
 {% include 'lc-overview.j2' %}
 
 {% if files %}
-## Complete File Contents
-
 {% include 'lc-files.j2' %}
 {% endif %}
 
 {% if excerpts %}
-## Code Outlines - Implementation Retrieval
-
-Smart outlines highlighting important definitions in the codebase.
-{% if sample_definitions %}
-Instructions for AI:: The following outlines show definition declarations in files. To retrieve full implementations of any function, class, or method shown here:
-
-> **Note:** Implementation retrieval doesn't support C/C++ files.
-
-{% if tools_available %}
-Using the lc-get-implementations tool:
-```json
-{
-  "root_path": "{{ abs_root_path }}",
-  "queries": [
-    {% for path, name in sample_definitions %}
-    ["{{ path }}", "{{ name }}"]{% if not loop.last %},{% endif %}
-    {% endfor %}
-  ]
-}
-```
-{% else %}
-Copy these references to clipboard:
-```
-{% for path, name in sample_definitions %}
-{{ path }}:{{ name }}
-{% endfor %}
-```
-Then ask the human to run `lc-clip-implementations`
+{% include 'excerpters/lc-excerpts.j2' %}
 {% endif %}
 
-NOTE: Prefer requesting specific implementations rather than entire files when possible.
-{% endif %}
-
-{% include 'lc-excerpts.j2' %}
-{% endif %}
 ## FINAL REMINDER
 
 {% if overview_mode == "focused" -%}
 {% if tools_available -%}
-Instructions for AI: ⚠️ This document contains focused project context. Use the available tools (lc-get-files, lc-list-modified-files, lc-get-implementations) to retrieve additional files as needed for your analysis. Check the repository structure above to see file status before requesting.
+Instructions for AI: ⚠️ This document contains focused project context. Use the available tools (lc-get-files, lc-list-modified-files, lc-get-implementations, lc-get-excluded) to retrieve additional content as needed for your analysis. Files shown as excerpted (E) can have their excluded sections retrieved via lc-get-excluded.
 {%- else -%}
 Instructions for AI: ⚠️ This document contains focused project context. Additional files can be requested by following the file request instructions in the repository structure section above.
 {%- endif %}
 {%- else -%}
 {% if tools_available -%}
-Instructions for AI: ⚠️ DO NOT REQUEST ADDITIONAL CONTEXT OR FILES ALREADY INCLUDED ABOVE. This document contains complete project context. Only request files that have been modified since context generation (using lc-list-modified-files) or specific files marked as excluded (✗) that are necessary for your analysis.
+Instructions for AI: ⚠️ DO NOT REQUEST ADDITIONAL CONTEXT OR FILES ALREADY INCLUDED ABOVE. This document contains complete project context. Only request files that have been modified since context generation (using lc-list-modified-files), specific implementations (using lc-get-implementations), or excluded sections from excerpted files (using lc-get-excluded) that are necessary for your analysis.
 {%- else -%}
 Instructions for AI: ⚠️ DO NOT REQUEST ADDITIONAL CONTEXT OR FILES ALREADY INCLUDED ABOVE. This document contains complete project context. Additional files can be requested by following the file request instructions in the repository structure section above.
 {%- endif %}

@@ -1,0 +1,39 @@
+## Code Outlines - Implementation Retrieval
+
+Smart outlines highlighting important definitions in the codebase. These show function/class signatures while omitting implementation details to reduce token usage.
+
+{% if sample_definitions %}
+**Implementation Retrieval Instructions**
+The outlines below show definition declarations. To retrieve full implementations:
+
+{% if tools_available %}
+Use lc-get-implementations tool:
+```json
+{
+  "root_path": "{{ abs_root_path }}",
+  "queries": [
+    {% for path, name in sample_definitions %}
+    ["{{ path }}", "{{ name }}"]{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+```
+{% else %}
+Copy these references to clipboard:
+```
+{% for path, name in sample_definitions %}
+{{ path }}:{{ name }}
+{% endfor %}
+```
+Then ask the human to run `lc-clip-implementations`
+{% endif %}
+
+> **Note:** Implementation retrieval doesn't support C/C++ files.
+{% endif %}
+
+{% for item in code_outline_excerpts %}
+{{ item.rel_path }}
+॥๛॥
+{{ item.content }}
+॥๛॥
+{% endfor %}

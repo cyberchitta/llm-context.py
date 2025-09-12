@@ -102,7 +102,7 @@ async def excerpts(arguments: dict) -> list[TextContent]:
         settings = ContextSettings.create(False, False, True)
         content = ContextGenerator.create(
             cur_env.config, file_sel_excerpted, settings, env.tagger
-        ).excerpts()
+        ).outlines()
         return [TextContent(type="text", text=content)]
 
 

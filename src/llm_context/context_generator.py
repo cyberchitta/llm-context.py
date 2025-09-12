@@ -182,7 +182,7 @@ class ContextGenerator:
         rel_paths = in_files if in_files else self.full_rel
         return self._render("files", {"files": self.collector.files(rel_paths)})
 
-    def excerpts(self, template_id: str = "excerpts") -> str:
+    def outlines(self, template_id: str = "outlines") -> str:
         excerpts = self.collector.excerpts(self.tagger, self.excerpted_rel, self.spec.rule)
         context = {"excerpts": excerpts.excerpts}
         return self._render(template_id, context)

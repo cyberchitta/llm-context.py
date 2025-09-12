@@ -48,7 +48,7 @@ class Config:
                 "definitions": "lc-definitions.j2",
                 "end-prompt": "lc-end-prompt.j2",
                 "files": "lc-files.j2",
-                "excerpts": "lc-excerpts.j2",
+                "outlines": "lc-outlines.j2",
                 "overview": "lc-overview.j2",
                 "prompt": "lc-prompt.j2",
             },

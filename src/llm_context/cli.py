@@ -157,7 +157,7 @@ def excerpts(env: ExecutionEnvironment) -> ExecutionResult:
     file_sel_excerpted = selector.select_excerpted_only(env.state.file_selection)
     content = ContextGenerator.create(
         env.config, file_sel_excerpted, settings, env.tagger
-    ).excerpts()
+    ).outlines()
     return ExecutionResult(content, env)
 
 

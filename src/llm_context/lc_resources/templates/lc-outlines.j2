@@ -1,0 +1,7 @@
+{% set code_outline_excerpts = excerpts | selectattr("metadata.processor_type", "equalto", "code-outliner") | list %}
+{%- for item in code_outline_excerpts -%}
+{{ item.rel_path }}
+॥๛॥
+{{ item.content }}
+॥๛॥
+{% endfor %}
