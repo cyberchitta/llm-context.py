@@ -34,13 +34,13 @@ class LangQuery:
         return self._read_tag_query(language)
 
     def _read_tag_query(self, language: str) -> str:
-        return self._read_query("ts", language)
+        return self._read_query(language)
 
-    def _read_query(self, pfx: str, language: str) -> str:
+    def _read_query(self, language: str) -> str:
         query_file_name = f"{language}-tags.scm"
         try:
             return (
-                resources.files(f"llm_context.excerpters.{pfx}-qry")
+                resources.files("llm_context.excerpters.ts-qry")
                 .joinpath(query_file_name)
                 .read_text()
             )
