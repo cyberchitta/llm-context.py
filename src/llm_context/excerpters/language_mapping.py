@@ -37,7 +37,7 @@ class LangQuery:
         return self._read_query("ts", language)
 
     def _read_query(self, pfx: str, language: str) -> str:
-        query_file_name = f"tree-sitter-{language}-tags.scm"
+        query_file_name = f"{language}-tags.scm"
         try:
             return (
                 resources.files(f"llm_context.excerpters.{pfx}-qry")
