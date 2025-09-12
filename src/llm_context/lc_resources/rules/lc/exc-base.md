@@ -22,4 +22,4 @@ excerpt-config:
   sfc-excerpter:
     include_style: false
     include_template_logic: false
-------
+---
