@@ -150,7 +150,7 @@ def context(env: ExecutionEnvironment) -> ExecutionResult:
 
 
 @create_clipboard_cmd
-def excerpts(env: ExecutionEnvironment) -> ExecutionResult:
+def outlines(env: ExecutionEnvironment) -> ExecutionResult:
     rule_feedback(env)
     settings = ContextSettings.create(False, False, False)
     selector = ContextSelector.create(env.config)
