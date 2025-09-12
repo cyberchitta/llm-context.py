@@ -34,7 +34,7 @@ class LangQuery:
         return self._read_tag_query(language)
 
     def _read_tag_query(self, language: str) -> str:
-        return self._read_query("tag", language)
+        return self._read_query("ts", language)
 
     def _read_query(self, pfx: str, language: str) -> str:
         query_file_name = f"tree-sitter-{language}-tags.scm"
