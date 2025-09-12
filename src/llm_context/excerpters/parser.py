@@ -11,7 +11,7 @@ warnings.filterwarnings("ignore", category=FutureWarning, module="tree_sitter")
 
 class Source(NamedTuple):
     rel_path: str
-    code: str
+    content: str
 
 
 @dataclass(frozen=True)
@@ -69,7 +69,7 @@ class ASTFactory:
         assert language_name, f"Unsupported language: {source.rel_path}"
         language = self.parser_factory.get_language(language_name)
         parser = self.parser_factory.get_parser(language_name)
-        tree = parser.parse(bytes(source.code, "utf-8"))
+        tree = parser.parse(bytes(source.content, "utf-8"))
         return AST(language_name, language, parser, tree, self.lang_qry_factory, source.rel_path)
 
 

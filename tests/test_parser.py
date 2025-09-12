@@ -17,7 +17,7 @@ def test_function():
     
 test_function()
 """
-    source = Source(rel_path="test.py", code=code)
+    source = Source(rel_path="test.py", content=code)
     ast_factory = ASTFactory.create()
     return ast_factory.create_from_code(source)
 
@@ -35,7 +35,7 @@ def test_function():
     
 test_function()
 """
-    source = Source(rel_path="test.py", code=code)
+    source = Source(rel_path="test.py", content=code)
     ast_factory = ASTFactory.create()
     workspace_path = "/fake/workspace/path"
     tagger = ASTBasedTagger.create(workspace_path, ast_factory)

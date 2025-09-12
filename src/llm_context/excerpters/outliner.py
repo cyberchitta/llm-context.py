@@ -36,11 +36,11 @@ class Outliner:
             return None
         rel_path = file_tags[0].rel_path
         lines_of_interest = [tag.name.begin.ln if tag.name else tag.begin.ln for tag in file_tags]
-        source = Source(rel_path=rel_path, code=code)
+        source = Source(rel_path=rel_path, content=code)
         return Outliner(source, lines_of_interest)
 
     def to_highlights(self) -> dict[str, str]:
-        code_lines = self.source.code.split("\n")
+        code_lines = self.source.content.split("\n")
         highlighter = OutlineFormatter(
             code_lines=code_lines,
             lines_of_interest=sorted(self.lines_of_interest),
@@ -64,7 +64,7 @@ class Outlines:
         code_outlines = []
         for tags, source in zip(self.defs, self.source_set):
             if tags:
-                outliner = Outliner.create(tags, source.code)
+                outliner = Outliner.create(tags, source.content)
                 if outliner:
                     code_outlines.append(outliner.to_highlights())
         return code_outlines

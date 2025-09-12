@@ -15,7 +15,7 @@ def tagger():
 def test_outliner_line_numbering():
     code = "line1\nline2\nline3\nline4\nline5"
     lines_of_interest = [1, 3]  # zero-indexed, so lines 2 and 4
-    source = Source(rel_path="test.py", code=code)
+    source = Source(rel_path="test.py", content=code)
     outliner = Outliner(source, lines_of_interest)
 
     result = outliner.to_highlights()
@@ -26,7 +26,7 @@ def test_outliner_line_numbering():
 def test_outliner_first_line_highlighting():
     code = "line1\nline2\nline3"
     lines_of_interest = [0]  # first line
-    source = Source(rel_path="test.py", code=code)
+    source = Source(rel_path="test.py", content=code)
     outliner = Outliner(source, lines_of_interest)
 
     result = outliner.to_highlights()
@@ -43,7 +43,7 @@ class TestClass:
 def test_function():
     pass
 """
-    return Source(rel_path="test.py", code=code)
+    return Source(rel_path="test.py", content=code)
 
 
 @pytest.fixture
@@ -71,14 +71,14 @@ def sample_definitions(sample_source):
 
 
 def test_outliner_creation(sample_source, sample_definitions):
-    outliner = Outliner.create(sample_definitions, sample_source.code)
+    outliner = Outliner.create(sample_definitions, sample_source.content)
     assert outliner is not None
     assert outliner.source.rel_path == "test.py"
     assert len(outliner.lines_of_interest) == 2
 
 
 def test_outliner_highlights(sample_source, sample_definitions):
-    outliner = Outliner.create(sample_definitions, sample_source.code)
+    outliner = Outliner.create(sample_definitions, sample_source.content)
     highlights = outliner.to_highlights()
 
     assert highlights["rel_path"] == "test.py"
