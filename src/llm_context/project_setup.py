@@ -141,12 +141,12 @@ class ProjectSetup:
         Yaml.save(self.project_layout.config_path, Config.create_default().to_dict())
 
     def _copy_resource(self, resource_name: str, dest_path: Path):
-        template_content = resources.read_text(lc_resources, resource_name)
+        template_content = resources.files(lc_resources).joinpath(resource_name).read_text()
         dest_path.write_text(template_content)
         log(INFO, f"Updated resource {resource_name} to {dest_path}")
 
     def _copy_template(self, template_name: str, dest_path: Path):
-        template_content = resources.read_text(templates, template_name)
+        template_content = resources.files(templates).joinpath(template_name).read_text()
         dest_path.write_text(template_content)
         log(INFO, f"Updated template {template_name} to {dest_path}")
 
