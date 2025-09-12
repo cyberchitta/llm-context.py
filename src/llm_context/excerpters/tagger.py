@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, NamedTuple, Optional, Protocol
 
-from llm_context.highlighter.parser import ASTFactory, Source, to_definition
+from llm_context.excerpters.parser import ASTFactory, Source, to_definition
 
 
 class Position(NamedTuple):

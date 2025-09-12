@@ -4,7 +4,7 @@ from typing import Any, NamedTuple, cast
 
 from tree_sitter import Language, Node, Parser, Tree  # type: ignore
 
-from llm_context.highlighter.language_mapping import LangQuery, to_language
+from llm_context.excerpters.language_mapping import LangQuery, to_language
 
 warnings.filterwarnings("ignore", category=FutureWarning, module="tree_sitter")
 

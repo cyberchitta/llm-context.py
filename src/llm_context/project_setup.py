@@ -18,6 +18,7 @@ PROJECT_INFO: str = (
 )
 
 SYSTEM_RULES = [
+    "lc/exc-base.md",
     "lc/flt-base.md",
     "lc/flt-no-files.md",
     "lc/flt-no-full.md",
@@ -128,7 +129,7 @@ class ProjectSetup:
             notes_path.parent.mkdir(parents=True, exist_ok=True)
             notes_path.write_text(
                 "## User Notes\n\n"
-                "Add any personal notes or reminders about this or other projects here.\n"
+                "Add Any personal notes or reminders about this or other projects here.\n"
                 "This file is private and stored in your user config directory.\n"
             )
 

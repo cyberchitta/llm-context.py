@@ -40,7 +40,7 @@ class LangQuery:
         query_file_name = f"tree-sitter-{language}-tags.scm"
         try:
             return (
-                resources.files(f"llm_context.highlighter.{pfx}-qry")
+                resources.files(f"llm_context.excerpters.{pfx}-qry")
                 .joinpath(query_file_name)
                 .read_text()
             )

@@ -1,8 +1,8 @@
 import pytest
 
-from llm_context.highlighter.outliner import Outliner, generate_outlines
-from llm_context.highlighter.parser import ASTFactory, Source
-from llm_context.highlighter.tagger import ASTBasedTagger, Definition, Position, Tag
+from llm_context.excerpters.outliner import Outliner, generate_outlines
+from llm_context.excerpters.parser import ASTFactory, Source
+from llm_context.excerpters.tagger import ASTBasedTagger, Definition, Position, Tag
 
 
 @pytest.fixture

@@ -1,7 +1,7 @@
 import pytest
 
-from llm_context.highlighter.parser import AST, ASTFactory, Source
-from llm_context.highlighter.tagger import ASTBasedTagger, Definition, FileTags, Position, Tag
+from llm_context.excerpters.parser import AST, ASTFactory, Source
+from llm_context.excerpters.tagger import ASTBasedTagger, Definition, FileTags, Position, Tag
 
 
 @pytest.fixture

@@ -2,8 +2,8 @@ import random
 from dataclasses import dataclass
 from typing import Optional, cast
 
-from llm_context.highlighter.parser import Source
-from llm_context.highlighter.tagger import ASTBasedTagger, Definition, FileTags, Tag
+from llm_context.excerpters.parser import Source
+from llm_context.excerpters.tagger import ASTBasedTagger, Definition, FileTags, Tag
 
 
 @dataclass(frozen=True)

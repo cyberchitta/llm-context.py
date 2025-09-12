@@ -4,6 +4,7 @@ instructions: ["lc/ins-rule-intro", "lc/ins-rule-framework"]
 overview: full
 compose:
   filters: [lc/flt-base]
+  excerpters: [lc/exc-base]
 also-include:
   full-files: [/.llm-context/rules/**]
 ---

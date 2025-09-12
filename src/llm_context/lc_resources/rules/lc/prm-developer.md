@@ -3,4 +3,5 @@ description: Configures a base prompt for developer workflows, composing standar
 instructions: [lc/ins-developer]
 compose:
   filters: [lc/flt-base]
+  excerpters: [lc/exc-base]
 ---

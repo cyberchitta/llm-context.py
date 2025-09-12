@@ -1,7 +1,6 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict
 
 from llm_context.file_selector import FileSelector
 from llm_context.utils import _format_size, format_age
@@ -85,8 +84,8 @@ class FocusedOverview:
         helper = OverviewHelper(root_dir, full_files, excerpted_files, rule_files)
         return FocusedOverview(helper)
 
-    def _group_files_by_immediate_parent(self, abs_paths: list[str]) -> Dict[str, list[str]]:
-        folders: Dict[str, list[str]] = {}
+    def _group_files_by_immediate_parent(self, abs_paths: list[str]) -> dict[str, list[str]]:
+        folders: dict[str, list[str]] = {}
         for abs_path in abs_paths:
             parent_path = str(Path(abs_path).parent)
             if parent_path not in folders:

@@ -1,8 +1,8 @@
 import pytest
 
-from llm_context.highlighter.outliner import generate_outlines
-from llm_context.highlighter.parser import Source
-from llm_context.highlighter.tagger import ASTBasedTagger
+from llm_context.excerpters.outliner import generate_outlines
+from llm_context.excerpters.parser import Source
+from llm_context.excerpters.tagger import ASTBasedTagger
 
 TEST_CASES = [
     (
@@ -642,7 +642,7 @@ IO.puts "Cube of 3: #{MathOperations.cube(math_op)}"
 
 @pytest.fixture
 def tagger():
-    from llm_context.highlighter.parser import ASTFactory
+    from llm_context.excerpters.parser import ASTFactory
 
     return ASTBasedTagger.create("", ASTFactory.create())
 

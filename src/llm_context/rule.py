@@ -20,13 +20,13 @@ DEFAULT_OVERVIEW_MODE = "full"
 @dataclass(frozen=True)
 class RuleComposition:
     filters: list[str]
-    rules: list[str]
+    excerpters: list[str]
 
     @staticmethod
     def from_config(config: dict[str, Any]) -> "RuleComposition":
         return RuleComposition(
             config.get("filters", []),
-            config.get("rules", []),
+            config.get("excerpters", []),
         )
 
 
@@ -41,8 +41,8 @@ class Rule:
     limit_to: dict[str, list[str]]
     also_include: dict[str, list[str]]
     implementations: list[tuple[str, str]]  # (file_path, definition_name)
-    rules: list[str]
     excerpt_modes: dict[str, str]
+    excerpt_config: dict[str, dict[str, Any]]
 
     @staticmethod
     def from_config(config: dict[str, Any]) -> "Rule":
@@ -56,8 +56,8 @@ class Rule:
             config.get("limit-to", {}),
             config.get("also-include", {}),
             [tuple(impl) for impl in config.get("implementations", [])],
-            config.get("rules", []),
             config.get("excerpt-modes", {}),
+            config.get("excerpt-config", {}),
         )
 
     @staticmethod
@@ -71,8 +71,8 @@ class Rule:
         limit_to,
         also_include,
         implementations,
-        rules,
         excerpt_modes,
+        excerpt_config,
     ) -> "Rule":
         return Rule(
             name,
@@ -84,8 +84,8 @@ class Rule:
             limit_to,
             also_include,
             implementations,
-            rules,
             excerpt_modes,
+            excerpt_config,
         )
 
     def get_excerpt_mode(self, rel_path: str) -> Optional[str]:
@@ -95,6 +95,9 @@ class Rule:
             if fnmatch.fnmatch(rel_path, pattern):
                 return mode
         return None
+
+    def get_excerpt_config(self, excerpter_name: str) -> dict[str, Any]:
+        return self.excerpt_config.get(excerpter_name, {})
 
     def get_ignore_patterns(self, context_type: str) -> list[str]:
         return self.gitignores.get(f"{context_type}-files", IGNORE_NOTHING)
@@ -122,16 +125,16 @@ class Rule:
             "instructions": self.instructions,
             "compose": {
                 "filters": self.compose.filters,
-                "rules": self.compose.rules,
+                "excerpters": self.compose.excerpters,
             }
-            if any([self.compose.filters, self.compose.rules])
+            if any([self.compose.filters, self.compose.excerpters])
             else {},
             **({"gitignores": self.gitignores} if self.gitignores else {}),
             **({"limit-to": self.limit_to} if self.limit_to else {}),
             **({"also-include": self.also_include} if self.also_include else {}),
             **({"implementations": self.implementations} if self.implementations else {}),
-            **({"rules": self.rules} if self.rules else {}),
             **({"excerpt-modes": self.excerpt_modes} if self.excerpt_modes else {}),
+            **({"excerpt-config": self.excerpt_config} if self.excerpt_config else {}),
         }
 
 
@@ -243,8 +246,8 @@ class RuleResolver:
             "limit-to": {},
             "also-include": {},
             "implementations": [],
-            "rules": [],
             "excerpt-modes": {},
+            "excerpt-config": {},
         }
         compose_config = rule.frontmatter.get("compose", {})
         for filter_rule_name in compose_config.get("filters", []):
@@ -253,16 +256,18 @@ class RuleResolver:
             self._merge_gitignores(composed_config, filter_config)
             self._merge_limit_to(composed_config, filter_config)
             self._merge_also_include(composed_config, filter_config)
-        for composed_rule_name in compose_config.get("rules", []):
-            new_resolver.rule_loader.load_rule(composed_rule_name)
-            composed_config["rules"].append(composed_rule_name)
+        for excerpter_rule_name in compose_config.get("excerpters", []):
+            composed_excerpter_rule = new_resolver.get_rule(excerpter_rule_name)
+            excerpter_config = composed_excerpter_rule.to_dict()
+            self._merge_excerpt_modes(composed_config, excerpter_config)
+            self._merge_excerpt_config(composed_config, excerpter_config)
         for field in [
             "gitignores",
             "limit-to",
             "also-include",
             "implementations",
-            "rules",
             "excerpt-modes",
+            "excerpt-config",
         ]:
             if field in rule.frontmatter:
                 if field == "gitignores":
@@ -273,6 +278,8 @@ class RuleResolver:
                     self._merge_also_include(composed_config, rule.frontmatter)
                 elif field == "excerpt-modes":
                     self._merge_excerpt_modes(composed_config, rule.frontmatter)
+                elif field == "excerpt-config":
+                    self._merge_excerpt_config(composed_config, rule.frontmatter)
                 else:
                     composed_config[field].extend(rule.frontmatter[field])
         return composed_config
@@ -311,3 +318,11 @@ class RuleResolver:
         for pattern, mode in source_modes.items():
             if pattern not in target["excerpt-modes"]:
                 target["excerpt-modes"][pattern] = mode
+
+    def _merge_excerpt_config(self, target: dict, source: dict):
+        source_configs = source.get("excerpt-config", {})
+        for processor_name, processor_config in source_configs.items():
+            if processor_name not in target["excerpt-config"]:
+                target["excerpt-config"][processor_name] = {}
+            existing = target["excerpt-config"][processor_name]
+            existing.update(processor_config)

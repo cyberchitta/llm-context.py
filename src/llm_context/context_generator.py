@@ -8,15 +8,16 @@ from typing import Any, Optional, cast
 from jinja2 import Environment, FileSystemLoader  # type: ignore
 
 from llm_context.context_spec import ContextSpec
-from llm_context.excerpt_processor import ExcerptProcessorRegistry
+from llm_context.excerpters.base import Excerpts
+from llm_context.excerpters.language_mapping import to_language
+from llm_context.excerpters.parser import Source
+from llm_context.excerpters.service import ExcerpterRegistry
 from llm_context.file_selector import FileSelector
-from llm_context.highlighter.language_mapping import to_language
-from llm_context.highlighter.parser import Source
 from llm_context.overviews import get_focused_overview, get_full_overview
 from llm_context.rule import IGNORE_NOTHING, INCLUDE_ALL, Rule
 from llm_context.rule_parser import RuleLoader, RuleProvider
 from llm_context.state import FileSelection
-from llm_context.utils import PathConverter, ProjectLayout, _format_size, log, safe_read_file
+from llm_context.utils import PathConverter, ProjectLayout, safe_read_file
 
 
 @dataclass(frozen=True)
@@ -43,8 +44,8 @@ class ContextCollector:
     rule_loader: RuleLoader
 
     @staticmethod
-    def get_excerpter() -> ExcerptProcessorRegistry:
-        return ExcerptProcessorRegistry.create()
+    def get_excerpter() -> ExcerpterRegistry:
+        return ExcerpterRegistry.create()
 
     @staticmethod
     def create(root_path: Path) -> "ContextCollector":
@@ -61,24 +62,6 @@ class ContextCollector:
         incomplete_files = sorted(list(all_abs - set(full_abs)))
         return random.sample(incomplete_files, min(2, len(incomplete_files)))
 
-    def rule_files(self, files: list[str]) -> list[dict[str, str]]:
-        return self.files(files)
-
-    def rules(self, rule_names: list[str]) -> list[dict[str, str]]:
-        results = []
-        for rule_name in rule_names:
-            try:
-                rule_parser = self.rule_loader.load_rule(rule_name)
-                results.append(
-                    {
-                        "path": f"/{self.root_path.name}/.llm-context/rules/{rule_name}.md",
-                        "content": rule_parser.content,
-                    }
-                )
-            except Exception as e:
-                log(ERROR, f"Failed to load rule {rule_name}: {e}")
-        return results
-
     def files(self, rel_paths: list[str]) -> list[dict[str, str]]:
         abs_paths = self.converter.to_absolute(rel_paths)
         return [
@@ -87,9 +70,7 @@ class ContextCollector:
             if (content := safe_read_file(abs_path)) is not None
         ]
 
-    def excerpts(
-        self, tagger: Any, rel_paths: list[str], rule: Rule
-    ) -> tuple[list[dict[str, str]], list[tuple[str, str]]]:
+    def excerpts(self, tagger: Any, rel_paths: list[str], rule: Rule) -> Excerpts:
         abs_paths = self.converter.to_absolute(rel_paths)
         excerpter = self.get_excerpter()
         if rel_paths:
@@ -98,14 +79,14 @@ class ContextCollector:
                 for rel, abs_path in zip(rel_paths, abs_paths)
                 if (content := safe_read_file(abs_path)) is not None
             ]
-            return excerpter.excerpt(sources, rule, tagger)
+            return excerpter.excerpt(sources, rule, tagger)[0]
         else:
-            return ([], [])
+            return excerpter.empty()
 
     def definitions(self, tagger: Any, requests: list[tuple[str, str]]) -> list[dict[str, Any]]:
         if requests and ContextCollector.get_excerpter():
-            from llm_context.highlighter.parser import Source
-            from llm_context.highlighter.tagger import find_definition
+            from llm_context.excerpters.parser import Source
+            from llm_context.excerpters.tagger import find_definition
 
             rel_paths = list({path for path, _ in requests})
             abs_paths = self.converter.to_absolute(rel_paths)
@@ -202,8 +183,8 @@ class ContextGenerator:
         return self._render("files", {"files": self.collector.files(rel_paths)})
 
     def excerpts(self, template_id: str = "excerpts") -> str:
-        excerpts, _ = self.collector.excerpts(self.tagger, self.excerpted_rel, self.spec.rule)
-        context = {"excerpts": excerpts}
+        excerpts = self.collector.excerpts(self.tagger, self.excerpted_rel, self.spec.rule)
+        context = {"excerpts": excerpts.excerpts}
         return self._render(template_id, context)
 
     def definitions(self, requests, template_id: str = "definitions") -> str:
@@ -216,16 +197,13 @@ class ContextGenerator:
         context = {
             "prompt": descriptor.get_instructions(),
             "user_notes": descriptor.get_user_notes(layout),
-            "rules": self.collector.rules(descriptor.rules),
         }
         return self._render(template_id, context)
 
     def context(self, template_id: str = "context") -> tuple[str, float]:
         descriptor = self.spec.rule
         layout = self.spec.project_layout
-        excerpts, sample_definitions = self.collector.excerpts(
-            self.tagger, self.excerpted_rel, descriptor
-        )
+        excerpts = self.collector.excerpts(self.tagger, self.excerpted_rel, descriptor)
         implementations = self.collector.definitions(self.tagger, descriptor.implementations)
         files = self.collector.files(self.full_rel)
         settings = self.settings
@@ -243,8 +221,8 @@ class ContextGenerator:
             ),
             "overview_mode": descriptor.overview,
             "files": files,
-            "excerpts": excerpts,
-            "sample_definitions": sample_definitions,
+            "excerpts": excerpts.excerpts,
+            "sample_definitions": excerpts.metadata["sample_definitions"],
             "implementations": implementations,
             "sample_requested_files": self.converter.to_relative(
                 self.collector.sample_file_abs(self.full_abs)
@@ -253,7 +231,6 @@ class ContextGenerator:
             "project_notes": descriptor.get_project_notes(layout),
             "tools_available": settings.tools_available,
             "user_notes": descriptor.get_user_notes(layout) if settings.with_user_notes else None,
-            "rules": self.collector.rules(descriptor.rules),
             "rule_included_paths": set(),
         }
         return self._render(template_id, context), context_timestamp
