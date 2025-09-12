@@ -112,7 +112,11 @@ class SfcExcerpter(Excerpter):
         last_included_line = -1
         for section in sections:
             if last_included_line >= 0 and section.start_line > last_included_line + 1:
-                result_lines.append("⋮...")
+                if self.config.get("include_template_logic", False):
+                    gap_lines = lines[last_included_line + 1 : section.start_line]
+                    result_lines.extend(gap_lines)
+                else:
+                    result_lines.append("⋮...")
             if self._should_include_section(section.section_type):
                 section_lines = lines[section.start_line : section.end_line + 1]
                 result_lines.extend(section_lines)
