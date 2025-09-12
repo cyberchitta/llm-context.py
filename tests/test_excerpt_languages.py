@@ -1,7 +1,7 @@
 import pytest
 
 from llm_context.excerpters.parser import Source
-from llm_context.excerpters.sfc_excerpter import SfcExcerpter
+from llm_context.excerpters.sfc import Sfc
 
 # Test cases: (test_name, extension, code, config, expected_output)
 TEST_CASES = [
@@ -142,7 +142,7 @@ TEST_CASES = [
   let items = ['apple', 'banana', 'cherry'];
   let showList = true;
 </script>
-⋮...
+
 <style>
 ⋮...
 </style>
@@ -252,7 +252,7 @@ TEST_CASES = [
   
   $: doubled = count * 2;
 </script>
-⋮...
+
 <style>
   .title { 
     font-size: 2rem; 
@@ -345,7 +345,7 @@ TEST_CASES = [
 @pytest.mark.parametrize("test_name,extension,code,config,expected_output", TEST_CASES)
 def test_svelte_excerpting(test_name, extension, code, config, expected_output):
     source = Source(f"test_file.{extension}", code)
-    excerpter = SfcExcerpter(config)
+    excerpter = Sfc(config)
 
     result = excerpter.excerpt([source])
 
@@ -361,7 +361,7 @@ def test_svelte_excerpting(test_name, extension, code, config, expected_output):
 def test_svelte_empty_file():
     """Test handling of empty Svelte files."""
     source = Source("empty.svelte", "")
-    excerpter = SfcExcerpter({"include_style": False, "include_template_logic": False})
+    excerpter = Sfc({"include_style": False, "include_template_logic": False})
 
     result = excerpter.excerpt([source])
 
@@ -373,7 +373,7 @@ def test_svelte_empty_file():
 def test_svelte_non_svelte_file():
     """Test that non-Svelte files are ignored."""
     source = Source("test.js", "console.log('hello');")
-    excerpter = SfcExcerpter({"include_style": False, "include_template_logic": False})
+    excerpter = Sfc({"include_style": False, "include_template_logic": False})
 
     result = excerpter.excerpt([source])
 
@@ -387,7 +387,7 @@ def test_multiple_svelte_files():
         Source("App.svelte", """<script>let name = 'App';</script><div>{name}</div>"""),
         Source("Button.svelte", """<script>export let label;</script><button>{label}</button>"""),
     ]
-    excerpter = SfcExcerpter({"include_style": False, "include_template_logic": False})
+    excerpter = Sfc({"include_style": False, "include_template_logic": False})
 
     result = excerpter.excerpt(sources)
 

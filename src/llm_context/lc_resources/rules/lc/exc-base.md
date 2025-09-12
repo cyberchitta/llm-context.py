@@ -16,8 +16,8 @@ excerpt-modes:
   "*.php": code-outliner
   "*.ex": code-outliner
   "*.elm": code-outliner
-  "*.svelte": sfc-excerpter
-  "*.vue": sfc-excerpter
+  "*.svelte": sfc
+  "*.vue": sfc
 excerpt-config:
   sfc-excerpter:
     include_style: false

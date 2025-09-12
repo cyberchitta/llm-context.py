@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from importlib import resources
-from pathlib import Path
 from typing import Any, Optional, cast
 
 from llm_context.excerpters.base import Excerpt, Excerpter, Excerpts, Excluded
@@ -18,7 +17,7 @@ class SfcSection:
 
 
 @dataclass(frozen=True)
-class SfcExcerpter(Excerpter):
+class Sfc(Excerpter):
     config: dict[str, Any]
 
     def excerpt(self, sources: list[Source]) -> Excerpts:
