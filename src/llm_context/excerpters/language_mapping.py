@@ -20,29 +20,40 @@ def to_language(filename: str) -> Optional[str]:
         "py": "python",
         "rb": "ruby",
         "rs": "rust",
+        "svelte": "svelte",
         "ts": "typescript",
+        "vue": "vue",
     }
     extension = filename.split(".")[-1]
     return ext_to_lang.get(extension)
 
 
+_tag_languages = [
+    "c",
+    "cpp",
+    "csharp",
+    "elisp",
+    "elixir",
+    "elm",
+    "go",
+    "java",
+    "javascript",
+    "php",
+    "python",
+    "ruby",
+    "rust",
+    "typescript",
+]
+
+
 @dataclass(frozen=True)
 class LangQuery:
     def get_tag_query(self, language: str) -> str:
+        assert language in _tag_languages
         if language == "typescript":
             return self._read_tag_query("javascript") + self._read_tag_query("typescript")
         return self._read_tag_query(language)
 
     def _read_tag_query(self, language: str) -> str:
-        return self._read_query(language)
-
-    def _read_query(self, language: str) -> str:
-        query_file_name = f"{language}-tags.scm"
-        try:
-            return (
-                resources.files("llm_context.excerpters.ts-qry")
-                .joinpath(query_file_name)
-                .read_text()
-            )
-        except FileNotFoundError:
-            raise ValueError(f"Query file not found for language: {language}")
+        filename = f"{language}-tags.scm"
+        return resources.files("llm_context.excerpters.ts-qry").joinpath(filename).read_text()
