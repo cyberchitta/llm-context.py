@@ -2,9 +2,6 @@ import argparse
 import ast
 from importlib.metadata import version as pkg_ver
 from logging import INFO
-from pathlib import Path
-
-import pyperclip  # type: ignore
 
 from llm_context import commands
 from llm_context.cmd_pipeline import (
@@ -15,7 +12,6 @@ from llm_context.cmd_pipeline import (
 )
 from llm_context.context_generator import ContextSettings
 from llm_context.exec_env import ExecutionEnvironment
-from llm_context.file_selector import ContextSelector
 from llm_context.utils import log
 
 
@@ -92,20 +88,6 @@ def select_all_files(env: ExecutionEnvironment) -> ExecutionResult:
 
 
 @create_clipboard_cmd
-def files_from_scratch(env: ExecutionEnvironment) -> ExecutionResult:
-    rule_feedback(env)
-    content = commands.get_files_from_paths(env, [])
-    return ExecutionResult(content, env)
-
-
-@create_clipboard_cmd
-def files_from_clip(env: ExecutionEnvironment) -> ExecutionResult:
-    paths = pyperclip.paste().strip().split("\n")
-    content = commands.get_files_from_paths(env, paths)
-    return ExecutionResult(content, env)
-
-
-@create_clipboard_cmd
 def focus_help(env: ExecutionEnvironment) -> ExecutionResult:
     content = commands.get_focus_help(env)
     return ExecutionResult(content, env)
@@ -133,7 +115,6 @@ def context(env: ExecutionEnvironment) -> ExecutionResult:
     nxt_env = env.with_state(env.state.with_selection(updated_selection))
     nxt_env.state.store()
     if args.f:
-        Path(args.f).write_text(content)
         log(INFO, f"Wrote context to {args.f}")
     return ExecutionResult(content, env)
 
@@ -150,14 +131,6 @@ def changed_files(env: ExecutionEnvironment) -> ExecutionResult:
     timestamp = env.state.file_selection.timestamp
     files = commands.list_modified_files(env, env.state.file_selection.rule_name, timestamp)
     return ExecutionResult("\n".join(files), env)
-
-
-@create_clipboard_cmd
-def implementations_from_clip(env: ExecutionEnvironment) -> ExecutionResult:
-    clip = pyperclip.paste().strip()
-    requests = [(w[0], w[1]) for line in clip.splitlines() if len(w := line.split(":", 1)) == 2]
-    content = commands.get_implementations(env, requests)
-    return ExecutionResult(content, env)
 
 
 @create_clipboard_cmd
