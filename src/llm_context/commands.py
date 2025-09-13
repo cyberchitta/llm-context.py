@@ -107,11 +107,6 @@ def generate_context(env: ExecutionEnvironment, settings: ContextSettings) -> tu
     return generator.context()
 
 
-def get_files_from_paths(env: ExecutionEnvironment, paths: list[str]) -> str:
-    settings = ContextSettings.create(False, False, False)
-    return ContextGenerator.create(env.config, env.state.file_selection, settings).files(paths)
-
-
 def get_outlines(env: ExecutionEnvironment) -> str:
     settings = ContextSettings.create(False, False, False)
     selector = ContextSelector.create(env.config)

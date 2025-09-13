@@ -1,4 +1,4 @@
-import asyncio
+import ast
 from importlib.metadata import version as pkg_ver
 from pathlib import Path
 
@@ -87,6 +87,25 @@ def lc_get_excluded(root_path: str, paths: list[str], timestamp: float) -> str:
     # For now, return placeholder as the original implementation wasn't complete
     return "No excluded sections available yet for tree-sitter-outline processors."
 
+@mcp.tool()
+def lc_missing(root_path: str, param_type: str, data: str, timestamp: float) -> str:
+    """Unified tool for retrieving missing context (files or implementations).
+    Args:
+        root_path: Root directory path
+        param_type: Type of data - 'f' for files, 'i' for implementations  
+        data: JSON string containing the data (file paths or implementation queries)
+        timestamp: Context generation timestamp (required for files, ignored for implementations)
+    """
+    env = ExecutionEnvironment.create(Path(root_path))
+    with env.activate():
+        if param_type == "f":
+            file_list = ast.literal_eval(data)
+            return commands.get_files(env, file_list, timestamp)
+        elif param_type == "i":
+            impl_list = ast.literal_eval(data)
+            return commands.get_implementations(env, impl_list)
+        else:
+            raise ValueError(f"Invalid parameter type: {param_type}. Use 'f' for files or 'i' for implementations.")
 
 def run_server():
     mcp.run(transport="stdio")

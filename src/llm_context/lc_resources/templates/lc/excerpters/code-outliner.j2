@@ -7,28 +7,21 @@ Smart outlines highlighting important definitions in the codebase. These show fu
 The outlines below show definition declarations. To retrieve full implementations:
 
 {% if tools_available %}
-Use lc-get-implementations tool:
+Use lc-missing tool:
 ```json
 {
   "root_path": "{{ abs_root_path }}",
-  "queries": [
-    {% for path, name in sample_definitions %}
-    ["{{ path }}", "{{ name }}"]{% if not loop.last %},{% endif %}
-    {% endfor %}
-  ]
+  "param_type": "i", 
+  "data": "{{ sample_definitions | tojson }}",
+  "timestamp": {{ context_timestamp }}
 }
 ```
 {% else %}
-Copy these references to clipboard:
+Copy and run:
+```bash
+lc-missing -i "{{ sample_definitions | tojson }}" -t {{ context_timestamp }}
 ```
-{% for path, name in sample_definitions %}
-{{ path }}:{{ name }}
-{% endfor %}
-```
-Then ask the human to run `lc-clip-implementations`
 {% endif %}
-
-> **Note:** Implementation retrieval doesn't support C/C++ files.
 {% endif %}
 
 {% for item in code_outline_excerpts %}

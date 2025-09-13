@@ -1,4 +1,5 @@
 import argparse
+import ast
 from importlib.metadata import version as pkg_ver
 from logging import INFO
 from pathlib import Path
@@ -55,7 +56,7 @@ def set_rule_with_args(env: ExecutionEnvironment) -> ExecutionResult:
     return res
 
 
-@create_command
+@create_init_command
 def show_version(*, env: ExecutionEnvironment) -> ExecutionResult:
     log(INFO, f"llm-context version {pkg_ver('llm-context')}")
     return ExecutionResult(None, env)
@@ -156,4 +157,24 @@ def implementations_from_clip(env: ExecutionEnvironment) -> ExecutionResult:
     clip = pyperclip.paste().strip()
     requests = [(w[0], w[1]) for line in clip.splitlines() if len(w := line.split(":", 1)) == 2]
     content = commands.get_implementations(env, requests)
+    return ExecutionResult(content, env)
+
+
+@create_clipboard_cmd
+def missing(env: ExecutionEnvironment) -> ExecutionResult:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", type=str)
+    parser.add_argument("-i", type=str)
+    parser.add_argument("-t", type=float, required=True)
+    args = parser.parse_args()
+    if not args.f and not args.i:
+        parser.error("Must specify either -f or -i")
+    if args.f and args.i:
+        parser.error("Cannot specify both -f and -i")
+    if args.f:
+        file_list = ast.literal_eval(args.f)
+        content = commands.get_files(env, file_list, args.t)
+    elif args.i:
+        impl_list = ast.literal_eval(args.i)
+        content = commands.get_implementations(env, impl_list)
     return ExecutionResult(content, env)
