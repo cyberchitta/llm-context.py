@@ -5,13 +5,14 @@ from pathlib import Path
 
 import pyperclip  # type: ignore
 
+from llm_context import commands
 from llm_context.cmd_pipeline import (
     ExecutionResult,
     create_clipboard_cmd,
     create_command,
     create_init_command,
 )
-from llm_context.context_generator import ContextGenerator, ContextSettings
+from llm_context.context_generator import ContextSettings
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
 from llm_context.utils import log
@@ -27,16 +28,6 @@ def set_rule(rule: str, env: ExecutionEnvironment) -> ExecutionResult:
     nxt_env = env.with_rule(rule)
     nxt_env.state.store()
     log(INFO, f"Active rule set to '{rule}'.")
-    return ExecutionResult(None, nxt_env)
-
-
-def select_all_files(env: ExecutionEnvironment) -> ExecutionResult:
-    rule_feedback(env)
-    selector = ContextSelector.create(env.config)
-    file_sel_full = selector.select_full_files(env.state.file_selection)
-    file_sel_excerpted = selector.select_excerpted_files(file_sel_full)
-    nxt_env = env.with_state(env.state.with_selection(file_sel_excerpted))
-    nxt_env.state.store()
     return ExecutionResult(None, nxt_env)
 
 
@@ -73,8 +64,7 @@ def show_version(*, env: ExecutionEnvironment) -> ExecutionResult:
 @create_command
 def select_full_files(env: ExecutionEnvironment):
     rule_feedback(env)
-    selector = ContextSelector.create(env.config)
-    file_selection = selector.select_full_files(env.state.file_selection)
+    file_selection = commands.select_full_files(env)
     nxt_env = env.with_state(env.state.with_selection(file_selection))
     nxt_env.state.store()
     log(INFO, f"Selected {len(file_selection.full_files)} full files.")
@@ -84,47 +74,46 @@ def select_full_files(env: ExecutionEnvironment):
 @create_command
 def select_excerpted_files(env: ExecutionEnvironment) -> ExecutionResult:
     rule_feedback(env)
-    selector = ContextSelector.create(env.config)
-    file_selection = selector.select_excerpted_files(env.state.file_selection)
+    file_selection = commands.select_excerpted_files(env)
     nxt_env = env.with_state(env.state.with_selection(file_selection))
     nxt_env.state.store()
     log(INFO, f"Selected {len(file_selection.excerpted_files)} excerpted files.")
     return ExecutionResult(None, nxt_env)
 
 
+@create_command
+def select_all_files(env: ExecutionEnvironment) -> ExecutionResult:
+    rule_feedback(env)
+    file_selection = commands.select_all_files(env)
+    nxt_env = env.with_state(env.state.with_selection(file_selection))
+    nxt_env.state.store()
+    return ExecutionResult(None, nxt_env)
+
+
 @create_clipboard_cmd
 def files_from_scratch(env: ExecutionEnvironment) -> ExecutionResult:
     rule_feedback(env)
-    settings = ContextSettings.create(False, False, False)
-    return ExecutionResult(
-        ContextGenerator.create(env.config, env.state.file_selection, settings).files([]), env
-    )
+    content = commands.get_files_from_paths(env, [])
+    return ExecutionResult(content, env)
 
 
 @create_clipboard_cmd
-def files_from_clip(in_files: list[str] = [], *, env: ExecutionEnvironment):
-    settings = ContextSettings.create(False, False, False)
-    return ExecutionResult(
-        ContextGenerator.create(env.config, env.state.file_selection, settings).files(
-            pyperclip.paste().strip().split("\n")
-        ),
-        env,
-    )
+def files_from_clip(env: ExecutionEnvironment) -> ExecutionResult:
+    paths = pyperclip.paste().strip().split("\n")
+    content = commands.get_files_from_paths(env, paths)
+    return ExecutionResult(content, env)
 
 
 @create_clipboard_cmd
 def focus_help(env: ExecutionEnvironment) -> ExecutionResult:
-    settings = ContextSettings.create(False, False, False)
-    generator = ContextGenerator.create(env.config, env.state.file_selection, settings)
-    content = generator.focus_help()
+    content = commands.get_focus_help(env)
     return ExecutionResult(content, env)
 
 
 @create_clipboard_cmd
 def prompt(env: ExecutionEnvironment) -> ExecutionResult:
     rule_feedback(env)
-    settings = ContextSettings.create(False, False, False)
-    content = ContextGenerator.create(env.config, env.state.file_selection, settings).prompt()
+    content = commands.get_prompt(env)
     return ExecutionResult(content, env)
 
 
@@ -138,8 +127,7 @@ def context(env: ExecutionEnvironment) -> ExecutionResult:
     parser.add_argument("-f", type=str, help="Write context to file")
     args, _ = parser.parse_known_args()
     settings = ContextSettings.create(args.p, args.u, not args.nt)
-    generator = ContextGenerator.create(env.config, env.state.file_selection, settings, env.tagger)
-    content, context_timestamp = generator.context()
+    content, context_timestamp = commands.generate_context(env, settings)
     updated_selection = env.state.file_selection.with_timestamp(context_timestamp)
     nxt_env = env.with_state(env.state.with_selection(updated_selection))
     nxt_env.state.store()
@@ -152,30 +140,20 @@ def context(env: ExecutionEnvironment) -> ExecutionResult:
 @create_clipboard_cmd
 def outlines(env: ExecutionEnvironment) -> ExecutionResult:
     rule_feedback(env)
-    settings = ContextSettings.create(False, False, False)
-    selector = ContextSelector.create(env.config)
-    file_sel_excerpted = selector.select_excerpted_only(env.state.file_selection)
-    content = ContextGenerator.create(
-        env.config, file_sel_excerpted, settings, env.tagger
-    ).outlines()
+    content = commands.get_outlines(env)
     return ExecutionResult(content, env)
 
 
 @create_clipboard_cmd
 def changed_files(env: ExecutionEnvironment) -> ExecutionResult:
     timestamp = env.state.file_selection.timestamp
-    selector = ContextSelector.create(env.config, timestamp)
-    file_sel_full = selector.select_full_files(env.state.file_selection)
-    file_sel_excerpted = selector.select_excerpted_files(file_sel_full)
-    return ExecutionResult("\n".join(file_sel_excerpted.files), env)
+    files = commands.list_modified_files(env, env.state.file_selection.rule_name, timestamp)
+    return ExecutionResult("\n".join(files), env)
 
 
 @create_clipboard_cmd
 def implementations_from_clip(env: ExecutionEnvironment) -> ExecutionResult:
-    settings = ContextSettings.create(False, False, False)
     clip = pyperclip.paste().strip()
     requests = [(w[0], w[1]) for line in clip.splitlines() if len(w := line.split(":", 1)) == 2]
-    content = ContextGenerator.create(
-        env.config, env.state.file_selection, settings, env.tagger
-    ).definitions(requests)
+    content = commands.get_implementations(env, requests)
     return ExecutionResult(content, env)
