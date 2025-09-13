@@ -44,13 +44,13 @@ class Config:
     def create_default() -> "Config":
         return Config(
             templates={
-                "context": "lc-context.j2",
-                "definitions": "lc-definitions.j2",
-                "end-prompt": "lc-end-prompt.j2",
-                "files": "lc-files.j2",
-                "outlines": "lc-outlines.j2",
-                "overview": "lc-overview.j2",
-                "prompt": "lc-prompt.j2",
+                "context": "lc/context.j2",
+                "definitions": "lc/definitions.j2",
+                "end-prompt": "lc/end-prompt.j2",
+                "files": "lc/files.j2",
+                "outlines": "lc/outlines.j2",
+                "overview": "lc/overview.j2",
+                "prompt": "lc/prompt.j2",
             },
         )
 
@@ -99,6 +99,7 @@ class ProjectSetup:
             self._create_config_file()
         elif self.constants.needs_update:
             self._update_config_file()
+            self._clean_old_resources()
 
     def _create_curr_ctx_file(self):
         if not self.project_layout.state_store_path.exists():
@@ -106,7 +107,6 @@ class ProjectSetup:
 
     def _update_templates_if_needed(self):
         if self.constants.needs_update:
-            self._clean_old_templates()
             config = Yaml.load(self.project_layout.config_path)
             for _, template_name in config["templates"].items():
                 template_path = self.project_layout.get_template_path(template_name)
@@ -149,6 +149,7 @@ class ProjectSetup:
 
     def _copy_template(self, template_name: str, dest_path: Path):
         template_content = resources.files(templates).joinpath(template_name).read_text()
+        dest_path.parent.mkdir(parents=True, exist_ok=True)
         dest_path.write_text(template_content)
         log(INFO, f"Updated template {template_name} to {dest_path}")
 
@@ -173,20 +174,24 @@ class ProjectSetup:
             self._copy_rule(rule, rule_path)
 
     def _copy_excerpter_templates(self):
-        excerpters_source = resources.files(templates).joinpath("excerpters")
-        excerpters_dest = self.project_layout.templates_path / "excerpters"
+        excerpters_source = resources.files(templates).joinpath("lc").joinpath("excerpters")
+        excerpters_dest = self.project_layout.templates_path / "lc" / "excerpters"
         if excerpters_source.is_dir():
-            excerpters_dest.mkdir(exist_ok=True)
+            excerpters_dest.mkdir(parents=True, exist_ok=True)
             for template_file in excerpters_source.iterdir():
                 if template_file.is_file() and template_file.name.endswith(".j2"):
                     dest_file = excerpters_dest / template_file.name
                     dest_file.write_text(template_file.read_text())
                     log(INFO, f"Updated excerpter template {template_file.name} to {dest_file}")
 
-    def _clean_old_templates(self):
+    def _clean_old_resources(self):
         templates_path = self.project_layout.templates_path
-        if not templates_path.exists():
-            return
-        for template_file in templates_path.rglob("lc-*.j2"):
-            template_file.unlink()
-            log(INFO, f"Removed old template {template_file}")
+        if templates_path.exists():
+            for template_file in templates_path.rglob("lc-*.j2"):
+                template_file.unlink()
+                log(INFO, f"Removed old template {template_file}")
+        rules_path = self.project_layout.rules_path
+        if rules_path.exists():
+            for rule_file in rules_path.rglob("lc-*.md"):
+                rule_file.unlink()
+                log(INFO, f"Removed old rule {rule_file}")

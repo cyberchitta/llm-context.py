@@ -1,4 +1,4 @@
-{% include 'lc-prompt.j2' %}
+{% include 'lc/prompt.j2' %}
 {%- if rules %}
 
 {% for item in rules -%}
@@ -9,14 +9,14 @@
 {{ project_notes }}
 {% endif %}
 
-{% include 'lc-overview.j2' %}
+{% include 'lc/overview.j2' %}
 
 {% if files %}
-{% include 'lc-files.j2' %}
+{% include 'lc/files.j2' %}
 {% endif %}
 
 {% if excerpts %}
-{% include 'excerpters/lc-excerpts.j2' %}
+{% include 'lc/excerpters/lc-excerpts.j2' %}
 {% endif %}
 
 ## FINAL REMINDER
@@ -35,4 +35,4 @@ Instructions for AI: ⚠️ DO NOT REQUEST ADDITIONAL CONTEXT OR FILES ALREADY I
 {%- endif %}
 {%- endif %}
 
-{% include 'lc-end-prompt.j2' %}
+{% include 'lc/end-prompt.j2' %}
