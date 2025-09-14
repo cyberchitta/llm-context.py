@@ -9,8 +9,7 @@
 5. [AI-Assisted Rule Creation](#ai-assisted-rule-creation)
 6. [Command Reference](#command-reference)
 7. [Best Practices](#best-practices)
-8. [Experimental Features](#experimental-features)
-9. [Troubleshooting](#troubleshooting)
+8. [Troubleshooting](#troubleshooting)
 
 ## Installation & Setup
 
@@ -22,7 +21,7 @@
 ### Installation
 
 ```bash
-uv tool install "llm-context>=0.4.0"
+uv tool install "llm-context>=0.5.0"
 ```
 
 ### Project Initialization
@@ -40,12 +39,10 @@ Creates `.llm-context/` directory with default configuration and rules.
 
 ```bash
 # 1. Select files (smart defaults)
-lc-sel-files
-
+lc-select
 # 2. Generate context
-lc-context          # For MCP environments
-lc-context -nt      # For manual workflows
-
+lc-context # For MCP environments
+lc-context -nt # For manual workflows
 # 3. Paste into AI chat
 # 4. AI can access additional files as needed
 ```
@@ -66,12 +63,11 @@ gitignores:
     - "*.md"
     - /tests
     - /node_modules
-  outline-files:
+  excerpt-files:
     - "*.md"
     - /tests
 ---
 EOF
-
 # Main development rule
 cat > .llm-context/rules/prm-code.md << 'EOF'
 ---
@@ -79,8 +75,8 @@ description: "Main development rule"
 instructions: [lc/ins-developer, lc/sty-python]
 compose:
   filters: [flt-repo]
+  excerpters: [lc/exc-base]
 ---
-
 Additional project-specific guidelines and context.
 EOF
 ```
@@ -89,22 +85,24 @@ EOF
 
 ### Systematic Organization
 
-LLM Context uses a four-category rule system with kebab-case prefixes:
+LLM Context uses a five-category rule system with kebab-case prefixes:
 
 - **Prompt Rules (`prm-`)**: Generate project contexts
 - **Filter Rules (`flt-`)**: Control file inclusion/exclusion
 - **Instruction Rules (`ins-`)**: Provide guidance and frameworks
 - **Style Rules (`sty-`)**: Enforce coding standards
+- **Excerpt Rules (`exc-`)**: Configure extractions of significant content for context reduction (generalizes outlining)
 
 ### Decision Framework
 
 **Choose rule types based on your needs:**
 
 - **Need detailed code implementations?** → Use `lc/prm-developer` for full content
-- **Need only code structure?** → Use `lc/flt-no-full` with outline files
+- **Need only code structure?** → Use `lc/flt-no-full` with excerpt files
 - **Need coding guidelines?** → Include `lc/sty-code`, `lc/sty-python` for relevant languages
 - **Need minimal context?** → Use `lc/flt-no-files` with specific inclusions
 - **Need rule creation help?** → Use `lc/prm-rule-create` with `lc/ins-rule-framework`
+- **Need context reduction via extractions?** → Compose with `lc/exc-base` or custom exc- rules
 
 ### Rule Structure
 
@@ -116,10 +114,13 @@ description: "Brief description"
 instructions: [lc/ins-developer, lc/sty-python] # Compose instructions
 compose:
   filters: [lc/flt-base, custom-filters] # File selection rules
+  excerpters: [lc/exc-base] # Excerpt rules
 gitignores: # Additional exclusions
   full-files: ["*.tmp"]
 also-include: # Force include specific files
   full-files: ["/important.config"]
+  excerpt-files: ["/large-file.py"]
+excerpters: [code-outliner, sfc] # Specify excerpters
 overview: "full" # "full" (default) or "focused"
 ---
 ## Rule Content
@@ -132,26 +133,22 @@ Markdown content providing additional context for the AI.
 
 - `lc/prm-developer` - Standard development context
 - `lc/prm-rule-create` - Full project context for rule creation
-
-**Filter Rules (`lc/flt-*`)**:
-
+  **Filter Rules (`lc/flt-*`)**:
 - `lc/flt-base` - Standard exclusions (binaries, build artifacts)
 - `lc/flt-no-files` - Exclude everything (use with `also-include`)
 - `lc/flt-no-full` - Exclude all full content files
-- `lc/flt-no-outline` - Exclude all outline files
-
-**Instruction Rules (`lc/ins-*`)**:
-
+- `lc/flt-no-outline` - Exclude all excerpt files
+  **Instruction Rules (`lc/ins-*`)**:
 - `lc/ins-developer` - Developer persona and guidelines
 - `lc/ins-rule-framework` - Rule creation framework and best practices
 - `lc/ins-rule-intro` - Chat-based rule creation introduction
-
-**Style Rules (`lc/sty-*`)**:
-
+  **Style Rules (`lc/sty-*`)**:
 - `lc/sty-code` - Universal programming principles
 - `lc/sty-python` - Python-specific guidelines
 - `lc/sty-javascript` - JavaScript-specific guidelines
 - `lc/sty-jupyter` - Jupyter notebook guidelines
+  **Excerpt Rules (`lc/exc-*`)**:
+- `lc/exc-base` - Base configuration for excerpting, using code-outliner and SFC excerpters for structure extraction without full implementations
 
 ### Rule Composition Patterns
 
@@ -163,6 +160,7 @@ description: "Main development rule"
 instructions: [lc/ins-developer, lc/sty-python]
 compose:
   filters: [lc/flt-base, project-filters]
+  excerpters: [lc/exc-base]
 ---
 ```
 
@@ -173,6 +171,7 @@ compose:
 description: "Debug authentication issues"
 compose:
   filters: [lc/flt-no-files]
+  excerpters: [lc/exc-base]
 also-include:
   full-files: ["/src/auth/**", "/tests/auth/**"]
 ---
@@ -185,8 +184,9 @@ also-include:
 description: "Review code structure"
 compose:
   filters: [lc/flt-no-full]
+  excerpters: [lc/exc-base]
 also-include:
-  outline-files: ["/src/**/*.py", "/src/**/*.js"]
+  excerpt-files: ["/src/**/*.py", "/src/**/*.js"]
 ---
 ```
 
@@ -198,7 +198,6 @@ All paths relative to project root, starting with `/`:
 # ✅ Correct
 also-include:
   full-files: ["/src/main.py", "/config/**"]
-
 # ❌ Wrong - includes project name
 also-include:
   full-files: ["/myproject/src/main.py"]
@@ -240,7 +239,7 @@ Provides seamless file access during AI conversations.
 
 1. **Code Review**: "I've implemented the auth changes, can you review them?"
 
-   - AI uses `lc-get-files` to examine modified files
+   - AI uses `lc-missing` to examine modified files
    - Provides feedback on completeness and correctness
 
 2. **Additional Context**: "What about the database schema?"
@@ -249,7 +248,7 @@ Provides seamless file access during AI conversations.
 
 3. **Change Tracking**: "What files have we modified?"
 
-   - AI uses `lc-list-modified-files` to track conversation changes
+   - AI uses `lc-changed` to track conversation changes
 
 4. **Following References**: "Let me check the utility functions"
 
@@ -257,9 +256,10 @@ Provides seamless file access during AI conversations.
 
 #### MCP Tools
 
-- `lc-get-files` - Direct file access
-- `lc-list-modified-files` - Track changes during conversation
-- Experimental: `lc-code-outlines`, `lc-get-implementations`
+- `lc-missing` - Unified access to files, excerpts, implementations
+- `lc-changed` - Track changes during conversation
+
+## Integration Options
 
 ### Manual Workflow (Fallback)
 
@@ -268,12 +268,16 @@ For environments without MCP support:
 ```bash
 # Generate context with file request instructions
 lc-context -nt
-
 # When AI requests additional files:
-# 1. Copy file list from AI
-# 2. Run: lc-clip-files
-# 3. Paste result back to AI
+# 1. The AI will provide a full command in a fenced code block, like:
+lc-missing -f "[file1, file2]" -t 1234567890.123456
 ```
+
+# 2. Copy and run this command in your terminal
+
+# 3. The output will be copied to your clipboard automatically
+
+# 4. Paste the output back into the AI chat
 
 The `-nt` flag optimizes context for manual workflows.
 
@@ -286,18 +290,16 @@ For unusual tasks or new projects, let AI help create focused rules using the sy
 ```bash
 # 1. Get full project context with rule creation framework
 lc-set-rule lc/prm-rule-create
-lc-sel-files
+lc-select
 lc-context -nt
-
 # 2. Describe task to AI
 # "I need to add OAuth integration to the auth system"
-
 # 3. AI generates focused rule using framework
 # 4. Use the focused context
 lc-set-rule tmp-prm-oauth-task
-lc-sel-files
+lc-select
 lc-context
-```
+````
 
 ### Framework-Based Rule Creation
 
@@ -309,6 +311,7 @@ description: "Add OAuth support to authentication system"
 overview: full
 compose:
   filters: [lc/flt-no-files]
+  excerpters: [lc/exc-base]
 also-include:
   full-files:
     - "/src/auth/**"
@@ -317,6 +320,7 @@ also-include:
     - "/tests/auth/**"
 implementations:
   - ["/src/utils/jwt.js", "validateToken"]
+excerpters: [code-outliner, sfc]
 ---
 ## OAuth Integration Context
 Focus on existing auth patterns to maintain consistency when adding OAuth providers.
@@ -336,58 +340,59 @@ Check token validation, middleware integration, and configuration patterns.
 **lc-init**
 
 ```bash
-lc-init                    # Initialize project
+lc-init # Initialize project
 ```
 
 **lc-set-rule**
 
 ```bash
-lc-set-rule prm-code                # Switch to custom code rule
-lc-set-rule lc/prm-developer        # Use system developer rule
-lc-set-rule lc/prm-rule-create      # Switch to rule creation
-lc-set-rule tmp-prm-my-task         # Switch to temporary task rule
+lc-set-rule prm-code # Switch to custom code rule
+lc-set-rule lc/prm-developer # Use system developer rule
+lc-set-rule lc/prm-rule-create # Switch to rule creation
+lc-set-rule tmp-prm-my-task # Switch to temporary task rule
 ```
 
-**lc-sel-files**
+**lc-select**
 
 ```bash
-lc-sel-files               # Select files based on current rule
+lc-select # Select files based on current rule for full and excerpt content
 ```
 
 **lc-context**
 
 ```bash
-lc-context                 # Generate context (MCP optimized)
-lc-context -p              # Include prompt instructions
-lc-context -u              # Include user notes
-lc-context -nt             # No tools (manual workflow)
-lc-context -f output.md    # Write to file
+lc-context # Generate context (MCP optimized)
+lc-context -p # Include prompt instructions
+lc-context -u # Include user notes
+lc-context -nt # No tools (manual workflow)
+lc-context -f output.md # Write to file
 ```
 
 ### Utility Commands
 
-**lc-clip-files**
+**lc-missing**
 
 ```bash
-lc-clip-files              # Process file requests from clipboard
+lc-missing -f "[file1, file2]" -t <timestamp> # Process file requests
+lc-missing -i "[[file, def], [file, def]]" -t <timestamp> # Process implementation requests
 ```
 
 **lc-changed**
 
 ```bash
-lc-changed                 # List files modified since last generation
+lc-changed # List files modified since last generation
 ```
 
 **lc-prompt**
 
 ```bash
-lc-prompt                  # Generate just instructions portion
+lc-prompt # Generate just instructions portion
 ```
 
-**lc-focus-help**
+**lc-rule-instructions**
 
 ```bash
-lc-focus-help             # Rule creation guidance
+lc-rule-instructions # Rule creation guidance
 ```
 
 ## Best Practices
@@ -398,12 +403,11 @@ lc-focus-help             # Rule creation guidance
 
 ```bash
 # Project-specific base filters
-.llm-context/rules/filters.md      # extends lc/flt-base
-
+.llm-context/rules/filters.md # extends lc/flt-base
 # Main development rules
-.llm-context/rules/code.md         # general development
-.llm-context/rules/api.md          # API-focused work
-.llm-context/rules/frontend.md     # frontend development
+.llm-context/rules/code.md # general development
+.llm-context/rules/api.md # API-focused work
+.llm-context/rules/frontend.md # frontend development
 ```
 
 **Temporary Rules** (specific tasks):
@@ -423,6 +427,7 @@ lc-focus-help             # Rule creation guidance
 - Need minimal context? Start with `lc/flt-no-files`
 - Need standard exclusions? Use `lc/flt-base`
 - Need development instructions? Include `lc/ins-developer`
+- Need excerpting for code structure? Compose with `lc/exc-base`
 
 **Layer Compositions**:
 
@@ -431,19 +436,20 @@ lc-focus-help             # Rule creation guidance
 instructions: [lc/ins-developer, lc/sty-python, lc/sty-code]
 compose:
   filters: [lc/flt-base, project-filters, no-tests]
+  excerpters: [lc/exc-base]
 ```
 
 **Use Categories Appropriately**:
 
 ```yaml
 # Good: Clear separation of concerns
-instructions: [lc/ins-developer]  # Guidelines
+instructions: [lc/ins-developer] # Guidelines
 compose:
-  filters: [lc/flt-base]          # File selection
-
+  filters: [lc/flt-base] # File selection
+  excerpters: [lc/exc-base] # Excerpt configuration
 # Avoid: Mixing categories inappropriately
 compose:
-  filters: [lc/sty-python]       # Style rule in filters
+  filters: [lc/sty-python] # Style rule in filters
 ```
 
 ### Context Efficiency
@@ -467,8 +473,8 @@ compose:
 
 ```bash
 lc-set-rule code
-lc-sel-files
-lc-context                # Paste into Claude
+lc-select
+lc-context # Paste into Claude
 # Claude handles additional file access automatically
 ```
 
@@ -476,51 +482,48 @@ lc-context                # Paste into Claude
 
 ```bash
 lc-set-rule code
-lc-sel-files
-lc-context -nt            # Includes file request instructions
-# Use lc-clip-files for additional requests
+lc-select
+lc-context -nt # Includes file request instructions
+# Use lc-missing for additional requests
 ```
 
 **Project Knowledge Bases**:
 
 ```bash
-lc-context                # Clean context without instructions
+lc-context # Clean context without instructions
 ```
 
-## Experimental Features
+## Code Excerpting
 
-> **Note**: Under development, may have usability issues.
-
-### Code Outlining
-
-Show structure without implementation details.
-
-**Supported Languages**: C, C++, C#, Elixir, Elm, Go, Java, JavaScript, PHP, Python, Ruby, Rust, TypeScript
+Extractions of significant content to reduce context while preserving structure (generalizes previous outlining functionality).
+**Supported Languages**: C, C++, C#, Elixir, Elm, Go, Java, JavaScript, PHP, Python, Ruby, Rust, TypeScript, Svelte, Vue
 
 **Usage**:
 
 ```bash
-lc-sel-files        # Full content files
-lc-sel-outlines     # Additional structure-only files
+lc-select # Full and excerpt content files
 lc-context
 ```
 
 **Rule Configuration**:
 
 ```yaml
+compose:
+  excerpters: [lc/exc-base]
 also-include:
   full-files: ["/src/main.py"] # Complete content
-  outline-files: ["/src/utils/**"] # Structure only
+  excerpt-files: ["/src/utils/**"] # Structure only
 ```
 
-### Implementation Extraction
+## Implementation Extraction
 
 Extract specific functions/classes on demand.
 
 **Usage**:
 
 ```bash
-lc-clip-implementations    # Process AI requests for specific code
+# The AI will provide a full command in a fenced code block, like:
+lc-missing -i "[[path, name], ...]" -t 1234567890.123456 # Process AI requests for specific code (output copied to clipboard)
 ```
 
 **Rule Configuration**:
@@ -529,13 +532,6 @@ lc-clip-implementations    # Process AI requests for specific code
 implementations:
   - ["/src/utils.js", "validateUser"]
   - ["/src/auth.js", "AuthManager"]
-```
-
-**Expected Format for Manual Usage**:
-
-```
-/src/utils.js:validateUser
-/src/auth.js:AuthManager
 ```
 
 ## Troubleshooting
@@ -555,6 +551,7 @@ implementations:
 - Add exclusions to rule's `gitignores`
 - Switch to `overview: "focused"` for large repositories
 - Create focused rule with `tmp-prm-` prefix
+- Use excerpting to reduce content while keeping structure
 
 **Rule composition errors**:
 
@@ -574,15 +571,15 @@ implementations:
 **Check Current Selection**:
 
 ```bash
-cat .llm-context/curr_ctx.yaml     # See selected files
-lc-changed                         # Check recent changes
+cat .llm-context/curr_ctx.yaml # See selected files
+lc-changed # Check recent changes
 ```
 
 **Test System Rules**:
 
 ```bash
-lc-set-rule lc/prm-developer       # Test with known good rule
-lc-sel-files
+lc-set-rule lc/prm-developer # Test with known good rule
+lc-select
 ```
 
 **Validate Rule Syntax**:
@@ -593,7 +590,7 @@ lc-sel-files
 
 ### Getting Help
 
-1. `lc-focus-help` - Rule creation guidance from system
+1. `lc-rule-instructions` - Rule creation guidance from system
 2. `lc-set-rule lc/prm-rule-create` - Full framework with examples
 3. Check system rules in implementation for patterns
 4. Use AI-assisted rule creation for complex cases
@@ -603,11 +600,9 @@ lc-sel-files
 ```bash
 # Backup custom rules
 cp -r .llm-context/rules/*.md /tmp/backup-rules/
-
 # Reset to defaults
 rm -rf .llm-context
 lc-init
-
 # Restore custom rules
 cp /tmp/backup-rules/*.md .llm-context/rules/
 ```
@@ -617,7 +612,7 @@ cp /tmp/backup-rules/*.md .llm-context/rules/
 For development and troubleshooting, here are the current system rules:
 
 **File Organization**: All system rules use `lc/` prefix with category indicators
-**Categories**: `prm-` (prompts), `flt-` (filters), `ins-` (instructions), `sty-` (styles)
+**Categories**: `prm-` (prompts), `flt-` (filters), `ins-` (instructions), `sty-` (styles), `exc-` (excerpts)
 **Composition**: System rules can be composed into user rules
 **Updates**: System rules may be updated with new versions (user rules preserved)
 

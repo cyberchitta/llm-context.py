@@ -19,8 +19,8 @@ Getting project context into LLM chats is tedious:
 ## The Solution
 
 ```bash
-lc-sel-files    # Smart file selection
-lc-context      # Instant formatted context
+lc-select # Smart file selection
+lc-context # Instant formatted context
 # Paste and work - AI can access additional files seamlessly
 ```
 
@@ -31,7 +31,7 @@ lc-context      # Instant formatted context
 ## Installation
 
 ```bash
-uv tool install "llm-context>=0.4.0"
+uv tool install "llm-context>=0.5.0"
 ```
 
 ## Quick Start
@@ -42,9 +42,8 @@ uv tool install "llm-context>=0.4.0"
 # One-time setup
 cd your-project
 lc-init
-
 # Daily usage
-lc-sel-files
+lc-select
 lc-context
 ```
 
@@ -75,36 +74,38 @@ gitignores:
   full-files: ["*.md", "/tests", "/node_modules"]
 ---
 EOF
-
 # Customize main development rule
 cat > .llm-context/rules/prm-code.md << 'EOF'
 ---
 instructions: [lc/ins-developer, lc/sty-python]
 compose:
   filters: [flt-repo-base]
+  excerpters: [lc/exc-base]
 ---
+Additional project-specific guidelines and context.
 EOF
 ```
 
 ## Core Commands
 
-| Command              | Purpose                                   |
-| -------------------- | ----------------------------------------- |
-| `lc-init`            | Initialize project configuration          |
-| `lc-sel-files`       | Select files based on current rule        |
-| `lc-context`         | Generate and copy context                 |
-| `lc-context -nt`     | Generate context for non-MCP environments |
-| `lc-set-rule <name>` | Switch between rules                      |
-| `lc-clip-files`      | Handle file requests (non-MCP)            |
+| Command              | Purpose                                    |
+| -------------------- | ------------------------------------------ |
+| `lc-init`            | Initialize project configuration           |
+| `lc-select`          | Select files based on current rule         |
+| `lc-context`         | Generate and copy context                  |
+| `lc-context -nt`     | Generate context for non-MCP environments  |
+| `lc-set-rule <name>` | Switch between rules                       |
+| `lc-missing`         | Handle file and context requests (non-MCP) |
 
 ## Rule System
 
-Rules use a systematic four-category structure:
+Rules use a systematic five-category structure:
 
 - **Prompt Rules (`prm-`)**: Generate project contexts (e.g., `lc/prm-developer`, `lc/prm-rule-create`)
 - **Filter Rules (`flt-`)**: Control file inclusion (e.g., `lc/flt-base`, `lc/flt-no-files`)
 - **Instruction Rules (`ins-`)**: Provide guidelines (e.g., `lc/ins-developer`, `lc/ins-rule-framework`)
 - **Style Rules (`sty-`)**: Enforce coding standards (e.g., `lc/sty-python`, `lc/sty-code`)
+- **Excerpt Rules (`exc-`)**: Configure extractions for context reduction (e.g., `lc/exc-base`)
 
 ### Example Rule
 
@@ -113,6 +114,7 @@ Rules use a systematic four-category structure:
 description: "Debug API authentication issues"
 compose:
   filters: [lc/flt-no-files]
+  excerpters: [lc/exc-base]
 also-include:
   full-files: ["/src/auth/**", "/tests/auth/**"]
 ---
@@ -125,7 +127,7 @@ Focus on authentication system and related tests.
 
 ```bash
 lc-set-rule lc/prm-developer
-lc-sel-files
+lc-select
 lc-context
 # AI can review changes, access additional files as needed
 ```
@@ -151,8 +153,9 @@ lc-context -nt
 **Smart File Selection**: Rules automatically include/exclude appropriate files
 **Instant Context Generation**: Formatted context copied to clipboard in seconds
 **MCP Integration**: AI can access additional files without manual intervention
-**Systematic Rule Organization**: Four-category system for clear rule composition
+**Systematic Rule Organization**: Five-category system for clear rule composition
 **AI-Assisted Rule Creation**: Let AI help create minimal context for specific tasks
+**Code Excerpting**: Extractions of significant content to reduce context while preserving structure
 
 ## Learn More
 
