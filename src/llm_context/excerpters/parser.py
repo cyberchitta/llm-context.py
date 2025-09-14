@@ -2,7 +2,7 @@ import warnings
 from dataclasses import dataclass
 from typing import Any, NamedTuple, cast
 
-from tree_sitter import Language, Node, Parser, Tree  # type: ignore
+from tree_sitter import Language, Node, Parser, Query, QueryCursor, Tree  # type: ignore
 
 from llm_context.excerpters.language_mapping import LangQuery, to_language
 
@@ -82,9 +82,10 @@ class AST:
     lang_qry_factory: LangQueryFactory
     rel_path: str
 
-    def match(self, query_scm) -> list[tuple[int, dict[str, list[Node]]]]:
-        query = self.language.query(query_scm)
-        return query.matches(self.tree.root_node)
+    def match(self, query_scm: str) -> list[tuple[int, dict[str, list[Node]]]]:
+        query = Query(self.language, query_scm)
+        cursor = QueryCursor(query)
+        return cursor.matches(self.tree.root_node)
 
     def tag_matches(self) -> list[tuple[int, dict[str, list[Node]]]]:
         return self.match(self._get_tag_query())
@@ -124,5 +125,6 @@ def to_definition(match: tuple[int, dict[str, list[Any]]]) -> dict[str, Any]:
         return {}
     name_nodes: list[Node] = captures.get("name", [])
     name_node = ASTNode.create(name_nodes[0] if name_nodes else None)
-    def_node = ASTNode.create(captures[def_capture][0])
-    return cast(dict[str, Any], def_node.to_definition(name_node))
+    def_nodes: list[Node] = captures[def_capture]
+    def_node = ASTNode.create(def_nodes[0] if def_nodes else None)
+    return cast(dict[str, Any], def_node.to_definition(name_node)) if def_node and name_node else {}

@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from importlib import resources
 from typing import Any, Optional, cast
 
+from tree_sitter import Query, QueryCursor
+
 from llm_context.excerpters.base import Excerpt, Excerpter, Excerpts, Excluded
 from llm_context.excerpters.language_mapping import to_language
 from llm_context.excerpters.parser import ASTFactory, Source
@@ -64,13 +66,16 @@ class Sfc(Excerpter):
         ast_factory = ASTFactory.create()
         ast = ast_factory.create_from_code(source)
         queries = self._get_sfc_queries(language)
-        matches = ast.match(queries)
+        query = Query(ast.language, queries)
+        cursor = QueryCursor(query)
+        matches = cursor.matches(ast.tree.root_node)
         sections = []
         seen = set()
         for match_id, captures in matches:
             for capture_name, nodes in captures.items():
                 if capture_name == "injection.content":
-                    for node in nodes:
+                    node_list = nodes if isinstance(nodes, list) else [nodes]
+                    for node in node_list:
                         parent_node = node.parent
                         if parent_node:
                             section_type = self._get_section_type_from_node(parent_node)
