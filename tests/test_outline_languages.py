@@ -1,7 +1,7 @@
 import pytest
 
-from llm_context.excerpters.outliner import generate_outlines
-from llm_context.excerpters.parser import Source
+from llm_context.excerpters.code_outliner import CodeOutliner
+from llm_context.excerpters.parser import ASTFactory, Source
 from llm_context.excerpters.tagger import ASTBasedTagger
 
 TEST_CASES = [
@@ -642,21 +642,17 @@ IO.puts "Cube of 3: #{MathOperations.cube(math_op)}"
 
 @pytest.fixture
 def tagger():
-    from llm_context.excerpters.parser import ASTFactory
-
     return ASTBasedTagger.create("", ASTFactory.create())
 
 
 @pytest.mark.parametrize("language,extension,code,expected_highlights", TEST_CASES)
 def test_outline_generation(language, extension, code, expected_highlights, tagger):
     source = Source(f"test_file.{extension}", code)
-    outlines, _ = generate_outlines(tagger, [source])
-
-    assert len(outlines) == 1
-    assert outlines[0]["rel_path"] == f"test_file.{extension}"
-    assert "excerpts" in outlines[0]
-
-    actual_highlights = outlines[0]["excerpts"].strip()
+    excerpter = CodeOutliner({"tagger": tagger})
+    result = excerpter.excerpt([source])
+    assert len(result.excerpts) == 1
+    assert result.excerpts[0].rel_path == f"test_file.{extension}"
+    actual_highlights = result.excerpts[0].content.strip()
     assert actual_highlights == expected_highlights, (
         f"Mismatch in {language} highlights:\nExpected:\n{expected_highlights}\n\nActual:\n{actual_highlights}"
     )

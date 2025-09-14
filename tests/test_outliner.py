@@ -1,8 +1,8 @@
 import pytest
 
-from llm_context.excerpters.outliner import Outliner, generate_outlines
+from llm_context.excerpters.code_outliner import CodeOutliner
 from llm_context.excerpters.parser import ASTFactory, Source
-from llm_context.excerpters.tagger import ASTBasedTagger, Definition, Position, Tag
+from llm_context.excerpters.tagger import ASTBasedTagger
 
 
 @pytest.fixture
@@ -10,27 +10,6 @@ def tagger():
     workspace_path = "/fake/workspace/path"
     ast_factory = ASTFactory.create()
     return ASTBasedTagger.create(workspace_path, ast_factory)
-
-
-def test_outliner_line_numbering():
-    code = "line1\nline2\nline3\nline4\nline5"
-    lines_of_interest = [1, 3]  # zero-indexed, so lines 2 and 4
-    source = Source(rel_path="test.py", content=code)
-    outliner = Outliner(source, lines_of_interest)
-
-    result = outliner.to_highlights()
-    assert "█line2" in result["excerpts"]
-    assert "█line4" in result["excerpts"]
-
-
-def test_outliner_first_line_highlighting():
-    code = "line1\nline2\nline3"
-    lines_of_interest = [0]  # first line
-    source = Source(rel_path="test.py", content=code)
-    outliner = Outliner(source, lines_of_interest)
-
-    result = outliner.to_highlights()
-    assert "█line1" in result["excerpts"]
 
 
 @pytest.fixture
@@ -46,51 +25,55 @@ def test_function():
     return Source(rel_path="test.py", content=code)
 
 
-@pytest.fixture
-def sample_definitions(sample_source):
-    class_def = Definition(
-        rel_path=sample_source.rel_path,
-        name=Tag("TestClass", Position(1, 6), Position(1, 15), 7, 16),
-        text="class TestClass:",
-        begin=Position(1, 0),
-        end=Position(3, 12),
-        start=1,
-        finish=44,
-    )
-
-    method_def = Definition(
-        rel_path=sample_source.rel_path,
-        name=Tag("test_method", Position(2, 8), Position(2, 19), 27, 38),
-        text="def test_method(self):",
-        begin=Position(2, 4),
-        end=Position(3, 12),
-        start=23,
-        finish=56,
-    )
-    return [class_def, method_def]
+def test_code_outliner_integration(sample_source, tagger):
+    """Test the complete code outlining functionality."""
+    excerpter = CodeOutliner({"tagger": tagger})
+    result = excerpter.excerpt([sample_source])
+    assert len(result.excerpts) == 1
+    assert result.excerpts[0].rel_path == "test.py"
+    assert "class TestClass" in result.excerpts[0].content
+    assert result.excerpts[0].metadata["processor_type"] == "code-outliner"
+    assert "sample_definitions" in result.metadata
+    assert isinstance(result.metadata["sample_definitions"], list)
 
 
-def test_outliner_creation(sample_source, sample_definitions):
-    outliner = Outliner.create(sample_definitions, sample_source.content)
-    assert outliner is not None
-    assert outliner.source.rel_path == "test.py"
-    assert len(outliner.lines_of_interest) == 2
+def test_code_outliner_empty_sources(tagger):
+    """Test handling of empty source list."""
+    excerpter = CodeOutliner({"tagger": tagger})
+    result = excerpter.excerpt([])
+    assert len(result.excerpts) == 0
+    assert result.metadata["sample_definitions"] == []
 
 
-def test_outliner_highlights(sample_source, sample_definitions):
-    outliner = Outliner.create(sample_definitions, sample_source.content)
-    highlights = outliner.to_highlights()
+def test_code_outliner_unsupported_language(tagger):
+    """Test handling of unsupported file types."""
+    source = Source("test.txt", "some text content")
+    excerpter = CodeOutliner({"tagger": tagger})
+    result = excerpter.excerpt([source])
+    assert len(result.excerpts) == 0
+    assert result.metadata["sample_definitions"] == []
 
-    assert highlights["rel_path"] == "test.py"
-    assert "█class TestClass" in highlights["excerpts"]
-    assert "█    def test_method" in highlights["excerpts"]
+
+def test_code_outliner_multiple_sources(tagger):
+    """Test processing multiple source files."""
+    sources = [
+        Source("file1.py", "def func1():\n    pass"),
+        Source("file2.py", "class Class2:\n    def method2(self):\n        pass"),
+        Source("file3.txt", "unsupported file"),
+    ]
+    excerpter = CodeOutliner({"tagger": tagger})
+    result = excerpter.excerpt(sources)
+    assert len(result.excerpts) == 2
+    paths = {excerpt.rel_path for excerpt in result.excerpts}
+    assert paths == {"file1.py", "file2.py"}
+    for excerpt in result.excerpts:
+        assert excerpt.metadata["processor_type"] == "code-outliner"
 
 
-def test_generate_highlights(sample_source, tagger):
-    defs = tagger.extract_definitions(sample_source)
-    assert len(defs) > 0
-
-    outlines, _ = generate_outlines(tagger, [sample_source])
-    assert len(outlines) == 1
-    assert outlines[0]["rel_path"] == "test.py"
-    assert "class TestClass" in outlines[0]["excerpts"]
+def test_code_outliner_no_definitions(tagger):
+    """Test handling of code with no extractable definitions."""
+    source = Source("empty.py", "# just a comment\nprint('hello')")
+    excerpter = CodeOutliner({"tagger": tagger})
+    result = excerpter.excerpt([source])
+    assert isinstance(result.excerpts, list)
+    assert result.metadata["sample_definitions"] == []
