@@ -2,7 +2,7 @@
 {% set sfc_excerpts = excerpts | selectattr("metadata.processor_type", "equalto", "sfc-excerpter") | list %}
 
 {% if code_outline_excerpts %}
-{% include 'lc/excerpters/lc-code-outliner.j2' %}
+{% include 'lc/excerpters/code-outliner.j2' %}
 {% endif %}
 
 {% if sfc_excerpts %}
