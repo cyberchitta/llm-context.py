@@ -26,6 +26,10 @@ class ExcerpterRegistry:
         return excerpter_class(config) if excerpter_class else None  # type: ignore[call-arg]
 
     def excerpt(self, sources: list[Source], rule: Rule, tagger: Any) -> list[Excerpts]:
+        if not rule.excerpt_modes:
+            raise ValueError(
+                f"Rule {rule.name} has no excerpt-modes configured. Add excerpt-modes or compose 'lc/exc-base'."
+            )
         sources_by_mode: dict[str, list[Source]] = {}
         for source in sources:
             excerpt_mode = rule.get_excerpt_mode(source.rel_path)

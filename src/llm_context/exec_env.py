@@ -131,6 +131,10 @@ class ExecutionEnvironment:
         if rule_name == self.state.file_selection.rule_name:
             return self
         config = ContextSpec.create(self.config.project_root_path, rule_name, self.constants)
+        if not config.rule.excerpt_modes:
+            raise ValueError(
+                f"Rule '{rule_name}' has no excerpt-modes configured. Add excerpt-modes or compose 'lc/exc-base'."
+            )
         empty_selection = FileSelection.create(rule_name, [], [])
         selector = ContextSelector.create(config)
         file_selection = selector.select_full_files(empty_selection)
