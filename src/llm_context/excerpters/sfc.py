@@ -116,7 +116,7 @@ class Sfc(Excerpter):
         last_included_line = -1
         for section in sections:
             if last_included_line >= 0 and section.start_line > last_included_line + 1:
-                if self.config.get("include_template_logic", False):
+                if self.config.get("with-template", False):
                     gap_lines = lines[last_included_line + 1 : section.start_line]
                     result_lines.extend(gap_lines)
                 else:
@@ -133,7 +133,7 @@ class Sfc(Excerpter):
                     result_lines.append(lines[section.end_line])
                 last_included_line = section.end_line
         if last_included_line < len(lines) - 1:
-            if self.config.get("include_template_logic", False):
+            if self.config.get("with-template", False):
                 result_lines.extend(lines[last_included_line + 1 :])
             else:
                 result_lines.append("⋮...")
@@ -143,15 +143,15 @@ class Sfc(Excerpter):
         if section_type == "script":
             return True
         elif section_type == "style":
-            return cast(bool, self.config.get("include_style", False))
+            return cast(bool, self.config.get("with-style", False))
         elif section_type == "template":
-            return cast(bool, self.config.get("include_template_logic", False))
+            return cast(bool, self.config.get("with-template", False))
         return False
 
     def _get_included_section_types(self) -> list[str]:
         included = ["script"]
-        if self.config.get("include_style", False):
+        if self.config.get("with-style", False):
             included.append("style")
-        if self.config.get("include_template_logic", False):
+        if self.config.get("with-template", False):
             included.append("template")
         return included

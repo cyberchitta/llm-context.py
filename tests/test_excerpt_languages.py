@@ -38,7 +38,7 @@ TEST_CASES = [
 {#if title}
   <h2>{title}</h2>
 {/if}""",
-        {"include_style": False, "include_template_logic": False},
+        {"with-style": False, "with-template": False},
         """<script>
   let name = 'world';
   
@@ -83,7 +83,7 @@ TEST_CASES = [
   <p class="counter">Count: {count}</p>
   <button on:click={() => count++}>+</button>
 </div>""",
-        {"include_style": True, "include_template_logic": False},
+        {"with-style": True, "with-template": False},
         """<script>
   let theme = 'dark';
   let count = 0;
@@ -137,7 +137,7 @@ TEST_CASES = [
 <button on:click={() => showList = !showList}>
   Toggle list
 </button>""",
-        {"include_style": False, "include_template_logic": True},
+        {"with-style": False, "with-template": True},
         """<script>
   let items = ['apple', 'banana', 'cherry'];
   let showList = true;
@@ -191,7 +191,7 @@ TEST_CASES = [
   {greet(user)}
   <p>Age: {user.age}</p>
 </div>""",
-        {"include_style": False, "include_template_logic": False},
+        {"with-style": False, "with-template": False},
         """<script lang="ts">
   interface User {
     name: string;
@@ -245,7 +245,7 @@ TEST_CASES = [
   
   <button on:click={() => count++}>Increment</button>
 </div>""",
-        {"include_style": True, "include_template_logic": True},
+        {"with-style": True, "with-template": True},
         """<script>
   export let title = 'Component';
   let count = 0;
@@ -311,7 +311,7 @@ TEST_CASES = [
   <p>Data: {processData(data)}</p>
   <p>Instance: {instanceCount}</p>
 </div>""",
-        {"include_style": False, "include_template_logic": False},
+        {"with-style": False, "with-template": False},
         """<script context="module">
   export function preload(page) {
     return { 
@@ -361,7 +361,7 @@ def test_svelte_excerpting(test_name, extension, code, config, expected_output):
 def test_svelte_empty_file():
     """Test handling of empty Svelte files."""
     source = Source("empty.svelte", "")
-    excerpter = Sfc({"include_style": False, "include_template_logic": False})
+    excerpter = Sfc({"with-style": False, "with-template": False})
 
     result = excerpter.excerpt([source])
 
@@ -373,7 +373,7 @@ def test_svelte_empty_file():
 def test_svelte_non_svelte_file():
     """Test that non-Svelte files are ignored."""
     source = Source("test.js", "console.log('hello');")
-    excerpter = Sfc({"include_style": False, "include_template_logic": False})
+    excerpter = Sfc({"with-style": False, "with-template": False})
 
     result = excerpter.excerpt([source])
 
@@ -387,7 +387,7 @@ def test_multiple_svelte_files():
         Source("App.svelte", """<script>let name = 'App';</script><div>{name}</div>"""),
         Source("Button.svelte", """<script>export let label;</script><button>{label}</button>"""),
     ]
-    excerpter = Sfc({"include_style": False, "include_template_logic": False})
+    excerpter = Sfc({"with-style": False, "with-template": False})
 
     result = excerpter.excerpt(sources)
 

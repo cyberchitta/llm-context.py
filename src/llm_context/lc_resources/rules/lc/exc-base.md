@@ -20,6 +20,6 @@ excerpt-modes:
   "*.vue": sfc
 excerpt-config:
   sfc-excerpter:
-    include_style: false
-    include_template_logic: false
+    with-style: false
+    with-template: false
 ---

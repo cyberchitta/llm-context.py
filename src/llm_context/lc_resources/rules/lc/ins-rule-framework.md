@@ -49,18 +49,22 @@ Extracts script sections from Single File Components while preserving structure:
 
 ### Advanced Excerpting Configuration
 
-Control excerpting behavior through `excerpt-modes` and `excerpt-config`:
+Control excerpting behavior through `excerpt-config`:
 
 ```yaml
-excerpt-modes:
-  "**/*.py": "code-outliner" # Python files use code outlining
-  "**/*.svelte": "sfc" # Svelte files use SFC excerpting
-
 excerpt-config:
   sfc:
-    include_style: false # Exclude CSS/styling sections
-    include_template_logic: true # Include template markup
+    with-style: false # Exclude CSS/styling sections
+    with-template: true # Include template markup
 ```
+
+### Required Composition
+
+**All rules must compose `lc/exc-base`** to enable code outlining functionality. The excerpting system requires excerpt-modes configuration - without it, selected files cannot be processed for structural views.
+
+- Always include `compose: {excerpters: [lc/exc-base]}` in your rules
+- Advanced users can customize `excerpt-modes` patterns if needed
+- Rules without excerpt configuration will fail when processing excerpted files
 
 ## Rule System Semantics
 
@@ -122,8 +126,8 @@ excerpt-modes:
   "**/*.svelte": "sfc"
 excerpt-config:
   sfc:
-    include_style: false
-    include_template_logic: true
+    with-style: false
+    with-template: true
 implementations:
   - ["/src/utils/helpers.js", "validateToken"]
 ---
