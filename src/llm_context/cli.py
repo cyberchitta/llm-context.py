@@ -19,7 +19,7 @@ def rule_feedback(env: ExecutionEnvironment):
     log(INFO, f"Active rule: {env.state.file_selection.rule_name}")
 
 
-def set_rule(rule: str, env: ExecutionEnvironment) -> ExecutionResult:
+def _set_rule(rule: str, env: ExecutionEnvironment) -> ExecutionResult:
     if not env.config.has_rule(rule):
         raise ValueError(f"Rule '{rule}' does not exist.")
     nxt_env = env.with_rule(rule)
@@ -39,7 +39,7 @@ def init_project(env: ExecutionEnvironment):
 
 
 @create_command
-def set_rule_with_args(env: ExecutionEnvironment) -> ExecutionResult:
+def set_rule(env: ExecutionEnvironment) -> ExecutionResult:
     parser = argparse.ArgumentParser(description="Set active rule for LLM context")
     parser.add_argument(
         "rule",
@@ -47,13 +47,13 @@ def set_rule_with_args(env: ExecutionEnvironment) -> ExecutionResult:
         help="Rule to set as active",
     )
     args = parser.parse_args()
-    res = set_rule(args.rule, env)
+    res = _set_rule(args.rule, env)
     res.env.state.store()
     return res
 
 
 @create_init_command
-def show_version(*, env: ExecutionEnvironment) -> ExecutionResult:
+def version(*, env: ExecutionEnvironment) -> ExecutionResult:
     log(INFO, f"llm-context version {pkg_ver('llm-context')}")
     return ExecutionResult(None, env)
 
@@ -71,17 +71,8 @@ def select(env: ExecutionEnvironment) -> ExecutionResult:
     return ExecutionResult(None, nxt_env)
 
 
-@create_command
-def select_all_files(env: ExecutionEnvironment) -> ExecutionResult:
-    rule_feedback(env)
-    file_selection = commands.select_all_files(env)
-    nxt_env = env.with_state(env.state.with_selection(file_selection))
-    nxt_env.state.store()
-    return ExecutionResult(None, nxt_env)
-
-
 @create_clipboard_cmd
-def focus_help(env: ExecutionEnvironment) -> ExecutionResult:
+def rule_instructions(env: ExecutionEnvironment) -> ExecutionResult:
     content = commands.get_focus_help(env)
     return ExecutionResult(content, env)
 

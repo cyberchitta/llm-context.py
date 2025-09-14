@@ -11,9 +11,7 @@ mcp = FastMCP("llm-context")
 
 
 @mcp.tool()
-def lc_list_modified_files(
-    root_path: str, rule_name: str = "lc/prm-developer", timestamp: float = 0
-) -> str:
+def lc_changed(root_path: str, rule_name: str = "lc/prm-developer", timestamp: float = 0) -> str:
     """Returns list of files modified since given timestamp.
     Args:
         root_path: Root directory path (e.g. '/home/user/projects/myproject')
@@ -40,7 +38,7 @@ def lc_outlines(root_path: str, rule_name: str = "lc/prm-developer", timestamp: 
 
 
 @mcp.tool()
-def lc_create_rule_instructions(root_path: str) -> str:
+def lc_rule_instructions(root_path: str) -> str:
     """Provides step-by-step instructions for creating custom rules.
     Args:
         root_path: Root directory path
@@ -54,9 +52,9 @@ def lc_create_rule_instructions(root_path: str) -> str:
 def lc_missing(root_path: str, param_type: str, data: str, timestamp: float) -> str:
     """Unified tool for retrieving missing context (files or implementations).
     Args:
-        root_path: Root directory path
+        root_path: Root directory path (e.g. '/home/user/projects/myproject')
         param_type: Type of data - 'f' for files, 'i' for implementations
-        data: JSON string containing the data (file paths or implementation queries)
+        data: JSON string containing the data (file paths in /{project-name}/ format or implementation queries)
         timestamp: Context generation timestamp (required for files, ignored for implementations)
     """
     env = ExecutionEnvironment.create(Path(root_path))

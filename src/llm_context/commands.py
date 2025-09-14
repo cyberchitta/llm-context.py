@@ -6,7 +6,6 @@ from llm_context.context_spec import ContextSpec
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
 from llm_context.state import FileSelection
-from llm_context.utils import PathConverter, is_newer
 
 
 def get_prompt(env: ExecutionEnvironment) -> str:
