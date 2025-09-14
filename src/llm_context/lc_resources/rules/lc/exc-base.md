@@ -19,7 +19,7 @@ excerpt-modes:
   "*.svelte": sfc
   "*.vue": sfc
 excerpt-config:
-  sfc-excerpter:
+  sfc:
     with-style: false
     with-template: false
 ---
