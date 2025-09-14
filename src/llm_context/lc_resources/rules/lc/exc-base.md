@@ -17,7 +17,6 @@ excerpt-modes:
   "*.ex": code-outliner
   "*.elm": code-outliner
   "*.svelte": sfc
-  "*.vue": sfc
 excerpt-config:
   sfc:
     with-style: false
