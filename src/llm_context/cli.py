@@ -59,22 +59,15 @@ def show_version(*, env: ExecutionEnvironment) -> ExecutionResult:
 
 
 @create_command
-def select_full_files(env: ExecutionEnvironment):
+def select(env: ExecutionEnvironment) -> ExecutionResult:
     rule_feedback(env)
-    file_selection = commands.select_full_files(env)
+    file_selection = commands.select_all_files(env)
     nxt_env = env.with_state(env.state.with_selection(file_selection))
     nxt_env.state.store()
-    log(INFO, f"Selected {len(file_selection.full_files)} full files.")
-    return ExecutionResult(None, nxt_env)
-
-
-@create_command
-def select_excerpted_files(env: ExecutionEnvironment) -> ExecutionResult:
-    rule_feedback(env)
-    file_selection = commands.select_excerpted_files(env)
-    nxt_env = env.with_state(env.state.with_selection(file_selection))
-    nxt_env.state.store()
-    log(INFO, f"Selected {len(file_selection.excerpted_files)} excerpted files.")
+    log(
+        INFO,
+        f"Selected {len(file_selection.full_files)} full files and {len(file_selection.excerpted_files)} excerpted files.",
+    )
     return ExecutionResult(None, nxt_env)
 
 

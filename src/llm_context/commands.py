@@ -15,16 +15,6 @@ def get_prompt(env: ExecutionEnvironment) -> str:
     return generator.prompt()
 
 
-def select_full_files(env: ExecutionEnvironment) -> FileSelection:
-    selector = ContextSelector.create(env.config)
-    return selector.select_full_files(env.state.file_selection)
-
-
-def select_excerpted_files(env: ExecutionEnvironment) -> FileSelection:
-    selector = ContextSelector.create(env.config)
-    return selector.select_excerpted_files(env.state.file_selection)
-
-
 def select_all_files(env: ExecutionEnvironment) -> FileSelection:
     selector = ContextSelector.create(env.config)
     file_sel_full = selector.select_full_files(env.state.file_selection)
