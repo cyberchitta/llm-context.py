@@ -17,7 +17,7 @@ from llm_context.overviews import get_focused_overview, get_full_overview
 from llm_context.rule import IGNORE_NOTHING, INCLUDE_ALL, Rule
 from llm_context.rule_parser import RuleLoader, RuleProvider
 from llm_context.state import FileSelection
-from llm_context.utils import PathConverter, ProjectLayout, safe_read_file
+from llm_context.utils import PathConverter, ProjectLayout, is_newer, safe_read_file
 
 
 @dataclass(frozen=True)
@@ -189,6 +189,29 @@ class ContextGenerator:
 
     def definitions(self, requests, template_id: str = "definitions") -> str:
         context = {"definitions": self.collector.definitions(self.tagger, requests)}
+        return self._render(template_id, context)
+
+    def missing_files(
+        self,
+        paths: list[str],
+        matching_selection: FileSelection,
+        timestamp: float,
+        template_id: str = "missing-files",
+    ) -> str:
+        orig_full = set(matching_selection.full_files)
+        orig_excerpted = set(matching_selection.excerpted_files)
+        abs_paths = self.converter.to_absolute(paths)
+        files_to_fetch = {
+            r for r, a in zip(paths, abs_paths) if r not in orig_full or is_newer(a, timestamp)
+        }
+        already_included = list(set(paths) - files_to_fetch - orig_excerpted)
+        in_excerpted = list(set(paths) & orig_excerpted)
+        context = {
+            "already_included": already_included,
+            "in_excerpted": in_excerpted,
+            "files_to_fetch": self.collector.files(list(files_to_fetch)),
+            "tools_available": self.settings.tools_available,
+        }
         return self._render(template_id, context)
 
     def prompt(self, template_id: str = "prompt") -> str:

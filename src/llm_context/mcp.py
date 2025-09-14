@@ -36,7 +36,7 @@ def lc_outlines(root_path: str, rule_name: str = "lc/prm-developer", timestamp: 
     """
     env = ExecutionEnvironment.create(Path(root_path))
     with env.activate():
-        return commands.get_excerpts(env, rule_name, timestamp)
+        return commands.get_missing_excerpted(env, rule_name, timestamp)
 
 
 @mcp.tool()
@@ -63,7 +63,7 @@ def lc_missing(root_path: str, param_type: str, data: str, timestamp: float) -> 
     with env.activate():
         if param_type == "f":
             file_list = ast.literal_eval(data)
-            return commands.get_files(env, file_list, timestamp)
+            return commands.get_missing_files(env, file_list, timestamp)
         elif param_type == "i":
             impl_list = ast.literal_eval(data)
             return commands.get_implementations(env, impl_list)

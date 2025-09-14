@@ -146,7 +146,7 @@ def missing(env: ExecutionEnvironment) -> ExecutionResult:
         parser.error("Cannot specify both -f and -i")
     if args.f:
         file_list = ast.literal_eval(args.f)
-        content = commands.get_files(env, file_list, args.t)
+        content = commands.get_missing_files(env, file_list, args.t)
     elif args.i:
         impl_list = ast.literal_eval(args.i)
         content = commands.get_implementations(env, impl_list)

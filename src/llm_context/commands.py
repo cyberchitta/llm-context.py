@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 from llm_context.context_generator import ContextGenerator, ContextSettings
 from llm_context.context_spec import ContextSpec
@@ -30,40 +31,15 @@ def select_all_files(env: ExecutionEnvironment) -> FileSelection:
     return selector.select_excerpted_files(file_sel_full)
 
 
-def get_files(env: ExecutionEnvironment, paths: list[str], timestamp: float) -> str:
+def get_missing_files(env: ExecutionEnvironment, paths: list[str], timestamp: float) -> str:
     matching_selection = env.state.selections.get_selection_by_timestamp(timestamp)
     if matching_selection is None:
         raise ValueError(
             f"No context found with timestamp {timestamp}. Warn the user that the context is stale."
         )
-    orig_full = set(matching_selection.full_files)
-    orig_excerpted = set(matching_selection.excerpted_files)
-    converter = PathConverter.create(env.config.project_root_path)
-    abs_paths = converter.to_absolute(paths)
-    files_to_fetch = {
-        r for r, a in zip(paths, abs_paths) if r not in orig_full or is_newer(a, timestamp)
-    }
-    already_included = set(paths) - files_to_fetch - orig_excerpted
-    in_excerpted = set(paths) & orig_excerpted
-    response_parts = []
-    if already_included:
-        response_parts.append(
-            "The latest version of the following full files are already included in the current context:\n"
-            + "\n".join(already_included)
-        )
-    if in_excerpted:
-        response_parts.append(
-            "The following files are included as excerpts. Use lc-get-excluded if you need excluded sections:\n"
-            + "\n".join(in_excerpted)
-        )
-    if files_to_fetch:
-        settings = ContextSettings.create(False, False, True)
-        content = ContextGenerator.create(env.config, env.state.file_selection, settings).files(
-            list(files_to_fetch)
-        )
-        if content.strip():
-            response_parts.append(content)
-    return "\n\n".join(response_parts) if response_parts else "No new files to retrieve."
+    settings = ContextSettings.create(False, False, True)
+    generator = ContextGenerator.create(env.config, env.state.file_selection, settings)
+    return generator.missing_files(paths, matching_selection, timestamp)
 
 
 def list_modified_files(env: ExecutionEnvironment, rule_name: str, timestamp: float) -> list[str]:
@@ -74,7 +50,7 @@ def list_modified_files(env: ExecutionEnvironment, rule_name: str, timestamp: fl
     return file_sel_excerpted.files
 
 
-def get_excerpts(env: ExecutionEnvironment, rule_name: str, timestamp: float) -> str:
+def get_missing_excerpted(env: ExecutionEnvironment, rule_name: str, timestamp: float) -> str:
     cur_env = env.with_rule(rule_name)
     matching_selection = cur_env.state.selections.get_selection_by_timestamp(timestamp)
     if matching_selection is None:
@@ -121,7 +97,7 @@ def get_context(
     with_prompt: bool = False,
     with_user_notes: bool = False,
     tools_available: bool = True,
-    output_file: str = None,
+    output_file: Optional[str] = None,
 ) -> tuple[str, float]:
     settings = ContextSettings.create(with_prompt, with_user_notes, tools_available)
     content, context_timestamp = generate_context(env, settings)

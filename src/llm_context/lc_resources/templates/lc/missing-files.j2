@@ -1,0 +1,25 @@
+{%- if already_included -%}
+The latest version of the following full files are already included in the current context:
+{% for file in already_included -%}
+{{ file }}
+{% endfor %}
+
+{% endif -%}
+{%- if in_excerpted -%}
+The following files are included as excerpts. {% if tools_available %}Use lc-missing with param_type "i" if you need excluded sections{% else %}Use `lc-missing -i` if you need excluded sections{% endif %}:
+{% for file in in_excerpted -%}
+{{ file }}
+{% endfor %}
+
+{% endif -%}
+{%- if files_to_fetch -%}
+{% for item in files_to_fetch -%}
+{{ item.path }}
+॥๛॥
+{{ item.content }}
+॥๛॥
+{% endfor %}
+{%- endif -%}
+{%- if not already_included and not in_excerpted and not files_to_fetch -%}
+No new files to retrieve.
+{%- endif -%}
