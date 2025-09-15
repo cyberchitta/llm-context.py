@@ -263,11 +263,12 @@ class ContextGenerator:
                 if (content := safe_read_file(abs_path)) is not None
             ]
             if temp_sources:
-                excerpts = self.collector.excerpts(
+                all_excerpts = self.collector.excerpts(
                     self.tagger, list(orig_excerpted), self.spec.rule
                 )
-                for excerpt in excerpts.excerpts:
-                    excerpted_metadata[excerpt.rel_path] = excerpt.metadata
+                for excerpts_obj in all_excerpts:
+                    for excerpt in excerpts_obj.excerpts:
+                        excerpted_metadata[excerpt.rel_path] = excerpt.metadata
         already_excerpted = list(set(paths) & orig_excerpted)
         files_to_fetch = {
             r
