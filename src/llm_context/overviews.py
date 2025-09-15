@@ -1,9 +1,10 @@
 import os
+import random
 from dataclasses import dataclass
 from pathlib import Path
 
 from llm_context.file_selector import FileSelector
-from llm_context.utils import _format_size, format_age
+from llm_context.utils import PathConverter, _format_size, format_age
 
 STATUS_DESCRIPTIONS = {
     "✓": "Full content",
@@ -47,6 +48,14 @@ class OverviewHelper:
             f"{format_age(os.path.getmtime(abs_path))}",
         )
 
+    def sample_excluded_files(self, abs_paths: list[str]) -> list[str]:
+        excluded_files = [path for path in abs_paths if self.get_status(path) == "✗"]
+        converter = PathConverter.create(Path(self.root_dir))
+        sample_excluded = (
+            random.sample(excluded_files, min(2, len(excluded_files))) if excluded_files else []
+        )
+        return converter.to_relative(sample_excluded)
+
 
 @dataclass(frozen=True)
 class FullOverview:
@@ -59,13 +68,15 @@ class FullOverview:
         helper = OverviewHelper(root_dir, full_files, excerpted_files, outlined_files)
         return FullOverview(helper)
 
-    def generate(self, abs_paths: list[str]) -> str:
+    def generate(self, abs_paths: list[str]) -> tuple[str, list[str]]:
         if not abs_paths:
-            return "No files found"
+            return "No files found", []
         entries = [self.helper.get_file_info(path) for path in sorted(abs_paths)]
         header = self.helper.format_legend_header(abs_paths)
         rows = [f"{status} {entry}" for status, entry in entries]
-        return header + "\n".join(rows)
+        overview_string = header + "\n".join(rows)
+        sample_excluded_files = self.helper.sample_excluded_files(abs_paths)
+        return overview_string, sample_excluded_files
 
 
 @dataclass(frozen=True)
@@ -116,9 +127,9 @@ class FocusedOverview:
         total_size = sum(os.path.getsize(f) for f in files_in_folder)
         return f"{folder_display} ({len(files_in_folder)} files, {_format_size(total_size)})"
 
-    def generate(self, abs_paths: list[str]) -> str:
+    def generate(self, abs_paths: list[str]) -> tuple[str, list[str]]:
         if not abs_paths:
-            return "No files found"
+            return "No files found", []
         folders = self._group_files_by_immediate_parent(abs_paths)
         header = self.helper.format_legend_header(abs_paths)
         sections = []
@@ -128,7 +139,9 @@ class FocusedOverview:
                 sections.append(self._format_folder_with_file_details(folder_path, files_in_folder))
             else:
                 sections.append(self._format_folder_summary(folder_path, files_in_folder))
-        return header + "\n".join(sections)
+        overview_string = header + "\n".join(sections)
+        sample_excluded_files = self.helper.sample_excluded_files(abs_paths)
+        return overview_string, sample_excluded_files
 
 
 def get_full_overview(
@@ -137,7 +150,7 @@ def get_full_overview(
     excerpted_files: list[str],
     outlined_files: list[str],
     overview_ignores: list[str] = [],
-) -> str:
+) -> tuple[str, list[str]]:
     overview_ignorer = FileSelector.create_ignorer(project_root, overview_ignores)
     abs_paths = overview_ignorer.get_files()
     overview = FullOverview.create(
@@ -152,7 +165,7 @@ def get_focused_overview(
     excerpted_files: list[str],
     outlined_files: list[str],
     overview_ignores: list[str] = [],
-) -> str:
+) -> tuple[str, list[str]]:
     overview_ignorer = FileSelector.create_ignorer(project_root, overview_ignores)
     abs_paths = overview_ignorer.get_files()
     overview = FocusedOverview.create(

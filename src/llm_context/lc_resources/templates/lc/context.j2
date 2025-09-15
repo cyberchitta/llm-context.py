@@ -18,23 +18,7 @@
 {% endif %}
 
 {% if excerpts %}
-{% include 'lc/excerpters/excerpts.j2' %}
+{% include 'lc/excerpts.j2' %}
 {% endif %}
-
-## FINAL REMINDER
-
-{% if overview_mode == "focused" -%}
-{% if tools_available -%}
-Instructions for AI: ⚠️ This document contains focused project context. Use lc-missing to retrieve additional content as needed for your analysis.
-{%- else -%}
-Instructions for AI: ⚠️ This document contains focused project context. Additional files can be requested using the lc-missing commands shown above.
-{%- endif %}
-{%- else -%}
-{% if tools_available -%}
-Instructions for AI: ⚠️ DO NOT REQUEST ADDITIONAL CONTEXT OR FILES ALREADY INCLUDED ABOVE. This document contains complete project context. Only use lc-missing for files modified since context generation or specific implementations that are necessary for your analysis.
-{%- else -%}
-Instructions for AI: ⚠️ DO NOT REQUEST ADDITIONAL CONTEXT OR FILES ALREADY INCLUDED ABOVE. This document contains complete project context. Additional files can be requested using the lc-missing commands shown above.
-{%- endif %}
-{%- endif %}
 
 {% include 'lc/end-prompt.j2' %}

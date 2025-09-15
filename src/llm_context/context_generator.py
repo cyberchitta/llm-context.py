@@ -143,7 +143,7 @@ class ContextCollector:
         excerpted_abs: list[str],
         rule_abs: list[str],
         diagram_ignores: list[str],
-    ) -> str:
+    ) -> tuple[str, list[str]]:
         return (
             get_full_overview(self.root_path, full_abs, excerpted_abs, rule_abs, diagram_ignores)
             if overview_mode == "full"
@@ -306,17 +306,18 @@ class ContextGenerator:
         )
         outlined_abs = self.converter.to_absolute(outlined_rel)
         other_excerpted_abs = self.converter.to_absolute(other_excerpted_rel)
+        overview_string, sample_excluded_files = self.collector.overview(
+            descriptor.overview,
+            self.full_abs,
+            other_excerpted_abs,
+            outlined_abs,
+            descriptor.get_ignore_patterns("overview"),
+        )
         context = {
             "project_name": self.project_root.name,
             "context_timestamp": context_timestamp,
             "abs_root_path": str(self.project_root),
-            "overview": self.collector.overview(
-                descriptor.overview,
-                self.full_abs,
-                other_excerpted_abs,
-                outlined_abs,
-                descriptor.get_ignore_patterns("overview"),
-            ),
+            "overview": overview_string,
             "overview_mode": descriptor.overview,
             "files": files,
             "excerpts": excerpts.excerpts,
@@ -325,6 +326,7 @@ class ContextGenerator:
             "sample_requested_files": self.converter.to_relative(
                 self.collector.sample_file_abs(self.full_abs)
             ),
+            "sample_excluded_files": sample_excluded_files,
             "prompt": descriptor.get_instructions() if settings.with_prompt else None,
             "project_notes": descriptor.get_project_notes(layout),
             "tools_available": settings.tools_available,

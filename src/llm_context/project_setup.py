@@ -47,6 +47,7 @@ class Config:
                 "context": "lc/context.j2",
                 "definitions": "lc/definitions.j2",
                 "end-prompt": "lc/end-prompt.j2",
+                "excerpts": "lc/excerpts.j2",
                 "excluded": "lc/excluded.j2",
                 "files": "lc/files.j2",
                 "missing-files": "lc/missing-files.j2",
