@@ -1,6 +1,6 @@
 [project]
 name = "llm-context"
-version = "0.4.1"
+version = "0.5.0"
 description = "Share code with LLMs via Model Context Protocol or clipboard. Rule-based customization enables easy switching between different tasks (like code review and documentation). Code outlining support is included as a standard feature."
 authors = [
   { name = "restlessronin", email = "88921269+restlessronin@users.noreply.github.com" },
@@ -23,12 +23,12 @@ classifiers = [
 
 dependencies = [
   "jinja2>=3.1.6, <4.0",
-  "mcp>=1.12.0",
+  "mcp>=1.14.0",
   "packaging>=24.1, <25.0",
   "pathspec>=0.12.1, <0.13.0",
   "pyperclip>=1.9.0, <2.0.0",
   "pyyaml>=6.0.2",
-  "tree-sitter>=0.24, <0.25",
+  "tree-sitter>=0.25",
   "tree-sitter-language-pack>=0.9.0",
 ]
 
@@ -42,6 +42,7 @@ lc-changed = "llm_context.cli:changed_files"
 lc-init = "llm_context.cli:init_project"
 lc-rule-instructions = "llm_context.cli:rule_instructions"
 lc-mcp = "llm_context.mcp:run_server"
+lc-missing = "llm_context.cli:missing"
 lc-outlines = "llm_context.cli:outlines"
 lc-prompt = "llm_context.cli:prompt"
 lc-select = "llm_context.cli:select"

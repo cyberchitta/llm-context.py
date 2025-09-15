@@ -2,6 +2,65 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2025-09-15
+
+### Bug Fixes
+
+- Return list[Excerpts] from collector to handle multiple excerpt modes
+- Clarify lc-missing instructions are for user execution not LLM
+- Run sfc on svelte repo
+- Template name
+- Include template content when include_template_logic is true in SFC excerpter
+- Correct YAML frontmatter delimiter in lc/exc-base.md
+- Refine dev instructions
+- Clarify that latest versions are included in lc-get-files message
+- Corrected cli command names in create rule instructions
+
+### Documentation
+
+- Update user docs with new features
+
+### Features
+
+- Fix lc-missing examples to use actual sample data instead of placeholders
+- Add excluded sections retrieval with -e parameter for non-outline excerpts
+- Add processor-aware guidance for already excerpted files in missing-files template
+- Remove unused missing-excerpted template and dependencies
+- Validate excerpt-modes required for all rules and fast-fail on missing config
+- Update rule framework for unified excerpting system with code outlining prominence
+- Upgrade to tree-sitter 0.25 API with Query/QueryCursor
+- Consolidate file selection into single lc-select command
+- Unify context retrieval with lc-missing tool and update templates
+- Refactor excerpts to excerpter-specific templates with explanations
+- Clean and copy excerpter templates during project setup
+- Add SFC excerpter for extracting script sections from Svelte/Vue files
+- Replace outlining with unified excerpting system using tree-sitter wrapper
+- Remove lc-project-context MCP tool
+
+### Refactor
+
+- Remove vue config pending test
+- Rename SFC config to with-style and with-template for consistency
+- Consolidate code outlining into canonical excerpter structure
+- Rationalized naming
+- Move get_excerpted logic to ContextGenerator.missing_excerpted with template
+- Move get_files logic to ContextGenerator.missing_files with template
+- Remove obsolete tools replaced by unified lc-missing
+- Simplify tool descriptions even more
+- Extract remaining CLI business logic to commands module
+- Extract MCP business logic to commands module for CLI/MCP unification
+- Replace MCP server with FastMCP, remove Pydantic boilerplate
+- Keep header in main context
+- Reorganize templates into lc/ folder structure without prefixes
+- Changed cli command back to outlines
+- Rename sfc class and mode, fix test
+- Use modern resources api
+- Rename Source field
+- Simplify query path construction
+- Shorten query file names
+- Rename scm folder
+- Reorganize project, propogate new excerpter architecture into templates
+
 ## [0.4.1] - 2025-08-29
 
 ### Bug Fixes
