@@ -50,12 +50,12 @@ def lc_rule_instructions(root_path: str) -> str:
 
 @mcp.tool()
 def lc_missing(root_path: str, param_type: str, data: str, timestamp: float) -> str:
-    """Unified tool for retrieving missing context (files or implementations).
+    """Unified tool for retrieving missing context (files, implementations, or excluded sections).
     Args:
         root_path: Root directory path (e.g. '/home/user/projects/myproject')
-        param_type: Type of data - 'f' for files, 'i' for implementations
+        param_type: Type of data - 'f' for files, 'i' for implementations, 'e' for excluded sections
         data: JSON string containing the data (file paths in /{project-name}/ format or implementation queries)
-        timestamp: Context generation timestamp (required for files, ignored for implementations)
+        timestamp: Context generation timestamp
     """
     env = ExecutionEnvironment.create(Path(root_path))
     with env.activate():
@@ -65,9 +65,12 @@ def lc_missing(root_path: str, param_type: str, data: str, timestamp: float) -> 
         elif param_type == "i":
             impl_list = ast.literal_eval(data)
             return commands.get_implementations(env, impl_list)
+        elif param_type == "e":
+            file_list = ast.literal_eval(data)
+            return commands.get_excluded(env, file_list, timestamp)
         else:
             raise ValueError(
-                f"Invalid parameter type: {param_type}. Use 'f' for files or 'i' for implementations."
+                f"Invalid parameter type: {param_type}. Use 'f' for files, 'i' for implementations, or 'e' for excluded sections."
             )
 
 

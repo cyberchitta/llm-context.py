@@ -122,16 +122,19 @@ def missing(env: ExecutionEnvironment) -> ExecutionResult:
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", type=str)
     parser.add_argument("-i", type=str)
+    parser.add_argument("-e", type=str)
     parser.add_argument("-t", type=float, required=True)
     args = parser.parse_args()
-    if not args.f and not args.i:
-        parser.error("Must specify either -f or -i")
-    if args.f and args.i:
-        parser.error("Cannot specify both -f and -i")
+    param_count = sum(1 for param in [args.f, args.i, args.e] if param)
+    if param_count != 1:
+        parser.error("Must specify exactly one of -f, -i, or -e")
     if args.f:
         file_list = ast.literal_eval(args.f)
         content = commands.get_missing_files(env, file_list, args.t)
     elif args.i:
         impl_list = ast.literal_eval(args.i)
         content = commands.get_implementations(env, impl_list)
+    elif args.e:
+        file_list = ast.literal_eval(args.e)
+        content = commands.get_excluded(env, file_list, args.t)
     return ExecutionResult(content, env)

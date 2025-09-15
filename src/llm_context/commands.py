@@ -39,6 +39,15 @@ def list_modified_files(env: ExecutionEnvironment, rule_name: str, timestamp: fl
     return file_sel_excerpted.files
 
 
+def get_excluded(env: ExecutionEnvironment, paths: list[str], timestamp: float) -> str:
+    matching_selection = env.state.selections.get_selection_by_timestamp(timestamp)
+    if matching_selection is None:
+        raise ValueError(f"No context found with timestamp {timestamp}...")
+    settings = ContextSettings.create(False, False, True)
+    generator = ContextGenerator.create(env.config, env.state.file_selection, settings, env.tagger)
+    return generator.excluded(paths, matching_selection, timestamp)
+
+
 def get_implementations(env: ExecutionEnvironment, queries: list[tuple[str, str]]) -> str:
     settings = ContextSettings.create(False, False, True)
     return ContextGenerator.create(

@@ -5,7 +5,8 @@
 ## Quick Reference
 - ✓ = Full content included below
 {% if excerpts %}
-- E = Excerpted content (focused sections/definitions))
+- O = Outlined content (definitions/functions only)
+- E = Excerpted content (specific sections extracted)
 {% endif %}
 - ✗ = Excluded (not included)
 
@@ -22,22 +23,25 @@ This context presents a comprehensive view of the _/{{ project_name }}_ reposito
 ## Instructions for AI: 📂 Before {% if tools_available %}Accessing{% else %}Requesting{% endif %} Any Files
 
 1. **SEARCH THIS DOCUMENT** to check if the file is already included below
-2. **CHECK the repository structure** below to confirm file status (✓,{% if excerpts %} E,{% endif %} or ✗)
-3. {% if overview_mode == "focused" %}{% if tools_available %}Use lc-missing for ✗{% if excerpts %} or E{% endif %} files that are needed for your analysis{% else %}Use lc-missing commands below for ✗{% if excerpts %} or E{% endif %} files that are needed{% endif %}{% else %}Only request ✗{% if excerpts %} or E{% endif %} files that are absolutely necessary for your analysis{% endif %}
+2. **CHECK the repository structure** below to confirm file status (✓,{% if excerpts %} O, E,{% endif %} or ✗)
+3. {% if overview_mode == "focused" %}{% if tools_available %}Use lc-missing for ✗{% if excerpts %}, O, or E{% endif %} files that are needed for your analysis{% else %}Use lc-missing commands below for ✗{% if excerpts %}, O, or E{% endif %} files that are needed{% endif %}{% else %}Only request ✗{% if excerpts %}, O, or E{% endif %} files that are absolutely necessary for your analysis{% endif %}
 
 {% if tools_available %}
 {% if overview_mode == "focused" -%}
 Use lc-missing for:
-- Any ✗{% if excerpts %} or E{% endif %} files you need to examine
+- Any ✗{% if excerpts %}, O, or E{% endif %} files you need to examine
 - Files modified since context generation (use lc-list-modified-files to identify these)
 {%- else -%}
 Only use lc-missing for:
 - Files modified since context generation (use lc-list-modified-files to identify these)
-- Files marked ✗{% if excerpts %} or E{% endif %} in the repository structure that you need to examine
+- Files marked ✗{% if excerpts %}, O, or E{% endif %} in the repository structure that you need to examine
 {%- endif %}
 
 {% if excerpts %}
-**EFFICIENCY TIP:** If you only need specific functions or methods, use lc-missing with param_type "i" instead of retrieving complete files.
+**EFFICIENCY TIP:** 
+- For O files: Use lc-missing with param_type "i" to get specific implementations
+- For E files: Use lc-missing with param_type "e" to get excluded sections
+- For complete files: Use lc-missing with param_type "f"
 {% endif %}
 {% endif %}
 
@@ -57,12 +61,22 @@ Using the lc-missing tool:
    }
    ```
    
-   {% if sample_definitions %}For implementations:
+   {% if sample_definitions %}For implementations (O files):
    ```json
    {
      "root_path": "{{ abs_root_path }}",
      "param_type": "i",
      "data": "{{ sample_definitions | tojson }}",
+     "timestamp": {{ context_timestamp }}
+   }
+   ```
+   
+   For excluded sections (E files):
+   ```json
+   {
+     "root_path": "{{ abs_root_path }}",
+     "param_type": "e",
+     "data": "[\"/{{ project_name }}/path/to/file.ext\"]",
      "timestamp": {{ context_timestamp }}
    }
    ```
@@ -73,9 +87,14 @@ For files, copy and run:
 lc-missing -f "{{ sample_requested_files | tojson }}" -t {{ context_timestamp }}
 ```
 
-{% if sample_definitions %}For implementations, copy and run:
+{% if sample_definitions %}For implementations (O files), copy and run:
 ```bash
 lc-missing -i "{{ sample_definitions | tojson }}" -t {{ context_timestamp }}
+```
+
+For excluded sections (E files), copy and run:
+```bash
+lc-missing -e "[\"/{project_name}/path/to/file.ext\"]" -t {{ context_timestamp }}
 ```
 {% endif %}
 
@@ -92,7 +111,7 @@ lc-list-modified-files {{ abs_root_path }} lc/prm-developer {{ context_timestamp
 This focused view shows complete file details for directories containing included files, and folder summaries for directories with only excluded files.
 {%- else -%}
 ```
-Status: ✓=Full content, E=Excerpted content, ✗=Excluded
+Status: ✓=Full content, O=Outlined content, E=Excerpted content, ✗=Excluded
 Format: status path bytes (size) age
 ```
 {%- endif %}

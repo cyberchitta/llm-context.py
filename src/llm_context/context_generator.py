@@ -8,7 +8,7 @@ from typing import Any, Optional, cast
 from jinja2 import Environment, FileSystemLoader  # type: ignore
 
 from llm_context.context_spec import ContextSpec
-from llm_context.excerpters.base import Excerpts
+from llm_context.excerpters.base import Excerpts, Excluded
 from llm_context.excerpters.language_mapping import to_language
 from llm_context.excerpters.parser import Source
 from llm_context.excerpters.service import ExcerpterRegistry
@@ -54,6 +54,17 @@ class ContextCollector:
         return ContextCollector(
             root_path, PathConverter.create(root_path), project_layout, rule_loader
         )
+
+    def split_excerpted(self, rel_paths: list[str], rule: Rule) -> tuple[list[str], list[str]]:
+        outlined_files = []
+        other_excerpted_files = []
+        for rel_path in rel_paths:
+            excerpt_mode = rule.get_excerpt_mode(rel_path)
+            if excerpt_mode == "code-outliner":
+                outlined_files.append(rel_path)
+            else:
+                other_excerpted_files.append(rel_path)
+        return outlined_files, other_excerpted_files
 
     def sample_file_abs(self, full_abs: list[str]) -> list[str]:
         all_abs = set(
@@ -102,6 +113,28 @@ class ContextCollector:
             ]
         else:
             return []
+
+    def excluded(self, tagger: Any, rel_paths: list[str], rule: Rule) -> list[Excluded]:
+        abs_paths = self.converter.to_absolute(rel_paths)
+        excerpter = self.get_excerpter()
+        if not rel_paths:
+            return []
+        sources = [
+            Source(rel, content)
+            for rel, abs_path in zip(rel_paths, abs_paths)
+            if (content := safe_read_file(abs_path)) is not None
+        ]
+        excluded_results = []
+        for source in sources:
+            excerpt_mode = rule.get_excerpt_mode(source.rel_path)
+            if excerpt_mode and excerpt_mode != "code-outliner":
+                excerpt_config = rule.get_excerpt_config(excerpt_mode)
+                excerpt_config["tagger"] = tagger
+                processor = excerpter.get_excerpter(excerpt_mode, excerpt_config)
+                if processor:
+                    excluded = processor.excluded([source])
+                    excluded_results.extend(excluded)
+        return excluded_results
 
     def overview(
         self,
@@ -191,6 +224,25 @@ class ContextGenerator:
         context = {"definitions": self.collector.definitions(self.tagger, requests)}
         return self._render(template_id, context)
 
+    def excluded(
+        self,
+        paths: list[str],
+        matching_selection: FileSelection,
+        timestamp: float,
+        template_id: str = "excluded",
+    ) -> str:
+        excerpted_files = set(matching_selection.excerpted_files)
+        requested_excerpted = [p for p in paths if p in excerpted_files]
+        not_excerpted = [p for p in paths if p not in excerpted_files]
+        excluded_content = self.collector.excluded(self.tagger, requested_excerpted, self.spec.rule)
+        context = {
+            "requested_excerpted": requested_excerpted,
+            "not_excerpted": not_excerpted,
+            "excluded_content": excluded_content,
+            "tools_available": self.settings.tools_available,
+        }
+        return self._render(template_id, context)
+
     def missing_files(
         self,
         paths: list[str],
@@ -249,6 +301,11 @@ class ContextGenerator:
         files = self.collector.files(self.full_rel)
         settings = self.settings
         context_timestamp = datetime.now().timestamp()
+        outlined_rel, other_excerpted_rel = self.collector.split_excerpted(
+            self.excerpted_rel, descriptor
+        )
+        outlined_abs = self.converter.to_absolute(outlined_rel)
+        other_excerpted_abs = self.converter.to_absolute(other_excerpted_rel)
         context = {
             "project_name": self.project_root.name,
             "context_timestamp": context_timestamp,
@@ -256,8 +313,8 @@ class ContextGenerator:
             "overview": self.collector.overview(
                 descriptor.overview,
                 self.full_abs,
-                self.excerpted_abs,
-                [],
+                other_excerpted_abs,
+                outlined_abs,
                 descriptor.get_ignore_patterns("overview"),
             ),
             "overview_mode": descriptor.overview,
