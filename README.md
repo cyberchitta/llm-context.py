@@ -150,12 +150,12 @@ lc-context -nt
 
 ## Key Features
 
-**Smart File Selection**: Rules automatically include/exclude appropriate files
-**Instant Context Generation**: Formatted context copied to clipboard in seconds
-**MCP Integration**: AI can access additional files without manual intervention
-**Systematic Rule Organization**: Five-category system for clear rule composition
-**AI-Assisted Rule Creation**: Let AI help create minimal context for specific tasks
-**Code Excerpting**: Extractions of significant content to reduce context while preserving structure
+- **Smart File Selection**: Rules automatically include/exclude appropriate files
+- **Instant Context Generation**: Formatted context copied to clipboard in seconds
+- **MCP Integration**: AI can access additional files without manual intervention
+- **Systematic Rule Organization**: Five-category system for clear rule composition
+- **AI-Assisted Rule Creation**: Let AI help create minimal context for specific tasks
+- **Code Excerpting**: Extractions of significant content to reduce context while preserving structure
 
 ## Learn More
 
