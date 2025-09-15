@@ -25,7 +25,7 @@ def lc_changed(root_path: str, rule_name: str = "lc/prm-developer", timestamp: f
 
 
 @mcp.tool()
-def lc_outlines(root_path: str, rule_name: str = "lc/prm-developer", timestamp: float = 0) -> str:
+def lc_outlines(root_path: str) -> str:
     """Returns excerpted content highlighting important sections in all supported files.
     Args:
         root_path: Root directory path
@@ -34,7 +34,7 @@ def lc_outlines(root_path: str, rule_name: str = "lc/prm-developer", timestamp: 
     """
     env = ExecutionEnvironment.create(Path(root_path))
     with env.activate():
-        return commands.get_missing_excerpted(env, rule_name, timestamp)
+        return commands.get_outlines(env)
 
 
 @mcp.tool()

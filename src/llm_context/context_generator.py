@@ -191,31 +191,6 @@ class ContextGenerator:
         context = {"definitions": self.collector.definitions(self.tagger, requests)}
         return self._render(template_id, context)
 
-    def missing_excerpted(
-        self,
-        excerptable_files: list[str],
-        matching_selection: FileSelection,
-        template_id: str = "missing-excerpted",
-    ) -> str:
-        current_excerpted = set(matching_selection.excerpted_files)
-        already_included = list(set(excerptable_files) & current_excerpted)
-        missing_files = list(set(excerptable_files) - current_excerpted)
-        outlines_content = ""
-        if missing_files:
-            temp_generator = ContextGenerator.create(
-                self.spec,
-                FileSelection.create(matching_selection.rule_name, [], missing_files),
-                self.settings,
-                self.tagger,
-            )
-            outlines_content = temp_generator.outlines()
-        context = {
-            "already_included": already_included,
-            "missing_excerpted": bool(missing_files),
-            "outlines": outlines_content,
-        }
-        return self._render(template_id, context)
-
     def missing_files(
         self,
         paths: list[str],

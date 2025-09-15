@@ -39,23 +39,6 @@ def list_modified_files(env: ExecutionEnvironment, rule_name: str, timestamp: fl
     return file_sel_excerpted.files
 
 
-def get_missing_excerpted(env: ExecutionEnvironment, rule_name: str, timestamp: float) -> str:
-    cur_env = env.with_rule(rule_name)
-    matching_selection = cur_env.state.selections.get_selection_by_timestamp(timestamp)
-    if matching_selection is None:
-        raise ValueError(f"No context found with timestamp {timestamp}...")
-    selector = ContextSelector.create(cur_env.config)
-    all_excerpted_selection = selector.select_excerpted_only(
-        FileSelection.create(matching_selection.rule_name, [], [])
-    )
-    all_excerptable_files = all_excerpted_selection.excerpted_files
-    settings = ContextSettings.create(False, False, True)
-    generator = ContextGenerator.create(
-        cur_env.config, cur_env.state.file_selection, settings, env.tagger
-    )
-    return generator.missing_excerpted(all_excerptable_files, matching_selection)
-
-
 def get_implementations(env: ExecutionEnvironment, queries: list[tuple[str, str]]) -> str:
     settings = ContextSettings.create(False, False, True)
     return ContextGenerator.create(
