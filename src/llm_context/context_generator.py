@@ -201,14 +201,32 @@ class ContextGenerator:
         orig_full = set(matching_selection.full_files)
         orig_excerpted = set(matching_selection.excerpted_files)
         abs_paths = self.converter.to_absolute(paths)
+        excerpted_metadata = {}
+        if orig_excerpted:
+            temp_sources = [
+                Source(rel, content)
+                for rel, abs_path in zip(
+                    orig_excerpted, self.converter.to_absolute(list(orig_excerpted))
+                )
+                if (content := safe_read_file(abs_path)) is not None
+            ]
+            if temp_sources:
+                excerpts = self.collector.excerpts(
+                    self.tagger, list(orig_excerpted), self.spec.rule
+                )
+                for excerpt in excerpts.excerpts:
+                    excerpted_metadata[excerpt.rel_path] = excerpt.metadata
+        already_excerpted = list(set(paths) & orig_excerpted)
         files_to_fetch = {
-            r for r, a in zip(paths, abs_paths) if r not in orig_full or is_newer(a, timestamp)
+            r
+            for r, a in zip(paths, abs_paths)
+            if r not in orig_full and r not in orig_excerpted or is_newer(a, timestamp)
         }
         already_included = list(set(paths) - files_to_fetch - orig_excerpted)
-        in_excerpted = list(set(paths) & orig_excerpted)
         context = {
             "already_included": already_included,
-            "in_excerpted": in_excerpted,
+            "already_excerpted": already_excerpted,
+            "excerpted_metadata": excerpted_metadata,
             "files_to_fetch": self.collector.files(list(files_to_fetch)),
             "tools_available": self.settings.tools_available,
         }
