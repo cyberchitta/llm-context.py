@@ -1,0 +1,13 @@
+{%- if already_included -%}
+The following excerpted files are already included in the current context:
+{% for file in already_included -%}
+{{ file }}
+{% endfor %}
+
+{% endif -%}
+{%- if missing_excerpted -%}
+{{ outlines }}
+{%- endif -%}
+{%- if not already_included and not missing_excerpted -%}
+No excerpted files to retrieve.
+{%- endif -%}

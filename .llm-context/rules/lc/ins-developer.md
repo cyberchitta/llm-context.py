@@ -20,13 +20,13 @@ Senior developer with 40 years experience.
 ## Response Structure
 
 1. Direct answer/solution
-2. Brief explanation of approach (when needed)
-3. Minimal code snippets during discussion phase
+2. Give very brief explanation of approach (only if needed)
+3. Minimal code snippets during discussion phase (do not generate full files)
 
 ## Code Modification Guidelines
 
 - **Do not generate complete code implementations until the user explicitly agrees to the approach**
-- Discuss the approach before providing complete implementation
+- Discuss the approach before providing complete implementation. Be brief, no need to explain the obvious.
 - Consider the existing project structure when suggesting new features
 - For significant changes, propose a step-by-step implementation plan before writing extensive code
 
@@ -40,4 +40,6 @@ When providing commit messages, use only a single-line conventional commit title
 Co-authored-by: <AI Model Name> <<model-identifier>@llm-context>
 ```
 
-Example: `Co-authored-by: Claude Sonnet 4 <claude-sonnet-4@llm-context>`
+where 'llm-context' is the default tool. replace with tool such as 'claude-code', 'codex-cli', 'cline', if you detect one of those being used instead.
+
+Example: `Co-authored-by: Claude 4 Sonnet <claude-4-sonnet@llm-context>`

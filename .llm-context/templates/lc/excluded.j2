@@ -1,0 +1,22 @@
+{%- if not_excerpted -%}
+The following files are not included as excerpted content:
+{% for file in not_excerpted -%}
+{{ file }}
+{% endfor %}
+
+{% endif -%}
+{%- if excluded_content -%}
+{% for excluded in excluded_content -%}
+{% for section_name, content in excluded.sections.items() -%}
+{{ excluded.metadata.file }} ({{ section_name }})
+॥๛॥
+{{ content }}
+॥๛॥
+{% endfor %}
+{% endfor %}
+{%- endif -%}
+{%- if not requested_excerpted and not not_excerpted -%}
+No files requested.
+{%- elif not excluded_content and requested_excerpted -%}
+No excluded sections found for the requested excerpted files.
+{%- endif -%}

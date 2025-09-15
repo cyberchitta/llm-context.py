@@ -7,11 +7,11 @@ gitignores:
   full-files:
     - "*.md"
     - /tests
-    - tag-qry/
+    - ts-qry/
     - lc_resources/
   excerpted-files:
     - "*.md"
     - /tests
-    - tag-qry/
+    - ts-qry/
     - lc_resources/
 ---

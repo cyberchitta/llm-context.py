@@ -1,0 +1,24 @@
+{% include 'lc/prompt.j2' %}
+{%- if rules %}
+
+{% for item in rules -%}
+{{ item.content }}
+{% endfor %}
+{%- endif -%}
+{% if project_notes %}
+{{ project_notes }}
+{% endif %}
+
+{% include 'lc/overview.j2' %}
+
+{% if files %}
+## Complete File Contents
+
+{% include 'lc/files.j2' %}
+{% endif %}
+
+{% if excerpts %}
+{% include 'lc/excerpts.j2' %}
+{% endif %}
+
+{% include 'lc/end-prompt.j2' %}

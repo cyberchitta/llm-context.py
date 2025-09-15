@@ -1,0 +1,10 @@
+{% for excerpts_group in excerpts %}
+  {% if excerpts_group.excerpts and excerpts_group.excerpts[0].metadata.processor_type == "code-outliner" %}
+{% for item in excerpts_group.excerpts %}
+{{ item.rel_path }}
+॥๛॥
+{{ item.content }}
+॥๛॥
+{% endfor %}
+  {% endif %}
+{% endfor %}

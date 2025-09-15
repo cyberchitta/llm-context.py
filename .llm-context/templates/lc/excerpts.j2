@@ -1,0 +1,68 @@
+{% for excerpts_group in excerpts %}
+  {% if excerpts_group.excerpts %}
+    {% set processor_type = excerpts_group.excerpts[0].metadata.processor_type %}
+    
+    {% if processor_type == "code-outliner" %}
+## Code Outlines - Implementation Retrieval
+
+Smart outlines highlighting important definitions in the codebase. These show function/class signatures while omitting implementation details to reduce token usage.
+
+{% set sample_definitions = excerpts_group.metadata.sample_definitions %}
+{% if sample_definitions %}
+**Get specific implementations:**
+{% if tools_available %}
+```json
+{
+  "root_path": "{{ abs_root_path }}",
+  "param_type": "i", 
+  "data": {{ sample_definitions | tojson }},
+  "timestamp": {{ context_timestamp }}
+}
+```
+{% else %}
+```bash
+lc-missing -i {{ sample_definitions | tojson | tojson }} -t {{ context_timestamp }}
+```
+{% endif %}
+{% endif %}
+
+{% for item in excerpts_group.excerpts %}
+{{ item.rel_path }}
+॥๛॥
+{{ item.content }}
+॥๛॥
+{% endfor %}
+
+    {% elif processor_type == "sfc-excerpter" %}
+## Content Excerpts - Key Sections
+
+Excerpted content showing important sections from files. These sections are configurable per file type:
+
+**Get excluded sections:**
+{% set sample_sfc_file = excerpts_group.excerpts | first %}
+{% if sample_sfc_file %}
+{% if tools_available %}
+```json
+{
+  "root_path": "{{ abs_root_path }}",
+  "param_type": "e",
+  "data": ["{{ sample_sfc_file.rel_path }}"], 
+  "timestamp": {{ context_timestamp }}
+}
+```
+{% else %}
+```bash
+lc-missing -e "[\"{{ sample_sfc_file.rel_path }}\"]" -t {{ context_timestamp }}
+```
+{% endif %}
+{% endif %}
+
+{% for item in excerpts_group.excerpts %}
+{{ item.rel_path }}
+॥๛॥
+{{ item.content }}
+॥๛॥
+{% endfor %}
+    {% endif %}
+  {% endif %}
+{% endfor %}

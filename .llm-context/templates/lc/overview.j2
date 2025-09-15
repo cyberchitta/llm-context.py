@@ -1,0 +1,100 @@
+# {% if tools_available %}Repository{% else %}Detailed Repository{% endif %} Content: **{{ project_name }}**
+
+## Instructions for AI: {% if overview_mode == "focused" %}⚠️ FOCUSED PROJECT CONTEXT PROVIDED - {% if tools_available %}USE TOOLS FOR ADDITIONAL FILES{% else %}USE COMMANDS FOR ADDITIONAL FILES{% endif %} ⚠️{% else %}⚠️ COMPLETE PROJECT CONTEXT PROVIDED - NO NEED TO REQUEST ADDITIONAL CONTEXT ⚠️{% endif %}
+
+## Quick Reference
+- ✓ = Full content included below
+{% if excerpts -%}
+- O = Outlined content (definitions/functions only)
+- E = Excerpted content (specific sections extracted)
+{% endif -%}
+{% if sample_excluded_files -%}
+- ✗ = Excluded (not included)
+{% endif %}
+
+> Generation timestamp: {{ context_timestamp }}
+> {% if tools_available %}For updates: Use lc-changed to identify changes, then lc-missing for specific files{% else %}For updates: Use the lc-missing commands shown below{% endif %}
+
+{% if overview_mode == "focused" -%}
+This context presents a focused view of the _/{{ project_name }}_ repository, including complete contents for key files and excerpted content for important code sections. {% if tools_available %}Additional files can be retrieved using the lc-missing tool.{% else %}Additional files can be requested using the lc-missing commands shown below.{% endif %}
+{%- else -%}
+This context presents a comprehensive view of the _/{{ project_name }}_ repository.
+{%- endif %}
+
+{% if sample_requested_files or sample_excluded_files %}
+## Instructions for AI: 📂 Before {% if tools_available %}Accessing{% else %}Requesting{% endif %} Any Files
+
+1. **SEARCH THIS DOCUMENT** to check if the file is already included below
+2. **CHECK the repository structure** below to confirm file status (✓,{% if excerpts %} O, E,{% endif %} or ✗)
+3. {% if overview_mode == "focused" %}{% if tools_available %}Use lc-missing for ✗{% if excerpts %}, O, or E{% endif %} files that are needed for your analysis{% else %}Use lc-missing commands below for ✗{% if excerpts %}, O, or E{% endif %} files that are needed{% endif %}{% else %}Only request ✗{% if excerpts %}, O, or E{% endif %} files that are absolutely necessary for your analysis{% endif %}
+
+{% if tools_available %}
+{% if overview_mode == "focused" -%}
+Use lc-missing for:
+- Any ✗{% if excerpts %}, O, or E{% endif %} files you need to examine
+- Files modified since context generation (use lc-changed to identify these)
+{%- else -%}
+Only use lc-missing for:
+- Files modified since context generation (use lc-changed to identify these)
+- Files marked ✗{% if excerpts %}, O, or E{% endif %} in the repository structure that you need to examine
+{%- endif %}
+
+{% if excerpts %}
+**EFFICIENCY TIP:** 
+- For O files: Use lc-missing with param_type "i" to get specific implementations
+- For E files: Use lc-missing with param_type "e" to get excluded sections
+- For complete files: Use lc-missing with param_type "f"
+{% endif %}
+{% endif %}
+
+### How to Request Missing Files
+
+{% if tools_available %}
+Using the lc-missing tool:
+   **ROOT PATH must be: {{ abs_root_path }}**
+   
+   For files:
+   ```json
+   {
+     "root_path": "{{ abs_root_path }}",
+     "param_type": "f",
+     "data": {% if sample_excluded_files %}{{ sample_excluded_files | tojson }}{% else %}{{ sample_requested_files | tojson }}{% endif %},
+     "timestamp": {{ context_timestamp }}
+   }
+   ```
+   
+   For modified files since context generation:
+   ```json
+   {
+     "root_path": "{{ abs_root_path }}",
+     "rule_name": "lc/prm-developer",
+     "timestamp": {{ context_timestamp }}
+   }
+   ```
+{% else %}
+For files, the user should run:
+```bash
+lc-missing -f {% if sample_excluded_files %}{{ sample_excluded_files | tojson | tojson }}{% else %}{{ sample_requested_files | tojson | tojson }}{% endif %} -t {{ context_timestamp }}
+```
+
+For modified files since context generation, the user should run:
+```bash
+lc-changed "{{ abs_root_path }}" lc/prm-developer {{ context_timestamp }}
+```
+{% endif %}
+{% endif %}
+
+## Repository Structure{% if overview_mode == "focused" %} (Focused View){% endif %}
+
+{% if overview_mode == "focused" -%}
+This focused view shows complete file details for directories containing included files, and folder summaries for directories with only excluded files.
+{%- else -%}
+```
+Status: ✓=Full content, O=Outlined content, E=Excerpted content, ✗=Excluded
+Format: status path bytes (size) age
+```
+{%- endif %}
+
+```
+{{ overview }}
+```
