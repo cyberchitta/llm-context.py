@@ -81,7 +81,7 @@ class ContextCollector:
             if (content := safe_read_file(abs_path)) is not None
         ]
 
-    def excerpts(self, tagger: Any, rel_paths: list[str], rule: Rule) -> Excerpts:
+    def excerpts(self, tagger: Any, rel_paths: list[str], rule: Rule) -> list[Excerpts]:
         abs_paths = self.converter.to_absolute(rel_paths)
         excerpter = self.get_excerpter()
         if rel_paths:
@@ -90,7 +90,7 @@ class ContextCollector:
                 for rel, abs_path in zip(rel_paths, abs_paths)
                 if (content := safe_read_file(abs_path)) is not None
             ]
-            return excerpter.excerpt(sources, rule, tagger)[0]
+            return excerpter.excerpt(sources, rule, tagger)
         else:
             return excerpter.empty()
 
@@ -217,7 +217,7 @@ class ContextGenerator:
 
     def outlines(self, template_id: str = "outlines") -> str:
         excerpts = self.collector.excerpts(self.tagger, self.excerpted_rel, self.spec.rule)
-        context = {"excerpts": excerpts.excerpts}
+        context = {"excerpts": excerpts}
         return self._render(template_id, context)
 
     def definitions(self, requests, template_id: str = "definitions") -> str:
@@ -320,8 +320,7 @@ class ContextGenerator:
             "overview": overview_string,
             "overview_mode": descriptor.overview,
             "files": files,
-            "excerpts": excerpts.excerpts,
-            "sample_definitions": excerpts.metadata["sample_definitions"],
+            "excerpts": excerpts,
             "implementations": implementations,
             "sample_requested_files": self.converter.to_relative(
                 self.collector.sample_file_abs(self.full_abs)

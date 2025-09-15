@@ -47,5 +47,5 @@ class ExcerpterRegistry:
                 all_excerpts.extend([excerpts])
         return all_excerpts
 
-    def empty(self) -> Excerpts:
-        return Excerpts([], {"sample_definitions": []})
+    def empty(self) -> list[Excerpts]:
+        return [Excerpts([], {"sample_definitions": []})]
