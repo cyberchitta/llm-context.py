@@ -72,12 +72,12 @@ Using the lc-missing tool:
    }
    ```
 {% else %}
-For files, copy and run:
+For files, the user should run:
 ```bash
 lc-missing -f {% if sample_excluded_files %}{{ sample_excluded_files | tojson | tojson }}{% else %}{{ sample_requested_files | tojson | tojson }}{% endif %} -t {{ context_timestamp }}
 ```
 
-For modified files since context generation, copy and run:
+For modified files since context generation, the user should run:
 ```bash
 lc-changed "{{ abs_root_path }}" lc/prm-developer {{ context_timestamp }}
 ```
