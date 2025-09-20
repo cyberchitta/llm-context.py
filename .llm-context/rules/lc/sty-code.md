@@ -27,7 +27,11 @@ description: Outlines universal code style principles for modern programming lan
 ### Error Handling
 
 - Validate inputs at application boundaries, not within internal functions
+- **Natural Failure Over Validation**: Don't add explicit checks for conditions that will naturally cause failures
+- Let language built-in error mechanisms work (TypeError, ReferenceError, etc.)
+- Only validate at true application boundaries (user input, external APIs)
 - Internal functions should assume valid inputs and fail fast
+- Trust that calling code has met preconditions - fail fast if not
 - Avoid defensive programming within core logic
 - Create clear contracts between functions
 
