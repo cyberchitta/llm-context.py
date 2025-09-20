@@ -253,6 +253,17 @@ class ContextGenerator:
         orig_full = set(matching_selection.full_files)
         orig_excerpted = set(matching_selection.excerpted_files)
         abs_paths = self.converter.to_absolute(paths)
+        missing_files = {
+            r for r, a in zip(paths, abs_paths)
+            if r not in orig_full and r not in orig_excerpted
+        }
+        modified_files = {
+            r for r, a in zip(paths, abs_paths)
+            if (r in orig_full or r in orig_excerpted) and is_newer(a, timestamp)
+        }
+        files_to_fetch = missing_files | modified_files
+        already_excerpted_candidates = set(paths) & orig_excerpted
+        already_excerpted = list(already_excerpted_candidates - files_to_fetch)
         excerpted_metadata = {}
         if orig_excerpted:
             temp_sources = [
@@ -269,18 +280,14 @@ class ContextGenerator:
                 for excerpts_obj in all_excerpts:
                     for excerpt in excerpts_obj.excerpts:
                         excerpted_metadata[excerpt.rel_path] = excerpt.metadata
-        already_excerpted = list(set(paths) & orig_excerpted)
-        files_to_fetch = {
-            r
-            for r, a in zip(paths, abs_paths)
-            if r not in orig_full and r not in orig_excerpted or is_newer(a, timestamp)
-        }
-        already_included = list(set(paths) - files_to_fetch - orig_excerpted)
+        already_included = list((set(paths) & orig_full) - files_to_fetch)
         context = {
             "already_included": already_included,
             "already_excerpted": already_excerpted,
             "excerpted_metadata": excerpted_metadata,
             "files_to_fetch": self.collector.files(list(files_to_fetch)),
+            "missing_files": list(missing_files),
+            "modified_files": list(modified_files),
             "tools_available": self.settings.tools_available,
         }
         return self._render(template_id, context)

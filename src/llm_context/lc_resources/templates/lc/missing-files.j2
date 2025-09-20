@@ -1,27 +1,26 @@
 {%- if already_included -%}
-The latest version of the following full files are already included in the current context:
+Already included (full content):
 {% for file in already_included -%}
 {{ file }}
 {% endfor %}
-
 {% endif -%}
 {%- if already_excerpted -%}
-The following files are already included as excerpted content:
+Already included (excerpted):
 {% for file in already_excerpted -%}
 {%- set excerpt_meta = excerpted_metadata.get(file, {}) -%}
 {%- set processor_type = excerpt_meta.get('processor_type', 'unknown') -%}
-{{ file }}{% if processor_type == 'code-outliner' %} (use lc-missing {% if not tools_available %}-{% endif %}i for implementations){% else %} (use lc-missing {% if not tools_available %}-{% endif %}e for excluded sections){% endif %}
+{{ file }}{% if processor_type == 'code-outliner' %} (lc-missing -i for details){% else %} (lc-missing -e for excluded){% endif %}
 {% endfor %}
-
 {% endif -%}
 {%- if files_to_fetch -%}
+Updated content:
 {% for item in files_to_fetch -%}
-{{ item.path }}
+{{ item.path }}{% if item.path in modified_files %} (modified){% elif item.path in missing_files %} (new){% endif %}
 ॥๛॥
 {{ item.content }}
 ॥๛॥
 {% endfor %}
 {%- endif -%}
 {%- if not already_included and not already_excerpted and not files_to_fetch -%}
-No new files to retrieve.
+No files to retrieve.
 {%- endif -%}
