@@ -9,7 +9,7 @@ from llm_context.exceptions import RuleResolutionError
 from llm_context.rule_parser import DEFAULT_CODE_RULE, RuleLoader, RuleParser
 from llm_context.utils import ProjectLayout, Yaml, log, safe_read_file
 
-CURRENT_CONFIG_VERSION = version.parse("5.0")
+CURRENT_CONFIG_VERSION = version.parse("5.1")
 
 IGNORE_NOTHING = [".git"]
 INCLUDE_ALL = ["**/*"]

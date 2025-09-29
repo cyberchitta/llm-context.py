@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.1] - 2025-09-29
+
+### Bug Fixes
+- Eliminate overlap between files_to_fetch and already_excerpted in missing_files
+- Handle list[Excerpts] return type in missing_files method
+
+### Features
+- Add explicit file verification wording to prevent content assumptions
+- Add natural failure principle to error handling guidelines
+
 ## [0.5.0] - 2025-09-15
 
 ### Bug Fixes
