@@ -40,7 +40,6 @@ When providing commit messages, use only a single-line conventional commit title
 Co-authored-by: <Your actual AI model name and version> <model-identifier@llm-context>
 ```
 
-where 'llm-context' is the default tool. replace with tool such as 'claude-code', 'codex-cli', 'cline', if you detect one of those being used instead.
-
 Example format: Claude 4.5 Sonnet <claude-4.5-sonnet@llm-context>
-(Note: Use your actual model name, not this example)
+
+(Note: Use your actual model name and identifier, not this example. However the domain part identifies the tool, in this case 'llm-context'.)
