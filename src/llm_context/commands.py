@@ -27,7 +27,7 @@ def get_missing_files(env: ExecutionEnvironment, paths: list[str], timestamp: fl
             f"No context found with timestamp {timestamp}. Warn the user that the context is stale."
         )
     settings = ContextSettings.create(False, False, True)
-    generator = ContextGenerator.create(env.config, env.state.file_selection, settings)
+    generator = ContextGenerator.create(env.config, env.state.file_selection, settings, env.tagger)
     return generator.missing_files(paths, matching_selection, timestamp)
 
 
