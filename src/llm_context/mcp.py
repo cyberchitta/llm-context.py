@@ -11,16 +11,15 @@ mcp = FastMCP("llm-context")
 
 
 @mcp.tool()
-def lc_changed(root_path: str, rule_name: str = "lc/prm-developer", timestamp: float = 0) -> str:
+def lc_changed(root_path: str, timestamp: float) -> str:
     """Returns list of files modified since given timestamp.
     Args:
         root_path: Root directory path (e.g. '/home/user/projects/myproject')
-        rule_name: Rule to use for file inclusion rules
         timestamp: Unix timestamp to check modifications since
     """
     env = ExecutionEnvironment.create(Path(root_path))
     with env.activate():
-        files = commands.list_modified_files(env, rule_name, timestamp)
+        files = commands.list_modified_files(env, timestamp)
         return "\n".join(files)
 
 

@@ -31,10 +31,17 @@ def get_missing_files(env: ExecutionEnvironment, paths: list[str], timestamp: fl
     return generator.missing_files(paths, matching_selection, timestamp)
 
 
-def list_modified_files(env: ExecutionEnvironment, rule_name: str, timestamp: float) -> list[str]:
-    config = ContextSpec.create(env.config.project_root_path, rule_name, env.constants)
+def list_modified_files(env: ExecutionEnvironment, timestamp: float) -> list[str]:
+    matching_selection = env.state.selections.get_selection_by_timestamp(timestamp)
+    if matching_selection is None:
+        raise ValueError(
+            f"No context found with timestamp {timestamp}. The context may be stale or deleted."
+        )
+    config = ContextSpec.create(
+        env.config.project_root_path, matching_selection.rule_name, env.constants
+    )
     selector = ContextSelector.create(config, timestamp)
-    file_sel_full = selector.select_full_files(FileSelection.create(rule_name, [], []))
+    file_sel_full = selector.select_full_files(matching_selection)
     file_sel_excerpted = selector.select_excerpted_files(file_sel_full)
     return file_sel_excerpted.files
 
