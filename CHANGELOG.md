@@ -2,13 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.2] - 2025-10-01
+
+### Bug Fixes
+
+- Pass env.tagger to ContextGenerator in get_missing_files to support excerpted file metadata
+- Further refine commit instruciton
+- Refine model identification in commit message
+
+### Refactor
+
+- Remove rule_name parameter from lc-changed, use timestamp to lookup original selection
+
 ## [0.5.1] - 2025-09-29
 
 ### Bug Fixes
+
 - Eliminate overlap between files_to_fetch and already_excerpted in missing_files
 - Handle list[Excerpts] return type in missing_files method
 
 ### Features
+
 - Add explicit file verification wording to prevent content assumptions
 - Add natural failure principle to error handling guidelines
 
