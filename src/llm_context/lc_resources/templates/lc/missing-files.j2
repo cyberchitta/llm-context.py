@@ -12,6 +12,12 @@ Already included (excerpted):
 {{ file }}{% if processor_type == 'code-outliner' %} (lc-missing -i for details){% else %} (lc-missing -e for excluded){% endif %}
 {% endfor %}
 {% endif -%}
+{%- if deleted_files -%}
+Deleted files (no longer exist):
+{% for file in deleted_files -%}
+{{ file }}
+{% endfor %}
+{% endif -%}
 {%- if files_to_fetch -%}
 Updated content:
 {% for item in files_to_fetch -%}
@@ -21,6 +27,6 @@ Updated content:
 ॥๛॥
 {% endfor %}
 {%- endif -%}
-{%- if not already_included and not already_excerpted and not files_to_fetch -%}
+{%- if not already_included and not already_excerpted and not deleted_files and not files_to_fetch -%}
 No files to retrieve.
 {%- endif -%}
