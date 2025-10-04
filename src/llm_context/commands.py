@@ -6,6 +6,7 @@ from llm_context.context_spec import ContextSpec
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
 from llm_context.state import FileSelection
+from llm_context.utils import PathConverter, is_newer
 
 
 def get_prompt(env: ExecutionEnvironment) -> str:
@@ -31,7 +32,7 @@ def get_missing_files(env: ExecutionEnvironment, paths: list[str], timestamp: fl
     return generator.missing_files(paths, matching_selection, timestamp)
 
 
-def list_modified_files(env: ExecutionEnvironment, timestamp: float) -> list[str]:
+def list_modified_files(env: ExecutionEnvironment, timestamp: float) -> str:
     matching_selection = env.state.selections.get_selection_by_timestamp(timestamp)
     if matching_selection is None:
         raise ValueError(
@@ -43,7 +44,22 @@ def list_modified_files(env: ExecutionEnvironment, timestamp: float) -> list[str
     selector = ContextSelector.create(config, timestamp)
     file_sel_full = selector.select_full_files(matching_selection)
     file_sel_excerpted = selector.select_excerpted_files(file_sel_full)
-    return file_sel_excerpted.files
+    current_files = set(file_sel_excerpted.files)
+    original_files = set(matching_selection.files)
+    converter = PathConverter.create(env.config.project_root_path)
+    modified = {
+        f
+        for f in (current_files & original_files)
+        if is_newer(converter.to_absolute([f])[0], timestamp)
+    }
+    added = current_files - original_files
+    deleted = original_files - current_files
+    result = [
+        f"{label}:\n" + "\n".join(sorted(files))
+        for label, files in [("Added", added), ("Modified", modified), ("Deleted", deleted)]
+        if files
+    ]
+    return "\n\n".join(result) if result else "No changes"
 
 
 def get_excluded(env: ExecutionEnvironment, paths: list[str], timestamp: float) -> str:

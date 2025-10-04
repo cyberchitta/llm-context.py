@@ -19,8 +19,7 @@ def lc_changed(root_path: str, timestamp: float) -> str:
     """
     env = ExecutionEnvironment.create(Path(root_path))
     with env.activate():
-        files = commands.list_modified_files(env, timestamp)
-        return "\n".join(files)
+        return commands.list_modified_files(env, timestamp)
 
 
 @mcp.tool()

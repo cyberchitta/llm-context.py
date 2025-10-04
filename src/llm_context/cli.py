@@ -113,8 +113,7 @@ def outlines(env: ExecutionEnvironment) -> ExecutionResult:
 @create_clipboard_cmd
 def changed_files(env: ExecutionEnvironment) -> ExecutionResult:
     timestamp = env.state.file_selection.timestamp
-    files = commands.list_modified_files(env, timestamp)
-    return ExecutionResult("\n".join(files), env)
+    return ExecutionResult(commands.list_modified_files(env, timestamp), env)
 
 
 @create_clipboard_cmd
