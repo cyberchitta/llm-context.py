@@ -2,6 +2,7 @@ import argparse
 import ast
 from importlib.metadata import version as pkg_ver
 from logging import INFO
+from pathlib import Path
 
 from llm_context import commands
 from llm_context.cmd_pipeline import (
@@ -99,6 +100,7 @@ def context(env: ExecutionEnvironment) -> ExecutionResult:
     nxt_env = env.with_state(env.state.with_selection(updated_selection))
     nxt_env.state.store()
     if args.f:
+        Path(args.f).write_text(content)
         log(INFO, f"Wrote context to {args.f}")
     return ExecutionResult(content, env)
 

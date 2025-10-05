@@ -94,17 +94,3 @@ def get_outlines(env: ExecutionEnvironment) -> str:
     selector = ContextSelector.create(env.config)
     file_sel_excerpted = selector.select_excerpted_only(env.state.file_selection)
     return ContextGenerator.create(env.config, file_sel_excerpted, settings, env.tagger).outlines()
-
-
-def get_context(
-    env: ExecutionEnvironment,
-    with_prompt: bool = False,
-    with_user_notes: bool = False,
-    tools_available: bool = True,
-    output_file: Optional[str] = None,
-) -> tuple[str, float]:
-    settings = ContextSettings.create(with_prompt, with_user_notes, tools_available)
-    content, context_timestamp = generate_context(env, settings)
-    if output_file:
-        Path(output_file).write_text(content)
-    return content, context_timestamp
