@@ -41,7 +41,7 @@ def list_modified_files(env: ExecutionEnvironment, timestamp: float) -> str:
     config = ContextSpec.create(
         env.config.project_root_path, matching_selection.rule_name, env.constants
     )
-    selector = ContextSelector.create(config, timestamp)
+    selector = ContextSelector.create(config)
     file_sel_full = selector.select_full_files(matching_selection)
     file_sel_excerpted = selector.select_excerpted_files(file_sel_full)
     current_files = set(file_sel_excerpted.files)
@@ -53,10 +53,10 @@ def list_modified_files(env: ExecutionEnvironment, timestamp: float) -> str:
         if is_newer(converter.to_absolute([f])[0], timestamp)
     }
     added = current_files - original_files
-    deleted = original_files - current_files
+    removed = original_files - current_files
     result = [
         f"{label}:\n" + "\n".join(sorted(files))
-        for label, files in [("Added", added), ("Modified", modified), ("Deleted", deleted)]
+        for label, files in [("Added", added), ("Modified", modified), ("Removed", removed)]
         if files
     ]
     return "\n\n".join(result) if result else "No changes"
