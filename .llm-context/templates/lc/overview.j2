@@ -27,6 +27,7 @@ This context presents a comprehensive view of the _/{{ project_name }}_ reposito
 1. **SEARCH THIS DOCUMENT** to check if the file is already included below
 2. **CHECK the repository structure** below to confirm file status (✓,{% if excerpts %} O, E,{% endif %} or ✗)
 3. {% if overview_mode == "focused" %}{% if tools_available %}Use lc-missing for ✗{% if excerpts %}, O, or E{% endif %} files that are needed for your analysis{% else %}Use lc-missing commands below for ✗{% if excerpts %}, O, or E{% endif %} files that are needed{% endif %}{% else %}Only request ✗{% if excerpts %}, O, or E{% endif %} files that are absolutely necessary for your analysis{% endif %}
+4. **Never assume file contents** - if a file is ✗, O, or E and you need it to answer accurately, use lc_missing to fetch it first.  Don't guess at the contents based on conventions / patterns / partial information, etc.
 
 {% if tools_available %}
 {% if overview_mode == "focused" -%}
