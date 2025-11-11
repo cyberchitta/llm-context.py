@@ -64,6 +64,10 @@ class ProjectLayout:
         return Path.home() / ".llm-context" / "lc-user-notes.md"
 
     @property
+    def user_skills_path(self) -> Path:
+        return Path.home() / ".claude" / "skills"
+
+    @property
     def config_path(self) -> Path:
         return self.project_config_path / "config.yaml"
 

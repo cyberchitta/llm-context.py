@@ -7,9 +7,9 @@ from typing import Any
 
 from llm_context import lc_resources
 from llm_context.lc_resources import rules, templates
-from llm_context.rule import ProjectLayout, ToolConstants
+from llm_context.rule import ToolConstants
 from llm_context.state import StateStore
-from llm_context.utils import Yaml, log
+from llm_context.utils import ProjectLayout, Yaml, log
 
 PROJECT_INFO: str = (
     "This project uses llm-context. For more information, visit: "
@@ -90,6 +90,7 @@ class ProjectSetup:
         self._create_project_notes_file()
         self._create_user_notes_file()
         self._setup_default_rules()
+        self._setup_global_skill()
 
     def _create_or_update_ancillary_files(self):
         if not self.project_layout.config_path.exists() or self.constants.needs_update:
@@ -198,3 +199,21 @@ class ProjectSetup:
             for rule_file in rules_path.rglob("lc-*.md"):
                 rule_file.unlink()
                 log(INFO, f"Removed old rule {rule_file}")
+
+    def _setup_global_skill(self):
+        skill_name = "llm-context-rule-creator"
+        skill_path = self.project_layout.user_skills_path / skill_name
+        if skill_path.exists() and not self.constants.needs_update:
+            return
+        if skill_path.exists():
+            shutil.rmtree(skill_path)
+            log(INFO, "Updating Claude Skill")
+        skill_path.mkdir(parents=True, exist_ok=True)
+        skills_source = resources.files(lc_resources).joinpath("skills") / skill_name
+        if not skills_source.is_dir():
+            return
+        for skill_file in skills_source.iterdir():
+            if skill_file.is_file():
+                (skill_path / skill_file.name).write_text(skill_file.read_text())
+        log(INFO, f"Claude Skill installed to: {skill_path}")
+        log(INFO, "Restart Claude Code/Desktop to activate")

@@ -121,6 +121,25 @@ also-include:
 Focus on authentication system and related tests.
 ```
 
+## AI-Assisted Rule Creation
+
+Let AI create focused rules for specific tasks:
+
+```bash
+# Automatic with Claude Skills (recommended)
+lc-init  # Installs skill globally
+# Then in Claude: "Create a rule for [your task]"
+```
+
+```bash
+# Or prompt-based (any LLM)
+lc-set-rule lc/prm-rule-create
+lc-context -nt
+# Describe your task to the AI
+```
+
+Both approaches analyze your codebase and generate optimized rules that can significantly reduce context size.
+
 ## Workflow Patterns
 
 ### Daily Development

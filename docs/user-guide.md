@@ -283,55 +283,159 @@ The `-nt` flag optimizes context for manual workflows.
 
 ## AI-Assisted Rule Creation
 
-For unusual tasks or new projects, let AI help create focused rules using the systematic framework.
+Let AI help create focused, task-specific rules by analyzing your codebase.
 
-### Process
+### Method 1: Claude Skill (Recommended)
+
+**Automatic Installation:**
+
+The rule creator Skill is automatically installed when you run `lc-init`. It installs globally to `~/.claude/skills/llm-context-rule-creator/`, making it available across all your projects.
+
+After first installation, restart Claude Code or Claude Desktop to activate.
+
+**Usage:**
+
+In any Claude conversation, simply describe your task:
+
+```
+"Create a rule for refactoring authentication to JWT"
+"I need a rule to debug the payment processing system"
+"Add rate limiting to API endpoints"
+```
+
+The Skill will:
+
+1. Examine your codebase using MCP tools (`lc_outlines`, `lc_missing`)
+2. Intelligently select relevant files (5-15 full, 10-30 excerpted)
+3. Generate optimized rule configuration
+4. Save to `.llm-context/rules/tmp-prm-<task-name>.md`
+5. Provide instructions for using the rule
+
+**Example Interaction:**
+
+````
+You: "Create a rule for adding rate limiting to our API"
+
+Claude: I'll analyze your codebase and create a focused rule.
+
+[Examines structure with lc_outlines]
+[Checks middleware patterns with lc_missing]
+
+Created rule 'tmp-prm-rate-limiting':
+
+Full content (3 files):
+- API middleware directory
+- Routes configuration
+- API config
+
+Excerpted (12 files):
+- Endpoint definitions
+- Existing middleware examples
+
+Implementations:
+- rate_limit decorator from utils
+
+Estimated: ~35k tokens
+
+To use in a fresh chat:
+```bash
+lc-set-rule tmp-prm-rate-limiting
+lc-select
+lc-context
+````
+
+````
+
+**Skill Updates:**
+
+The Skill is automatically updated when you upgrade llm-context:
+
+```bash
+uv tool upgrade llm-context
+# Skill updates on next lc-init or any lc command
+# Restart Claude to use new version
+````
+
+### Method 2: Prompt-Based (Fallback)
+
+For environments without Skills support (API, other LLMs):
 
 ```bash
 # 1. Get full project context with rule creation framework
 lc-set-rule lc/prm-rule-create
 lc-select
 lc-context -nt
+
 # 2. Describe task to AI
 # "I need to add OAuth integration to the auth system"
+
 # 3. AI generates focused rule using framework
+
 # 4. Use the focused context
 lc-set-rule tmp-prm-oauth-task
 lc-select
 lc-context
-````
+```
 
-### Framework-Based Rule Creation
+The AI follows the systematic framework from `lc/ins-rule-framework` to create rules with:
 
-The AI follows the systematic framework from `lc/ins-rule-framework`:
+- Minimal file selection
+- Appropriate composition
+- Token budget awareness
+- Proper path formatting
 
-```yaml
+### Method 3: Manual Creation
+
+For advanced users who prefer direct control:
+
+```bash
+cat > .llm-context/rules/tmp-prm-my-task.md << 'EOF'
 ---
-description: "Add OAuth support to authentication system"
+description: My specific task
 overview: full
 compose:
-  filters: [lc/flt-no-files]
+  filters: [lc/flt-base]
   excerpters: [lc/exc-base]
 also-include:
   full-files:
-    - "/src/auth/**"
-    - "/src/middleware/auth.js"
-    - "/config/auth.js"
-    - "/tests/auth/**"
-implementations:
-  - ["/src/utils/jwt.js", "validateToken"]
-excerpters: [code-outliner, sfc]
+    - "/path/to/modify/**"
+  excerpted-files:
+    - "/path/to/context/**"
 ---
-## OAuth Integration Context
-Focus on existing auth patterns to maintain consistency when adding OAuth providers.
-Check token validation, middleware integration, and configuration patterns.
+## Task Context
+Brief explanation of optimization focus.
+EOF
+
+lc-set-rule tmp-prm-my-task
+lc-select
+lc-context
 ```
+
+### Comparison
+
+| Method           | Setup     | Interaction             | Validation | Best For                    |
+| ---------------- | --------- | ----------------------- | ---------- | --------------------------- |
+| **Skill**        | Automatic | Interactive, multi-turn | Automatic  | Claude Desktop/Code users   |
+| **Prompt-based** | None      | Single turn             | Manual     | API, other LLMs, automation |
+| **Manual**       | None      | Direct editing          | Manual     | Power users, templates      |
 
 ### Naming Conventions
 
-- **Temporary user rules**: Use `tmp-prm-` prefix (e.g., `tmp-prm-api-debug`)
-- **Permanent user rules**: Use descriptive names with `prm-` prefix (e.g., `prm-code`, `prm-frontend`)
-- **System rules**: Uses `lc/` prefix with category prefixes (e.g., `lc/flt-base`, `lc/sty-python`)
+- **Temporary task rules**: Use `tmp-prm-` prefix (e.g., `tmp-prm-api-debug`)
+- **Permanent project rules**: Use descriptive names with `prm-` prefix (e.g., `prm-code`, `prm-api`)
+- **System rules**: Use `lc/` prefix with category (e.g., `lc/flt-base`, `lc/sty-python`)
+
+### Skill Details
+
+The Skill includes progressive documentation:
+
+- **SKILL.md** - Core workflow (always loaded when relevant)
+- **SYNTAX.md** - Detailed syntax reference (on demand)
+- **PATTERNS.md** - Common rule patterns (on demand)
+- **EXAMPLES.md** - Complete walkthroughs (on demand)
+- **TROUBLESHOOTING.md** - Problem solving (on demand)
+
+This progressive disclosure keeps context minimal while providing deep documentation when needed.
 
 ## Command Reference
 
