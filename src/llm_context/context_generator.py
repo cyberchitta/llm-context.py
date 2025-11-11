@@ -254,17 +254,20 @@ class ContextGenerator:
         orig_excerpted = set(matching_selection.excerpted_files)
         abs_paths = self.converter.to_absolute(paths)
         deleted_files = {
-            r for r, a in zip(paths, abs_paths)
+            r
+            for r, a in zip(paths, abs_paths)
             if (r in orig_full or r in orig_excerpted) and not Path(a).exists()
         }
         missing_files = {
-            r for r, a in zip(paths, abs_paths)
+            r
+            for r, a in zip(paths, abs_paths)
             if r not in orig_full and r not in orig_excerpted and Path(a).exists()
         }
         modified_files = {
-            r for r, a in zip(paths, abs_paths)
-            if (r in orig_full or r in orig_excerpted) 
-            and Path(a).exists() 
+            r
+            for r, a in zip(paths, abs_paths)
+            if (r in orig_full or r in orig_excerpted)
+            and Path(a).exists()
             and is_newer(a, timestamp)
         }
         files_to_fetch = missing_files | modified_files
