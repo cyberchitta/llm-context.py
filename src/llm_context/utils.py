@@ -144,6 +144,12 @@ class PathConverter:
     def create(root: Path) -> "PathConverter":
         return PathConverter(root)
 
+    def validate_with_error(self, paths: list[str]) -> None:
+        invalid = [p for p in paths if not self.validate(p)]
+        if invalid:
+            prefix = f"/{self.root.name}/"
+            raise ValueError(f"Paths must use format '{prefix}path/to/file'. Got: {invalid}")
+
     def validate(self, paths: Union[str, list[str]]) -> bool:
         if isinstance(paths, str):
             return paths.startswith(f"/{self.root.name}/")

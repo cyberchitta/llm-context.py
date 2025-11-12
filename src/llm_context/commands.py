@@ -1,6 +1,3 @@
-from pathlib import Path
-from typing import Optional
-
 from llm_context.context_generator import ContextGenerator, ContextSettings
 from llm_context.context_spec import ContextSpec
 from llm_context.exec_env import ExecutionEnvironment
@@ -22,6 +19,7 @@ def select_all_files(env: ExecutionEnvironment) -> FileSelection:
 
 
 def get_missing_files(env: ExecutionEnvironment, paths: list[str], timestamp: float) -> str:
+    PathConverter.create(env.config.project_root_path).validate_with_error(paths)
     matching_selection = env.state.selections.get_selection_by_timestamp(timestamp)
     if matching_selection is None:
         raise ValueError(
@@ -63,6 +61,7 @@ def list_modified_files(env: ExecutionEnvironment, timestamp: float) -> str:
 
 
 def get_excluded(env: ExecutionEnvironment, paths: list[str], timestamp: float) -> str:
+    PathConverter.create(env.config.project_root_path).validate_with_error(paths)
     matching_selection = env.state.selections.get_selection_by_timestamp(timestamp)
     if matching_selection is None:
         raise ValueError(f"No context found with timestamp {timestamp}...")
@@ -72,6 +71,7 @@ def get_excluded(env: ExecutionEnvironment, paths: list[str], timestamp: float) 
 
 
 def get_implementations(env: ExecutionEnvironment, queries: list[tuple[str, str]]) -> str:
+    PathConverter.create(env.config.project_root_path).validate_with_error([p for p, _ in queries])
     settings = ContextSettings.create(False, False, True)
     return ContextGenerator.create(
         env.config, env.state.file_selection, settings, env.tagger
