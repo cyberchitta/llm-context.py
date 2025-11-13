@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![PyPI version](https://img.shields.io/pypi/v/llm-context.svg)](https://pypi.org/project/llm-context/)
-[![Downloads](https://static.pepy.tech/badge/llm-context/week)](https://pepy.tech/project/llm-context)
+[![Downloads](https://img.shields.io/static.pepy.tech/badge/llm-context/week)](https://pepy.tech/project/llm-context)
 
 **Reduce friction when providing context to LLMs.** Share relevant project files instantly through smart selection and rule-based filtering.
 
@@ -88,14 +88,14 @@ EOF
 
 ## Core Commands
 
-| Command              | Purpose                                    |
-| -------------------- | ------------------------------------------ |
-| `lc-init`            | Initialize project configuration           |
-| `lc-select`          | Select files based on current rule         |
-| `lc-context`         | Generate and copy context                  |
-| `lc-context -nt`     | Generate context for non-MCP environments  |
-| `lc-set-rule <name>` | Switch between rules                       |
-| `lc-missing`         | Handle file and context requests (non-MCP) |
+| Command           | Purpose                                    |
+| ----------------- | ------------------------------------------ |
+| `lc-init`         | Initialize project configuration           |
+| `lc-select`       | Select files based on current rule         |
+| `lc-context`      | Generate and copy context                  |
+| `lc-context -nt`  | Generate context for non-MCP environments  |
+| `lc-set-rule <n>` | Switch between rules                       |
+| `lc-missing`      | Handle file and context requests (non-MCP) |
 
 ## Rule System
 
@@ -123,22 +123,92 @@ Focus on authentication system and related tests.
 
 ## AI-Assisted Rule Creation
 
-Let AI create focused rules for specific tasks:
+Let AI create focused rules for specific tasks. There are two approaches depending on your setup:
+
+### Approach 1: Claude Skill (Recommended for Claude Desktop/Code)
+
+**How it works**: A global Claude Skill helps you create rules interactively. It requires project context (with overview) already shared via llm-context, and uses `lc-missing` to examine specific files as needed.
+
+**Setup**:
 
 ```bash
-# Automatic with Claude Skills (recommended)
-lc-init  # Installs skill globally
-# Then in Claude: "Create a rule for [your task]"
+lc-init  # Installs skill to ~/.claude/skills/
+# Restart Claude Desktop or Claude Code
 ```
 
+**Workflow**:
+
 ```bash
-# Or prompt-based (any LLM)
+# 1. Share any project context (overview is required)
+lc-context  # Can use any rule - overview will be included
+# 2. Paste into Claude
+
+# 3. Ask the Skill to help create a rule
+# "Create a rule for refactoring authentication to JWT"
+# "I need a rule to debug the payment processing system"
+```
+
+Claude will:
+
+1. Use the project overview already in context
+2. Use `lc-missing` to examine specific files as needed for deeper analysis
+3. Ask clarifying questions about scope and focus
+4. Intelligently select relevant files (5-15 full, 10-30 excerpted)
+5. Generate optimized rule configuration
+6. Save to `.llm-context/rules/tmp-prm-<task-name>.md`
+7. Provide instructions for testing the rule
+
+**Skill Files**:
+
+- `Skill.md` - Quick workflow and patterns (always loaded)
+- `PATTERNS.md` - Common rule patterns (on demand)
+- `SYNTAX.md` - Detailed syntax reference (on demand)
+- `EXAMPLES.md` - Complete walkthroughs (on demand)
+- `TROUBLESHOOTING.md` - Problem solving (on demand)
+
+**Skill Updates**: Automatically updated when you upgrade llm-context. Restart Claude to use the new version.
+
+### Approach 2: Prompt-Based with Instruction Rules (Works Anywhere)
+
+**How it works**: You use a project rule that loads comprehensive rule-creation documentation as context.
+
+**Setup**: No special setup needed - the documentation is built-in.
+
+**Usage**:
+
+```bash
+# 1. Load the rule creation framework into context
 lc-set-rule lc/prm-rule-create
+lc-select
 lc-context -nt
-# Describe your task to the AI
+
+# 2. Paste into any LLM and describe your task
+# "I need to add OAuth integration to the auth system"
+
+# 3. The LLM generates a focused rule using the framework
+
+# 4. Use the focused context
+lc-set-rule tmp-prm-oauth-task
+lc-select
+lc-context
 ```
 
-Both approaches analyze your codebase and generate optimized rules that can significantly reduce context size.
+**Documentation Included**:
+
+- `lc/ins-rule-intro` - Chat-based rule creation introduction
+- `lc/ins-rule-framework` - Comprehensive decision framework, semantics, and best practices
+
+### Comparison
+
+| Aspect                       | Skill                             | Instruction Rules               |
+| ---------------------------- | --------------------------------- | ------------------------------- |
+| **Setup**                    | Automatic with `lc-init`          | Already available               |
+| **Requires project context** | Yes (overview needed)             | Yes (overview needed)           |
+| **Interaction**              | Interactive, multi-turn in Claude | Static documentation in context |
+| **Exploration**              | Uses `lc-missing` as needed       | Manual or via AI requests       |
+| **Best for**                 | Claude Desktop/Code users         | Any LLM, API, automation        |
+
+Both approaches require sharing project context first via `lc-context`. They produce equivalent results - choose based on your environment and preference.
 
 ## Workflow Patterns
 
@@ -154,10 +224,14 @@ lc-context
 ### Focused Tasks
 
 ```bash
-# Let AI help create minimal context
-lc-set-rule lc/prm-rule-create
-lc-context -nt
-# Work with AI to create task-specific rule using tmp-prm- prefix
+# Share project context
+lc-context
+
+# Then ask Skill (Claude Desktop/Code):
+# "Create a rule for [your task]"
+
+# Or work with any LLM using instruction rules:
+# lc-set-rule lc/prm-rule-create && lc-context -nt
 ```
 
 ### MCP Benefits
@@ -173,7 +247,7 @@ lc-context -nt
 - **Instant Context Generation**: Formatted context copied to clipboard in seconds
 - **MCP Integration**: AI can access additional files without manual intervention
 - **Systematic Rule Organization**: Five-category system for clear rule composition
-- **AI-Assisted Rule Creation**: Let AI help create minimal context for specific tasks
+- **AI-Assisted Rule Creation**: Two approaches - interactive Skill or documentation-based
 - **Code Excerpting**: Extractions of significant content to reduce context while preserving structure
 
 ## Learn More
