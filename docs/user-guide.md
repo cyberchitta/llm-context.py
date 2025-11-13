@@ -91,7 +91,7 @@ LLM Context uses a five-category rule system with kebab-case prefixes:
 - **Filter Rules (`flt-`)**: Control file inclusion/exclusion
 - **Instruction Rules (`ins-`)**: Provide guidance and frameworks
 - **Style Rules (`sty-`)**: Enforce coding standards
-- **Excerpt Rules (`exc-`)**: Configure extractions of significant content for context reduction (generalizes outlining)
+- **Excerpt Rules (`exc-`)**: Configure extractions of significant content for context reduction
 
 ### Decision Framework
 
@@ -101,7 +101,7 @@ LLM Context uses a five-category rule system with kebab-case prefixes:
 - **Need only code structure?** → Use `lc/flt-no-full` with excerpt files
 - **Need coding guidelines?** → Include `lc/sty-code`, `lc/sty-python` for relevant languages
 - **Need minimal context?** → Use `lc/flt-no-files` with specific inclusions
-- **Need rule creation help?** → Use `lc/prm-rule-create` with `lc/ins-rule-framework`
+- **Need rule creation help?** → Use AI-assisted approaches (see below)
 - **Need context reduction via extractions?** → Compose with `lc/exc-base` or custom exc- rules
 
 ### Rule Structure
@@ -120,7 +120,6 @@ gitignores: # Additional exclusions
 also-include: # Force include specific files
   full-files: ["/important.config"]
   excerpt-files: ["/large-file.py"]
-excerpters: [code-outliner, sfc] # Specify excerpters
 overview: "full" # "full" (default) or "focused"
 ---
 ## Rule Content
@@ -133,22 +132,30 @@ Markdown content providing additional context for the AI.
 
 - `lc/prm-developer` - Standard development context
 - `lc/prm-rule-create` - Full project context for rule creation
-  **Filter Rules (`lc/flt-*`)**:
+
+**Filter Rules (`lc/flt-*`)**:
+
 - `lc/flt-base` - Standard exclusions (binaries, build artifacts)
 - `lc/flt-no-files` - Exclude everything (use with `also-include`)
 - `lc/flt-no-full` - Exclude all full content files
 - `lc/flt-no-outline` - Exclude all excerpt files
-  **Instruction Rules (`lc/ins-*`)**:
+
+**Instruction Rules (`lc/ins-*`)**:
+
 - `lc/ins-developer` - Developer persona and guidelines
 - `lc/ins-rule-framework` - Rule creation framework and best practices
 - `lc/ins-rule-intro` - Chat-based rule creation introduction
-  **Style Rules (`lc/sty-*`)**:
+
+**Style Rules (`lc/sty-*`)**:
+
 - `lc/sty-code` - Universal programming principles
 - `lc/sty-python` - Python-specific guidelines
 - `lc/sty-javascript` - JavaScript-specific guidelines
 - `lc/sty-jupyter` - Jupyter notebook guidelines
-  **Excerpt Rules (`lc/exc-*`)**:
-- `lc/exc-base` - Base configuration for excerpting, using code-outliner and SFC excerpters for structure extraction without full implementations
+
+**Excerpt Rules (`lc/exc-*`)**:
+
+- `lc/exc-base` - Base configuration for excerpting, using code-outliner and SFC excerpters for structure extraction
 
 ### Rule Composition Patterns
 
@@ -259,8 +266,6 @@ Provides seamless file access during AI conversations.
 - `lc-missing` - Unified access to files, excerpts, implementations
 - `lc-changed` - Track changes during conversation
 
-## Integration Options
-
 ### Manual Workflow (Fallback)
 
 For environments without MCP support:
@@ -268,123 +273,195 @@ For environments without MCP support:
 ```bash
 # Generate context with file request instructions
 lc-context -nt
-# When AI requests additional files:
-# 1. The AI will provide a full command in a fenced code block, like:
-lc-missing -f "[file1, file2]" -t 1234567890.123456
+# When AI requests additional files, run the command it provides
+lc-missing -f "[file1, file2]" -t <timestamp>
 ```
-
-# 2. Copy and run this command in your terminal
-
-# 3. The output will be copied to your clipboard automatically
-
-# 4. Paste the output back into the AI chat
-
-The `-nt` flag optimizes context for manual workflows.
 
 ## AI-Assisted Rule Creation
 
-Let AI help create focused, task-specific rules by analyzing your codebase.
+Let AI help create focused, task-specific rules by analyzing your codebase. There are two distinct approaches:
 
-### Method 1: Claude Skill (Recommended)
+### Understanding the Two Pathways
 
-**Automatic Installation:**
+LLM Context provides two different ways for AI to help you create rules:
 
-The rule creator Skill is automatically installed when you run `lc-init`. It installs globally to `~/.claude/skills/llm-context-rule-creator/`, making it available across all your projects.
+**1. Global Claude Skill** (`llm-context-rule-creator`)
 
-After first installation, restart Claude Code or Claude Desktop to activate.
+- **Scope**: Available in all Claude conversations, all projects
+- **Location**: `~/.claude/skills/llm-context-rule-creator/`
+- **Install**: Automatic with `lc-init` + Claude restart
+- **Best for**: Claude Desktop/Code users who want interactive guidance
+- **Requires**: Project context already shared via llm-context
 
-**Usage:**
+**2. Project Instruction Rules** (`lc/ins-rule-framework`, `lc/ins-rule-intro`)
 
-In any Claude conversation, simply describe your task:
+- **Scope**: Available within specific projects, in project-specific conversations
+- **Location**: `.llm-context/rules/lc/` (part of project)
+- **Install**: Already included, no setup needed
+- **Best for**: Any LLM, any environment, systematic documentation
+- **Requires**: Project context already shared via llm-context
 
+Both approaches require sharing project context first and produce equivalent results - they're just suited to different workflows and environments.
+
+### Method 1: Claude Skill (Interactive, Claude Desktop/Code)
+
+**How it works**: A global Claude Skill helps you create rules interactively. It requires project context (overview + framework) already shared via llm-context, and uses `lc-missing` to examine specific files as needed for deeper analysis.
+
+**Setup**:
+
+```bash
+lc-init  # Installs skill to ~/.claude/skills/
+# Restart Claude Desktop or Claude Code to activate
 ```
-"Create a rule for refactoring authentication to JWT"
-"I need a rule to debug the payment processing system"
-"Add rate limiting to API endpoints"
+
+**Workflow**:
+
+```bash
+# 1. Share any project context (overview is required)
+lc-context  # Can use any rule - overview will be included
+# 2. Paste into Claude
+# 1. Share any project context (overview is required)
+lc-context  # Can use any rule - overview will be included
+# 2. Paste into Claude
+# 1. Share any project context (overview is required)
+lc-context  # Can use any rule - overview will be included
+# 2. Paste into Claude
+# 1. Share any project context (overview is required)
+lc-context  # Can use any rule - overview will be included
+# 2. Paste into Claude
+# 1. Share any project context (overview is required)
+lc-context  # Can use any rule - overview will be included
+# 2. Paste into Claude
+# 1. Share any project context (overview is required)
+lc-context  # Can use any rule - overview will be included
+# 2. Paste into Claude
+# 1. Share any project context (overview is required)
+lc-context  # Can use any rule - overview will be included
+# 2. Paste into Claude
+# "Create a rule for refactoring authentication to JWT"
+# "I need a rule to debug the payment processing system"
 ```
 
-The Skill will:
+**Why context is required**: The Skill needs the project overview to understand your codebase structure. It will then use `lc-missing` to examine specific files as needed while developing the rule strategy.
 
-1. Examine your codebase using MCP tools (`lc_outlines`, `lc_missing`)
-2. Intelligently select relevant files (5-15 full, 10-30 excerpted)
-3. Generate optimized rule configuration
-4. Save to `.llm-context/rules/tmp-prm-<task-name>.md`
-5. Provide instructions for using the rule
+Claude will:
 
-**Example Interaction:**
+1. Use the project overview and framework already in context
+2. Use `lc-missing` to examine specific files as needed for deeper analysis
+3. Ask clarifying questions about scope and focus
+4. Intelligently select relevant files (typically 5-15 full, 10-30 excerpted)
+5. Generate optimized rule configuration
+6. Save to `.llm-context/rules/tmp-prm-<task-name>.md`
+7. Provide instructions for testing and refining the rule
+
+**Example Interaction**:
 
 ````
-You: "Create a rule for adding rate limiting to our API"
+You: [Paste project context from lc-context]
+"Create a rule for adding OAuth integration"
 
-Claude: I'll analyze your codebase and create a focused rule.
+Claude: I see your auth system structure. Let me examine the existing auth patterns.
 
-[Examines structure with lc_outlines]
-[Checks middleware patterns with lc_missing]
+[Uses lc_missing to check auth.py implementation]
+[Uses lc_missing to check OAuth library usage]
 
-Created rule 'tmp-prm-rate-limiting':
+Created rule 'tmp-prm-oauth-integration':
 
-Full content (3 files):
-- API middleware directory
-- Routes configuration
-- API config
+Full content (4 files):
+- /src/auth/** (existing auth system)
+- /config/auth.yaml (auth configuration)
+- /tests/auth/test_oauth.py (OAuth tests)
 
-Excerpted (12 files):
-- Endpoint definitions
-- Existing middleware examples
+Excerpted (8 files):
+- /src/api/routes/auth.py (auth endpoints)
+- /src/models/user.py (user model)
+- Dependencies and utilities
 
-Implementations:
-- rate_limit decorator from utils
+Estimated: ~40k tokens
 
-Estimated: ~35k tokens
-
-To use in a fresh chat:
+To use this rule:
 ```bash
-lc-set-rule tmp-prm-rate-limiting
+lc-set-rule tmp-prm-oauth-integration
 lc-select
 lc-context
+```
 ````
 
-````
+**Skill Files** (progressively disclosed):
 
-**Skill Updates:**
+- `Skill.md` - Quick workflow and decision patterns (always loaded)
+- `PATTERNS.md` - Common rule patterns (loaded when relevant)
+- `SYNTAX.md` - Detailed syntax reference (on demand)
+- `EXAMPLES.md` - Complete walkthroughs (on demand)
+- `TROUBLESHOOTING.md` - Problem solving (on demand)
 
-The Skill is automatically updated when you upgrade llm-context:
+**Skill Updates**: Automatically updated when you upgrade llm-context.
 
 ```bash
 uv tool upgrade llm-context
-# Skill updates on next lc-init or any lc command
+# Skill updates on next lc command
 # Restart Claude to use new version
-````
+```
 
-### Method 2: Prompt-Based (Fallback)
+**Note on lc-outlines**: This is a separate command for extracting code structure/definitions. The Skill uses `lc-missing` for file examination, not `lc-outlines`.
 
-For environments without Skills support (API, other LLMs):
+### Method 2: Prompt-Based with Instruction Rules (Works Anywhere)
+
+**How it works**: You load comprehensive rule-creation documentation into context, then work with any LLM to create rules. The documentation provides systematic frameworks without requiring interactive exploration.
+
+**Setup**: No special setup - documentation is built-in to the project.
+
+**Workflow**:
 
 ```bash
-# 1. Get full project context with rule creation framework
+# 1. Load the rule creation framework into context
 lc-set-rule lc/prm-rule-create
 lc-select
 lc-context -nt
 
-# 2. Describe task to AI
-# "I need to add OAuth integration to the auth system"
+# 2. Paste into your LLM and describe your task
+# The context includes:
+# - ins-rule-intro: introduction and decision framework
+# - ins-rule-framework: comprehensive semantics and best practices
+# - All system rules for reference
+# - Code examples
 
-# 3. AI generates focused rule using framework
+# 3. Work with the LLM to refine the rule
 
-# 4. Use the focused context
-lc-set-rule tmp-prm-oauth-task
+# 4. Use the generated rule
+lc-set-rule tmp-prm-your-task
 lc-select
 lc-context
 ```
 
-The AI follows the systematic framework from `lc/ins-rule-framework` to create rules with:
+**Example Workflow**:
 
-- Minimal file selection
-- Appropriate composition
-- Token budget awareness
-- Proper path formatting
+```bash
+$ lc-set-rule lc/prm-rule-create
+$ lc-select
+$ lc-context -nt
+# [Copies comprehensive rule creation framework to clipboard]
 
-### Method 3: Manual Creation
+# Paste into your LLM:
+# "I need a rule for debugging payment processing.
+#  My project has /src/payments/**, /tests/**, and uses
+#  Stripe integration in /src/integrations/stripe.py"
+
+# LLM uses the framework to generate:
+# - Decision about filters
+# - File selection strategy
+# - Rule configuration
+# - Explanation of choices
+```
+
+**Documentation Included**:
+
+- `lc/ins-rule-intro` - Introduction and overview
+- `lc/ins-rule-framework` - Complete decision framework, semantics, best practices
+- Reference to all system rules
+- Code examples
+
+### Method 3: Manual Creation (Power Users)
 
 For advanced users who prefer direct control:
 
@@ -413,29 +490,19 @@ lc-context
 
 ### Comparison
 
-| Method           | Setup     | Interaction             | Validation | Best For                    |
-| ---------------- | --------- | ----------------------- | ---------- | --------------------------- |
-| **Skill**        | Automatic | Interactive, multi-turn | Automatic  | Claude Desktop/Code users   |
-| **Prompt-based** | None      | Single turn             | Manual     | API, other LLMs, automation |
-| **Manual**       | None      | Direct editing          | Manual     | Power users, templates      |
+| Aspect                          | Skill                              | Instruction Rules        | Manual                 |
+| ------------------------------- | ---------------------------------- | ------------------------ | ---------------------- |
+| **Setup**                       | Automatic with `lc-init` + restart | Already available        | No setup               |
+| **Requires pre-shared context** | Yes                                | Yes                      | No                     |
+| **Interaction**                 | Interactive, uses `lc-missing`     | Static documentation     | Direct editing         |
+| **Best for**                    | Claude Desktop/Code                | Any LLM, any environment | Power users, templates |
+| **Learning curve**              | Gentle, conversational             | Comprehensive reference  | Steep                  |
 
 ### Naming Conventions
 
-- **Temporary task rules**: Use `tmp-prm-` prefix (e.g., `tmp-prm-api-debug`)
-- **Permanent project rules**: Use descriptive names with `prm-` prefix (e.g., `prm-code`, `prm-api`)
+- **Temporary task rules**: Use `tmp-prm-` prefix (e.g., `tmp-prm-api-debug`, `tmp-prm-oauth-integration`)
+- **Permanent project rules**: Use descriptive names with `prm-` prefix (e.g., `prm-code`, `prm-api`, `prm-frontend`)
 - **System rules**: Use `lc/` prefix with category (e.g., `lc/flt-base`, `lc/sty-python`)
-
-### Skill Details
-
-The Skill includes progressive documentation:
-
-- **SKILL.md** - Core workflow (always loaded when relevant)
-- **SYNTAX.md** - Detailed syntax reference (on demand)
-- **PATTERNS.md** - Common rule patterns (on demand)
-- **EXAMPLES.md** - Complete walkthroughs (on demand)
-- **TROUBLESHOOTING.md** - Problem solving (on demand)
-
-This progressive disclosure keeps context minimal while providing deep documentation when needed.
 
 ## Command Reference
 
@@ -591,15 +658,10 @@ lc-context -nt # Includes file request instructions
 # Use lc-missing for additional requests
 ```
 
-**Project Knowledge Bases**:
-
-```bash
-lc-context # Clean context without instructions
-```
-
 ## Code Excerpting
 
-Extractions of significant content to reduce context while preserving structure (generalizes previous outlining functionality).
+Extractions of significant content to reduce context while preserving structure.
+
 **Supported Languages**: C, C++, C#, Elixir, Elm, Go, Java, JavaScript, PHP, Python, Ruby, Rust, TypeScript, Svelte, Vue
 
 **Usage**:
@@ -627,7 +689,7 @@ Extract specific functions/classes on demand.
 
 ```bash
 # The AI will provide a full command in a fenced code block, like:
-lc-missing -i "[[path, name], ...]" -t 1234567890.123456 # Process AI requests for specific code (output copied to clipboard)
+lc-missing -i "[[path, name], ...]" -t 1234567890.123456 # Process AI requests for specific code
 ```
 
 **Rule Configuration**:
@@ -694,10 +756,17 @@ lc-select
 
 ### Getting Help
 
-1. `lc-rule-instructions` - Rule creation guidance from system
-2. `lc-set-rule lc/prm-rule-create` - Full framework with examples
-3. Check system rules in implementation for patterns
-4. Use AI-assisted rule creation for complex cases
+1. **For Skill-based rule creation**:
+
+   - Share project context: `lc-context` (any rule)
+   - Then ask Skill in Claude: "Create a rule for [your task]"
+
+2. **For instruction-based rule creation**:
+
+   - Load framework: `lc-set-rule lc/prm-rule-create && lc-context -nt`
+   - Work with LLM using the documentation provided
+
+3. **For manual troubleshooting**: Check system rules for implementation patterns
 
 ### Recovery
 

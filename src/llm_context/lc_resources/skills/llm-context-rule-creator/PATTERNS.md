@@ -2,6 +2,12 @@
 
 Load this for pattern library and examples.
 
+## Start with Filters
+
+**Before selecting files to include, always determine what to exclude.** Every pattern here starts with appropriate filters. Check your project's custom filters first (e.g., `flt-repo-base` in llm-context), then compose with `lc/flt-base`.
+
+---
+
 ## Refactoring Pattern
 
 **When:** Changing implementation of existing system
@@ -9,7 +15,7 @@ Load this for pattern library and examples.
 ```yaml
 description: Refactor X to use Y
 compose:
-  filters: [lc/flt-base]
+  filters: [lc/flt-base] # Filter first
   excerpters: [lc/exc-base]
 also-include:
   full-files:
@@ -19,7 +25,7 @@ also-include:
     - "/<code-it-depends-on>/**"
 gitignores:
   full-files:
-    - "**/test/**" # Optional: exclude tests initially
+    - "**/test/**" # Optional: additional exclusions
 ```
 
 **Typical sizes:** 8-12 full, 15-25 excerpted, ~50k tokens
@@ -33,7 +39,7 @@ gitignores:
 ```yaml
 description: Add feature Z
 compose:
-  filters: [lc/flt-base]
+  filters: [lc/flt-base] # Filter first
   excerpters: [lc/exc-base]
 also-include:
   full-files:
@@ -56,7 +62,7 @@ implementations:
 ```yaml
 description: Debug issue in X
 compose:
-  filters: [lc/flt-base]
+  filters: [lc/flt-base] # Filter first
   excerpters: [lc/exc-base]
 also-include:
   full-files:
@@ -78,7 +84,7 @@ also-include:
 ```yaml
 description: Migrate X to Y
 compose:
-  filters: [lc/flt-base]
+  filters: [lc/flt-base] # Filter first
   excerpters: [lc/exc-base]
 also-include:
   full-files:
@@ -100,7 +106,7 @@ also-include:
 ```yaml
 description: Quick fix for specific issue
 compose:
-  filters: [lc/flt-no-files]
+  filters: [lc/flt-no-files] # Exclude everything, then be explicit
   excerpters: [lc/exc-base]
 also-include:
   full-files:
@@ -122,7 +128,7 @@ implementations:
 ```yaml
 description: Review changes to X
 compose:
-  filters: [lc/flt-base]
+  filters: [lc/flt-base] # Filter first
   excerpters: [lc/exc-base]
 also-include:
   full-files:
@@ -143,7 +149,7 @@ also-include:
 ```yaml
 description: Develop/modify API endpoints
 compose:
-  filters: [lc/flt-base]
+  filters: [lc/flt-base] # Filter first
   excerpters: [lc/exc-base]
 also-include:
   full-files:
@@ -167,7 +173,7 @@ implementations:
 ```yaml
 description: Add tests for X
 compose:
-  filters: [lc/flt-base]
+  filters: [lc/flt-base] # Filter first
   excerpters: [lc/exc-base]
 also-include:
   full-files:
@@ -189,7 +195,7 @@ also-include:
 ```yaml
 description: Optimize performance of X
 compose:
-  filters: [lc/flt-base]
+  filters: [lc/flt-base] # Filter first
   excerpters: [lc/exc-base]
 also-include:
   full-files:

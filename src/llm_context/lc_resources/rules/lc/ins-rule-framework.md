@@ -2,6 +2,20 @@
 description: Provides a decision framework, semantics, and best practices for creating task-focused rules, including file selection patterns and composition guidelines. Use as core guidance for building custom rules for context generation.
 ---
 
+## Filtering is Critical
+
+**Without filters, you get thousands of files** - build artifacts, dependencies, config noise, test data, etc. Always filter first.
+
+**Your workflow**:
+
+1. **Determine filters** - Check what's available in `.llm-context/rules/` (e.g., `flt-repo-base`) and start with appropriate filters
+2. **Select files** - After filtering removes unwanted files, use `also-include` to add back what you need
+3. **Compose and generate** - Build the rule with proper composition
+
+This approach keeps context manageable instead of drowning in thousands of irrelevant files.
+
+---
+
 ## Decision Framework
 
 Create task-focused rules by selecting the minimal set of files needed for your objective, using the following rule categories:
@@ -9,7 +23,7 @@ Create task-focused rules by selecting the minimal set of files needed for your 
 - **Prompt Rules (`prm-`)**: Generate project contexts (e.g., `lc/prm-developer` for code files, `lc/prm-rule-create` for rule creation tasks).
 - **Filter Rules (`flt-`)**: Control file inclusion/exclusion (e.g., `lc/flt-base` for standard exclusions, `lc/flt-no-files` for minimal contexts).
 - **Excerpting Rules (`exc-`)**: Configure code outlining and structure extraction (e.g., `lc/exc-base` for standard code outlining).
-- **Instruction Rules (`ins-`)**: Provide guidance (e.g., `lc/ins-developer` for developer guidelines, `lc/ins-rule-intro` for chat-based rule creation).
+- **Instruction Rules (`ins-`)**: Provide guidance (e.g., `lc/ins-developer` for developer guidelines, `lc/ins-rule-framework` for rule creation).
 - **Style Rules (`sty-`)**: Enforce coding standards (e.g., `lc/sty-python` for Python-specific style, `lc/sty-code` for universal principles).
 
 ### Quick Decision Guide
@@ -77,23 +91,30 @@ excerpt-config:
 
 ### Filtering (gitignore-style patterns)
 
+**Start here** - Determine what to exclude before selecting what to include.
+
 - **`gitignores: {full-files: [...], excerpted-files: [...], overview-files: [...]}`**: Exclude files using patterns.
   - Use `lc/flt-base` for standard exclusions (e.g., binaries, logs).
   - Use `lc/flt-no-full` or `lc/flt-no-outline` to exclude all full or excerpted files.
+  - Compose multiple filter rules: `filters: [lc/flt-base, project-filters]`
 - **`limit-to: {full-files: [...], excerpted-files: [...], overview-files: [...]}`**: Restrict selections to specific patterns.
   - **Important**: When composing rules, only the first `limit-to` clause for each key is used. Subsequent clauses are ignored with a warning.
   - Example: `["src/api/**"]` to limit to API-related files.
 
-**Path Format**: All patterns must be relative to project root, starting with `/` but excluding the project name:
+**Important**: `also-include` bypasses gitignores entirely - it includes everything matching the pattern, including build artifacts and cache. Be specific with patterns or add manual gitignores for unwanted files.
 
-- ✅ `"/src/components/**"` (correct relative path)
-- ❌ `"/myproject/src/components/**"` (includes project name)
-- ✅ `"/.llm-context/rules/**"` (correct for rule files)
+### Path Format
+
+All patterns must be relative to project root, starting with `/` but excluding the project name:
+
+- ✅ `/src/components/**` (correct relative path)
+- ❌ `/myproject/src/components/**` (includes project name)
+- ✅ `/.llm-context/rules/**` (correct for rule files)
 
 **Important**: `limit-to` and `also-include` must match file paths, not directories:
 
-- ✅ `"src/**"` (matches all files in src)
-- ❌ `"src/"` (directory pattern, won't match files)
+- ✅ `src/**` (matches all files in src)
+- ❌ `src/` (directory pattern, won't match files)
 
 ### Composition
 
@@ -151,7 +172,7 @@ cat > .llm-context/rules/tmp-prm-task-name.md << 'EOF'
 description: Brief description of the task focus
 overview: full
 compose:
-  filters: [lc/flt-no-files]
+  filters: [lc/flt-base]
   excerpters: [lc/exc-base]
 also-include:
   full-files:
@@ -170,7 +191,7 @@ lc-context
 
 ## Best Practices
 
-- **Start Minimal**: Use `lc/flt-no-files` with explicit `also-include` for precise control, or compose with `lc/flt-base` for broader patterns.
+- **Start with Filters**: Always choose filters first. Check your project's custom filters in `.llm-context/rules/` before defaulting to `lc/flt-base`.
 - **Use Descriptive Names**: Prefix temporary rules with `tmp-prm-` (e.g., `tmp-prm-api-debug`).
 - **Leverage Categories**:
   - Use `prm-` rules for task-specific contexts

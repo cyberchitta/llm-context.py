@@ -83,6 +83,50 @@ implementations:
   - ["/src/auth.js", "AuthManager"]
 ```
 
+## Common Mistakes
+
+### Instructions Field vs Markdown Content
+
+⚠️ **Don't mix these:**
+
+```yaml
+---
+instructions: [lc/ins-developer]
+---
+## This markdown will be ignored!
+```
+
+**Why:** When you specify `instructions` field, the rule composes content from those referenced rules. Any markdown in the current rule is discarded (with a warning logged).
+
+**Fix:** Choose one approach:
+
+- Use `instructions: [...]` to compose from other rules (no markdown needed)
+- Or put content directly in markdown (no `instructions` field)
+
+### also-include Bypasses Filters
+
+⚠️ `also-include` **ignores gitignores** - it will include everything matching the pattern, including build artifacts, cache directories, etc.
+
+**Problem:**
+
+```yaml
+also-include:
+  full-files:
+    - "/src/**" # Gets __pycache__, .pyc, node_modules, etc.
+```
+
+**Solution:** Be specific with patterns, or manually add `gitignores` for what you don't want:
+
+```yaml
+also-include:
+  full-files:
+    - "/src/my-specific-module/**"
+gitignores:
+  full-files:
+    - "__pycache__"
+    - "*.pyc"
+```
+
 ## Path Format Rules
 
 ✅ **Correct:**
