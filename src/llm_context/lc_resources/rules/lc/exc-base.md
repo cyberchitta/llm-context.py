@@ -2,7 +2,7 @@
 description: Base excerpt mode mappings and default configurations
 excerpt-modes:
   "*.py": code-outliner
-  "*.js": code-outliner  
+  "*.js": code-outliner
   "*.ts": code-outliner
   "*.jsx": code-outliner
   "*.tsx": code-outliner
@@ -17,8 +17,16 @@ excerpt-modes:
   "*.ex": code-outliner
   "*.elm": code-outliner
   "*.svelte": sfc
+  "*.md": markdown
 excerpt-config:
   sfc:
     with-style: false
     with-template: false
+excerpt-config:
+  markdown:
+    with-code-blocks: true
+    with-lists: true
+    with-tables: true
+    with-blockquotes: true
+    with-thematic-breaks: true
 ---

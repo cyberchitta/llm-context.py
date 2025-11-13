@@ -3,6 +3,7 @@ from typing import Any, Optional, Type
 
 from llm_context.excerpters.base import Excerpter, Excerpts
 from llm_context.excerpters.code_outliner import CodeOutliner
+from llm_context.excerpters.markdown import Markdown
 from llm_context.excerpters.parser import Source
 from llm_context.excerpters.sfc import Sfc
 from llm_context.rule import Rule  # Import for type
@@ -17,6 +18,7 @@ class ExcerpterRegistry:
         return ExcerpterRegistry(
             {
                 "code-outliner": CodeOutliner,
+                "markdown": Markdown,
                 "sfc": Sfc,
             }
         )

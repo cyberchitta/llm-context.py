@@ -1,5 +1,6 @@
 import pytest
 
+from llm_context.excerpters.markdown import Markdown
 from llm_context.excerpters.parser import Source
 from llm_context.excerpters.sfc import Sfc
 
@@ -394,3 +395,398 @@ def test_multiple_svelte_files():
     assert len(result.excerpts) == 2
     paths = {excerpt.rel_path for excerpt in result.excerpts}
     assert paths == {"App.svelte", "Button.svelte"}
+
+
+MARKDOWN_TEST_CASES = [
+    (
+        "markdown_all_elements",
+        "md",
+        """# Main Heading
+
+This is the first paragraph that should be included.
+
+## Subheading
+
+Another paragraph to filter out.
+
+- List item one
+- List item two
+- List item three
+
+```python
+def hello():
+    print("Hello, World!")
+```
+
+> This is a blockquote
+> with multiple lines
+
+---
+
+| Header 1 | Header 2 |
+|----------|----------|
+| Cell 1   | Cell 2   |
+| Cell 3   | Cell 4   |
+
+Final paragraph to filter.""",
+        {
+            "with-code-blocks": True,
+            "with-lists": True,
+            "with-tables": True,
+            "with-blockquotes": True,
+            "with-thematic-breaks": True,
+        },
+        """# Main Heading
+
+⋮...
+## Subheading
+
+⋮...
+- List item one
+- List item two
+- List item three
+
+```python
+def hello():
+    print("Hello, World!")
+```
+
+> This is a blockquote
+> with multiple lines
+
+---
+
+| Header 1 | Header 2 |
+|----------|----------|
+| Cell 1   | Cell 2   |
+| Cell 3   | Cell 4   |""",
+    ),
+    (
+        "markdown_headings_only",
+        "md",
+        """# Getting Started
+
+Learn how to use this tool.
+
+## Installation
+
+Run this command to install.
+
+```bash
+npm install
+```
+
+## Usage
+
+Here's how to use it.
+
+- Step 1
+- Step 2
+
+### Advanced
+
+More details here.""",
+        {
+            "with-code-blocks": False,
+            "with-lists": False,
+            "with-tables": False,
+            "with-blockquotes": False,
+            "with-thematic-breaks": False,
+        },
+        """# Getting Started
+
+⋮...
+## Installation
+
+⋮...
+## Usage
+
+⋮...
+### Advanced""",
+    ),
+    (
+        "markdown_with_code_only",
+        "md",
+        """# Documentation
+
+This intro paragraph is included.
+
+## Code Examples
+
+Here's some code that should be included:
+
+```javascript
+const x = 42;
+console.log(x);
+```
+
+More prose that gets excluded.
+
+```python
+def example():
+    return True
+```
+
+Final paragraph excluded.""",
+        {
+            "with-code-blocks": True,
+            "with-lists": False,
+            "with-tables": False,
+            "with-blockquotes": False,
+            "with-thematic-breaks": False,
+        },
+        """# Documentation
+
+⋮...
+## Code Examples
+
+⋮...
+```javascript
+const x = 42;
+console.log(x);
+```
+
+⋮...
+```python
+def example():
+    return True
+```""",
+    ),
+    (
+        "markdown_lists_tables",
+        "md",
+        """# Data Management
+
+Overview paragraph here.
+
+## Configuration Options
+
+- Option A
+- Option B
+- Option C
+
+Some explanatory text.
+
+| Option | Value | Description |
+|--------|-------|-------------|
+| A      | 1     | First       |
+| B      | 2     | Second      |
+
+More info excluded.""",
+        {
+            "with-code-blocks": False,
+            "with-lists": True,
+            "with-tables": True,
+            "with-blockquotes": False,
+            "with-thematic-breaks": False,
+        },
+        """# Data Management
+
+⋮...
+## Configuration Options
+
+- Option A
+- Option B
+- Option C
+
+Some explanatory text.
+| Option | Value | Description |
+|--------|-------|-------------|
+| A      | 1     | First       |
+| B      | 2     | Second      |""",
+    ),
+    (
+        "markdown_blockquotes_breaks",
+        "md",
+        """# Important Notes
+
+Read this carefully.
+
+## Warnings
+
+> **Warning:** This is critical
+> Do not ignore this
+
+---
+
+## Information
+
+> This is informational
+> Take note
+
+Some additional text excluded.""",
+        {
+            "with-code-blocks": False,
+            "with-lists": False,
+            "with-tables": False,
+            "with-blockquotes": True,
+            "with-thematic-breaks": True,
+        },
+        """# Important Notes
+
+⋮...
+## Warnings
+
+> **Warning:** This is critical
+> Do not ignore this
+
+---
+
+## Information
+
+> This is informational
+> Take note""",
+    ),
+    (
+        "markdown_setext_headings",
+        "md",
+        """Main Title
+===========
+
+This paragraph is included.
+
+Subsection
+----------
+
+Text to filter out.
+
+Another subsection
+------------------
+
+More excluded text.""",
+        {
+            "with-code-blocks": True,
+            "with-lists": True,
+            "with-tables": True,
+            "with-blockquotes": True,
+            "with-thematic-breaks": True,
+        },
+        """Main Title
+===========
+
+⋮...
+Subsection
+----------
+
+⋮...
+Another subsection
+------------------""",
+    ),
+]
+
+
+@pytest.mark.parametrize("test_name,extension,code,config,expected_output", MARKDOWN_TEST_CASES)
+def test_markdown_excerpting(test_name, extension, code, config, expected_output):
+    source = Source(f"test_file.{extension}", code)
+    excerpter = Markdown(config)
+
+    result = excerpter.excerpt([source])
+
+    assert len(result.excerpts) == 1
+    assert result.excerpts[0].rel_path == f"test_file.{extension}"
+
+    actual_output = result.excerpts[0].content.strip()
+    assert actual_output == expected_output, (
+        f"Mismatch in {test_name}:\nExpected:\n{expected_output}\n\nActual:\n{actual_output}"
+    )
+
+
+def test_markdown_empty_file():
+    """Test handling of empty markdown files."""
+    source = Source("empty.md", "")
+    excerpter = Markdown(
+        {
+            "with-code-blocks": True,
+            "with-first-paragraph": True,
+            "with-lists": True,
+            "with-tables": True,
+            "with-blockquotes": True,
+            "with-thematic-breaks": True,
+        }
+    )
+
+    result = excerpter.excerpt([source])
+
+    assert len(result.excerpts) == 1
+    assert result.excerpts[0].content.strip() == ""
+
+
+def test_markdown_non_markdown_file():
+    """Test that non-markdown files are ignored."""
+    source = Source("test.py", "print('hello')")
+    excerpter = Markdown(
+        {
+            "with-code-blocks": True,
+            "with-first-paragraph": True,
+            "with-lists": True,
+            "with-tables": True,
+            "with-blockquotes": True,
+            "with-thematic-breaks": True,
+        }
+    )
+
+    result = excerpter.excerpt([source])
+
+    assert len(result.excerpts) == 0
+
+
+def test_markdown_multiple_files():
+    """Test processing multiple markdown files."""
+    sources = [
+        Source(
+            "README.md",
+            """# Project
+
+Overview here.
+
+- Item 1
+- Item 2""",
+        ),
+        Source(
+            "GUIDE.md",
+            """# Guide
+
+Instructions here.
+
+```bash
+./run.sh
+```""",
+        ),
+    ]
+    excerpter = Markdown(
+        {
+            "with-code-blocks": True,
+            "with-first-paragraph": True,
+            "with-lists": True,
+            "with-tables": True,
+            "with-blockquotes": True,
+            "with-thematic-breaks": True,
+        }
+    )
+
+    result = excerpter.excerpt(sources)
+
+    assert len(result.excerpts) == 2
+    paths = {excerpt.rel_path for excerpt in result.excerpts}
+    assert paths == {"README.md", "GUIDE.md"}
+
+
+def test_markdown_metadata():
+    """Test that metadata is correctly generated."""
+    source = Source("test.md", "# Title\n\nContent")
+    config = {
+        "with-code-blocks": True,
+        "with-first-paragraph": False,
+        "with-lists": False,
+        "with-tables": False,
+        "with-blockquotes": False,
+        "with-thematic-breaks": False,
+    }
+    excerpter = Markdown(config)
+
+    result = excerpter.excerpt([source])
+
+    assert len(result.excerpts) == 1
+    metadata = result.excerpts[0].metadata
+    assert metadata["processor_type"] == "markdown"
+    assert "included_elements" in metadata

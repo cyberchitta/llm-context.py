@@ -15,6 +15,7 @@ def to_language(filename: str) -> Optional[str]:
         "go": "go",
         "java": "java",
         "js": "javascript",
+        "md": "markdown",
         "mjs": "javascript",
         "php": "php",
         "py": "python",
