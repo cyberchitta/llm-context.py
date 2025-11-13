@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2025-11-13
+
+### Bug Fixes
+
+- Improve path validation error messages in lc-missing, lc-excluded, and lc-implementations
+- Correct change detection in lc-changed command
+- Write context to file when -f flag is provided in cli.context()
+
+### Documentation
+
+- README made consistent with new skills docs
+- Emphasize filtering-first workflow and clarify skill vs instruction rules
+- Add changelog link to PyPI project metadata
+
+### Features
+
+- Add markdown excerpter with tree-sitter support
+- Add Claude Skill for interactive rule creation
+- Detect and report deleted files in lc-missing output
+- Add deleted file tracking to lc-changed output
+
 ## [0.5.2] - 2025-10-01
 
 ### Bug Fixes
