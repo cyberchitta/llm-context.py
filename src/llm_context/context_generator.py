@@ -158,10 +158,13 @@ class ContextSettings:
     with_prompt: bool = False
     with_user_notes: bool = False
     with_tools: bool = True
+    as_message: bool = False
 
     @staticmethod
-    def create(with_prompt: bool, with_user_notes: bool, with_tools: bool) -> "ContextSettings":
-        return ContextSettings(with_prompt, with_user_notes, with_tools)
+    def create(
+        with_prompt: bool, with_user_notes: bool, with_tools: bool, as_message: bool
+    ) -> "ContextSettings":
+        return ContextSettings(with_prompt, with_user_notes, with_tools, as_message)
 
 
 @dataclass(frozen=True)
@@ -347,6 +350,7 @@ class ContextGenerator:
             "with_tools": settings.with_tools,
             "user_notes": descriptor.get_user_notes(layout) if settings.with_user_notes else None,
             "rule_included_paths": set(),
+            "as_message": settings.as_message,
         }
         return self._render(template_id, context), context_timestamp
 

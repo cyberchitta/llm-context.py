@@ -86,6 +86,18 @@ Additional project-specific guidelines and context.
 EOF
 ```
 
+## Deployment Patterns
+
+Choose based on your LLM environment:
+
+- **System Message**: `lc-context -p` (AI Studio, etc.)
+- **Single User Message**: `lc-context -p -m` (Grok, etc.)
+- **Separate Messages**: `lc-prompt` + `lc-context -m`
+- **Project/Files (included)**: `lc-context` (Claude Projects, etc.)
+- **Project/Files (searchable)**: `lc-context -m` (force into context)
+
+See [Deployment Patterns](docs/user-guide.md#deployment-patterns) in the user guide for details.
+
 ## Core Commands
 
 | Command           | Purpose                                    |
@@ -93,7 +105,10 @@ EOF
 | `lc-init`         | Initialize project configuration           |
 | `lc-select`       | Select files based on current rule         |
 | `lc-context`      | Generate and copy context                  |
-| `lc-context -nt`  | Generate context for non-MCP environments  |
+| `lc-context -p`   | Generate context with prompt               |
+| `lc-context -m`   | Send context as separate message           |
+| `lc-context -nt`  | No tools (for Project/Files inclusion)     |
+| `lc-context -f `  | Write context to file                      |
 | `lc-set-rule <n>` | Switch between rules                       |
 | `lc-missing`      | Handle file and context requests (non-MCP) |
 

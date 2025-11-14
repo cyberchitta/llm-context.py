@@ -1,6 +1,6 @@
-# {% if tools_available %}Repository{% else %}Detailed Repository{% endif %} Content: **{{ project_name }}**
+# {% if with_tools %}Repository{% else %}Detailed Repository{% endif %} Content: **{{ project_name }}**
 
-## Instructions for AI: {% if overview_mode == "focused" %}⚠️ FOCUSED PROJECT CONTEXT PROVIDED - {% if tools_available %}USE TOOLS FOR ADDITIONAL FILES{% else %}USE COMMANDS FOR ADDITIONAL FILES{% endif %} ⚠️{% else %}⚠️ COMPLETE PROJECT CONTEXT PROVIDED - NO NEED TO REQUEST ADDITIONAL CONTEXT ⚠️{% endif %}
+## Instructions for AI: {% if overview_mode == "focused" %}⚠️ FOCUSED PROJECT CONTEXT PROVIDED - {% if with_tools %}USE TOOLS FOR ADDITIONAL FILES{% else %}USE COMMANDS FOR ADDITIONAL FILES{% endif %} ⚠️{% else %}⚠️ COMPLETE PROJECT CONTEXT PROVIDED - NO NEED TO REQUEST ADDITIONAL CONTEXT ⚠️{% endif %}
 
 ## Quick Reference
 - ✓ = Full content included below
@@ -13,23 +13,23 @@
 {% endif %}
 
 > Generation timestamp: {{ context_timestamp }}
-> {% if tools_available %}For updates: Use lc-changed to identify changes, then lc-missing for specific files{% else %}For updates: Use the lc-missing commands shown below{% endif %}
+> {% if with_tools %}For updates: Use lc-changed to identify changes, then lc-missing for specific files{% else %}For updates: Use the lc-missing commands shown below{% endif %}
 
 {% if overview_mode == "focused" -%}
-This context presents a focused view of the _/{{ project_name }}_ repository, including complete contents for key files and excerpted content for important code sections. {% if tools_available %}Additional files can be retrieved using the lc-missing tool.{% else %}Additional files can be requested using the lc-missing commands shown below.{% endif %}
+This context presents a focused view of the _/{{ project_name }}_ repository, including complete contents for key files and excerpted content for important code sections. {% if with_tools %}Additional files can be retrieved using the lc-missing tool.{% else %}Additional files can be requested using the lc-missing commands shown below.{% endif %}
 {%- else -%}
 This context presents a comprehensive view of the _/{{ project_name }}_ repository.
 {%- endif %}
 
 {% if sample_requested_files or sample_excluded_files %}
-## Instructions for AI: 📂 Before {% if tools_available %}Accessing{% else %}Requesting{% endif %} Any Files
+## Instructions for AI: 📂 Before {% if with_tools %}Accessing{% else %}Requesting{% endif %} Any Files
 
 1. **SEARCH THIS DOCUMENT** to check if the file is already included below
 2. **CHECK the repository structure** below to confirm file status (✓,{% if excerpts %} O, E,{% endif %} or ✗)
-3. {% if overview_mode == "focused" %}{% if tools_available %}Use lc-missing for ✗{% if excerpts %}, O, or E{% endif %} files that are needed for your analysis{% else %}Use lc-missing commands below for ✗{% if excerpts %}, O, or E{% endif %} files that are needed{% endif %}{% else %}Only request ✗{% if excerpts %}, O, or E{% endif %} files that are absolutely necessary for your analysis{% endif %}
+3. {% if overview_mode == "focused" %}{% if with_tools %}Use lc-missing for ✗{% if excerpts %}, O, or E{% endif %} files that are needed for your analysis{% else %}Use lc-missing commands below for ✗{% if excerpts %}, O, or E{% endif %} files that are needed{% endif %}{% else %}Only request ✗{% if excerpts %}, O, or E{% endif %} files that are absolutely necessary for your analysis{% endif %}
 4. **Never assume file contents** - if a file is ✗, O, or E and you need it to answer accurately, use lc_missing to fetch it first.  Don't guess at the contents based on conventions / patterns / partial information, etc.
 
-{% if tools_available %}
+{% if with_tools %}
 {% if overview_mode == "focused" -%}
 Use lc-missing for:
 - Any ✗{% if excerpts %}, O, or E{% endif %} files you need to examine
@@ -50,7 +50,7 @@ Only use lc-missing for:
 
 ### How to Request Missing Files
 
-{% if tools_available %}
+{% if with_tools %}
 Using the lc-missing tool:
    **ROOT PATH must be: {{ abs_root_path }}**
    

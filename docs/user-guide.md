@@ -4,12 +4,13 @@
 
 1. [Installation & Setup](#installation--setup)
 2. [Core Workflow](#core-workflow)
-3. [Rule System](#rule-system)
-4. [Integration Options](#integration-options)
-5. [AI-Assisted Rule Creation](#ai-assisted-rule-creation)
-6. [Command Reference](#command-reference)
-7. [Best Practices](#best-practices)
-8. [Troubleshooting](#troubleshooting)
+3. [Deployment Patterns](#deployment-patterns)
+4. [Rule System](#rule-system)
+5. [Integration Options](#integration-options)
+6. [AI-Assisted Rule Creation](#ai-assisted-rule-creation)
+7. [Command Reference](#command-reference)
+8. [Best Practices](#best-practices)
+9. [Troubleshooting](#troubleshooting)
 
 ## Installation & Setup
 
@@ -80,6 +81,45 @@ compose:
 Additional project-specific guidelines and context.
 EOF
 ```
+
+## Deployment Patterns
+
+There are four common ways to provide context to LLMs:
+
+### Pattern 1: System Message (AI Studio, etc.)
+
+- **Prompt**: System message
+- **Context**: System message (same)
+- **Query**: First user message
+- **Command**: `lc-context -p`
+
+### Pattern 2: Single User Message (Grok, etc.)
+
+- **Prompt**: User message
+- **Context**: User message (same)
+- **Query**: Second user message
+- **Command**: `lc-context -p -m`
+
+### Pattern 3: Separate User Message
+
+- **Prompt**: System/instruction area (use `lc-prompt`)
+- **Context**: User message (separate)
+- **Query**: Second user message
+- **Command**: `lc-prompt` then `lc-context -m`
+
+### Pattern 4a: Project/Files (Included in Context)
+
+- **Prompt**: System/instruction area
+- **Context**: Pasted into "Project" section as named text
+- **Query**: First user message
+- **Command**: `lc-context`
+
+### Pattern 4b: Project/Files (Searchable)
+
+- **Prompt**: System/instruction area
+- **Context**: User message (separate, via search)
+- **Query**: Second user message
+- **Command**: `lc-context -m`
 
 ## Rule System
 
@@ -224,7 +264,7 @@ also-include:
 
 ## Integration Options
 
-### MCP Integration (Recommended)
+### MCP Integration (Recommended for Claude Desktop)
 
 Provides seamless file access during AI conversations.
 
@@ -242,38 +282,24 @@ Provides seamless file access during AI conversations.
 }
 ```
 
-#### Common Use Cases
+#### How It Works
 
-1. **Code Review**: "I've implemented the auth changes, can you review them?"
-
-   - AI uses `lc-missing` to examine modified files
-   - Provides feedback on completeness and correctness
-
-2. **Additional Context**: "What about the database schema?"
-
-   - AI accesses initially excluded files when discussion reveals their relevance
-
-3. **Change Tracking**: "What files have we modified?"
-
-   - AI uses `lc-changed` to track conversation changes
-
-4. **Following References**: "Let me check the utility functions"
-
-   - AI accesses files referenced during implementation discussions
-
-#### MCP Tools
+MCP tools become available for the LLM to use during conversation:
 
 - `lc-missing` - Unified access to files, excerpts, implementations
 - `lc-changed` - Track changes during conversation
 
+#### Common Use Cases
+
+1. **Code Review**: "I've implemented the auth changes, can you review them?"
+2. **Additional Context**: "What about the database schema?"
+3. **Change Tracking**: "What files have we modified?"
+
 ### Manual Workflow (Fallback)
 
-For environments without MCP support:
+For environments without MCP support, when LLM requests additional files:
 
 ```bash
-# Generate context with file request instructions
-lc-context -nt
-# When AI requests additional files, run the command it provides
 lc-missing -f "[file1, file2]" -t <timestamp>
 ```
 
@@ -535,7 +561,9 @@ lc-select # Select files based on current rule for full and excerpt content
 lc-context # Generate context (MCP optimized)
 lc-context -p # Include prompt instructions
 lc-context -u # Include user notes
+lc-context -m # Send context as separate message (defers query to next message)
 lc-context -nt # No tools (manual workflow)
+lc-context -p -m # Include prompt with separate message mode
 lc-context -f output.md # Write to file
 ```
 
