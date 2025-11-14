@@ -157,13 +157,11 @@ class ContextCollector:
 class ContextSettings:
     with_prompt: bool = False
     with_user_notes: bool = False
-    tools_available: bool = True
+    with_tools: bool = True
 
     @staticmethod
-    def create(
-        with_prompt: bool, with_user_notes: bool, tools_available: bool
-    ) -> "ContextSettings":
-        return ContextSettings(with_prompt, with_user_notes, tools_available)
+    def create(with_prompt: bool, with_user_notes: bool, with_tools: bool) -> "ContextSettings":
+        return ContextSettings(with_prompt, with_user_notes, with_tools)
 
 
 @dataclass(frozen=True)
@@ -239,7 +237,7 @@ class ContextGenerator:
             "requested_excerpted": requested_excerpted,
             "not_excerpted": not_excerpted,
             "excluded_content": excluded_content,
-            "tools_available": self.settings.tools_available,
+            "with_tools": self.settings.with_tools,
         }
         return self._render(template_id, context)
 
@@ -298,7 +296,7 @@ class ContextGenerator:
             "missing_files": list(missing_files),
             "modified_files": list(modified_files),
             "deleted_files": list(deleted_files),
-            "tools_available": self.settings.tools_available,
+            "with_tools": self.settings.with_tools,
         }
         return self._render(template_id, context)
 
@@ -346,7 +344,7 @@ class ContextGenerator:
             "sample_excluded_files": sample_excluded_files,
             "prompt": descriptor.get_instructions() if settings.with_prompt else None,
             "project_notes": descriptor.get_project_notes(layout),
-            "tools_available": settings.tools_available,
+            "with_tools": settings.with_tools,
             "user_notes": descriptor.get_user_notes(layout) if settings.with_user_notes else None,
             "rule_included_paths": set(),
         }
