@@ -7,7 +7,7 @@ from llm_context.utils import PathConverter, is_newer
 
 
 def get_prompt(env: ExecutionEnvironment) -> str:
-    settings = ContextSettings.create(False, False, False)
+    settings = ContextSettings.create(False, False, False, False)
     generator = ContextGenerator.create(env.config, env.state.file_selection, settings)
     return generator.prompt()
 
@@ -25,7 +25,7 @@ def get_missing_files(env: ExecutionEnvironment, paths: list[str], timestamp: fl
         raise ValueError(
             f"No context found with timestamp {timestamp}. Warn the user that the context is stale."
         )
-    settings = ContextSettings.create(False, False, True)
+    settings = ContextSettings.create(False, False, True, False)
     generator = ContextGenerator.create(env.config, env.state.file_selection, settings, env.tagger)
     return generator.missing_files(paths, matching_selection, timestamp)
 
@@ -65,21 +65,21 @@ def get_excluded(env: ExecutionEnvironment, paths: list[str], timestamp: float) 
     matching_selection = env.state.selections.get_selection_by_timestamp(timestamp)
     if matching_selection is None:
         raise ValueError(f"No context found with timestamp {timestamp}...")
-    settings = ContextSettings.create(False, False, True)
+    settings = ContextSettings.create(False, False, True, False)
     generator = ContextGenerator.create(env.config, env.state.file_selection, settings, env.tagger)
     return generator.excluded(paths, matching_selection, timestamp)
 
 
 def get_implementations(env: ExecutionEnvironment, queries: list[tuple[str, str]]) -> str:
     PathConverter.create(env.config.project_root_path).validate_with_error([p for p, _ in queries])
-    settings = ContextSettings.create(False, False, True)
+    settings = ContextSettings.create(False, False, True, False)
     return ContextGenerator.create(
         env.config, env.state.file_selection, settings, env.tagger
     ).definitions(queries)
 
 
 def get_focus_help(env: ExecutionEnvironment) -> str:
-    settings = ContextSettings.create(False, False, True)
+    settings = ContextSettings.create(False, False, True, False)
     generator = ContextGenerator.create(env.config, env.state.file_selection, settings)
     return generator.focus_help()
 
@@ -90,7 +90,7 @@ def generate_context(env: ExecutionEnvironment, settings: ContextSettings) -> tu
 
 
 def get_outlines(env: ExecutionEnvironment) -> str:
-    settings = ContextSettings.create(False, False, False)
+    settings = ContextSettings.create(False, False, False, False)
     selector = ContextSelector.create(env.config)
     file_sel_excerpted = selector.select_excerpted_only(env.state.file_selection)
     return ContextGenerator.create(env.config, file_sel_excerpted, settings, env.tagger).outlines()
