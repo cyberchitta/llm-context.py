@@ -273,7 +273,14 @@ class ContextGenerator:
         }
         files_to_fetch = missing_files | modified_files
         already_excerpted_candidates = set(paths) & orig_excerpted
+        code_outlined = {
+            f
+            for f in already_excerpted_candidates
+            if self.spec.rule.get_excerpt_mode(f) == "code-outliner"
+        }
+        files_to_fetch = files_to_fetch | code_outlined
         already_excerpted = list(already_excerpted_candidates - files_to_fetch - deleted_files)
+        already_included = list((set(paths) & orig_full) - files_to_fetch - deleted_files)
         excerpted_metadata = {}
         if orig_excerpted:
             temp_sources = [
@@ -290,7 +297,6 @@ class ContextGenerator:
                 for excerpts_obj in all_excerpts:
                     for excerpt in excerpts_obj.excerpts:
                         excerpted_metadata[excerpt.rel_path] = excerpt.metadata
-        already_included = list((set(paths) & orig_full) - files_to_fetch - deleted_files)
         context = {
             "already_included": already_included,
             "already_excerpted": already_excerpted,
