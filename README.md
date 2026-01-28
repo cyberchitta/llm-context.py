@@ -42,7 +42,7 @@ lc-context tmp-prm-auth    # Get focused context for sub-agent
 ## Installation
 
 ```bash
-uv tool install "llm-context>=0.5.0"
+uv tool install "llm-context>=0.6.0"
 ```
 
 ## Quick Start

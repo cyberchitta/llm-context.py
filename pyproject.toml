@@ -6,7 +6,7 @@ authors = [
   { name = "restlessronin", email = "88921269+restlessronin@users.noreply.github.com" },
 ]
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license = "Apache-2.0"
 keywords = ["llm", "ai", "context", "code", "clipboard", "chat"]
 classifiers = [
@@ -24,7 +24,7 @@ classifiers = [
 dependencies = [
   "jinja2>=3.1.6, <4.0",
   "mcp>=1.26.0",
-  "packaging>=24.2, <25.0",
+  "packaging>=26.0, <27.0",
   "pathspec>=1.0.4",
   "pyperclip>=1.11.0, <2.0.0",
   "pyyaml>=6.0.3",
