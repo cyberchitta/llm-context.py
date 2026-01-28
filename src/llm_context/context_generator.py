@@ -152,6 +152,45 @@ class ContextCollector:
             )
         )
 
+    def file_stats(self, rel_paths: list[str]) -> list[tuple[str, int]]:
+        abs_paths = self.converter.to_absolute(rel_paths)
+        return [
+            (rel_path, Path(abs_path).stat().st_size)
+            for rel_path, abs_path in zip(rel_paths, abs_paths)
+            if Path(abs_path).exists()
+        ]
+
+    def excerpt_stats(
+        self, tagger: Any, rel_paths: list[str], rule: Rule
+    ) -> list[tuple[str, int, int]]:
+        if not rel_paths:
+            return []
+        abs_paths = self.converter.to_absolute(rel_paths)
+        sources = [
+            Source(rel, content)
+            for rel, abs_path in zip(rel_paths, abs_paths)
+            if Path(abs_path).exists() and (content := safe_read_file(abs_path)) is not None
+        ]
+        if not sources:
+            return []
+        try:
+            excerpts_list = self.excerpts(tagger, [s.rel_path for s in sources], rule)
+            excerpt_sizes = {}
+            for excerpts in excerpts_list:
+                for excerpt in excerpts.excerpts:
+                    excerpt_sizes[excerpt.rel_path] = len(excerpt.content.encode("utf-8"))
+            return [
+                (
+                    rel_path,
+                    Path(abs_path).stat().st_size,
+                    excerpt_sizes.get(rel_path, Path(abs_path).stat().st_size),
+                )
+                for rel_path, abs_path in zip(rel_paths, abs_paths)
+                if Path(abs_path).exists()
+            ]
+        except Exception:
+            return [(rel_path, size, size) for rel_path, size in self.file_stats(rel_paths)]
+
 
 @dataclass(frozen=True)
 class ContextSettings:

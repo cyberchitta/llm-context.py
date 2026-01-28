@@ -3,117 +3,229 @@ name: llm-context-rule-creator
 description: Create optimized llm-context rules for specific tasks by analyzing codebase content and generating minimal file selection patterns
 ---
 
-# LLM Context Rule Creator
+# Context Descriptor Creation
 
-Create focused rules for specific development tasks.
+Create rules that define exactly what context is needed for a task—whether for a sub-agent or a chat conversation.
 
-## What Rules Do
+## Two Usage Modes
 
-Rules define which project files appear in LLM context. You specify **full files** (complete content) and **excerpted files** (structure/signatures only) to keep token usage reasonable. Without rules, you'd get thousands of files - build artifacts, dependencies, cache, etc. Rules filter and curate what matters for your task.
+This skill works in two environments:
 
-See **SYNTAX.md** for detailed field descriptions.
+| Environment | Interface | When to Use |
+|-------------|-----------|-------------|
+| **Chat harness** (Claude.ai, etc.) | MCP tools | Creating context for the current conversation |
+| **Agentic harness** (Claude Code, etc.) | CLI commands | Creating context to delegate to sub-agents |
 
-## Quick Workflow
+The rule format is identical—only the commands differ.
 
-1. **Understand task** - Extract goal, target files, scope
-2. **Examine codebase** - Use `lc_outlines` and `lc_missing` to explore
-3. **Determine filters** - Start with project defaults, check custom filters
-4. **Select files** - 5-15 full, 10-30 excerpted
-5. **Generate rule** - Use template with proper composition
-6. **Estimate & save** - ~40k tokens target, save to `tmp-prm-<n>`
+## Why This Matters
 
-## Filtering is Critical
+When providing code context (to a sub-agent or yourself), curation is essential:
 
-**Without filters, you get thousands of files** - build artifacts, dependencies, config noise, test data, etc. Always filter first.
+- **Too much:** Full codebase overwhelms the context window (thousands of files, millions of tokens)
+- **Too little:** Missing information to complete the task
+- **Wrong focus:** Irrelevant code obscures what matters
 
-**Start with project filters:**
+Rules solve this by describing: which files to include fully, which to excerpt (signatures/structure only), and what to exclude entirely.
 
-- Check `.llm-context/rules/` for custom filters like `flt-repo-base`
-- Use `lc/flt-base` as minimum (excludes binaries, logs, common noise)
-- Compose filters in the `compose.filters` array
+## The Core Workflow
 
-**Then refine with `also-include`:**
+```
+1. Understand the task
+2. Explore the codebase (outlines, file reads)
+3. Create a rule file
+4. Validate the rule
+5. Iterate until context is focused and complete
+6. Generate and use the context
+```
 
-- After filtering removes unwanted files, use `also-include` to add back what you need
-- This is much faster than dealing with thousands of irrelevant files
+### CLI vs MCP Commands
 
-## File Selection Guide
+| Step | CLI (Agentic) | MCP (Chat) |
+|------|---------------|------------|
+| Explore | `lc-outlines` | `lc_outlines` tool |
+| Validate | `lc-preview <rule>` | `lc_preview` tool |
+| Get context | `lc-context <rule>` | `lc_outlines` with rule + `lc_missing` |
+| Check changes | `lc-changed` | `lc_changed` tool |
+| Get files | `lc-missing -f '[paths]'` | `lc_missing` tool |
 
-**Full content (5-15 files):**
+## Rule Basics
 
-- Files to be modified
-- Small configs
-- Integration points
-
-**Excerpted (10-30 files):**
-
-- Related modules (structure only)
-- Large files (signatures needed)
-- Tests, dependencies
-
-**Implementations:**
-
-- Specific functions from large files
-
-## Basic Template
+Rules are YAML frontmatter + markdown, saved to `.llm-context/rules/`:
 
 ```yaml
 ---
-description: <one-line task>
-overview: full
+description: Refactor authentication to use JWT
 compose:
-  filters: [lc/flt-base] # Always filter first to exclude noise
-  excerpters: [lc/exc-base] # Required for outlining
+  filters: [lc/flt-base]        # What to exclude
+  excerpters: [lc/exc-base]     # How to excerpt
 also-include:
-  full-files:
-    - "/path/to/modify/**"
-  excerpted-files:
-    - "/path/to/context/**"
+  full-files:                   # Complete content
+    - "/src/auth/**"
+  excerpted-files:              # Structure/signatures only
+    - "/src/api/routes/**"
 ---
 ## Task Context
-Brief explanation of optimization focus.
+The auth module needs migration from sessions to JWT tokens.
+Focus on the middleware integration points.
 ```
 
-## Key Rules
+Save as: `.llm-context/rules/tmp-prm-auth-jwt.md`
 
-- Paths start with `/`, no project name
-- Always compose `lc/exc-base`
-- **Always use filters** - never skip this step
-- Target 20-80k tokens
-- Use `lc/flt-no-files` for minimal contexts
-- Save as `tmp-prm-<task-name>`
+## Two Categories of Files
 
-## Tools to Use
+**Full files (5-15 typical):**
+- Files to be modified
+- Small configs
+- Critical integration points
 
-- `lc_outlines(root_path)` - See structure
-- `lc_missing(root_path, "f", [paths], timestamp)` - Examine files
+**Excerpted files (10-30 typical):**
+- Related modules (need structure, not every line)
+- Large files (only signatures/definitions)
+- Dependencies and callers
 
-## Quick Patterns
+Excerpting uses tree-sitter to extract function/class definitions, reducing a 500-line file to ~50 lines of signatures.
 
-**Refactor:**
+## Always Filter First
+
+Without filters, you get thousands of files: build artifacts, node_modules, __pycache__, logs, etc.
 
 ```yaml
-full-files: ["/<target>/**"]
-excerpted-files: ["/<callers>/**", "/<dependencies>/**"]
+compose:
+  filters: [lc/flt-base]  # Standard exclusions (binaries, logs, caches)
 ```
 
-**Add Feature:**
+Check if the project has custom filters (e.g., `flt-repo-base`) and compose them:
 
 ```yaml
-full-files: ["/<integration>/**", "/<new-code>/**"]
-excerpted-files: ["/<similar-feature>/**"]
+compose:
+  filters: [flt-repo-base, lc/flt-base]
 ```
 
-**Debug:**
+Then use `also-include` to add back specific files you need.
+
+## Validating Your Rule
+
+Use the preview command/tool to see what a rule selects:
+
+**CLI:** `lc-preview tmp-prm-auth-jwt`
+**MCP:** `lc_preview` tool with rule name
+
+```
+Rule: tmp-prm-auth-jwt
+Composes: flt-repo-base → lc/flt-base
+
+Full files (8):              12,400 bytes
+  src/auth/handler.py         3,200 bytes
+  src/auth/middleware.py      2,800 bytes
+  ...
+
+Excerpted files (15):         8,200 bytes (of 45,000)
+  src/api/routes/user.py        420 bytes (of 2,800)
+  src/api/routes/admin.py       380 bytes (of 3,100)
+  ...
+
+Total: 23 files, 20,600 bytes (~5k tokens)
+```
+
+This feedback lets you iterate:
+- Too large? Move files from full to excerpted, add exclusions
+- Missing something? Adjust patterns in `also-include`
+- Wrong files? Check your filter composition
+
+## Path Format
+
+In rule patterns, paths start with `/`, relative to project root:
 
 ```yaml
-full-files: ["/<broken>/**", "/<tests>/**"]
-excerpted-files: ["/<callers>/**"]
+# Correct patterns in rules
+- "/src/auth/**"
+- "/config/settings.yaml"
+- "**/*.py"
+
+# Wrong
+- "src/auth/**"           # Missing leading /
+- "/src/"                 # Directory, not file pattern
 ```
+
+**Note:** In generated context and preview output, paths include the project directory name as a prefix (e.g., `/{project-name}/src/auth/handler.py`). This enables multi-project context composition—combining files from multiple projects without path conflicts.
+
+## Sizing Guidelines
+
+| Bytes | Tokens (~) | Use Case |
+|-------|------------|----------|
+| ~60KB | ~15k | Surgical fixes |
+| ~140KB | ~35k | Feature additions |
+| ~200KB | ~50k | Refactoring |
+| ~320KB | ~80k | Large migrations |
+
+Aim for the smallest context that includes everything needed.
+
+## Quick Reference
+
+**Minimal context (start here for small tasks):**
+```yaml
+compose:
+  filters: [lc/flt-no-files]   # Exclude everything
+  excerpters: [lc/exc-base]
+also-include:
+  full-files:
+    - "/specific/file.py"
+```
+
+**Standard task:**
+```yaml
+compose:
+  filters: [lc/flt-base]
+  excerpters: [lc/exc-base]
+also-include:
+  full-files:
+    - "/<modify>/**"
+  excerpted-files:
+    - "/<context>/**"
+```
+
+**With project filters:**
+```yaml
+compose:
+  filters: [flt-repo-base]  # Project-specific, composes lc/flt-base
+  excerpters: [lc/exc-base]
+```
+
+## Command Reference
+
+### CLI Commands (Agentic Harness)
+
+| Command | Purpose |
+|---------|---------|
+| `lc-outlines` | See project structure (excerpted view) |
+| `lc-preview <rule>` | Validate rule file selection |
+| `lc-context <rule>` | Generate context for the rule |
+| `lc-set-rule <rule>` | Set active rule |
+| `lc-changed` | List files modified since last context |
+| `lc-missing -f '[paths]' -t <ts>` | Get specific file contents |
+
+### MCP Tools (Chat Harness)
+
+| Tool | Purpose |
+|------|---------|
+| `lc_outlines` | See project structure (excerpted view) |
+| `lc_preview` | Validate rule file selection |
+| `lc_changed` | List files modified since last context |
+| `lc_missing` | Get specific files, implementations, or excluded sections |
+| `lc_rule_instructions` | Get rule creation documentation |
+
+**Note:** In chat mode, use `lc_outlines` with a rule name to generate context, then `lc_missing` to retrieve full content for specific files as needed.
+
+## File Naming
+
+- `prm-<name>.md` - Permanent prompt rules
+- `flt-<name>.md` - Reusable filter rules
+- `tmp-prm-<name>.md` - Temporary task rules (delete after use)
 
 ---
 
-**For detailed syntax, see SYNTAX.md**  
-**For more patterns, see PATTERNS.md**  
-**For complete examples, see EXAMPLES.md**  
-**For troubleshooting, see TROUBLESHOOTING.md**
+**Detailed syntax:** SYNTAX.md
+**Common patterns:** PATTERNS.md
+**Examples:** EXAMPLES.md
+**Troubleshooting:** TROUBLESHOOTING.md

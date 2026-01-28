@@ -1,68 +1,66 @@
-# Rule Creation Troubleshooting
+# Troubleshooting
 
 Common issues and solutions.
 
-## No Files Matched
+## No Files Selected
 
-**Problem:** Rule selects zero files
+**Symptom:** Rule produces empty or near-empty context.
 
 **Causes:**
 
-1. Paths don't start with `/`
-2. Paths include project name
-3. Patterns don't match actual structure
-4. Filters too restrictive
+1. Paths missing leading `/`
+2. Path includes project name
+3. Pattern doesn't match actual structure
+4. Filters too aggressive
 
-**Solutions:**
+**Debug with preview:**
+
+CLI: `lc-preview my-rule`
+MCP: `lc_preview` tool
+
+```
+Full files (0):
+Excerpted files (0):
+```
+
+**Fix:** Check path format:
 
 ```yaml
-# ❌ Wrong
-also-include:
-  full-files:
-    - "src/file.py"              # Missing /
-    - "/myproject/src/file.py"    # Has project name
-    - "/src/"                     # Directory, not files
+# Wrong
+- "src/file.py"              # Missing /
+- "/myproject/src/file.py"   # Has project name
 
-# ✅ Correct
-also-include:
-  full-files:
-    - "/src/file.py"
-    - "/src/**/*.py"
+# Correct
+- "/src/file.py"
+- "/src/**/*.py"
 ```
 
 ---
 
 ## Context Too Large
 
-**Problem:** Generated context exceeds 100k tokens
+**Symptom:** Context exceeds target size (>100k tokens).
 
 **Solutions:**
 
-1. **Move files to excerpted:**
+1. **Move files from full to excerpted:**
 
 ```yaml
 # Before
-also-include:
-  full-files:
-    - "/src/**"  # Too broad
+full-files: ["/src/**"]
 
 # After
-also-include:
-  full-files:
-    - "/src/core/**"  # Just core
-  excerpted-files:
-    - "/src/**"  # Rest as structure
+full-files: ["/src/core/**"]
+excerpted-files: ["/src/**"]
 ```
 
-2. **Use implementations:**
+2. **Use implementations for specific functions:**
 
 ```yaml
 # Instead of full file
-also-include:
-  full-files:
-    - "/src/large_utils.py"
+full-files: ["/src/large_utils.py"]
 
-# Extract specific function
+# Extract just what's needed
 implementations:
   - ["/src/large_utils.py", "needed_function"]
 ```
@@ -73,126 +71,136 @@ implementations:
 gitignores:
   full-files:
     - "**/test/**"
-    - "**/*.md"
+    - "*.md"
 ```
 
 ---
 
-## Missing Required Compose
+## Missing excerpters Error
 
-**Problem:** Error about missing excerpters
+**Symptom:** Error about missing excerpters in compose.
 
-**Solution:**
+**Fix:** Always include `lc/exc-base`:
 
 ```yaml
-# ❌ Missing
 compose:
   filters: [lc/flt-base]
-
-# ✅ Required
-compose:
-  filters: [lc/flt-base]
-  excerpters: [lc/exc-base]  # Always needed
+  excerpters: [lc/exc-base]   # Required
 ```
 
 ---
 
 ## Rule Not Found
 
-**Problem:** `lc-set-rule tmp-prm-my-rule` fails
+**Symptom:** Command/tool fails with "rule not found".
 
 **Causes:**
 
-1. File not saved to `.llm-context/rules/`
-2. Wrong filename (needs `.md` extension)
+1. File not in `.llm-context/rules/`
+2. Missing `.md` extension
 3. Typo in rule name
 
-**Solution:**
+**Fix:** Verify file location:
 
 ```bash
-# Save to correct location
-.llm-context/rules/tmp-prm-my-rule.md
-
-# Verify
-ls .llm-context/rules/tmp-prm-*.md
+ls .llm-context/rules/*.md
 ```
 
 ---
 
-## Composition Conflicts
+## also-include Pulls in Noise
 
-**Problem:** Warning about multiple `limit-to` clauses
+**Symptom:** Context includes __pycache__, node_modules, etc.
 
-**Cause:** Composing rules with conflicting `limit-to`
+**Cause:** `also-include` bypasses all filters.
 
-**Solution:**
-
-```yaml
-# Only first limit-to is used
-# Put most specific rule first in composition
-compose:
-  filters: [specific-filter, lc/flt-base]
-```
-
-Or define `limit-to` in the rule itself:
+**Fix:** Be specific:
 
 ```yaml
-compose:
-  filters: [lc/flt-base] # No limit-to conflicts
-limit-to:
-  full-files: ["/src/api/**"] # Define here
-```
+# Dangerous
+also-include:
+  full-files: ["/src/**"]
 
----
-
-## Path Pattern Not Matching
-
-**Problem:** Pattern should match but doesn't
-
-**Debug:**
-
-```yaml
-# Test patterns incrementally
+# Better
 also-include:
   full-files:
-    - "/src/api/routes.py"  # Specific file first
+    - "/src/auth/**"
+    - "/src/api/routes.py"
+```
 
-# Then expand
+Or add explicit exclusions:
+
+```yaml
 also-include:
+  full-files: ["/src/**"]
+gitignores:
   full-files:
-    - "/src/api/**"  # Directory pattern
-
-# Check for typos
-# ❌ /src/aip/**
-# ✅ /src/api/**
+    - "__pycache__"
+    - "*.pyc"
+    - "node_modules"
 ```
 
 ---
 
 ## YAML Syntax Error
 
-**Problem:** Invalid YAML in frontmatter
+**Symptom:** Parse error on rule file.
 
 **Common mistakes:**
 
 ```yaml
-# ❌ Missing quotes for patterns with special chars
+# Wrong - unquoted glob with special chars
 also-include:
   full-files:
     - /src/**/*.py
 
-# ✅ Quote patterns
+# Correct - quoted
 also-include:
   full-files:
     - "/src/**/*.py"
 
-# ❌ Wrong indentation
+# Wrong - bad indentation
 compose:
-filters: [lc/flt-base]  # Should be indented
+filters: [lc/flt-base]
 
-# ✅ Correct indentation
+# Correct
 compose:
   filters: [lc/flt-base]
 ```
 
-**Solution:** Validate YAML before saving
+---
+
+## limit-to Conflicts
+
+**Symptom:** Warning about multiple `limit-to` clauses.
+
+**Cause:** Composing rules that both have `limit-to`.
+
+**Fix:** Only the first `limit-to` per category is used. Put specific rule first, or define `limit-to` in the rule itself:
+
+```yaml
+compose:
+  filters: [lc/flt-base]   # No limit-to here
+limit-to:
+  full-files: ["/src/api/**"]   # Define here instead
+```
+
+---
+
+## Markdown Content Ignored
+
+**Symptom:** Rule markdown doesn't appear in context.
+
+**Cause:** Using `instructions` field.
+
+```yaml
+# Markdown is ignored when instructions is set
+instructions: [lc/ins-developer]
+---
+## This is discarded!
+```
+
+**Fix:** Choose one approach:
+
+- Use `instructions: [...]` to compose from other rules (no markdown needed)
+- Or write markdown directly (no `instructions` field)

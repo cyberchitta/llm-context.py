@@ -53,6 +53,7 @@ class Config:
                 "missing-files": "lc/missing-files.j2",
                 "outlines": "lc/outlines.j2",
                 "overview": "lc/overview.j2",
+                "preview": "lc/preview.j2",
                 "prompt": "lc/prompt.j2",
             },
         )

@@ -1,4 +1,5 @@
 from llm_context.context_generator import ContextGenerator, ContextSettings
+from llm_context.context_preview import ContextPreview
 from llm_context.context_spec import ContextSpec
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
@@ -94,3 +95,9 @@ def get_outlines(env: ExecutionEnvironment) -> str:
     selector = ContextSelector.create(env.config)
     file_sel_excerpted = selector.select_excerpted_only(env.state.file_selection)
     return ContextGenerator.create(env.config, file_sel_excerpted, settings, env.tagger).outlines()
+
+
+def preview_rule(env: ExecutionEnvironment, rule_name: str) -> str:
+    config = ContextSpec.create(env.config.project_root_path, rule_name, env.constants)
+    result = ContextPreview.create(config, env.tagger)
+    return result.format()

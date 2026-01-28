@@ -1,134 +1,168 @@
 # Common Rule Patterns
 
-Load this for pattern library and examples.
+Templates for common agent delegation scenarios.
 
-## Start with Filters
+## Pattern Selection Guide
 
-**Before selecting files to include, always determine what to exclude.** Every pattern here starts with appropriate filters. Check your project's custom filters first (e.g., `flt-repo-base` in llm-context), then compose with `lc/flt-base`.
+| Task Type | Pattern | Typical Size |
+|-----------|---------|--------------|
+| Fix a specific bug | Minimal | ~15k tokens |
+| Add a feature | Feature Addition | ~35k tokens |
+| Debug an issue | Debugging | ~40k tokens |
+| Refactor code | Refactoring | ~50k tokens |
+| Migrate to new pattern | Migration | ~60k tokens |
+| Review changes | Code Review | ~45k tokens |
 
 ---
 
-## Refactoring Pattern
+## Minimal Pattern
 
-**When:** Changing implementation of existing system
+**When:** Small, focused task with known files.
 
 ```yaml
-description: Refactor X to use Y
+---
+description: <specific task>
 compose:
-  filters: [lc/flt-base] # Filter first
+  filters: [lc/flt-no-files]    # Start with nothing
   excerpters: [lc/exc-base]
 also-include:
   full-files:
-    - "/<system-to-change>/**"
-  excerpted-files:
-    - "/<code-that-calls-it>/**"
-    - "/<code-it-depends-on>/**"
-gitignores:
-  full-files:
-    - "**/test/**" # Optional: additional exclusions
+    - "/path/to/file1.py"
+    - "/path/to/file2.py"
+---
+## Task
+<Brief description of the specific change needed>
 ```
 
-**Typical sizes:** 8-12 full, 15-25 excerpted, ~50k tokens
+**Use when:**
+- You know exactly which 2-5 files are involved
+- Task is surgical (fix a bug, add a parameter)
+- Minimal context reduces noise
 
 ---
 
 ## Feature Addition Pattern
 
-**When:** Adding new functionality
+**When:** Adding new functionality to existing codebase.
 
 ```yaml
-description: Add feature Z
+---
+description: Add <feature>
 compose:
-  filters: [lc/flt-base] # Filter first
+  filters: [lc/flt-base]
   excerpters: [lc/exc-base]
 also-include:
   full-files:
-    - "/<where-to-integrate>/**"
+    - "/<integration-point>/**"
     - "/<new-code-location>/**"
   excerpted-files:
-    - "/<similar-existing-features>/**"
-implementations:
-  - ["/<utilities>.py", "helper_function"]
+    - "/<similar-features>/**"
+---
+## Feature Context
+<What the feature does, where it integrates, patterns to follow>
 ```
 
-**Typical sizes:** 5-10 full, 10-20 excerpted, ~35k tokens
+**File selection:**
+- **Full:** Where new code goes + integration points
+- **Excerpted:** Similar existing features (for patterns)
 
 ---
 
 ## Debugging Pattern
 
-**When:** Investigating issue in specific area
+**When:** Investigating an issue in specific area.
 
 ```yaml
-description: Debug issue in X
+---
+description: Debug <issue description>
 compose:
-  filters: [lc/flt-base] # Filter first
+  filters: [lc/flt-base]
   excerpters: [lc/exc-base]
 also-include:
   full-files:
-    - "/<problematic-code>/**"
+    - "/<problem-area>/**"
     - "/<related-tests>/**"
   excerpted-files:
-    - "/<calling-code>/**"
+    - "/<callers>/**"
     - "/<dependencies>/**"
+---
+## Debug Context
+<Symptoms, reproduction steps, suspected areas>
 ```
 
-**Typical sizes:** 6-10 full, 8-15 excerpted, ~40k tokens
+**File selection:**
+- **Full:** Suspected problem code + relevant tests
+- **Excerpted:** Code that calls or is called by problem area
+
+---
+
+## Refactoring Pattern
+
+**When:** Changing implementation of existing system.
+
+```yaml
+---
+description: Refactor <system> to <approach>
+compose:
+  filters: [lc/flt-base]
+  excerpters: [lc/exc-base]
+also-include:
+  full-files:
+    - "/<code-to-change>/**"
+  excerpted-files:
+    - "/<callers>/**"
+    - "/<dependencies>/**"
+gitignores:
+  full-files:
+    - "**/test/**"           # Add tests later if needed
+---
+## Refactoring Context
+<Current structure, target structure, constraints>
+```
+
+**File selection:**
+- **Full:** All code being refactored
+- **Excerpted:** Everything that uses or is used by that code
 
 ---
 
 ## Migration Pattern
 
-**When:** Moving to new framework/library/pattern
+**When:** Moving to new framework, library, or pattern.
 
 ```yaml
-description: Migrate X to Y
+---
+description: Migrate <system> from <old> to <new>
 compose:
-  filters: [lc/flt-base] # Filter first
+  filters: [lc/flt-base]
   excerpters: [lc/exc-base]
 also-include:
   full-files:
     - "/<old-implementation>/**"
-    - "/<migration-entry-points>/**"
+    - "/<entry-points>/**"
   excerpted-files:
-    - "/<code-using-old-pattern>/**"
+    - "/<code-using-old>/**"
     - "/<new-pattern-examples>/**"
-```
-
-**Typical sizes:** 10-15 full, 20-30 excerpted, ~60k tokens
-
 ---
-
-## Minimal/Surgical Pattern
-
-**When:** Very specific, small scope task
-
-```yaml
-description: Quick fix for specific issue
-compose:
-  filters: [lc/flt-no-files] # Exclude everything, then be explicit
-  excerpters: [lc/exc-base]
-also-include:
-  full-files:
-    - "/specific/file1.py"
-    - "/specific/file2.py"
-    - "/config/relevant.yaml"
-implementations:
-  - ["/utils/helpers.py", "specific_function"]
+## Migration Context
+<Old approach, new approach, migration strategy>
 ```
 
-**Typical sizes:** 2-5 full, 0-3 excerpted, ~15k tokens
+**File selection:**
+- **Full:** Old code to replace + entry points
+- **Excerpted:** All usage sites + examples of new pattern
 
 ---
 
 ## Code Review Pattern
 
-**When:** Reviewing changes in specific area
+**When:** Reviewing changes for correctness and style.
 
 ```yaml
-description: Review changes to X
+---
+description: Review changes to <area>
 compose:
-  filters: [lc/flt-base] # Filter first
+  filters: [lc/flt-base]
   excerpters: [lc/exc-base]
 also-include:
   full-files:
@@ -136,20 +170,22 @@ also-include:
   excerpted-files:
     - "/<related-code>/**"
     - "/<tests>/**"
+---
+## Review Context
+<What changed, what to look for, standards to apply>
 ```
-
-**Typical sizes:** 8-12 full, 12-20 excerpted, ~45k tokens
 
 ---
 
 ## API Development Pattern
 
-**When:** Working on API endpoints
+**When:** Working on API endpoints.
 
 ```yaml
-description: Develop/modify API endpoints
+---
+description: <API task description>
 compose:
-  filters: [lc/flt-base] # Filter first
+  filters: [lc/flt-base]
   excerpters: [lc/exc-base]
 also-include:
   full-files:
@@ -160,50 +196,51 @@ also-include:
     - "/src/services/**"
 implementations:
   - ["/src/utils/validators.py", "validate_request"]
+---
+## API Context
+<Endpoint specifications, request/response formats>
 ```
-
-**Typical sizes:** 10-15 full, 15-25 excerpted, ~55k tokens
 
 ---
 
 ## Testing Pattern
 
-**When:** Writing/fixing tests for specific module
+**When:** Writing or fixing tests.
 
 ```yaml
-description: Add tests for X
+---
+description: Add tests for <module>
 compose:
-  filters: [lc/flt-base] # Filter first
+  filters: [lc/flt-base]
   excerpters: [lc/exc-base]
 also-include:
   full-files:
     - "/<module-to-test>/**"
     - "/<test-files>/**"
   excerpted-files:
-    - "/<existing-test-patterns>/**"
     - "/<test-utilities>/**"
+    - "/<similar-tests>/**"
+---
+## Testing Context
+<What to test, coverage goals, testing patterns used>
 ```
-
-**Typical sizes:** 8-10 full, 10-15 excerpted, ~40k tokens
 
 ---
 
-## Performance Optimization Pattern
+## Composition Example
 
-**When:** Optimizing specific bottleneck
+For projects with custom filters, compose them:
 
 ```yaml
-description: Optimize performance of X
+---
+description: <task>
 compose:
-  filters: [lc/flt-base] # Filter first
+  filters: [flt-repo-base]      # Project filter (includes lc/flt-base)
   excerpters: [lc/exc-base]
 also-include:
   full-files:
-    - "/<slow-code>/**"
-    - "/<benchmarks>/**"
-  excerpted-files:
-    - "/<calling-code>/**"
-    - "/<similar-optimized-code>/**"
+    - "/<specific-files>/**"
+---
 ```
 
-**Typical sizes:** 6-8 full, 10-15 excerpted, ~35k tokens
+Check `.llm-context/rules/` for available project filters like `flt-repo-base`.

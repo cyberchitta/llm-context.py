@@ -1,5 +1,4 @@
 import ast
-from importlib.metadata import version as pkg_ver
 from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
@@ -44,6 +43,18 @@ def lc_rule_instructions(root_path: str) -> str:
     env = ExecutionEnvironment.create(Path(root_path))
     with env.activate():
         return commands.get_focus_help(env)
+
+
+@mcp.tool()
+def lc_preview(root_path: str, rule_name: str) -> str:
+    """Preview what files a rule selects and their sizes.
+    Args:
+        root_path: Root directory path (e.g. '/home/user/projects/myproject')
+        rule_name: Name of the rule to preview (e.g. 'prm-code', 'tmp-prm-auth-jwt')
+    """
+    env = ExecutionEnvironment.create(Path(root_path))
+    with env.activate():
+        return commands.preview_rule(env, rule_name)
 
 
 @mcp.tool()

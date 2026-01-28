@@ -1,185 +1,249 @@
 # Rule Syntax Reference
 
-Load this when you need detailed syntax information.
+Complete schema and field details for rule files.
 
-## Complete Schema
+## Full Schema
 
 ```yaml
 ---
-description: "One-line task description (required)"
-overview: "full" | "focused"  # Default: full
+description: "Task description (required)"
+
 compose:
-  filters: [<filter-rules>]   # File selection rules
-  excerpters: [<exc-rules>]   # Outlining config (required)
-instructions: [<ins-rules>]   # Optional guidelines
-gitignores:                   # Additional exclusions
+  filters: [<filter-rules>]     # File exclusion rules
+  excerpters: [<exc-rules>]     # Excerpt configuration (required)
+
+instructions: [<ins-rules>]     # Optional: guidelines for the agent
+
+gitignores:                     # Additional exclusions (additive)
   full-files: [<patterns>]
   excerpted-files: [<patterns>]
   overview-files: [<patterns>]
-limit-to:                     # Restrict to patterns
+
+limit-to:                       # Restrict to only these patterns
   full-files: [<patterns>]
   excerpted-files: [<patterns>]
-also-include:                 # Force include
+
+also-include:                   # Force include (bypasses filters)
   full-files: [<patterns>]
   excerpted-files: [<patterns>]
-implementations:              # Specific extractions
+
+implementations:                # Extract specific definitions
   - [<file>, <name>]
-excerpt-modes:                # Override default outliner
+
+excerpt-modes:                  # Override default excerpter
   <pattern>: <mode>
-excerpt-config:               # Excerpter settings
+
+excerpt-config:                 # Excerpter settings
   <mode>: {<config>}
 ---
-## Rule Content
-Markdown providing task-specific context.
+## Markdown Content
+Task-specific context and instructions for the agent.
 ```
 
-## Field Details
+## Field Reference
 
-### compose
+### description (required)
 
-Merge rules together:
+One-line task description. Appears in rule listings.
 
-- `filters`: Combine gitignores, limit-to, also-include
-- `excerpters`: Combine excerpt-modes, excerpt-config
+```yaml
+description: Add rate limiting to API endpoints
+```
 
-**Always include:** `excerpters: [lc/exc-base]`
+### compose (required)
+
+Merge other rules into this one.
+
+```yaml
+compose:
+  filters: [lc/flt-base]        # Always include base filters
+  excerpters: [lc/exc-base]     # Required for excerpting
+```
+
+**filters:** Combine gitignores, limit-to, also-include from composed rules.
+
+**excerpters:** Combine excerpt-modes and excerpt-config. Always include `lc/exc-base`.
 
 ### gitignores
 
-Exclude patterns (additive):
+Exclude files matching patterns. Additive with composed filters.
 
 ```yaml
 gitignores:
-  full-files: ["**/test/**", "*.tmp"]
-  excerpted-files: ["*.md"]
+  full-files:
+    - "**/test/**"
+    - "*.generated.py"
+  excerpted-files:
+    - "*.md"
 ```
 
 ### limit-to
 
-**Warning:** Only first `limit-to` per key is used in composition.
+Only include files matching these patterns. **Warning:** Only the first `limit-to` per category is used in composition.
 
 ```yaml
 limit-to:
-  full-files: ["/src/api/**"] # Only these files
+  full-files: ["/src/api/**"]
+  excerpted-files: ["/src/**"]
 ```
 
 ### also-include
 
-Force include despite filters:
+Force include files, **bypassing all filters**. Use with caution.
 
 ```yaml
 also-include:
-  full-files: ["/important.config"]
-  excerpted-files: ["/large-file.py"]
+  full-files:
+    - "/src/auth/**"
+    - "/config/settings.yaml"
+  excerpted-files:
+    - "/src/models/**"
 ```
+
+**Warning:** `also-include` ignores gitignores. Be specific to avoid pulling in __pycache__, node_modules, etc.
 
 ### implementations
 
-Extract specific definitions:
+Extract specific function/class definitions from files.
 
 ```yaml
 implementations:
-  - ["/src/utils.js", "validateToken"]
-  - ["/src/auth.js", "AuthManager"]
+  - ["/src/utils.py", "validate_token"]
+  - ["/src/auth.py", "AuthManager"]
 ```
+
+Useful when you need one function from a large file.
+
+### instructions
+
+Reference instruction/style rules to include in context.
+
+```yaml
+instructions: [lc/ins-developer, lc/sty-python]
+```
+
+**Note:** When `instructions` is set, markdown content in the rule file is ignored.
+
+### excerpt-modes
+
+Override the default excerpter for specific file patterns.
+
+```yaml
+excerpt-modes:
+  "*.md": "markdown"
+  "*.vue": "sfc"
+```
+
+Available modes: `code-outliner` (default for code), `markdown`, `sfc` (Vue/Svelte).
+
+### excerpt-config
+
+Configure excerpter behavior.
+
+```yaml
+excerpt-config:
+  markdown:
+    with-code-blocks: true
+    with-lists: true
+```
+
+## Built-in Rules
+
+### Filters
+
+| Rule | Purpose |
+|------|---------|
+| `lc/flt-base` | Standard exclusions (binaries, logs, caches, deps) |
+| `lc/flt-no-files` | Exclude everything (use with `also-include`) |
+| `lc/flt-no-full` | No full-content files |
+| `lc/flt-no-outline` | No excerpted files |
+
+### Excerpters
+
+| Rule | Purpose |
+|------|---------|
+| `lc/exc-base` | Code outlining for all supported languages |
+
+### Instructions
+
+| Rule | Purpose |
+|------|---------|
+| `lc/ins-developer` | General development guidelines |
+| `lc/ins-rule-framework` | Full rule system documentation |
+
+### Styles
+
+| Rule | Purpose |
+|------|---------|
+| `lc/sty-code` | Universal code principles |
+| `lc/sty-python` | Python-specific guidelines |
+| `lc/sty-javascript` | JavaScript-specific guidelines |
+
+## Path Format
+
+In rule patterns, paths are relative to project root, starting with `/`:
+
+```yaml
+# Correct patterns in rules
+"/src/file.py"              # Specific file
+"/src/**/*.py"              # Glob pattern
+"**/*.js"                   # Any depth
+
+# Wrong
+"src/file.py"               # Missing leading /
+"/src/"                     # Directory (use /src/**)
+```
+
+**Output format:** In generated context and preview output, paths include the project directory name: `/{project-name}/src/file.py`. This enables combining context from multiple projects without path conflicts.
 
 ## Common Mistakes
 
-### Instructions Field vs Markdown Content
-
-⚠️ **Don't mix these:**
+### 1. Missing excerpters
 
 ```yaml
----
+# Wrong - will fail
+compose:
+  filters: [lc/flt-base]
+
+# Correct
+compose:
+  filters: [lc/flt-base]
+  excerpters: [lc/exc-base]
+```
+
+### 2. also-include pulling in noise
+
+```yaml
+# Dangerous - gets __pycache__, etc.
+also-include:
+  full-files: ["/src/**"]
+
+# Better - be specific
+also-include:
+  full-files: ["/src/auth/**", "/src/api/routes.py"]
+```
+
+### 3. Mixing instructions with markdown
+
+```yaml
+# Wrong - markdown will be ignored
 instructions: [lc/ins-developer]
 ---
-## This markdown will be ignored!
+## This content is discarded!
 ```
 
-**Why:** When you specify `instructions` field, the rule composes content from those referenced rules. Any markdown in the current rule is discarded (with a warning logged).
+Choose one: use `instructions` to compose, or write markdown directly.
 
-**Fix:** Choose one approach:
-
-- Use `instructions: [...]` to compose from other rules (no markdown needed)
-- Or put content directly in markdown (no `instructions` field)
-
-### also-include Bypasses Filters
-
-⚠️ `also-include` **ignores gitignores** - it will include everything matching the pattern, including build artifacts, cache directories, etc.
-
-**Problem:**
+### 4. YAML syntax errors
 
 ```yaml
+# Wrong - unquoted glob
 also-include:
   full-files:
-    - "/src/**" # Gets __pycache__, .pyc, node_modules, etc.
-```
+    - /src/**/*.py
 
-**Solution:** Be specific with patterns, or manually add `gitignores` for what you don't want:
-
-```yaml
+# Correct - quoted
 also-include:
   full-files:
-    - "/src/my-specific-module/**"
-gitignores:
-  full-files:
-    - "__pycache__"
-    - "*.pyc"
-```
-
-## Path Format Rules
-
-✅ **Correct:**
-
-- `/src/file.py` - Root-relative
-- `/src/**/*.py` - Glob pattern
-- `**/*.js` - Any depth
-
-❌ **Wrong:**
-
-- `/myproject/src/file.py` - Includes project name
-- `src/file.py` - Missing leading slash
-- `/src/` - Directory (match files: `/src/**`)
-
-## System Rules Reference
-
-**Filters:**
-
-- `lc/flt-base` - Standard exclusions (binaries, logs, etc.)
-- `lc/flt-no-files` - Exclude everything (use with also-include)
-- `lc/flt-no-full` - No full content files
-- `lc/flt-no-outline` - No excerpted files
-
-**Excerpters:**
-
-- `lc/exc-base` - Code outlining for all languages
-
-**Instructions:**
-
-- `lc/ins-developer` - Developer guidelines
-- `lc/ins-rule-framework` - Full framework docs
-
-**Styles:**
-
-- `lc/sty-code` - Universal principles
-- `lc/sty-python` - Python-specific
-- `lc/sty-javascript` - JS-specific
-
-## Composition Examples
-
-**Minimal context:**
-
-```yaml
-compose:
-  filters: [lc/flt-no-files]
-  excerpters: [lc/exc-base]
-```
-
-**Standard + custom:**
-
-```yaml
-compose:
-  filters: [lc/flt-base, my-project-filters]
-  excerpters: [lc/exc-base]
-instructions: [lc/ins-developer, lc/sty-python]
+    - "/src/**/*.py"
 ```

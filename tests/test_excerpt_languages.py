@@ -354,9 +354,9 @@ def test_svelte_excerpting(test_name, extension, code, config, expected_output):
     assert result.excerpts[0].rel_path == f"test_file.{extension}"
 
     actual_output = result.excerpts[0].content.strip()
-    assert actual_output == expected_output, (
-        f"Mismatch in {test_name}:\nExpected:\n{expected_output}\n\nActual:\n{actual_output}"
-    )
+    assert (
+        actual_output == expected_output
+    ), f"Mismatch in {test_name}:\nExpected:\n{expected_output}\n\nActual:\n{actual_output}"
 
 
 def test_svelte_empty_file():
@@ -686,9 +686,9 @@ def test_markdown_excerpting(test_name, extension, code, config, expected_output
     assert result.excerpts[0].rel_path == f"test_file.{extension}"
 
     actual_output = result.excerpts[0].content.strip()
-    assert actual_output == expected_output, (
-        f"Mismatch in {test_name}:\nExpected:\n{expected_output}\n\nActual:\n{actual_output}"
-    )
+    assert (
+        actual_output == expected_output
+    ), f"Mismatch in {test_name}:\nExpected:\n{expected_output}\n\nActual:\n{actual_output}"
 
 
 def test_markdown_empty_file():

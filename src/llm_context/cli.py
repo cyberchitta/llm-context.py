@@ -140,3 +140,13 @@ def missing(env: ExecutionEnvironment) -> ExecutionResult:
         file_list = ast.literal_eval(args.e)
         content = commands.get_excluded(env, file_list, args.t)
     return ExecutionResult(content, env)
+
+
+@create_command
+def preview(env: ExecutionEnvironment) -> ExecutionResult:
+    parser = argparse.ArgumentParser(description="Preview rule file selection and sizes")
+    parser.add_argument("rule", type=str, help="Rule to preview")
+    args = parser.parse_args()
+    result = commands.preview_rule(env, args.rule)
+    log(INFO, result)
+    return ExecutionResult(None, env)

@@ -69,7 +69,7 @@ class Markdown(Excerpter):
     def _format_content(self, content: str, included_line_set: set[int]) -> str:
         lines = content.splitlines()
         result: list[str] = []
-        last_included_index = -2  
+        last_included_index = -2
         for i, line in enumerate(lines):
             is_included = i in included_line_set
             if is_included:

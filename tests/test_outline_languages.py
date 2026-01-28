@@ -653,6 +653,6 @@ def test_outline_generation(language, extension, code, expected_highlights, tagg
     assert len(result.excerpts) == 1
     assert result.excerpts[0].rel_path == f"test_file.{extension}"
     actual_highlights = result.excerpts[0].content.strip()
-    assert actual_highlights == expected_highlights, (
-        f"Mismatch in {language} highlights:\nExpected:\n{expected_highlights}\n\nActual:\n{actual_highlights}"
-    )
+    assert (
+        actual_highlights == expected_highlights
+    ), f"Mismatch in {language} highlights:\nExpected:\n{expected_highlights}\n\nActual:\n{actual_highlights}"
