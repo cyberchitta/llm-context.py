@@ -1,0 +1,22 @@
+Rule: {{ rule_name }}
+{%- if compose_filters or compose_excerpters %}
+Composes: {% if compose_filters %}filters: {{ compose_filters }}{% endif %}{% if compose_filters and compose_excerpters %}, {% endif %}{% if compose_excerpters %}excerpters: {{ compose_excerpters }}{% endif %}
+{%- endif %}
+
+Full files ({{ full_files|length }}):                    {{ full_total_size }}
+{%- for file in full_files[:max_files] %}
+  {{ "%-60s"|format(file.rel_path) }} {{ "%10s"|format(file.original_size) }}
+{%- endfor %}
+{%- if full_files|length > max_files %}
+  ... and {{ full_files|length - max_files }} more files
+{%- endif %}
+
+Excerpted files ({{ excerpted_files|length }}):               {{ excerpted_total_size }} (of {{ excerpted_original_size }})
+{%- for file in excerpted_files[:max_files] %}
+  {{ "%-60s"|format(file.rel_path) }} {{ "%10s"|format(file.excerpted_size) }} (of {{ file.original_size }})
+{%- endfor %}
+{%- if excerpted_files|length > max_files %}
+  ... and {{ excerpted_files|length - max_files }} more files
+{%- endif %}
+
+Total: {{ total_files }} files, {{ total_size }} (~{{ estimated_tokens }}k tokens)

@@ -10,7 +10,7 @@ Smart outlines highlighting important definitions in the codebase. These show fu
 {% set sample_definitions = excerpts_group.metadata.sample_definitions %}
 {% if sample_definitions %}
 **Get specific implementations:**
-{% if tools_available %}
+{% if with_tools %}
 ```json
 {
   "root_path": "{{ abs_root_path }}",
@@ -41,7 +41,7 @@ Excerpted content showing important sections from files. These sections are conf
 **Get excluded sections:**
 {% set sample_sfc_file = excerpts_group.excerpts | first %}
 {% if sample_sfc_file %}
-{% if tools_available %}
+{% if with_tools %}
 ```json
 {
   "root_path": "{{ abs_root_path }}",

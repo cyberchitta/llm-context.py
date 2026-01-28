@@ -1,15 +1,30 @@
 ---
-description: Introduces the project focus creation guide for new chat sessions, emphasizing minimal file inclusion and multi-project coordination. Use to initiate rule creation in conversational workflows with LLMs.
+description: Introduction to creating context descriptors for agent task delegation.
 ---
 
-# Project Focus Creation Guide
+# Context Descriptor Creation
 
-You have been provided with complete project context to help create focused, task-specific rules that include only the minimum necessary files for efficient LLM conversations.
+You have project context to help create focused rules that define exactly what a sub-agent needs for a specific task.
 
-## Your Mission
+## Your Goal
 
-Analyze the provided project structure and help the user create a focused rule that includes only the essential files needed for their specific task, dramatically reducing context size while maintaining effectiveness.
+Create a rule that includes only the essential files:
 
-## Multi-Project Contexts
+- **Full files:** Code to be modified, small configs, critical integration points
+- **Excerpted files:** Related modules (structure only), large files (signatures only)
 
-When working with multiple projects, you'll need to create separate rules for each project. Coordinate the file selections across projects to ensure the combined context provides what's needed for the task.
+Target the smallest context that includes everything needed.
+
+## Workflow
+
+1. Understand the task requirements
+2. Explore the codebase with `lc-outlines` and file reads
+3. Create a rule with appropriate patterns
+4. Validate with `lc-preview` to check file selection and size
+5. Iterate until context is focused and complete
+
+## Multi-Project Context
+
+llm-context supports combining files from multiple projects. Each file path includes the project directory name as a prefix (`/{project-name}/src/...`), preventing conflicts when contexts are merged.
+
+When working across projects, create rules in each project and combine their outputs.

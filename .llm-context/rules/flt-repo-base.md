@@ -1,5 +1,4 @@
 ---
-name: flt-repo-base
 description: additional repo specific filters.
 compose:
   filters: [lc/flt-base]

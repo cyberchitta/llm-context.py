@@ -8,8 +8,7 @@ Already included (full content):
 Already included (excerpted):
 {% for file in already_excerpted -%}
 {%- set excerpt_meta = excerpted_metadata.get(file, {}) -%}
-{%- set processor_type = excerpt_meta.get('processor_type', 'unknown') -%}
-{{ file }}{% if processor_type == 'code-outliner' %} (lc-missing -i for details){% else %} (lc-missing -e for excluded){% endif %}
+{{ file }} (lc-missing -e for excluded)
 {% endfor %}
 {% endif -%}
 {%- if deleted_files -%}
