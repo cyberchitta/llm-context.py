@@ -146,8 +146,8 @@ def missing(env: ExecutionEnvironment) -> ExecutionResult:
 @create_command
 def preview(env: ExecutionEnvironment) -> ExecutionResult:
     parser = argparse.ArgumentParser(description="Preview rule file selection and sizes")
-    parser.add_argument("rule", type=str, help="Rule to preview")
+    parser.add_argument("-r", type=str, help="Use specified rule (temporary)")
     args = parser.parse_args()
-    result = commands.preview_rule(env, args.rule)
-    log(INFO, result)
-    return ExecutionResult(None, env)
+    rule_name = args.r if args.r else env.state.current_rule
+    result = commands.preview_rule(env, rule_name)
+    return ExecutionResult(result, env)
