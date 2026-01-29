@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.1] - 2026-01-29
+
+### Features
+
+- Add shell tab completion for rule names
+- Make lc-preview consistent with context/outlines commands
+- Add agent-friendly CLI output with -r flag
+- Add rule preview, update skill for agent use case
+- Return full content for code-outlined files in lc-missing
+- Add -m flag for context as separate message
+
+### Refactor
+
+- Pass explicit rule parameters to command functions
+- Rename tools field
+
 ## [0.6.0] - 2025-11-13
 
 ### Bug Fixes
