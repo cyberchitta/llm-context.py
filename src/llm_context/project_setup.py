@@ -1,3 +1,4 @@
+import os
 import shutil
 from dataclasses import dataclass
 from importlib import resources
@@ -92,6 +93,7 @@ class ProjectSetup:
         self._create_user_notes_file()
         self._setup_default_rules()
         self._setup_global_skill()
+        self._setup_shell_completions()
 
     def _create_or_update_ancillary_files(self):
         if not self.project_layout.config_path.exists() or self.constants.needs_update:
@@ -218,3 +220,47 @@ class ProjectSetup:
                 (skill_path / skill_file.name).write_text(skill_file.read_text())
         log(INFO, f"Claude Skill installed to: {skill_path}")
         log(INFO, "Restart Claude Code/Desktop to activate")
+
+    def _setup_shell_completions(self):
+        layout = self.project_layout
+        if not self.constants.needs_update:
+            if (
+                layout.user_completions_bash_file.exists()
+                or layout.user_completions_zsh_file.exists()
+            ):
+                return
+        shell = os.environ.get("SHELL", "")
+        if "bash" in shell:
+            self._install_bash_completion()
+        elif "zsh" in shell:
+            self._install_zsh_completion()
+        else:
+            self._install_bash_completion()
+            self._install_zsh_completion()
+
+    def _install_bash_completion(self):
+        layout = self.project_layout
+        layout.user_completions_bash_dir.mkdir(parents=True, exist_ok=True)
+        completion_content = (
+            resources.files(lc_resources).joinpath("completions/bash-completion.sh").read_text()
+        )
+        layout.user_completions_bash_file.write_text(completion_content)
+        log(INFO, f"Installed bash completions to: {layout.user_completions_bash_file}")
+        log(INFO, "Restart your shell or run: source ~/.bashrc")
+
+    def _install_zsh_completion(self):
+        layout = self.project_layout
+        layout.user_completions_zsh_dir.mkdir(parents=True, exist_ok=True)
+        completion_content = (
+            resources.files(lc_resources).joinpath("completions/zsh-completion.zsh").read_text()
+        )
+        layout.user_completions_zsh_file.write_text(completion_content)
+        log(INFO, f"Installed zsh completions to: {layout.user_completions_zsh_file}")
+        if layout.user_zshrc.exists():
+            zshrc_content = layout.user_zshrc.read_text()
+            if str(layout.user_completions_zsh_dir) not in zshrc_content:
+                fpath_line = f"\nfpath=({layout.user_completions_zsh_dir} $fpath)\n"
+                with layout.user_zshrc.open("a") as f:
+                    f.write(fpath_line)
+                log(INFO, f"Added {layout.user_completions_zsh_dir} to fpath in ~/.zshrc")
+        log(INFO, "Restart your shell or run: source ~/.zshrc")

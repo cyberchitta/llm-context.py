@@ -93,6 +93,26 @@ class ProjectLayout:
     def get_rule_path(self, rule_name: str) -> Path:
         return self.rules_path / rule_name
 
+    @property
+    def user_completions_bash_dir(self) -> Path:
+        return Path.home() / ".local/share/bash-completion/completions"
+
+    @property
+    def user_completions_bash_file(self) -> Path:
+        return self.user_completions_bash_dir / "lc-commands"
+
+    @property
+    def user_completions_zsh_dir(self) -> Path:
+        return Path.home() / ".zsh/completions"
+
+    @property
+    def user_completions_zsh_file(self) -> Path:
+        return self.user_completions_zsh_dir / "_lc-commands"
+
+    @property
+    def user_zshrc(self) -> Path:
+        return Path.home() / ".zshrc"
+
 
 def _format_size(size_bytes):
     for unit in ["B", "KB", "MB", "GB"]:
