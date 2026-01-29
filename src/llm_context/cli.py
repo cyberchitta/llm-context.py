@@ -143,7 +143,7 @@ def missing(env: ExecutionEnvironment) -> ExecutionResult:
     return ExecutionResult(content, env)
 
 
-@create_command
+@create_output_cmd
 def preview(env: ExecutionEnvironment) -> ExecutionResult:
     parser = argparse.ArgumentParser(description="Preview rule file selection and sizes")
     parser.add_argument("-r", type=str, help="Use specified rule (temporary)")
