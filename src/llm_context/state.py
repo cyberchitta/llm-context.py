@@ -79,12 +79,12 @@ class StateStore:
             return
         try:
             store = StateStore(state_path)
-            selections, current_profile = store.load()
-            rule_path = project_layout.get_rule_path(f"{current_profile}.md")
+            _, current_rule = store.load()
+            rule_path = project_layout.get_rule_path(f"{current_rule}.md")
             if not rule_path.exists():
                 log(
                     WARNING,
-                    f"Rule '{current_profile}' not found. Deleting state file: {state_path}",
+                    f"Rule '{current_rule}' not found. Deleting state file: {state_path}",
                 )
                 state_path.unlink(missing_ok=True)
         except Exception as e:
@@ -105,20 +105,20 @@ class StateStore:
                     sel_data.get("excerpted-files", []),
                     sel_data.get("timestamp", dt.now().timestamp()),
                 )
-            return AllSelections(selections), data.get("current-profile", DEFAULT_CODE_RULE)
+            return AllSelections(selections), data.get("current-rule", DEFAULT_CODE_RULE)
         except Exception:
             return AllSelections.create_empty(), DEFAULT_CODE_RULE
 
-    def save(self, store: AllSelections, current_profile: str):
+    def save(self, selections: AllSelections, current_rule: str):
         data = {
-            "current-profile": current_profile,
+            "current-rule": current_rule,
             "selections": {
                 rule_name: {
                     "full-files": sel.full_files,
                     "excerpted-files": sel.excerpted_files,
                     "timestamp": sel.timestamp,
                 }
-                for rule_name, sel in store.selections.items()
+                for rule_name, sel in selections.selections.items()
             },
         }
         Yaml.save(self.storage_path, data)

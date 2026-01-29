@@ -22,16 +22,15 @@ def lc_changed(root_path: str, timestamp: float) -> str:
 
 
 @mcp.tool()
-def lc_outlines(root_path: str) -> str:
+def lc_outlines(root_path: str, rule_name: str) -> str:
     """Returns excerpted content highlighting important sections in all supported files.
     Args:
         root_path: Root directory path
         rule_name: Rule to use for file selection rules
-        timestamp: Context generation timestamp to check against existing selections
     """
     env = ExecutionEnvironment.create(Path(root_path))
     with env.activate():
-        return commands.get_outlines(env)
+        return commands.get_outlines(env, rule_name)
 
 
 @mcp.tool()
@@ -73,7 +72,7 @@ def lc_missing(root_path: str, param_type: str, data: str, timestamp: float) -> 
             return commands.get_missing_files(env, file_list, timestamp)
         elif param_type == "i":
             impl_list = ast.literal_eval(data)
-            return commands.get_implementations(env, impl_list)
+            return commands.get_implementations(env, impl_list, timestamp)  # ← Pass timestamp
         elif param_type == "e":
             file_list = ast.literal_eval(data)
             return commands.get_excluded(env, file_list, timestamp)

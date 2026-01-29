@@ -12,26 +12,18 @@ from llm_context.cmd_pipeline import (
     create_init_command,
 )
 from llm_context.context_generator import ContextSettings
+from llm_context.context_spec import ContextSpec
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.utils import log
 
 
-def rule_feedback(env: ExecutionEnvironment):
-    log(INFO, f"Active rule: {env.state.file_selection.rule_name}")
-
-
-def _set_rule(rule: str, env: ExecutionEnvironment) -> ExecutionResult:
-    if not env.config.has_rule(rule):
-        raise ValueError(f"Rule '{rule}' does not exist.")
-    nxt_env = env.with_rule(rule)
-    nxt_env.state.store()
-    log(INFO, f"Active rule set to '{rule}'.")
-    return ExecutionResult(None, nxt_env)
+def rule_feedback(env: ExecutionEnvironment, rule_name: str):
+    log(INFO, f"Active rule: {rule_name}")
 
 
 @create_init_command
 def init_project(env: ExecutionEnvironment):
-    log(INFO, f"LLM Context initialized for project: {env.config.project_root}")
+    log(INFO, f"LLM Context initialized for project: {env.state.project_layout.root_path}")
     log(
         INFO,
         "See the user guide for setup and customization: https://github.com/cyberchitta/llm-context.py/blob/main/docs/user-guide.md",
@@ -42,15 +34,16 @@ def init_project(env: ExecutionEnvironment):
 @create_command
 def set_rule(env: ExecutionEnvironment) -> ExecutionResult:
     parser = argparse.ArgumentParser(description="Set active rule for LLM context")
-    parser.add_argument(
-        "rule",
-        type=str,
-        help="Rule to set as active",
-    )
+    parser.add_argument("rule", type=str, help="Rule to set as active")
     args = parser.parse_args()
-    res = _set_rule(args.rule, env)
-    res.env.state.store()
-    return res
+    config = ContextSpec.create(env.state.project_layout.root_path, args.rule, env.constants)
+    if not config.has_rule(args.rule):
+        raise ValueError(f"Rule '{args.rule}' does not exist.")
+    nxt_state = env.state.with_current_rule(args.rule)
+    nxt_env = env.with_state(nxt_state)
+    nxt_env.state.store()
+    log(INFO, f"Active rule set to '{args.rule}'.")
+    return ExecutionResult(None, nxt_env)
 
 
 @create_init_command
@@ -61,8 +54,9 @@ def version(*, env: ExecutionEnvironment) -> ExecutionResult:
 
 @create_command
 def select(env: ExecutionEnvironment) -> ExecutionResult:
-    rule_feedback(env)
-    file_selection = commands.select_all_files(env)
+    rule_name = env.state.current_rule
+    rule_feedback(env, rule_name)
+    file_selection = commands.select_all_files(env, rule_name)
     nxt_env = env.with_state(env.state.with_selection(file_selection))
     nxt_env.state.store()
     log(
@@ -80,14 +74,16 @@ def rule_instructions(env: ExecutionEnvironment) -> ExecutionResult:
 
 @create_clipboard_cmd
 def prompt(env: ExecutionEnvironment) -> ExecutionResult:
-    rule_feedback(env)
-    content = commands.get_prompt(env)
+    rule_name = env.state.current_rule
+    rule_feedback(env, rule_name)
+    content = commands.get_prompt(env, rule_name)
     return ExecutionResult(content, env)
 
 
 @create_clipboard_cmd
 def context(env: ExecutionEnvironment) -> ExecutionResult:
-    rule_feedback(env)
+    rule_name = env.state.current_rule
+    rule_feedback(env, rule_name)
     parser = argparse.ArgumentParser(description="Generate context for LLM")
     parser.add_argument("-p", action="store_true", help="Include prompt in context")
     parser.add_argument("-nt", action="store_true", help="Assume no MCP/tools")
@@ -96,8 +92,8 @@ def context(env: ExecutionEnvironment) -> ExecutionResult:
     parser.add_argument("-m", action="store_true", help="Send context as separate message")
     args, _ = parser.parse_known_args()
     settings = ContextSettings.create(args.p, args.u, not args.nt, args.m)
-    content, context_timestamp = commands.generate_context(env, settings)
-    updated_selection = env.state.file_selection.with_timestamp(context_timestamp)
+    content, context_timestamp = commands.generate_context(env, rule_name, settings)
+    updated_selection = env.state.get_selection(rule_name).with_timestamp(context_timestamp)
     nxt_env = env.with_state(env.state.with_selection(updated_selection))
     nxt_env.state.store()
     if args.f:
@@ -108,14 +104,15 @@ def context(env: ExecutionEnvironment) -> ExecutionResult:
 
 @create_clipboard_cmd
 def outlines(env: ExecutionEnvironment) -> ExecutionResult:
-    rule_feedback(env)
-    content = commands.get_outlines(env)
+    rule_name = env.state.current_rule
+    rule_feedback(env, rule_name)
+    content = commands.get_outlines(env, rule_name)
     return ExecutionResult(content, env)
 
 
 @create_clipboard_cmd
 def changed_files(env: ExecutionEnvironment) -> ExecutionResult:
-    timestamp = env.state.file_selection.timestamp
+    timestamp = env.state.get_selection(env.state.current_rule).timestamp
     return ExecutionResult(commands.list_modified_files(env, timestamp), env)
 
 
@@ -135,8 +132,8 @@ def missing(env: ExecutionEnvironment) -> ExecutionResult:
         content = commands.get_missing_files(env, file_list, args.t)
     elif args.i:
         impl_list = ast.literal_eval(args.i)
-        content = commands.get_implementations(env, impl_list)
-    elif args.e:
+        content = commands.get_implementations(env, impl_list, args.t)  # ← Pass timestamp
+    else:
         file_list = ast.literal_eval(args.e)
         content = commands.get_excluded(env, file_list, args.t)
     return ExecutionResult(content, env)

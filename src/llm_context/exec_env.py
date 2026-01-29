@@ -5,11 +5,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, ClassVar, Optional
 
-from llm_context.context_spec import ContextSpec
 from llm_context.excerpters.parser import ASTFactory
 from llm_context.excerpters.tagger import ASTBasedTagger
-from llm_context.file_selector import ContextSelector
-from llm_context.rule import DEFAULT_CODE_RULE, ToolConstants
+from llm_context.rule import ToolConstants
+from llm_context.rule_parser import DEFAULT_CODE_RULE
 from llm_context.state import AllSelections, FileSelection, StateStore
 from llm_context.utils import ProjectLayout
 
@@ -53,32 +52,31 @@ class RuntimeContext:
 class ExecutionState:
     project_layout: ProjectLayout
     selections: AllSelections
-    rule_name: str
+    current_rule: str
 
     @staticmethod
     def load(project_layout: ProjectLayout) -> "ExecutionState":
         store = StateStore(project_layout.state_store_path)
-        selections, current_profile = store.load()
-        return ExecutionState(project_layout, selections, current_profile)
+        selections, current_rule = store.load()
+        return ExecutionState(project_layout, selections, current_rule)
 
     @staticmethod
     def create(
-        project_layout: ProjectLayout, selections: AllSelections, rule_name: str
+        project_layout: ProjectLayout, selections: AllSelections, current_rule: str
     ) -> "ExecutionState":
-        return ExecutionState(project_layout, selections, rule_name)
+        return ExecutionState(project_layout, selections, current_rule)
 
-    @property
-    def file_selection(self) -> FileSelection:
-        return self.selections.get_selection(self.rule_name)
+    def get_selection(self, rule_name: str) -> FileSelection:
+        return self.selections.get_selection(rule_name)
 
     def store(self):
-        StateStore(self.project_layout.state_store_path).save(self.selections, self.rule_name)
+        StateStore(self.project_layout.state_store_path).save(self.selections, self.current_rule)
 
     def with_selection(self, file_selection: FileSelection) -> "ExecutionState":
         new_selections = self.selections.with_selection(file_selection)
-        return ExecutionState(self.project_layout, new_selections, self.rule_name)
+        return ExecutionState(self.project_layout, new_selections, self.current_rule)
 
-    def with_rule(self, rule_name: str) -> "ExecutionState":
+    def with_current_rule(self, rule_name: str) -> "ExecutionState":
         return ExecutionState(self.project_layout, self.selections, rule_name)
 
 
@@ -87,7 +85,7 @@ class ExecutionEnvironment:
     _current: ClassVar[ContextVar[Optional["ExecutionEnvironment"]]] = ContextVar(
         "current_env", default=None
     )
-    config: ContextSpec
+    project_layout: ProjectLayout
     runtime: RuntimeContext
     state: ExecutionState
     constants: ToolConstants
@@ -102,11 +100,10 @@ class ExecutionEnvironment:
             if project_layout.state_path.exists()
             else ToolConstants.create_null()
         )
-        config = ContextSpec.create(project_root, DEFAULT_CODE_RULE, constants)
         empty_selections = AllSelections.create_empty()
         state = ExecutionState.create(project_layout, empty_selections, DEFAULT_CODE_RULE)
         tagger = ExecutionEnvironment._tagger(project_root)
-        return ExecutionEnvironment(config, runtime, state, constants, tagger)
+        return ExecutionEnvironment(project_layout, runtime, state, constants, tagger)
 
     @staticmethod
     def create(project_root: Path) -> "ExecutionEnvironment":
@@ -114,9 +111,8 @@ class ExecutionEnvironment:
         project_layout = ProjectLayout(project_root)
         state = ExecutionState.load(project_layout)
         constants = ToolConstants.load(project_layout.state_path)
-        config = ContextSpec.create(project_root, state.file_selection.rule_name, constants)
         tagger = ExecutionEnvironment._tagger(project_root)
-        return ExecutionEnvironment(config, runtime, state, constants, tagger)
+        return ExecutionEnvironment(project_layout, runtime, state, constants, tagger)
 
     @staticmethod
     def _tagger(project_root: Path):
@@ -124,23 +120,8 @@ class ExecutionEnvironment:
 
     def with_state(self, new_state: ExecutionState) -> "ExecutionEnvironment":
         return ExecutionEnvironment(
-            self.config, self.runtime, new_state, self.constants, self.tagger
+            self.project_layout, self.runtime, new_state, self.constants, self.tagger
         )
-
-    def with_rule(self, rule_name: str) -> "ExecutionEnvironment":
-        if rule_name == self.state.file_selection.rule_name:
-            return self
-        config = ContextSpec.create(self.config.project_root_path, rule_name, self.constants)
-        if not config.rule.excerpt_modes:
-            raise ValueError(
-                f"Rule '{rule_name}' has no excerpt-modes configured. Add excerpt-modes or compose 'lc/exc-base'."
-            )
-        empty_selection = FileSelection.create(rule_name, [], [])
-        selector = ContextSelector.create(config)
-        file_selection = selector.select_full_files(empty_selection)
-        outline_selection = selector.select_excerpted_files(file_selection)
-        new_state = self.state.with_selection(outline_selection).with_rule(rule_name)
-        return ExecutionEnvironment(config, self.runtime, new_state, self.constants, self.tagger)
 
     @property
     def logger(self) -> logging.Logger:

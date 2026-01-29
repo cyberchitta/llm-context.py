@@ -1,4 +1,3 @@
-import os
 import sys
 import traceback
 from dataclasses import dataclass
@@ -78,8 +77,32 @@ def with_error(func: Callable[..., ExecutionResult]) -> Callable[..., None]:
     return wrapper
 
 
+def with_stdio(func: Callable[..., ExecutionResult]) -> Callable[..., ExecutionResult]:
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> ExecutionResult:
+        result = func(*args, **kwargs)
+        if result.content:
+            print(result.content)
+        return result
+
+    return wrapper
+
+
 def create_clipboard_cmd(func: Callable[..., ExecutionResult]) -> Callable[..., None]:
     return with_error(with_print(with_clipboard(with_env(func))))
+
+
+def create_stdio_cmd(func: Callable[..., ExecutionResult]) -> Callable[..., None]:
+    return with_error(with_print(with_stdio(with_env(func))))
+
+
+def create_output_cmd(func: Callable[..., ExecutionResult]) -> Callable[..., None]:
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> None:
+        cmd = create_stdio_cmd if "-r" in sys.argv else create_clipboard_cmd
+        return cmd(func)(*args, **kwargs)
+
+    return wrapper
 
 
 def create_command(func: Callable[..., ExecutionResult]) -> Callable[..., None]:
