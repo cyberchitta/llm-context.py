@@ -13,8 +13,8 @@ from llm_context.cmd_pipeline import (
     create_output_cmd,
 )
 from llm_context.context_generator import ContextSettings
-from llm_context.context_spec import ContextSpec
 from llm_context.exec_env import ExecutionEnvironment
+from llm_context.project_setup import ProjectSetup
 from llm_context.utils import log
 
 
@@ -29,6 +29,7 @@ def init_project(env: ExecutionEnvironment):
         INFO,
         "See the user guide for setup and customization: https://github.com/cyberchitta/llm-context.py/blob/main/docs/user-guide.md",
     )
+    ProjectSetup.create(env.state.project_layout).initialize()
     return ExecutionResult(None, env)
 
 
@@ -37,13 +38,11 @@ def set_rule(env: ExecutionEnvironment) -> ExecutionResult:
     parser = argparse.ArgumentParser(description="Set active rule for LLM context")
     parser.add_argument("rule", type=str, help="Rule to set as active")
     args = parser.parse_args()
-    config = ContextSpec.create(env.state.project_layout.root_path, args.rule, env.constants)
-    if not config.has_rule(args.rule):
-        raise ValueError(f"Rule '{args.rule}' does not exist.")
-    nxt_state = env.state.with_current_rule(args.rule)
+    rule_name = commands.current_rule(env, args.rule)
+    nxt_state = env.state.with_current_rule(rule_name)
     nxt_env = env.with_state(nxt_state)
     nxt_env.state.store()
-    log(INFO, f"Active rule set to '{args.rule}'.")
+    log(INFO, f"Active rule set to '{rule_name}'.")
     return ExecutionResult(None, nxt_env)
 
 

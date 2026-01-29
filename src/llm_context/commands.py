@@ -137,3 +137,10 @@ def preview_rule(env: ExecutionEnvironment, rule_name: str) -> str:
     config = ContextSpec.create(env.state.project_layout.root_path, rule_name, env.constants)
     result = ContextPreview.create(config, env.tagger)
     return result.format()
+
+
+def current_rule(env: ExecutionEnvironment, rule_name: str) -> str:
+    config = ContextSpec.create(env.state.project_layout.root_path, rule_name, env.constants)
+    if not config.has_rule(rule_name):
+        raise ValueError(f"Rule '{rule_name}' does not exist.")
+    return rule_name
