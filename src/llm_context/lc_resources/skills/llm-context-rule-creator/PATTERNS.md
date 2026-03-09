@@ -1,246 +1,177 @@
-# Common Rule Patterns
+# Primitive Rule Patterns
 
-Templates for common agent delegation scenarios.
+Use the smallest primitive vocabulary that can express the task cleanly.
 
-## Pattern Selection Guide
+The grounded examples in this repo point to five core primitives and one common project-local primitive.
 
-| Task Type | Pattern | Typical Size |
-|-----------|---------|--------------|
-| Fix a specific bug | Minimal | ~15k tokens |
-| Add a feature | Feature Addition | ~35k tokens |
-| Debug an issue | Debugging | ~40k tokens |
-| Refactor code | Refactoring | ~50k tokens |
-| Migrate to new pattern | Migration | ~60k tokens |
-| Review changes | Code Review | ~45k tokens |
+## Core Primitives
 
----
+### `lc/flt-no-files`
 
-## Minimal Pattern
+Start from nothing.
 
-**When:** Small, focused task with known files.
+Use when:
+- the task is surgical
+- you know the likely files
+- you want exact control over `full-files` and `excerpted-files`
+
+This should be the default starting point for many task rules.
+
+### `lc/flt-base`
+
+Start from a broad code-oriented baseline with standard noise removed.
+
+Use when:
+- the task spans a subsystem
+- you do not yet know the exact files
+- the repository is small enough that a broad baseline is still inspectable
+
+Risk:
+- can admit many unrelated files into `Full files`
+- must be verified with `lc-preview`
+
+### `lc/flt-no-full`
+
+Suppress all full-file selection.
+
+Use when:
+- you want structure only
+- you are surveying a subsystem before deciding what needs full content
+- you want an excerpt-heavy context
+
+### `lc/flt-no-outline`
+
+Suppress all excerpted-file selection.
+
+Use when:
+- you want only exact file bodies
+- excerpting would add noise
+- the selected set is already very small
+
+### `lc/exc-base`
+
+Standard excerpting behavior.
+
+Use when:
+- any file may need to be excerpted
+- you want the normal code-outliner / markdown / SFC behavior
+
+This is the standard excerpter primitive and should usually be composed into task rules.
+
+## Common Project-Local Primitive
+
+### `flt-repo-base`
+
+Repository-specific baseline filter.
+
+This is not a system primitive. It should live in `.llm-context/rules/` and capture local exclusions such as:
+- docs that are rarely needed
+- tests that should not be included by default
+- generated sources
+- project-specific resource folders
+
+Use when:
+- the repository has stable local noise that should be excluded by default
+- multiple task rules need the same repo-specific baseline
+
+Risk:
+- if this primitive is too broad, many task rules will silently over-select
+- `lc-preview` must confirm that it behaves as intended
+
+## Minimal Composition Recipes
+
+### 1. Surgical change
+
+Use this for tasks like improving `lc-preview` formatting.
 
 ```yaml
----
-description: <specific task>
 compose:
-  filters: [lc/flt-no-files]    # Start with nothing
+  filters: [lc/flt-no-files]
   excerpters: [lc/exc-base]
 also-include:
   full-files:
-    - "/path/to/file1.py"
-    - "/path/to/file2.py"
----
-## Task
-<Brief description of the specific change needed>
-```
-
-**Use when:**
-- You know exactly which 2-5 files are involved
-- Task is surgical (fix a bug, add a parameter)
-- Minimal context reduces noise
-
----
-
-## Feature Addition Pattern
-
-**When:** Adding new functionality to existing codebase.
-
-```yaml
----
-description: Add <feature>
-compose:
-  filters: [lc/flt-base]
-  excerpters: [lc/exc-base]
-also-include:
-  full-files:
-    - "/<integration-point>/**"
-    - "/<new-code-location>/**"
+    - "/<edit-targets>..."
   excerpted-files:
-    - "/<similar-features>/**"
----
-## Feature Context
-<What the feature does, where it integrates, patterns to follow>
+    - "/<supporting-context>..."
 ```
 
-**File selection:**
-- **Full:** Where new code goes + integration points
-- **Excerpted:** Similar existing features (for patterns)
+### 2. Surgical change with exact bodies only
 
----
-
-## Debugging Pattern
-
-**When:** Investigating an issue in specific area.
+Use when excerpting adds no value.
 
 ```yaml
----
-description: Debug <issue description>
 compose:
-  filters: [lc/flt-base]
+  filters: [lc/flt-no-files, lc/flt-no-outline]
   excerpters: [lc/exc-base]
 also-include:
   full-files:
-    - "/<problem-area>/**"
-    - "/<related-tests>/**"
+    - "/<edit-targets>..."
+```
+
+### 3. Broad local baseline plus targeted additions
+
+Use when the repo already has a reliable `flt-repo-base`.
+
+```yaml
+compose:
+  filters: [flt-repo-base]
+  excerpters: [lc/exc-base]
+also-include:
+  full-files:
+    - "/<edit-targets>..."
   excerpted-files:
-    - "/<callers>/**"
-    - "/<dependencies>/**"
----
-## Debug Context
-<Symptoms, reproduction steps, suspected areas>
+    - "/<supporting-context>..."
 ```
 
-**File selection:**
-- **Full:** Suspected problem code + relevant tests
-- **Excerpted:** Code that calls or is called by problem area
+### 4. Broad baseline but full-file bias
 
----
-
-## Refactoring Pattern
-
-**When:** Changing implementation of existing system.
+Use when you are editing docs, rules, or templates and excerpting is not helpful for the main target set.
 
 ```yaml
----
-description: Refactor <system> to <approach>
 compose:
-  filters: [lc/flt-base]
+  filters: [flt-repo-base, lc/flt-no-outline]
   excerpters: [lc/exc-base]
 also-include:
   full-files:
-    - "/<code-to-change>/**"
+    - "/<primary-files>..."
+```
+
+### 5. Broad baseline but excerpt-only survey
+
+Use before narrowing a task rule.
+
+```yaml
+compose:
+  filters: [flt-repo-base, lc/flt-no-full]
+  excerpters: [lc/exc-base]
+also-include:
   excerpted-files:
-    - "/<callers>/**"
-    - "/<dependencies>/**"
-gitignores:
-  full-files:
-    - "**/test/**"           # Add tests later if needed
----
-## Refactoring Context
-<Current structure, target structure, constraints>
+    - "/<area-to-survey>..."
 ```
 
-**File selection:**
-- **Full:** All code being refactored
-- **Excerpted:** Everything that uses or is used by that code
+## Heuristics from Real Tasks
 
----
+From the `lc-preview` task:
+- start with `lc/flt-no-files`
+- list edit targets in `full-files`
+- keep selection internals in `excerpted-files`
+- do not use a repo baseline unless preview proves it stays tight
 
-## Migration Pattern
+From the primitive-rule-docs task:
+- a repo baseline can be useful, but only if `lc-preview` shows it does not drag in unrelated files
+- if preview expands too far, fall back to `lc/flt-no-files`
 
-**When:** Moving to new framework, library, or pattern.
+From the markdown-excerpter task:
+- a changed file and its direct test usually belong in `full-files`
+- neighboring infrastructure often belongs in `excerpted-files`
 
-```yaml
----
-description: Migrate <system> from <old> to <new>
-compose:
-  filters: [lc/flt-base]
-  excerpters: [lc/exc-base]
-also-include:
-  full-files:
-    - "/<old-implementation>/**"
-    - "/<entry-points>/**"
-  excerpted-files:
-    - "/<code-using-old>/**"
-    - "/<new-pattern-examples>/**"
----
-## Migration Context
-<Old approach, new approach, migration strategy>
-```
+## Verification Checklist
 
-**File selection:**
-- **Full:** Old code to replace + entry points
-- **Excerpted:** All usage sites + examples of new pattern
+After writing a rule, run `lc-preview` and check:
 
----
+1. Are all intended edit targets in `Full files`?
+2. Did anything unrelated leak into `Full files`?
+3. Are support files in `Excerpted files` rather than `Full files`?
+4. Is the baseline primitive too broad for this task?
 
-## Code Review Pattern
-
-**When:** Reviewing changes for correctness and style.
-
-```yaml
----
-description: Review changes to <area>
-compose:
-  filters: [lc/flt-base]
-  excerpters: [lc/exc-base]
-also-include:
-  full-files:
-    - "/<changed-files>/**"
-  excerpted-files:
-    - "/<related-code>/**"
-    - "/<tests>/**"
----
-## Review Context
-<What changed, what to look for, standards to apply>
-```
-
----
-
-## API Development Pattern
-
-**When:** Working on API endpoints.
-
-```yaml
----
-description: <API task description>
-compose:
-  filters: [lc/flt-base]
-  excerpters: [lc/exc-base]
-also-include:
-  full-files:
-    - "/src/api/routes/**"
-    - "/src/api/middleware/**"
-  excerpted-files:
-    - "/src/models/**"
-    - "/src/services/**"
-implementations:
-  - ["/src/utils/validators.py", "validate_request"]
----
-## API Context
-<Endpoint specifications, request/response formats>
-```
-
----
-
-## Testing Pattern
-
-**When:** Writing or fixing tests.
-
-```yaml
----
-description: Add tests for <module>
-compose:
-  filters: [lc/flt-base]
-  excerpters: [lc/exc-base]
-also-include:
-  full-files:
-    - "/<module-to-test>/**"
-    - "/<test-files>/**"
-  excerpted-files:
-    - "/<test-utilities>/**"
-    - "/<similar-tests>/**"
----
-## Testing Context
-<What to test, coverage goals, testing patterns used>
-```
-
----
-
-## Composition Example
-
-For projects with custom filters, compose them:
-
-```yaml
----
-description: <task>
-compose:
-  filters: [flt-repo-base]      # Project filter (includes lc/flt-base)
-  excerpters: [lc/exc-base]
-also-include:
-  full-files:
-    - "/<specific-files>/**"
----
-```
-
-Check `.llm-context/rules/` for available project filters like `flt-repo-base`.
+If the answer to 2 or 4 is yes, narrow the primitive composition before changing the file lists.
