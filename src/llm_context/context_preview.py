@@ -72,8 +72,8 @@ class ContextPreview:
         return self.total_bytes // 4
 
     def format(self, max_files: int = 15) -> str:
-        sorted_full = sorted(self.full_files, key=lambda x: -x.original_bytes)
-        sorted_excerpted = sorted(self.excerpted_files, key=lambda x: -(x.excerpted_bytes or 0))
+        sorted_full = sorted(self.full_files, key=lambda x: x.rel_path)
+        sorted_excerpted = sorted(self.excerpted_files, key=lambda x: x.rel_path)
         full_file_data = [
             {
                 "rel_path": f.rel_path,
@@ -101,7 +101,6 @@ class ContextPreview:
             "total_files": len(self.full_files) + len(self.excerpted_files),
             "total_size": _format_size(self.total_bytes),
             "estimated_tokens": self.estimated_tokens // 1000,
-            "max_files": max_files,
         }
         template = Template.create(self.template_name, context, self.project_layout.templates_path)
         return template.render()
