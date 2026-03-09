@@ -2,6 +2,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from llm_context.file_selector import FileSelector, IncludeFilter
 from llm_context.utils import PathConverter
@@ -350,6 +351,26 @@ class TestPathFormatNormalization(unittest.TestCase):
 
 class TestPerformanceAndRegression(unittest.TestCase):
     """Test performance characteristics and regression prevention"""
+
+    def test_filter_files_calls_get_files_once(self):
+        """filter_files should not repeatedly recompute get_files() results"""
+        selector = FileSelector.create(
+            Path("/tmp"),
+            ignore_pathspecs=[],
+            limit_to_pathspecs=["**/*"],
+            also_include_pathspecs=[],
+        )
+
+        with patch.object(
+            FileSelector,
+            "get_files",
+            autospec=True,
+            return_value=["/tmp/a.py", "/tmp/b.py"],
+        ) as mock_get_files:
+            filtered = selector.filter_files(["/tmp/a.py", "/tmp/c.py", "/tmp/b.py"])
+
+        self.assertEqual(filtered, ["/tmp/a.py", "/tmp/b.py"])
+        mock_get_files.assert_called_once_with(selector)
 
     def test_no_also_include_patterns_no_extra_traversal(self):
         """Test that empty also-include doesn't cause extra work"""
