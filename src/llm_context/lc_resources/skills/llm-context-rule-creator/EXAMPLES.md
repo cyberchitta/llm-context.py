@@ -1,148 +1,100 @@
-# Rule Examples
+# Worked Examples
 
-Complete examples with reasoning.
+These examples use real tasks from the `llm-context.py` repo so the choices stay grounded.
 
-## Example 1: Add Rate Limiting
+## Example 1: Improve `lc-preview` Verification
 
-**Task:** "Add rate limiting middleware to API endpoints"
-
-**Analysis:**
-1. Explore with `lc-outlines` (CLI) or `lc_outlines` (MCP) → reveals `/src/api/middleware/` and `/src/api/routes.py`
-2. Read existing middleware to understand patterns
-3. Found `rate_limit` decorator in `/src/utils/decorators.py`
+**Task:** show the exact selected full and excerpted file lists in `lc-preview`.
 
 **Rule:**
 
 ```yaml
 ---
-description: Add rate limiting middleware to API endpoints
-compose:
-  filters: [lc/flt-base]
-  excerpters: [lc/exc-base]
-also-include:
-  full-files:
-    - "/src/api/middleware/**"
-    - "/src/api/routes.py"
-    - "/config/api.yaml"
-  excerpted-files:
-    - "/src/api/endpoints/**"
-implementations:
-  - ["/src/utils/decorators.py", "rate_limit"]
----
-## Context
-Add rate limiting to all API endpoints. Follow existing middleware patterns.
-The rate_limit decorator provides the implementation pattern.
-```
-
-**Reasoning:**
-- Full: middleware (where new code goes), routes (integration), config
-- Excerpted: endpoints (see structure, not full implementations)
-- Implementation: just the decorator, not the whole utils file
-
-**Result:** ~35k tokens (vs ~200k for full project)
-
----
-
-## Example 2: Refactor Auth to JWT
-
-**Task:** "Refactor authentication from sessions to JWT tokens"
-
-**Analysis:**
-1. Auth code in `/src/auth/`
-2. User model provides token payload context
-3. Routes show current auth usage patterns
-
-**Rule:**
-
-```yaml
----
-description: Refactor authentication from sessions to JWT
-compose:
-  filters: [lc/flt-base]
-  excerpters: [lc/exc-base]
-also-include:
-  full-files:
-    - "/src/auth/**"
-    - "/src/middleware/auth.py"
-    - "/config/auth.yaml"
-  excerpted-files:
-    - "/src/models/user.py"
-    - "/src/api/**/routes.py"
-gitignores:
-  full-files:
-    - "**/tests/**"
----
-## Context
-Migrate from session-based auth to JWT. User model shows token claim structure.
-Route files show current auth middleware usage.
-```
-
-**Reasoning:**
-- Full: all auth code (being modified), middleware, config
-- Excerpted: user model (token claims), routes (usage patterns)
-- Excluded: tests initially (add later if needed)
-
-**Result:** ~50k tokens
-
----
-
-## Example 3: Debug Performance
-
-**Task:** "Debug slow data processing in report generation"
-
-**Analysis:**
-1. Report generator at `/src/reports/generator.py`
-2. Performance tests exist at `/tests/reports/test_performance.py`
-3. Data sources in `/src/data/`
-
-**Rule:**
-
-```yaml
----
-description: Debug performance in report generation
-compose:
-  filters: [lc/flt-base]
-  excerpters: [lc/exc-base]
-also-include:
-  full-files:
-    - "/src/reports/generator.py"
-    - "/src/reports/processors/**"
-    - "/tests/reports/test_performance.py"
-  excerpted-files:
-    - "/src/data/**"
-    - "/src/models/report.py"
-implementations:
-  - ["/src/utils/profiling.py", "profile_function"]
----
-## Context
-Report generation is slow. Focus on generator and processors.
-Data layer shown as structure only. Use profiling decorator for instrumentation.
-```
-
-**Result:** ~30k tokens
-
----
-
-## Example 4: Minimal Fix
-
-**Task:** "Fix typo in error message in auth handler"
-
-**Rule:**
-
-```yaml
----
-description: Fix error message typo in auth handler
+description: Improve lc-preview verification output
 compose:
   filters: [lc/flt-no-files]
   excerpters: [lc/exc-base]
 also-include:
   full-files:
-    - "/src/auth/handler.py"
+    - "/src/llm_context/context_preview.py"
+    - "/src/llm_context/cli.py"
+    - "/src/llm_context/commands.py"
+    - "/src/llm_context/lc_resources/templates/lc/preview.j2"
+  excerpted-files:
+    - "/src/llm_context/context_generator.py"
+    - "/src/llm_context/context_spec.py"
+    - "/src/llm_context/file_selector.py"
+    - "/src/llm_context/rule.py"
 ---
-## Task
-Fix the typo in the authentication error message.
+Make lc-preview show exact full and excerpted file membership for rule verification.
 ```
 
-**Result:** ~2k tokens
+**Why this is minimal:**
+- full: the files directly changed by the feature
+- excerpted: supporting selection and rendering logic
+- no repo baseline, so unrelated source files cannot leak in
 
-This is the minimal pattern - exclude everything, include only what's needed.
+**How to verify:**
+- `lc-preview` should show exactly 4 full files and 4 excerpted files
+- the template should be full, not excerpted
+- selection internals should be excerpted, not full
+
+## Example 2: Tighten Primitive Rule Composition
+
+**Task:** improve the primitive rules and the skill docs that explain how to use them.
+
+**Rule:**
+
+```yaml
+---
+description: Improve primitive rules and skill guidance
+compose:
+  filters: [flt-repo-base, flt-no-excerpters]
+  excerpters: [lc/exc-base]
+also-include:
+  full-files:
+    - "/src/llm_context/lc_resources/skills/llm-context-rule-creator/*.md"
+    - "/src/llm_context/lc_resources/rules/lc/*.md"
+    - "/.llm-context/rules/*.md"
+    - "/src/llm_context/rule.py"
+    - "/src/llm_context/rule_parser.py"
+  excerpted-files:
+    - "/src/llm_context/context_spec.py"
+    - "/src/llm_context/file_selector.py"
+    - "/src/llm_context/commands.py"
+---
+Improve the primitive rule vocabulary and the skill instructions that teach agents how to compose and verify task rules.
+```
+
+**Why this may need iteration:**
+- `flt-repo-base` can still admit more full files than expected
+- `lc-preview` is required to confirm that rule mechanics did not pull in unrelated files
+- if the full-file list grows too much, switch to `lc/flt-no-files`
+
+## Example 3: Surgical Single-File Fix
+
+**Task:** adjust markdown excerpt behavior in the markdown excerpter only.
+
+**Rule:**
+
+```yaml
+---
+description: Adjust markdown excerpt behavior
+compose:
+  filters: [lc/flt-no-files]
+  excerpters: [lc/exc-base]
+also-include:
+  full-files:
+    - "/src/llm_context/excerpters/markdown.py"
+    - "/tests/test_excerpt_languages.py"
+  excerpted-files:
+    - "/src/llm_context/excerpters/service.py"
+    - "/src/llm_context/lc_resources/rules/lc/exc-base.md"
+---
+Adjust markdown excerpting while keeping context limited to markdown extraction logic and its tests.
+```
+
+**Why this is better than a broad repo filter:**
+- the task is isolated
+- the changed file and its test belong in full
+- neighboring excerpting infrastructure only needs structural context

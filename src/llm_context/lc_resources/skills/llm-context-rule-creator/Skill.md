@@ -5,227 +5,169 @@ description: Create optimized llm-context rules for specific tasks by analyzing 
 
 # Context Descriptor Creation
 
-Create rules that define exactly what context is needed for a task—whether for a sub-agent or a chat conversation.
+Create rules that define the minimal sufficient context for a task.
 
-## Two Usage Modes
+The job is not to gather a lot of relevant code. The job is to produce the smallest full-file and excerpted-file set that is still enough to complete the task.
 
-This skill works in two environments:
+## Use This Workflow
 
-| Environment | Interface | When to Use |
-|-------------|-----------|-------------|
-| **Chat harness** (Claude.ai, etc.) | MCP tools | Creating context for the current conversation |
-| **Agentic harness** (Claude Code, etc.) | CLI commands | Creating context to delegate to sub-agents |
+1. Understand the task in concrete file terms.
+2. Start from the narrowest sensible filter baseline.
+3. Put files to edit in `full-files`.
+4. Put callers, dependencies, and large reference files in `excerpted-files`.
+5. Run `lc-preview`.
+6. Read the exact `Full files` and `Excerpted files` lists.
+7. Tighten until the selection is minimal and sufficient.
 
-The rule format is identical—only the commands differ.
+## Pick the Baseline First
 
-## Why This Matters
+Start narrow unless you have a good reason not to.
 
-When providing code context (to a sub-agent or yourself), curation is essential:
+**Use `lc/flt-no-files` when:**
+- the task is surgical
+- you already know the likely files
+- you want exact control over membership
 
-- **Too much:** Full codebase overwhelms the context window (thousands of files, millions of tokens)
-- **Too little:** Missing information to complete the task
-- **Wrong focus:** Irrelevant code obscures what matters
+**Use `flt-repo-base` or `lc/flt-base` when:**
+- you need a broad project slice
+- the task spans a subsystem
+- the project already has a disciplined repo-level filter
 
-Rules solve this by describing: which files to include fully, which to excerpt (signatures/structure only), and what to exclude entirely.
+If `lc-preview` shows many unexpected full files, your baseline is too broad.
 
-## The Core Workflow
+## Full vs Excerpted
 
-```
-1. Understand the task
-2. Explore the codebase (outlines, file reads)
-3. Create a rule file
-4. Validate the rule
-5. Iterate until context is focused and complete
-6. Generate and use the context
-```
+**Full files**
+- files you expect to edit
+- small configs or templates that directly control the behavior
+- compact integration points where exact code matters
 
-### CLI vs MCP Commands
+**Excerpted files**
+- callers and dependencies
+- large modules where structure is enough
+- reference implementations and surrounding architecture
 
-| Step | CLI (Agentic) | MCP (Chat) |
-|------|---------------|------------|
-| Explore | `lc-outlines` | `lc_outlines` tool |
-| Validate | `lc-preview <rule>` | `lc_preview` tool |
-| Get context | `lc-context <rule>` | `lc_outlines` with rule + `lc_missing` |
-| Check changes | `lc-changed` | `lc_changed` tool |
-| Get files | `lc-missing -f '[paths]'` | `lc_missing` tool |
+Move a file from excerpted to full only when the exact body matters.
 
-## Rule Basics
+## Verify with `lc-preview`
 
-Rules are YAML frontmatter + markdown, saved to `.llm-context/rules/`:
+`lc-preview` is the main verification step.
+
+Read it in this order:
+
+1. `Summary`
+2. `Full files`
+3. `Excerpted files`
+
+Ask:
+- Are all expected edit targets in `Full files`?
+- Did any unrelated files leak into `Full files`?
+- Are context files in `Excerpted files` instead of `Full files`?
+- Is the total selection small enough for the task?
+
+Do not trust a rule until the exact file lists look right.
+
+## Grounded Example 1: Improve `lc-preview`
+
+Task: change preview formatting so it lists all selected full and excerpted files.
+
+This is a narrow task. Start from `lc/flt-no-files`.
 
 ```yaml
 ---
-description: Refactor authentication to use JWT
+description: Improve lc-preview verification output
 compose:
-  filters: [lc/flt-base]        # What to exclude
-  excerpters: [lc/exc-base]     # How to excerpt
-also-include:
-  full-files:                   # Complete content
-    - "/src/auth/**"
-  excerpted-files:              # Structure/signatures only
-    - "/src/api/routes/**"
----
-## Task Context
-The auth module needs migration from sessions to JWT tokens.
-Focus on the middleware integration points.
-```
-
-Save as: `.llm-context/rules/tmp-prm-auth-jwt.md`
-
-## Two Categories of Files
-
-**Full files (5-15 typical):**
-- Files to be modified
-- Small configs
-- Critical integration points
-
-**Excerpted files (10-30 typical):**
-- Related modules (need structure, not every line)
-- Large files (only signatures/definitions)
-- Dependencies and callers
-
-Excerpting uses tree-sitter to extract function/class definitions, reducing a 500-line file to ~50 lines of signatures.
-
-## Always Filter First
-
-Without filters, you get thousands of files: build artifacts, node_modules, __pycache__, logs, etc.
-
-```yaml
-compose:
-  filters: [lc/flt-base]  # Standard exclusions (binaries, logs, caches)
-```
-
-Check if the project has custom filters (e.g., `flt-repo-base`) and compose them:
-
-```yaml
-compose:
-  filters: [flt-repo-base, lc/flt-base]
-```
-
-Then use `also-include` to add back specific files you need.
-
-## Validating Your Rule
-
-Use the preview command/tool to see what a rule selects:
-
-**CLI:** `lc-preview tmp-prm-auth-jwt`
-**MCP:** `lc_preview` tool with rule name
-
-```
-Rule: tmp-prm-auth-jwt
-Composes: flt-repo-base → lc/flt-base
-
-Full files (8):              12,400 bytes
-  src/auth/handler.py         3,200 bytes
-  src/auth/middleware.py      2,800 bytes
-  ...
-
-Excerpted files (15):         8,200 bytes (of 45,000)
-  src/api/routes/user.py        420 bytes (of 2,800)
-  src/api/routes/admin.py       380 bytes (of 3,100)
-  ...
-
-Total: 23 files, 20,600 bytes (~5k tokens)
-```
-
-This feedback lets you iterate:
-- Too large? Move files from full to excerpted, add exclusions
-- Missing something? Adjust patterns in `also-include`
-- Wrong files? Check your filter composition
-
-## Path Format
-
-In rule patterns, paths start with `/`, relative to project root:
-
-```yaml
-# Correct patterns in rules
-- "/src/auth/**"
-- "/config/settings.yaml"
-- "**/*.py"
-
-# Wrong
-- "src/auth/**"           # Missing leading /
-- "/src/"                 # Directory, not file pattern
-```
-
-**Note:** In generated context and preview output, paths include the project directory name as a prefix (e.g., `/{project-name}/src/auth/handler.py`). This enables multi-project context composition—combining files from multiple projects without path conflicts.
-
-## Sizing Guidelines
-
-| Bytes | Tokens (~) | Use Case |
-|-------|------------|----------|
-| ~60KB | ~15k | Surgical fixes |
-| ~140KB | ~35k | Feature additions |
-| ~200KB | ~50k | Refactoring |
-| ~320KB | ~80k | Large migrations |
-
-Aim for the smallest context that includes everything needed.
-
-## Quick Reference
-
-**Minimal context (start here for small tasks):**
-```yaml
-compose:
-  filters: [lc/flt-no-files]   # Exclude everything
+  filters: [lc/flt-no-files]
   excerpters: [lc/exc-base]
 also-include:
   full-files:
-    - "/specific/file.py"
-```
-
-**Standard task:**
-```yaml
-compose:
-  filters: [lc/flt-base]
-  excerpters: [lc/exc-base]
-also-include:
-  full-files:
-    - "/<modify>/**"
+    - "/src/llm_context/context_preview.py"
+    - "/src/llm_context/cli.py"
+    - "/src/llm_context/commands.py"
+    - "/src/llm_context/lc_resources/templates/lc/preview.j2"
   excerpted-files:
-    - "/<context>/**"
+    - "/src/llm_context/context_generator.py"
+    - "/src/llm_context/context_spec.py"
+    - "/src/llm_context/file_selector.py"
+    - "/src/llm_context/rule.py"
+---
+Make lc-preview show exact full and excerpted file membership for rule verification.
 ```
 
-**With project filters:**
+Why this shape:
+- full: the command path and template being edited
+- excerpted: supporting selection and rendering code for orientation
+- narrow baseline: prevents accidental inclusion of most of the repo
+
+What to look for in `lc-preview`:
+- only those four edit targets in `Full files`
+- supporting internals in `Excerpted files`
+- no tests, docs, or unrelated resources unless intentionally added
+
+## Grounded Example 2: Tighten Primitive Rules and Skill Guidance
+
+Task: improve primitive rule composition and the skill docs that teach it.
+
+This task is broader, but still needs discipline. Start from a repo filter only if it already excludes enough noise.
+
 ```yaml
+---
+description: Improve primitive rules and skill guidance
 compose:
-  filters: [flt-repo-base]  # Project-specific, composes lc/flt-base
+  filters: [flt-repo-base, flt-no-excerpters]
   excerpters: [lc/exc-base]
+also-include:
+  full-files:
+    - "/src/llm_context/lc_resources/skills/llm-context-rule-creator/*.md"
+    - "/src/llm_context/lc_resources/rules/lc/*.md"
+    - "/.llm-context/rules/*.md"
+    - "/src/llm_context/rule.py"
+    - "/src/llm_context/rule_parser.py"
+  excerpted-files:
+    - "/src/llm_context/context_spec.py"
+    - "/src/llm_context/file_selector.py"
+    - "/src/llm_context/commands.py"
+---
+Improve the primitive rule vocabulary and the skill instructions that teach agents how to compose and verify task rules.
 ```
 
-## Command Reference
+What to look for in `lc-preview`:
+- all rule and skill docs appear in `Full files`
+- supporting mechanics stay excerpted unless they are being changed
+- repo-level defaults do not drag in unrelated source files
 
-### CLI Commands (Agentic Harness)
+If preview expands too far, drop the repo baseline and switch to `lc/flt-no-files`.
 
-| Command | Purpose |
-|---------|---------|
-| `lc-outlines` | See project structure (excerpted view) |
-| `lc-preview <rule>` | Validate rule file selection |
-| `lc-context <rule>` | Generate context for the rule |
-| `lc-set-rule <rule>` | Set active rule |
-| `lc-changed` | List files modified since last context |
-| `lc-missing -f '[paths]' -t <ts>` | Get specific file contents |
+## CLI and MCP Equivalents
 
-### MCP Tools (Chat Harness)
+| Step | CLI | MCP |
+|------|-----|-----|
+| Explore | `lc-outlines` | `lc_outlines` |
+| Validate | `lc-preview <rule>` | `lc_preview` |
+| Get context | `lc-context <rule>` | `lc_outlines` + `lc_missing` |
+| Check drift | `lc-changed` | `lc_changed` |
+| Fetch exact files | `lc-missing -f '[paths]' -t <ts>` | `lc_missing` |
 
-| Tool | Purpose |
-|------|---------|
-| `lc_outlines` | See project structure (excerpted view) |
-| `lc_preview` | Validate rule file selection |
-| `lc_changed` | List files modified since last context |
-| `lc_missing` | Get specific files, implementations, or excluded sections |
-| `lc_rule_instructions` | Get rule creation documentation |
+## Path Rules
 
-**Note:** In chat mode, use `lc_outlines` with a rule name to generate context, then `lc_missing` to retrieve full content for specific files as needed.
+In rule patterns, paths start with `/`, relative to project root.
+
+```yaml
+- "/src/llm_context/rule.py"
+- "/tests/test_outliner.py"
+```
+
+Preview and generated context show namespaced paths like `/{project-name}/src/...`.
 
 ## File Naming
 
-- `prm-<name>.md` - Permanent prompt rules
-- `flt-<name>.md` - Reusable filter rules
-- `tmp-prm-<name>.md` - Temporary task rules (delete after use)
+- `tmp-prm-<name>.md`: temporary task rule
+- `prm-<name>.md`: reusable prompt rule
+- `flt-<name>.md`: reusable filter primitive
 
----
+## References
 
-**Detailed syntax:** SYNTAX.md
-**Common patterns:** PATTERNS.md
-**Examples:** EXAMPLES.md
-**Troubleshooting:** TROUBLESHOOTING.md
+- `PATTERNS.md` for reusable shapes
+- `EXAMPLES.md` for worked examples
+- `SYNTAX.md` for rule syntax
+- `TROUBLESHOOTING.md` for failure cases
