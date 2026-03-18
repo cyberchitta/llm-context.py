@@ -120,7 +120,8 @@ class FileSelector:
         )
 
     def filter_files(self, files: list[str]) -> list[str]:
-        return [f for f in files if f in set(self.get_files())]
+        selected_files = set(self.get_files())
+        return [f for f in files if f in selected_files]
 
     def get_files(self) -> list[str]:
         files = list(set(self.traverse(self.root_path) + self.also_traverse(self.root_path)))
