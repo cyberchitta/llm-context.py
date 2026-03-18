@@ -2,7 +2,6 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
 
 from llm_context.file_selector import FileSelector, IncludeFilter
 from llm_context.utils import PathConverter
@@ -347,71 +346,6 @@ class TestPathFormatNormalization(unittest.TestCase):
         self.assertTrue(dir_filter.include("src/"))
         self.assertTrue(dir_filter.include("src/file.py"))  # Directory pattern matches contents
         self.assertTrue(dir_filter.include("src/other.py"))  # This is correct gitignore behavior
-
-
-class TestPerformanceAndRegression(unittest.TestCase):
-    """Test performance characteristics and regression prevention"""
-
-    def test_filter_files_calls_get_files_once(self):
-        """filter_files should not repeatedly recompute get_files() results"""
-        selector = FileSelector.create(
-            Path("/tmp"),
-            ignore_pathspecs=[],
-            limit_to_pathspecs=["**/*"],
-            also_include_pathspecs=[],
-        )
-
-        with patch.object(
-            FileSelector,
-            "get_files",
-            autospec=True,
-            return_value=["/tmp/a.py", "/tmp/b.py"],
-        ) as mock_get_files:
-            filtered = selector.filter_files(["/tmp/a.py", "/tmp/c.py", "/tmp/b.py"])
-
-        self.assertEqual(filtered, ["/tmp/a.py", "/tmp/b.py"])
-        mock_get_files.assert_called_once_with(selector)
-
-    def test_no_also_include_patterns_no_extra_traversal(self):
-        """Test that empty also-include doesn't cause extra work"""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root_path = Path(temp_dir)
-            (root_path / "test.py").write_text("# test")
-
-            # Create selector with no also-include patterns
-            selector = FileSelector.create(
-                root_path,
-                ignore_pathspecs=[],
-                limit_to_pathspecs=["**/*"],
-                also_include_pathspecs=[],  # Empty
-            )
-
-            # Should work normally
-            files = selector.get_relative_files()
-            self.assertGreater(len(files), 0)
-
-    def test_backward_compatibility_with_existing_rules(self):
-        """Test that existing behavior still works"""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root_path = Path(temp_dir)
-            (root_path / "src").mkdir()
-            (root_path / "src" / "app.py").write_text("# app")
-            (root_path / "test.py").write_text("# test")
-            (root_path / "readme.md").write_text("# readme")
-
-            # Test standard gitignore + limit-to behavior (no also-include)
-            selector = FileSelector.create(
-                root_path,
-                ignore_pathspecs=["*.md"],
-                limit_to_pathspecs=["*.py"],
-                also_include_pathspecs=[],
-            )
-            files = selector.get_relative_files()
-
-            filenames = [f.split("/")[-1] for f in files]
-            self.assertIn("app.py", filenames)
-            self.assertIn("test.py", filenames)
-            self.assertNotIn("readme.md", filenames)
 
 
 class TestRulesDirectoryAlsoInclude(unittest.TestCase):

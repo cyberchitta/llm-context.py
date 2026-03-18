@@ -119,10 +119,6 @@ class FileSelector:
             str(root_path), ignorer, converter, limit_filter, also_include_filter, since
         )
 
-    def filter_files(self, files: list[str]) -> list[str]:
-        selected_files = set(self.get_files())
-        return [f for f in files if f in selected_files]
-
     def get_files(self) -> list[str]:
         files = list(set(self.traverse(self.root_path) + self.also_traverse(self.root_path)))
         return [f for f in files if Path(f).stat().st_mtime > self.since] if self.since else files
