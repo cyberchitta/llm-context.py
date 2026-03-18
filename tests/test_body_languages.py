@@ -600,6 +600,6 @@ def test_body_extraction(language, extension, code, expected_bodies, tagger):
 
     # Check each expected body is present in actual bodies
     for expected in expected_bodies:
-        assert any(
-            actual.strip() == expected.strip() for actual in actual_bodies
-        ), f"Definition not found in {language}:\nExpected:\n{expected}\n\nActual:\n{actual_bodies}"
+        assert any(actual.strip() == expected.strip() for actual in actual_bodies), (
+            f"Definition not found in {language}:\nExpected:\n{expected}\n\nActual:\n{actual_bodies}"
+        )
