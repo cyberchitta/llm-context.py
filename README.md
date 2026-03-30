@@ -45,6 +45,10 @@ lc-context tmp-prm-auth    # Get focused context for sub-agent
 uv tool install "llm-context>=0.6.0"
 ```
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/cyberchitta-llm-context-py).
+
 ## Quick Start
 
 ### Human Workflow (Clipboard)
