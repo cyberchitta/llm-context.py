@@ -165,6 +165,12 @@ Preview and generated context show namespaced paths like `/{project-name}/src/..
 - `prm-<name>.md`: reusable prompt rule
 - `flt-<name>.md`: reusable filter primitive
 
+## Skill Feedback
+
+When you notice this skill could be clearer, is missing a pattern, or led you down the wrong path, offer to record the insight.
+
+Write it to `SKILL-FEEDBACK.md` at the root of the local llm-context.py repo (ask the user for the path if unsure). One short paragraph per entry: what happened, what the better approach is, and why.
+
 ## References
 
 - `PATTERNS.md` for reusable shapes
