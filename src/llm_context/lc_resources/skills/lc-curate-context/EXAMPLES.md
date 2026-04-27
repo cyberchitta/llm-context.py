@@ -53,7 +53,7 @@ compose:
   excerpters: [lc/exc-base]
 also-include:
   full-files:
-    - "/src/llm_context/lc_resources/skills/llm-context-rule-creator/*.md"
+    - "/src/llm_context/lc_resources/skills/lc-curate-context/*.md"
     - "/src/llm_context/lc_resources/rules/lc/*.md"
     - "/.llm-context/rules/*.md"
     - "/src/llm_context/rule.py"

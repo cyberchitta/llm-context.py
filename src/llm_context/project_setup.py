@@ -204,7 +204,7 @@ class ProjectSetup:
                 log(INFO, f"Removed old rule {rule_file}")
 
     def _setup_project_skill(self):
-        skill_name = "llm-context-rule-creator"
+        skill_name = "lc-curate-context"
         skill_path = self.project_layout.project_skills_path / skill_name
         if skill_path.exists() and not self.constants.needs_update:
             return
