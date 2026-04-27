@@ -92,7 +92,7 @@ class ProjectSetup:
         self._create_project_notes_file()
         self._create_user_notes_file()
         self._setup_default_rules()
-        self._setup_global_skill()
+        self._setup_project_skill()
         self._setup_shell_completions()
 
     def _create_or_update_ancillary_files(self):
@@ -203,9 +203,9 @@ class ProjectSetup:
                 rule_file.unlink()
                 log(INFO, f"Removed old rule {rule_file}")
 
-    def _setup_global_skill(self):
+    def _setup_project_skill(self):
         skill_name = "llm-context-rule-creator"
-        skill_path = self.project_layout.user_skills_path / skill_name
+        skill_path = self.project_layout.project_skills_path / skill_name
         if skill_path.exists() and not self.constants.needs_update:
             return
         if skill_path.exists():
@@ -219,7 +219,6 @@ class ProjectSetup:
             if skill_file.is_file():
                 (skill_path / skill_file.name).write_text(skill_file.read_text())
         log(INFO, f"Claude Skill installed to: {skill_path}")
-        log(INFO, "Restart Claude Code/Desktop to activate")
 
     def _setup_shell_completions(self):
         layout = self.project_layout
