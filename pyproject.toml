@@ -23,7 +23,7 @@ classifiers = [
 
 dependencies = [
   "jinja2>=3.1.6, <4.0",
-  "mcp>=1.26.0",
+  "mcp>=1.27.0",
   "packaging>=26.0, <27.0",
   "pathspec>=1.0.4",
   "pyperclip>=1.11.0, <2.0.0",
@@ -31,7 +31,11 @@ dependencies = [
   "tree-sitter>=0.25.2",
   "tree-sitter-language-pack>=0.13.0",
   # Indirect dependencies (security constraints)
-  "python-multipart>=0.0.22",
+  "cryptography>=46.0.7",
+  "Pygments>=2.20.0",
+  "PyJWT>=2.12.0",
+  "python-dotenv>=1.2.2",
+  "python-multipart>=0.0.26",
   "starlette>=0.49.1",
 ]
 
@@ -82,7 +86,7 @@ dev = [
   "git-cliff>=2.12.0, <3.0",
   "isort>=7.0.0, <8.0",
   "mypy>=1.19.1, <2.0",
-  "pytest>=9.0.2, <10.0",
+  "pytest>=9.0.3, <10.0",
   "types-pyyaml>=6.0.12.20241230",
   "ruff>=0.14.14, <1.0",
   "taplo>=0.9.3, <1.0",
