@@ -8,6 +8,8 @@ Complete schema and field details for rule files.
 ---
 description: "Task description (required)"
 
+overview: full | focused        # Optional. Default: full. Tree-rendering mode.
+
 compose:
   filters: [<filter-rules>]     # File exclusion rules
   excerpters: [<exc-rules>]     # Excerpt configuration (required)
@@ -49,6 +51,17 @@ One-line task description. Appears in rule listings.
 ```yaml
 description: Add rate limiting to API endpoints
 ```
+
+### overview
+
+Controls the directory tree rendered into the generated context. Default: `full`.
+
+```yaml
+overview: full      # Complete tree, every file annotated (✓ full, E excerpted, ✗ excluded)
+overview: focused   # Groups directories; expands only those with included files
+```
+
+Use `focused` for repositories where the full tree would dominate the output (1000+ files). The default `full` overview already lists every selected file, so the rule's markdown body should not re-enumerate them — see PATTERNS.md "Anti-Patterns".
 
 ### compose (required)
 
@@ -195,6 +208,8 @@ In rule patterns, paths are relative to project root, starting with `/`:
 ```
 
 **Output format:** In generated context and preview output, paths include the project directory name: `/{project-name}/src/file.py`. This enables combining context from multiple projects without path conflicts.
+
+**Scope:** All pathspecs (`gitignores`, `limit-to`, `also-include`) are matched against files inside the project root. The selector never walks outside that root, so `../sibling-repo/foo.md` and absolute paths silently match nothing. For shared briefs that live in a sibling repo, inline the content into the rule's markdown body — see PATTERNS.md "Shared brief in sibling repo".
 
 ## Common Mistakes
 

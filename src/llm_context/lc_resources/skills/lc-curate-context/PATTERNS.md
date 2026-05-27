@@ -149,6 +149,35 @@ also-include:
     - "/<area-to-survey>..."
 ```
 
+### 6. Shared brief in sibling repo
+
+Use when the task depends on a style guide, editorial brief, or design-system doc that lives in a sibling checkout (e.g. `../other-repo/voice.md`) rather than inside the project root.
+
+`also-include` pathspecs are bounded by the project root (see SYNTAX.md "Scope"), so cross-repo paths silently match nothing. Workaround: inline the brief's content into the rule's markdown body and keep the in-repo selection minimal.
+
+```yaml
+compose:
+  filters: [lc/flt-no-files]
+  excerpters: [lc/exc-base]
+also-include:
+  full-files:
+    - "/<edit-targets>..."
+---
+## Voice (inlined from ../other-repo/voice.md)
+
+<paste the brief here>
+```
+
+Drift risk: edits to the sibling-repo source won't propagate. Re-sync when the brief changes, and note the source path at the top of the inlined block so future readers know where to refresh from.
+
+## Anti-Patterns
+
+### Don't enumerate selected files in the markdown body
+
+The default `overview: full` already lists every selected file in the generated context (see SYNTAX.md "overview"). A "Files in this pack" preamble in the rule body duplicates that list and goes stale on every selection change.
+
+The markdown body is for task-specific instructions to the agent — what to do, what to watch out for, what context the files don't carry. Leave the file inventory to the template.
+
 ## Heuristics from Real Tasks
 
 From the `lc-preview` task:
