@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.2] - 2026-06-19
+
+### Bug Fixes
+
+- Cap tree-sitter-language-pack below 1.8 to avoid its incompatible native binding
+- Bump dependencies to address dependabot security alerts
+
+### Documentation
+
+- Document overview field and project-root scope in skill
+- Add agent install path and structured skill feedback loop
+- Refocus skill patterns on minimal context primitives
+- Ground skill guidance in real repo tasks
+
+### Features
+
+- Add feedback loop
+- Install Claude skill to project-local .claude/skills/
+- Make lc-preview list all selected full and excerpted files
+
+### Refactor
+
+- Optimize FileSelector.filter_files
+- Remove unused code
+
 ## [0.6.1] - 2026-01-29
 
 ### Features

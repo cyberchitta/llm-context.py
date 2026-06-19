@@ -1,6 +1,6 @@
 [project]
 name = "llm-context"
-version = "0.6.1"
+version = "0.6.2"
 description = "Share code with LLMs via Model Context Protocol or clipboard. Rule-based customization enables easy switching between different tasks (like code review and documentation). Code outlining support is included as a standard feature."
 authors = [
   { name = "restlessronin", email = "88921269+restlessronin@users.noreply.github.com" },
@@ -29,7 +29,10 @@ dependencies = [
   "pyperclip>=1.11.0, <2.0.0",
   "pyyaml>=6.0.3",
   "tree-sitter>=0.25.2",
-  "tree-sitter-language-pack>=0.13.0",
+  # Capped below 1.8: 1.8.x swapped get_parser() to its own native Parser
+  # (parse() wants str, not bytes) and 1.9.x swapped Language/Node too, both
+  # incompatible with our py-tree-sitter usage (Query/QueryCursor, parse(bytes)).
+  "tree-sitter-language-pack>=0.13.0, <1.8",
   # Indirect dependencies (security constraints)
   "cryptography>=48.0.1",
   "idna>=3.15",
