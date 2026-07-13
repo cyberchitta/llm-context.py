@@ -37,6 +37,24 @@ Excerpted files (0):
 
 ---
 
+## Preview Looks Right But Context Is Empty
+
+**Symptom:** `lc-preview -r my-rule` shows the correct `Full files` list and sizes, but `lc-context` (via `lc-set-rule my-rule` + `lc-context`, or `lc-context -r my-rule`) produces a repository tree with everything marked `✗ Excluded` and no file content bodies at all — including files the rule explicitly lists in `also-include.full-files`.
+
+**Cause:** `lc-preview` computes its file selection fresh on every call. `lc-context` (and `lc-outlines`) instead read a selection that was persisted to `.llm-context/curr_ctx.yaml` by a prior `lc-select` call. For a rule that has never been selected before, that persisted entry is empty — `lc-preview` will still show the correct list (it isn't reading the persisted entry), but `lc-context` will emit nothing for that rule until `lc-select` runs.
+
+**Fix:** Always run `lc-select` after `lc-set-rule` and before the first `lc-context` / `lc-prompt` / `lc-outlines` call for a new or edited rule:
+
+```bash
+lc-set-rule my-rule
+lc-select        # required — populates the selection lc-context reads from
+lc-context -nt   # now emits real content
+```
+
+`lc-preview` is a validation tool, not a priming step — it does not substitute for `lc-select`. If you edit `also-include` on an already-selected rule, re-run `lc-select` to refresh the persisted selection before generating context again.
+
+---
+
 ## Context Too Large
 
 **Symptom:** Context exceeds target size (>100k tokens).

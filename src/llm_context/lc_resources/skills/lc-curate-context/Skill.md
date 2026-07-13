@@ -18,6 +18,7 @@ The job is not to gather a lot of relevant code. The job is to produce the small
 5. Run `lc-preview`.
 6. Read the exact `Full files` and `Excerpted files` lists.
 7. Tighten until the selection is minimal and sufficient.
+8. Before handing the rule off, actually generate output once: `lc-set-rule <rule>` → `lc-select` → `lc-context` (or `lc-prompt`). `lc-preview` computes its own selection on the fly and does not populate the state that `lc-context` reads from — see TROUBLESHOOTING.md "Preview Looks Right But Context Is Empty".
 
 ## Pick the Baseline First
 
@@ -65,7 +66,7 @@ Ask:
 - Are context files in `Excerpted files` instead of `Full files`?
 - Is the total selection small enough for the task?
 
-Do not trust a rule until the exact file lists look right.
+Do not trust a rule until the exact file lists look right. Note that `lc-preview` looking right is not sufficient on its own — see step 8 above.
 
 ## Grounded Example 1: Improve `lc-preview`
 
@@ -144,6 +145,7 @@ If preview expands too far, drop the repo baseline and switch to `lc/flt-no-file
 |------|-----|-----|
 | Explore | `lc-outlines` | `lc_outlines` |
 | Validate | `lc-preview <rule>` | `lc_preview` |
+| Select | `lc-set-rule <rule>` then `lc-select` (required once before context/outlines will emit content) | not confirmed — flag if you hit an empty MCP result |
 | Get context | `lc-context <rule>` | `lc_outlines` + `lc_missing` |
 | Check drift | `lc-changed` | `lc_changed` |
 | Fetch exact files | `lc-missing -f '[paths]' -t <ts>` | `lc_missing` |

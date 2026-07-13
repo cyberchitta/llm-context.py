@@ -61,7 +61,7 @@ overview: full      # Complete tree, every file annotated (✓ full, E excerpted
 overview: focused   # Groups directories; expands only those with included files
 ```
 
-Use `focused` for repositories where the full tree would dominate the output (1000+ files). The default `full` overview already lists every selected file, so the rule's markdown body should not re-enumerate them — see PATTERNS.md "Anti-Patterns".
+Use `focused` for repositories where the full tree would dominate the output (1000+ files), or for a narrow `also-include` selection where the untouched directories are large and irrelevant (data dumps, images, build output) — `focused` only collapses directories with zero selected files, so it costs nothing in directories your selection already touches. See PATTERNS.md "Curated reading pack, narrow topic". Prefer `full` when the consumer can act on the "request a missing file" instructions (MCP tools, or a human relaying `lc-missing` calls) and plausible follow-up requests could come from directories outside the current selection. The default `full` overview already lists every selected file, so the rule's markdown body should not re-enumerate them — see PATTERNS.md "Anti-Patterns".
 
 ### compose (required)
 

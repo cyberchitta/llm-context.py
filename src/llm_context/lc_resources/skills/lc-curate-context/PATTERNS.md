@@ -170,6 +170,26 @@ also-include:
 
 Drift risk: edits to the sibling-repo source won't propagate. Re-sync when the brief changes, and note the source path at the top of the inlined block so future readers know where to refresh from.
 
+### 7. Curated reading pack, narrow topic
+
+Use for a `lc/flt-no-files` + `also-include` rule where the selected files all live in one or two directories (e.g. a curated set of articles) and the rest of the repo — data dumps, images, build scripts, unrelated skills — has nothing to do with the task.
+
+```yaml
+compose:
+  filters: [lc/flt-no-files]
+  excerpters: [lc/exc-base]
+overview: focused
+also-include:
+  full-files:
+    - "/<curated-reading-list>..."
+```
+
+`overview: full` vs `focused` is not a "chat mode vs coding agent" distinction — it's about whether the consumer can act on the "request a missing file" instructions the overview template emits (`lc_missing` via MCP, or a human relaying `lc-missing` calls back into the chat), and, separately, whether `focused` would actually hide anything you'd want discoverable.
+
+`focused` only collapses a directory into a one-line summary when it contains **zero** selected files — any directory holding at least one selected file still lists every file in it individually, `✓`/`✗` marked, exactly like `full`. So if your `also-include` set already touches the directory where a plausible follow-up request would come from (e.g. other files in the same `src/articles/`-style directory), `focused` costs nothing there. It only trims noise in directories that are already wholly unrelated to the task — which is also where `full`'s tree dump can balloon past the size of the actual curated content, on repos with large unrelated asset/data directories.
+
+Reach for `full` instead when the plausible follow-up requests could come from directories your selection doesn't already touch, and you have a channel (MCP or human relay) to service them.
+
 ## Anti-Patterns
 
 ### Don't enumerate selected files in the markdown body
