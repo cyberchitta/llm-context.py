@@ -43,4 +43,9 @@ Thumbs.db
 
 # Local scratch
 .commit-msg
-field-notes.md
+
+# Working notes live in _notes/, a symlink to the private working-notes repo.
+# No trailing slash: git treats a symlink as a file, so `_notes/` would not
+# match it. The old `field-notes.md` rule left with the file — keeping it
+# would silently ignore a real file of that name later.
+_notes
