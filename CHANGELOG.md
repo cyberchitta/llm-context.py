@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.3] - 2026-07-28
+
+### Bug Fixes
+
+- Require mcp>=1.28.1 to clear GHSA-vj7q-gjh5-988w
+- Add __init__.py to subpackages instead of relying on namespace packages
+
+### Documentation
+
+- Add a CLAUDE.md pointing at the working notes
+- Move working notes to _notes/
+- Document lc-select requirement and refine overview guidance
+
 ## [0.6.2] - 2026-06-19
 
 ### Bug Fixes
