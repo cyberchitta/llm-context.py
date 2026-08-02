@@ -1,12 +1,12 @@
 import ast
 from pathlib import Path
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server import MCPServer
 
 from llm_context import commands
 from llm_context.exec_env import ExecutionEnvironment
 
-mcp = FastMCP("llm-context")
+mcp = MCPServer("llm-context")
 
 
 @mcp.tool()
