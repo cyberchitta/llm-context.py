@@ -1,6 +1,6 @@
 [project]
 name = "llm-context"
-version = "0.6.3"
+version = "0.6.4"
 description = "Share code with LLMs via Model Context Protocol or clipboard. Rule-based customization enables easy switching between different tasks (like code review and documentation). Code outlining support is included as a standard feature."
 authors = [
   { name = "restlessronin", email = "88921269+restlessronin@users.noreply.github.com" },
@@ -23,7 +23,9 @@ classifiers = [
 
 dependencies = [
   "jinja2>=3.1.6, <4.0",
-  "mcp>=1.28.1",
+  # 2.0 renamed FastMCP to MCPServer and dropped mcp.server.fastmcp;
+  # also past 1.28.1, so GHSA-vj7q-gjh5-988w stays cleared
+  "mcp>=2.0.0, <3.0",
   "packaging>=26.0, <27.0",
   "pathspec>=1.0.4",
   "pyperclip>=1.11.0, <2.0.0",

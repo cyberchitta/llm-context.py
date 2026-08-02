@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.4] - 2026-08-02
+
+### Bug Fixes
+
+- Migrate to the mcp 2.x server API, which renamed FastMCP to MCPServer
+
+### Refactor
+
+- Remove shell tab completion; lc-init no longer writes to ~/.zshrc or ~/.local/share
+
 ## [0.6.3] - 2026-07-28
 
 ### Bug Fixes
