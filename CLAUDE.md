@@ -9,7 +9,8 @@ Read directly when relevant:
 - `_notes/field-notes.md` — friction log for the `lc-curate-context` skill,
   written from consumer sessions in other repos. Newest entry at the top.
 - `_notes/implementation-log.md` — what shipped from a drained field note.
-  Entries stand on their own; the note each came from is gone.
+  Entries stand on their own; the note each came from is gone. Its header
+  carries the next entry point; this repo keeps no separate worklist.
 
 Speculative unless stated otherwise. Do not implement from these without asking.
 
