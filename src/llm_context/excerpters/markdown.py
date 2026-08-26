@@ -85,14 +85,14 @@ class Markdown(Excerpter):
         ast = ASTFactory.create().create_from_code(source)
         matches = ast.match(self._get_query())
         included_ranges: set[tuple[int, int]] = set()
-        for _, captures in matches.items():
+        for _, captures in matches:
             for capture_name, nodes in captures.items():
                 node_type = self._map_capture_to_type(capture_name)
                 if self._should_include(node_type):
                     for node in nodes:
                         included_ranges.add((node.start_point[0], node.end_point[0]))
         excluded_paras = []
-        for _, captures in matches.items():
+        for _, captures in matches:
             if "content.paragraph" in captures:
                 for node in captures["content.paragraph"]:
                     node_range = (node.start_point[0], node.end_point[0])
