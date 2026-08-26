@@ -29,6 +29,7 @@
 
 (function_call_expression
   function: [
+    (name) @name
     (qualified_name (name) @name)
     (variable_name (name)) @name
   ]) @reference.call
