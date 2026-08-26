@@ -30,11 +30,15 @@ dependencies = [
   "pathspec>=1.0.4",
   "pyperclip>=1.11.0, <2.0.0",
   "pyyaml>=6.0.3",
-  "tree-sitter>=0.25.2",
-  # Capped below 1.8: 1.8.x swapped get_parser() to its own native Parser
-  # (parse() wants str, not bytes) and 1.9.x swapped Language/Node too, both
-  # incompatible with our py-tree-sitter usage (Query/QueryCursor, parse(bytes)).
-  "tree-sitter-language-pack>=0.13.0, <1.8",
+  "tree-sitter>=0.26.0",
+  # Pinned to 1.6.2 exactly - the last release that ships a
+  # `tree_sitter_language_pack` module. 1.6.3 is the native rewrite: its wheel
+  # contains only `_native/`, so the import fails outright and every parse dies.
+  # 1.6.2 works with our py-tree-sitter usage (Query/QueryCursor, parse(bytes))
+  # and has wheels for 3.12/3.13/3.14 - all verified 2026-08-26.
+  # This is an application, not a library, so there is no reason to accept a
+  # range: a floor only lets a fresh install resolve somewhere untested.
+  "tree-sitter-language-pack==1.6.2",
   # Indirect dependencies (security constraints)
   "cryptography>=48.0.1",
   "idna>=3.15",
