@@ -45,7 +45,7 @@ Task-specific instructions for the agent.
 
 **`overview`** — controls the directory tree rendered into the context. Default `full`: every file listed and annotated. `focused`: directories holding zero selected files collapse to a one-line summary; any directory with at least one selected file is still listed in full. Use `focused` where the tree would otherwise dominate the output — large repos, or a narrow selection alongside big irrelevant asset or data directories. See PATTERNS.md recipe 7.
 
-The tree is not an inventory of the repository. It is filtered by the repo's `.gitignore` files and by `gitignores.overview-files` before anything is marked `✗`.
+The tree is not an inventory of the repository. It is filtered by the repo's `.gitignore` files and by `gitignores.overview-files` before anything is marked `✗`. That same file set scopes `lc-preview`'s `Referenced but not selected` section, so a file excluded from the overview cannot be reported there either.
 
 **`compose`** (required) — merge other rules in. `filters` combine `gitignores`, `limit-to`, and `also-include`; `excerpters` combine `excerpt-modes` and `excerpt-config`. Always include `lc/exc-base`.
 

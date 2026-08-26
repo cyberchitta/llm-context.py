@@ -15,7 +15,7 @@ The job is not to gather a lot of relevant code. It is to produce the smallest f
 2. Pick the narrowest sensible baseline filter (see below).
 3. Put files you expect to **edit** in `full-files`.
 4. Put callers, dependencies, and large reference files in `excerpted-files`.
-5. Run `lc-preview -r <rule>` and read the exact `Full files` / `Excerpted files` lists.
+5. Run `lc-preview -r <rule>`. Read the exact `Full files` / `Excerpted files` lists, then `Referenced but not selected`.
 6. Tighten until the selection is minimal and sufficient.
 7. Generate the real output once before handing the rule off — `lc-context -r <rule>` — and confirm it contains file bodies, not just a tree.
 

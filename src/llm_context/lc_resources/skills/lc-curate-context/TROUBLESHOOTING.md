@@ -43,6 +43,24 @@ Note that the file listing is **not** an inventory of the repository. It is filt
 
 ---
 
+## "Referenced but not selected" names files that look irrelevant
+
+Matching is by symbol name, so a method named `create`, `run`, or `format` can point at whichever file happens to define that name. Symbols defined in more than a few files are dropped for exactly this reason, but a name defined in only one or two places is still attributed to them.
+
+Read the symbols listed beside each file. If they are not the symbols your selection actually uses, ignore the row — the section is advisory and changes nothing about what gets packed.
+
+---
+
+## "Referenced but not selected" is empty when it shouldn't be
+
+Three causes, in order of likelihood:
+
+1. **The language has no reference captures.** `c` and `cpp` tag queries carry definitions only, so files in those languages never contribute references.
+2. **The language has no tag query at all.** Only these are parsed: c, cpp, csharp, elisp, elixir, elm, go, java, javascript, php, python, ruby, rust, typescript. Everything else is skipped.
+3. **The defining file is outside the rule's overview scope.** The index is built over the same file set the overview tree walks, so a file excluded by `gitignores.overview-files` — or by the repo's own `.gitignore` — cannot be reported.
+
+---
+
 ## Context too large
 
 1. **Move files from full to excerpted:**

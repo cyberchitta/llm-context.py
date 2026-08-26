@@ -4,9 +4,9 @@
 [![PyPI version](https://img.shields.io/pypi/v/llm-context.svg)](https://pypi.org/project/llm-context/)
 [![Downloads](https://static.pepy.tech/badge/llm-context/week)](https://pepy.tech/project/llm-context)
 
-**Smart context management for LLM development workflows.** Define the minimal file set a task needs with a composable rule, then pack it for a chat, an MCP client, or a disposable sub-agent.
+**Context curation your coding agent does for itself.** `lc-init` installs a skill that teaches the agent to work out which files a task actually needs, write that down as a composable rule, check the rule against the codebase, and pack the result — for its own context, for a chat you paste into, or for a sub-agent it dispatches.
 
-Getting the right context into an LLM is friction-heavy: finding and copying files by hand wastes time, too much context hits token limits, too little misses what matters, and follow-up file requests mean more manual fetching. A rule describes the selection once; the tooling handles packing, follow-up fetches, and change tracking.
+Getting the right context into an LLM is friction-heavy: finding and copying files by hand wastes time, too much context hits token limits, too little misses what matters, and follow-up file requests mean more manual fetching. The usual answers are to send everything, or to have a person curate by hand. A rule describes the selection once, and it is a thing an agent can author, verify and reuse — the tooling handles packing, follow-up fetches, and change tracking.
 
 ## Documentation lives in the skill
 
@@ -35,14 +35,23 @@ Upgrading: `uv tool upgrade llm-context`, then any `lc-*` command refreshes the 
 
 ## Three ways to use it
 
-**Human, via clipboard** — generate context, paste into any chat.
+**Your coding agent, curating for itself** — this is the primary path. After `lc-init` the agent has the `lc-curate-context` skill, so "get me focused context for the auth refactor" becomes a rule it writes and verifies without you naming files.
 
 ```bash
-lc-select        # pin a file selection for the active rule
-lc-context       # copy the pack to the clipboard
+lc-preview -r tmp-prm-auth    # what does this rule actually select?
 ```
 
-**Chat with MCP** — the model fetches what it needs on its own.
+`lc-preview` reports the exact file lists, the size, and — via the code graph — files defining symbols the selection uses but does not include. That last section is how the agent catches the module it forgot, before spending a turn on a wrong answer.
+
+**A sub-agent, via a pipe** — a dispatcher writes the prompt, llm-context supplies the files.
+
+```bash
+lc-context -r tmp-prm-auth -a | claude -p 'Your task here'
+```
+
+`-r` routes output to stdout; without it `lc-context` copies to the clipboard, so a pipe or redirect gets nothing but log lines. These commands take no bare positional rule name — always `-r`. `-a` renders the pack's fetch instructions as shell commands the child runs itself, so from the repo root it can call `lc-missing` against the pack's timestamp for anything left out. See `SKILL.md` "Packing for a Sub-Agent".
+
+**A chat, via MCP or the clipboard** — for models that aren't driving a terminal.
 
 ```jsonc
 {
@@ -55,16 +64,7 @@ lc-context       # copy the pack to the clipboard
 }
 ```
 
-The `lc_missing`, `lc_changed`, `lc_outlines` and `lc_preview` tools let the model pull files it wasn't given and notice ones that changed underneath it.
-
-**Sub-agent, via a pipe** — a dispatcher writes the prompt, llm-context supplies the files.
-
-```bash
-lc-preview -r tmp-prm-auth              # check the rule selects what you expect
-lc-context -r tmp-prm-auth -a | claude -p 'Your task here'
-```
-
-`-r` is what routes output to stdout; without it `lc-context` copies to the clipboard, so a pipe or redirect gets nothing but log lines. These commands take no bare positional rule name — always `-r`. `-a` renders the pack's fetch instructions as shell commands the child runs itself, so from the repo root it can call `lc-missing` against the pack's timestamp for anything left out. See `SKILL.md` "Packing for a Sub-Agent".
+With MCP the model pulls files it wasn't given and notices ones that changed underneath it, through `lc_missing`, `lc_changed`, `lc_outlines` and `lc_preview`. Without it, `lc-select` then `lc-context` puts the pack on your clipboard to paste anywhere.
 
 ## Rules in one minute
 
@@ -82,7 +82,7 @@ also-include:
 Focus on the authentication system and its tests.
 ```
 
-Rules compose, and are named by category: `prm-` produces a context, `flt-` controls file inclusion, `ins-` supplies guidelines, `sty-` enforces coding standards, `exc-` configures excerpting. Files you expect to edit go in `full-files`; supporting code goes in `excerpted-files`, where it is reduced to signatures and definitions. See `SYNTAX.md` and `PATTERNS.md`.
+You rarely write one by hand — the skill does, and `lc-preview` is how it checks its work. Rules compose, and are named by category: `prm-` produces a context, `flt-` controls file inclusion, `ins-` supplies guidelines, `sty-` enforces coding standards, `exc-` configures excerpting. Files you expect to edit go in `full-files`; supporting code goes in `excerpted-files`, where it is reduced to signatures and definitions. See `SYNTAX.md` and `PATTERNS.md`.
 
 ## What a generated context contains
 

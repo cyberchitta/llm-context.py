@@ -38,6 +38,7 @@ Make lc-preview show exact full and excerpted file membership for rule verificat
 - `lc-preview` should show exactly 4 full files and 4 excerpted files
 - the template should be full, not excerpted
 - selection internals should be excerpted, not full
+- `Referenced but not selected` should name only things the task genuinely does not touch. `utils.py` showing up here is expected and fine to leave out; `context_generator.py` showing up would be worth a second look, since preview rendering reads from it.
 
 ## Example 2: Tighten Primitive Rule Composition
 
@@ -70,6 +71,7 @@ Improve the primitive rule vocabulary and the skill instructions that teach agen
 - `flt-repo-base` can still admit more full files than expected
 - `lc-preview` is required to confirm that rule mechanics did not pull in unrelated files
 - if the full-file list grows too much, switch to `lc/flt-no-files`
+- a broad baseline usually leaves `Referenced but not selected` nearly empty; a long list there means the baseline excluded something central, not that the list is noisy
 
 ## Example 3: Surgical Single-File Fix
 
