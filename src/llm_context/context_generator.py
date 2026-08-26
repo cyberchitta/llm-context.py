@@ -198,12 +198,17 @@ class ContextSettings:
     with_user_notes: bool = False
     with_tools: bool = True
     as_message: bool = False
+    consumer: str = "mcp"
 
     @staticmethod
     def create(
-        with_prompt: bool, with_user_notes: bool, with_tools: bool, as_message: bool
+        with_prompt: bool,
+        with_user_notes: bool,
+        with_tools: bool,
+        as_message: bool,
+        consumer: str = "mcp",
     ) -> "ContextSettings":
-        return ContextSettings(with_prompt, with_user_notes, with_tools, as_message)
+        return ContextSettings(with_prompt, with_user_notes, with_tools, as_message, consumer)
 
 
 @dataclass(frozen=True)
@@ -280,6 +285,7 @@ class ContextGenerator:
             "not_excerpted": not_excerpted,
             "excluded_content": excluded_content,
             "with_tools": self.settings.with_tools,
+            "consumer": self.settings.consumer,
         }
         return self._render(template_id, context)
 
@@ -345,6 +351,7 @@ class ContextGenerator:
             "modified_files": list(modified_files),
             "deleted_files": list(deleted_files),
             "with_tools": self.settings.with_tools,
+            "consumer": self.settings.consumer,
         }
         return self._render(template_id, context)
 
@@ -379,6 +386,7 @@ class ContextGenerator:
         )
         context = {
             "project_name": self.project_root.name,
+            "rule_name": descriptor.name,
             "context_timestamp": context_timestamp,
             "abs_root_path": str(self.project_root),
             "overview": overview_result.text,
@@ -395,9 +403,12 @@ class ContextGenerator:
                 self.collector.sample_file_abs(self.full_abs)
             ),
             "sample_excluded_files": overview_result.sample_excluded,
+            "sample_outlined_file": outlined_rel[0] if outlined_rel else None,
+            "sample_excerpted_file": other_excerpted_rel[0] if other_excerpted_rel else None,
             "prompt": descriptor.get_instructions() if settings.with_prompt else None,
             "project_notes": descriptor.get_project_notes(layout),
             "with_tools": settings.with_tools,
+            "consumer": settings.consumer,
             "user_notes": descriptor.get_user_notes(layout) if settings.with_user_notes else None,
             "rule_included_paths": set(),
             "as_message": settings.as_message,

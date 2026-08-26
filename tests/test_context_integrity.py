@@ -131,5 +131,73 @@ class TestOverviewTemplate(unittest.TestCase):
         self.assertNotIn("COMPLETE PROJECT CONTEXT", rendered.upper())
 
 
+class TestCallbackInstructions(unittest.TestCase):
+    """The commands a pack tells its reader to run must be real commands.
+
+    The pack used to emit `lc-changed "<root>" <rule> <ts>` (lc-changed takes no
+    arguments at all) and an lc_changed tool call carrying a `rule_name` field the
+    tool does not accept.
+    """
+
+    def render(self, **overrides):
+        context = {
+            "project_name": "proj",
+            "rule_name": "tmp-prm-task",
+            "context_timestamp": 1234.5,
+            "abs_root_path": "/tmp/proj",
+            "overview": "TREE",
+            "overview_mode": "full",
+            "full_count": 3,
+            "outlined_count": 1,
+            "excerpted_count": 1,
+            "excluded_count": 40,
+            "excerpts": True,
+            "with_tools": True,
+            "consumer": "mcp",
+            "sample_requested_files": ["/proj/x.py"],
+            "sample_excluded_files": ["/proj/y.py"],
+            "sample_outlined_file": "/proj/outlined.py",
+            "sample_excerpted_file": "/proj/excerpted.md",
+        }
+        context.update(overrides)
+        env = Environment(loader=FileSystemLoader(str(TEMPLATES_PATH)))
+        return env.get_template("lc/overview.j2").render(**context)
+
+    def test_never_emits_lc_changed_with_arguments(self):
+        for kwargs in [{}, {"consumer": "cli"}, {"with_tools": False}]:
+            rendered = self.render(**kwargs)
+            for line in rendered.splitlines():
+                if "lc-changed" in line and line.strip().startswith("lc-changed"):
+                    self.assertEqual(line.strip(), "lc-changed", "lc-changed takes no arguments")
+
+    def test_mcp_change_call_has_no_rule_name(self):
+        rendered = self.render(consumer="mcp")
+        after = rendered.split("lc-changed tool", 1)
+        self.assertEqual(len(after), 2, "mcp rendering should name the lc-changed tool")
+        self.assertNotIn("rule_name", after[1].split("```")[1])
+
+    def test_agent_rendering_gives_runnable_shell_commands(self):
+        rendered = self.render(consumer="cli")
+        self.assertIn("Run these yourself", rendered)
+        self.assertIn("lc-missing -f", rendered)
+        self.assertNotIn("the user should run", rendered)
+        self.assertNotIn('"param_type"', rendered)
+
+    def test_agent_examples_name_real_outlined_and_excerpted_files(self):
+        rendered = self.render(consumer="cli")
+        self.assertIn('lc-missing -i "[[\\"/proj/outlined.py\\"', rendered)
+        self.assertIn('lc-missing -e "[\\"/proj/excerpted.md\\"]"', rendered)
+
+    def test_human_rendering_addresses_the_user(self):
+        rendered = self.render(with_tools=False)
+        self.assertIn("Ask the user to run", rendered)
+        self.assertNotIn('"param_type"', rendered)
+
+    def test_mcp_rendering_keeps_the_tool_form(self):
+        rendered = self.render(consumer="mcp")
+        self.assertIn('"param_type"', rendered)
+        self.assertNotIn("Run these yourself", rendered)
+
+
 if __name__ == "__main__":
     unittest.main()

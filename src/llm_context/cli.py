@@ -84,7 +84,10 @@ def prompt(env: ExecutionEnvironment) -> ExecutionResult:
 def context(env: ExecutionEnvironment) -> ExecutionResult:
     parser = argparse.ArgumentParser(description="Generate context for LLM")
     parser.add_argument("-p", action="store_true", help="Include prompt in context")
-    parser.add_argument("-nt", action="store_true", help="Assume no MCP/tools")
+    parser.add_argument("-nt", action="store_true", help="Assume no MCP/tools (a human relays)")
+    parser.add_argument(
+        "-a", action="store_true", help="Consumer is an agent with a shell, not MCP tools"
+    )
     parser.add_argument("-u", action="store_true", help="Include user notes in context")
     parser.add_argument("-f", type=str, help="Write context to file")
     parser.add_argument("-m", action="store_true", help="Send context as separate message")
@@ -92,7 +95,9 @@ def context(env: ExecutionEnvironment) -> ExecutionResult:
     args, _ = parser.parse_known_args()
     rule_name = args.r if args.r else env.state.current_rule
     rule_feedback(env, rule_name)
-    settings = ContextSettings.create(args.p, args.u, not args.nt, args.m)
+    settings = ContextSettings.create(
+        args.p, args.u, not args.nt, args.m, "cli" if args.a else "mcp"
+    )
     content, context_timestamp, file_selection = commands.generate_context(env, rule_name, settings)
     updated_selection = file_selection.with_timestamp(context_timestamp)
     nxt_env = env.with_state(env.state.with_selection(updated_selection))

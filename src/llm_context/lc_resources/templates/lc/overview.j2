@@ -10,19 +10,57 @@
 **This is a partial view of _/{{ project_name }}_.** The listing below is itself filtered — by the repository's `.gitignore` files and by this rule's own overview ignores — so files may exist in the project that do not appear below at all. Treat the listing as the set of files this context knows about, not as an inventory of the repository.
 
 > Generation timestamp: {{ context_timestamp }}
-> {% if with_tools %}For updates: Use lc-changed to identify changes, then lc-missing for specific files{% else %}For updates: Use the lc-missing commands shown below{% endif %}
+> For updates: {% if with_tools %}use lc-changed to identify what moved, then lc-missing to fetch it{% else %}use the lc-missing commands shown below{% endif %}
 
 ## Instructions for AI
 
 1. **Anything marked ✓ is included below in full.** Read it from this document rather than requesting it again.
-2. **Anything marked{% if excerpts %} O, E,{% endif %} or ✗ — or not listed at all — is not in this context.** Never infer its contents from naming conventions, sibling files, or partial information. {% if with_tools %}Fetch it with lc-missing{% else %}Request it using the commands below{% endif %}, or say plainly that you could not see it.
+2. **Anything marked{% if excerpts %} O, E,{% endif %} or ✗ — or not listed at all — is not in this context.** Never infer its contents from naming conventions, sibling files, or partial information. {% if not with_tools %}Request it using the commands below{% elif consumer == "cli" %}Fetch it by running lc-missing yourself, as shown below{% else %}Fetch it with the lc-missing tool{% endif %}, or say plainly that you could not see it.
 3. **Check the repository structure below** to confirm a file's status before acting on it.
 {% if sample_requested_files or sample_excluded_files %}
 ### How to Request Missing Files
-{% if with_tools %}
+{% if not with_tools %}
+Ask the user to run these and paste back the output.
+
+For files:
+```bash
+lc-missing -f {% if sample_excluded_files %}{{ sample_excluded_files | tojson | tojson }}{% else %}{{ sample_requested_files | tojson | tojson }}{% endif %} -t {{ context_timestamp }}
+```
+
+For files that changed since this context was generated:
+```bash
+lc-set-rule {{ rule_name }}
+lc-changed
+```
+{% elif consumer == "cli" %}
+Run these yourself from the project root ({{ abs_root_path }}).
+
+For files:
+```bash
+lc-missing -f {% if sample_excluded_files %}{{ sample_excluded_files | tojson | tojson }}{% else %}{{ sample_requested_files | tojson | tojson }}{% endif %} -t {{ context_timestamp }}
+```
+{% if sample_outlined_file %}
+For one definition out of a file marked O, naming a definition you can see in its outline:
+```bash
+lc-missing -i "[[\"{{ sample_outlined_file }}\", \"<definition-name>\"]]" -t {{ context_timestamp }}
+```
+{% endif %}{% if sample_excerpted_file %}
+For the excluded sections of a file marked E:
+```bash
+lc-missing -e "[\"{{ sample_excerpted_file }}\"]" -t {{ context_timestamp }}
+```
+{% endif %}
+For files that changed since this context was generated:
+```bash
+lc-set-rule {{ rule_name }}
+lc-changed
+```
+
+Paths must be in the `/{{ project_name }}/...` form used throughout this document, and `-t` must be this context's timestamp.
+{% else %}
 Using the lc-missing tool:
    **ROOT PATH must be: {{ abs_root_path }}**
-   
+
    For files:
    ```json
    {
@@ -32,31 +70,20 @@ Using the lc-missing tool:
      "timestamp": {{ context_timestamp }}
    }
    ```
-   
-   For modified files since context generation:
+
+   For files modified since this context was generated, use the lc-changed tool:
    ```json
    {
      "root_path": "{{ abs_root_path }}",
-     "rule_name": "lc/prm-developer",
      "timestamp": {{ context_timestamp }}
    }
    ```
 {% if excerpts %}
-**EFFICIENCY TIP:** 
-- For O files: Use lc-missing with param_type "i" to get specific implementations
-- For E files: Use lc-missing with param_type "e" to get excluded sections
-- For complete files: Use lc-missing with param_type "f"
+**EFFICIENCY TIP:**
+- For O files: use lc-missing with param_type "i" to get specific implementations
+- For E files: use lc-missing with param_type "e" to get excluded sections
+- For complete files: use lc-missing with param_type "f"
 {% endif %}
-{% else %}
-For files, the user should run:
-```bash
-lc-missing -f {% if sample_excluded_files %}{{ sample_excluded_files | tojson | tojson }}{% else %}{{ sample_requested_files | tojson | tojson }}{% endif %} -t {{ context_timestamp }}
-```
-
-For modified files since context generation, the user should run:
-```bash
-lc-changed "{{ abs_root_path }}" lc/prm-developer {{ context_timestamp }}
-```
 {% endif %}
 {% endif %}
 
