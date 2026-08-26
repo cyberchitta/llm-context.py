@@ -93,8 +93,8 @@ def context(env: ExecutionEnvironment) -> ExecutionResult:
     rule_name = args.r if args.r else env.state.current_rule
     rule_feedback(env, rule_name)
     settings = ContextSettings.create(args.p, args.u, not args.nt, args.m)
-    content, context_timestamp = commands.generate_context(env, rule_name, settings)
-    updated_selection = env.state.get_selection(rule_name).with_timestamp(context_timestamp)
+    content, context_timestamp, file_selection = commands.generate_context(env, rule_name, settings)
+    updated_selection = file_selection.with_timestamp(context_timestamp)
     nxt_env = env.with_state(env.state.with_selection(updated_selection))
     nxt_env.state.store()
     if args.f:

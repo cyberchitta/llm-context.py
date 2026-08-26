@@ -69,6 +69,9 @@ class ExecutionState:
     def get_selection(self, rule_name: str) -> FileSelection:
         return self.selections.get_selection(rule_name)
 
+    def needs_selection(self, rule_name: str) -> bool:
+        return self.selections.needs_selection(rule_name)
+
     def store(self):
         StateStore(self.project_layout.state_store_path).save(self.selections, self.current_rule)
 

@@ -52,6 +52,10 @@ class AllSelections:
     def get_selection(self, rule_name: str) -> FileSelection:
         return self.selections.get(rule_name, FileSelection.create(rule_name, [], []))
 
+    def needs_selection(self, rule_name: str) -> bool:
+        selection = self.selections.get(rule_name)
+        return selection is None or not selection.files
+
     def get_selection_by_timestamp(self, timestamp: float) -> Optional[FileSelection]:
         return next(
             (

@@ -1,10 +1,12 @@
+from logging import INFO
+
 from llm_context.context_generator import ContextGenerator, ContextSettings
 from llm_context.context_preview import ContextPreview
 from llm_context.context_spec import ContextSpec
 from llm_context.exec_env import ExecutionEnvironment
 from llm_context.file_selector import ContextSelector
 from llm_context.state import FileSelection
-from llm_context.utils import PathConverter, is_newer
+from llm_context.utils import PathConverter, is_newer, log
 
 
 def get_prompt(env: ExecutionEnvironment, rule_name: str) -> str:
@@ -15,12 +17,15 @@ def get_prompt(env: ExecutionEnvironment, rule_name: str) -> str:
     return generator.prompt()
 
 
-def select_all_files(env: ExecutionEnvironment, rule_name: str) -> FileSelection:
-    config = ContextSpec.create(env.state.project_layout.root_path, rule_name, env.constants)
+def _select_files(config: ContextSpec, current_selection: FileSelection) -> FileSelection:
     selector = ContextSelector.create(config)
-    current_selection = env.state.get_selection(rule_name)
     file_sel_full = selector.select_full_files(current_selection)
     return selector.select_excerpted_files(file_sel_full)
+
+
+def select_all_files(env: ExecutionEnvironment, rule_name: str) -> FileSelection:
+    config = ContextSpec.create(env.state.project_layout.root_path, rule_name, env.constants)
+    return _select_files(config, env.state.get_selection(rule_name))
 
 
 def get_missing_files(env: ExecutionEnvironment, paths: list[str], timestamp: float) -> str:
@@ -117,11 +122,15 @@ def get_focus_help(env: ExecutionEnvironment) -> str:
 
 def generate_context(
     env: ExecutionEnvironment, rule_name: str, settings: ContextSettings
-) -> tuple[str, float]:
+) -> tuple[str, float, FileSelection]:
     config = ContextSpec.create(env.state.project_layout.root_path, rule_name, env.constants)
     file_selection = env.state.get_selection(rule_name)
+    if env.state.needs_selection(rule_name):
+        log(INFO, f"No stored file selection for rule '{rule_name}' - selecting now.")
+        file_selection = _select_files(config, file_selection)
     generator = ContextGenerator.create(config, file_selection, settings, env.tagger)
-    return generator.context()
+    content, context_timestamp = generator.context()
+    return content, context_timestamp, file_selection
 
 
 def get_outlines(env: ExecutionEnvironment, rule_name: str) -> str:
