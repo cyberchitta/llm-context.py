@@ -49,6 +49,12 @@ Read `Summary`, then `Full files`, then `Excerpted files`, and ask:
 
 Do not trust a rule until the exact file lists look right.
 
+### Referenced but not selected
+
+`lc-preview` also lists files that **define symbols your selection uses but which the rule does not include**, ranked by how many. This is the check for the failure the file lists cannot show you: a rule that looks tidy but omits the module its edit targets actually call.
+
+Add the ones the task needs. Leave the rest — they stay reachable through `lc-missing`, and pulling in everything reachable is how a minimal rule turns into the whole repo. Matching is by symbol name, so a common name may point at the wrong file; treat the list as a hint, not a checklist.
+
 ## Packing for a Sub-Agent
 
 A rule is also how you hand a task to a disposable child agent. The dispatcher writes the prompt; llm-context supplies the files.

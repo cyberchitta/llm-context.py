@@ -139,5 +139,6 @@ After writing a rule, run `lc-preview -r <rule>`:
 2. Did anything unrelated leak into `Full files`?
 3. Are support files in `Excerpted files` rather than `Full files`?
 4. Is the baseline primitive too broad for this task?
+5. In `Referenced but not selected`, is anything the task plainly needs?
 
-If 2 or 4 is yes, narrow the composition before touching the file lists.
+If 2 or 4 is yes, narrow the composition before touching the file lists. For 5, add only what the task needs — the rest stays reachable via `lc-missing`, and adding everything reachable defeats the point of a minimal rule.

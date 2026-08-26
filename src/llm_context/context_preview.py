@@ -2,7 +2,8 @@ from dataclasses import dataclass
 
 from llm_context.context_generator import ContextCollector, Template
 from llm_context.context_spec import ContextSpec
-from llm_context.file_selector import ContextSelector
+from llm_context.dependencies import DependencyGap, SymbolIndex
+from llm_context.file_selector import ContextSelector, FileSelector
 from llm_context.state import FileSelection
 from llm_context.utils import ProjectLayout, _format_size
 
@@ -23,6 +24,7 @@ class ContextPreview:
     excerpted_files: list[FileStats]
     project_layout: ProjectLayout
     template_name: str
+    dependency_gaps: list[DependencyGap]
 
     @staticmethod
     def create(config: ContextSpec, tagger) -> "ContextPreview":
@@ -41,6 +43,16 @@ class ContextPreview:
                 tagger, file_selection.excerpted_files, rule
             )
         ]
+        universe = FileSelector.create_ignorer(
+            config.project_root_path, rule.get_ignore_patterns("overview")
+        ).get_relative_files()
+        gaps = (
+            SymbolIndex.create(tagger, config.project_root_path, universe).gaps(
+                file_selection.files
+            )
+            if tagger
+            else []
+        )
         return ContextPreview(
             rule_name=rule.name,
             compose_filters=rule.compose.filters,
@@ -49,6 +61,7 @@ class ContextPreview:
             excerpted_files=excerpted_stats,
             project_layout=config.project_layout,
             template_name=config.templates["preview"],
+            dependency_gaps=gaps,
         )
 
     @property
@@ -101,6 +114,16 @@ class ContextPreview:
             "total_files": len(self.full_files) + len(self.excerpted_files),
             "total_size": _format_size(self.total_bytes),
             "estimated_tokens": self.estimated_tokens // 1000,
+            "dependency_gaps": [
+                {
+                    "rel_path": gap.rel_path,
+                    "reference_count": gap.reference_count,
+                    "symbols": ", ".join(gap.symbols[:5]),
+                    "more_symbols": max(0, len(gap.symbols) - 5),
+                }
+                for gap in self.dependency_gaps[:max_files]
+            ],
+            "dependency_gap_total": len(self.dependency_gaps),
         }
         template = Template.create(self.template_name, context, self.project_layout.templates_path)
         return template.render()

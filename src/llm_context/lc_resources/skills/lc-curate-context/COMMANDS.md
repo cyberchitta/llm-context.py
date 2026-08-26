@@ -58,6 +58,8 @@ lc-preview -r <rule>    # what the rule selects, with sizes
 
 `lc-preview` computes its selection fresh and does not change any stored state.
 
+Its `Referenced but not selected` section lists files defining symbols the selection uses but does not include, ranked by reference count. It is built from tree-sitter tag captures — the same parse that produces outlines — and matches by symbol name, so a name defined in several places is dropped rather than guessed at, and a common name can still point at the wrong file. Advisory only: nothing is added to the selection.
+
 ## Fetching what the pack left out
 
 Every generated context carries a `Generation timestamp`. These commands resolve a pack by that timestamp, so they only work for a pack llm-context itself produced.

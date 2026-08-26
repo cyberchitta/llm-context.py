@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, NamedTuple, Optional, Protocol
 
-from llm_context.excerpters.parser import ASTFactory, Source, to_definition
+from llm_context.excerpters.parser import ASTFactory, Source, to_definition, to_reference
 
 
 class Position(NamedTuple):
@@ -55,10 +55,29 @@ class Definition:
         )
 
 
+@dataclass(frozen=True)
+class Reference:
+    rel_path: str
+    name: str
+    kind: str
+    begin: Position
+
+    @staticmethod
+    def create(rel_path: str, node: dict[str, Any]) -> "Reference":
+        return Reference(
+            rel_path,
+            node["text"],
+            node["kind"],
+            Position(node["start_point"][0], node["start_point"][1]),
+        )
+
+
 class TagExtractor(Protocol):
     workspace_path: str
 
     def extract_definitions(self, source: Source) -> list[Definition]: ...
+
+    def extract_references(self, source: Source) -> list[Reference]: ...
 
 
 @dataclass(frozen=True)
@@ -76,6 +95,14 @@ class ASTBasedTagger(TagExtractor):
             Definition.create(ast.rel_path, defn)
             for defn in map(to_definition, ast.tag_matches())
             if defn
+        ]
+
+    def extract_references(self, source: Source) -> list[Reference]:
+        ast = self.ast_factory.create_from_code(source)
+        return [
+            Reference.create(ast.rel_path, ref)
+            for ref in map(to_reference, ast.tag_matches())
+            if ref
         ]
 
 

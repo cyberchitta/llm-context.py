@@ -25,3 +25,19 @@ Excerpted files
 {%- else %}
 none
 {%- endif %}
+
+Referenced but not selected
+{%- if dependency_gaps %}
+{%- for gap in dependency_gaps %}
+- {{ gap.rel_path }} ({{ gap.reference_count }} refs: {{ gap.symbols }}{% if gap.more_symbols %}, +{{ gap.more_symbols }} more{% endif %})
+{%- endfor %}
+{%- if dependency_gap_total > dependency_gaps|length %}
+- ...and {{ dependency_gap_total - dependency_gaps|length }} more files
+{%- endif %}
+
+These files define symbols the selection uses. Add the ones the task needs; the
+rest are reachable at runtime via lc-missing. Matching is by symbol name, so
+treat this as a hint, not a checklist.
+{%- else %}
+none
+{%- endif %}

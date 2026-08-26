@@ -118,6 +118,18 @@ class ASTNode:
         }
 
 
+def to_reference(match: tuple[int, dict[str, list[Any]]]) -> dict[str, Any]:
+    _, captures = match
+    ref_capture = next((name for name in captures if name.startswith("reference.")), None)
+    if not ref_capture:
+        return {}
+    name_nodes: list[Node] = captures.get("name", [])
+    name_node = ASTNode.create(name_nodes[0] if name_nodes else None)
+    if not name_node:
+        return {}
+    return {"kind": ref_capture[len("reference.") :], **name_node.to_text()}
+
+
 def to_definition(match: tuple[int, dict[str, list[Any]]]) -> dict[str, Any]:
     _, captures = match
     def_capture = next((name for name in captures if name.startswith("definition.")), None)
