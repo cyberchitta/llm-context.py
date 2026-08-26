@@ -184,13 +184,31 @@ also-include:
 ## Task-Specific Context
 Add optional task-specific instructions here.
 EOF
-lc-set-rule tmp-prm-task-name
-lc-select
-lc-context
+lc-preview -r tmp-prm-task-name
 ```
+
+Read the preview before generating anything. It reports the exact `Full files`
+and `Excerpted files` lists, the total size, and `Referenced but not selected` —
+files defining symbols your selection uses but does not include. That last
+section catches the common failure: a rule that looks tidy but omits a module
+the edit targets actually call.
+
+Then generate:
+
+```bash
+lc-context -r tmp-prm-task-name        # to stdout, for a pipe or a file
+lc-set-rule tmp-prm-task-name && lc-context   # to the clipboard, for pasting
+```
+
+`lc-context` takes no bare positional rule name — use `-r`, which also routes
+output to stdout. Without `-r` the pack goes to the clipboard, so a redirect
+captures only log lines.
 
 ## Best Practices
 
+- **Verify Before Generating**: `lc-preview -r <rule>` is the check that the rule
+  says what you meant. Add what `Referenced but not selected` shows the task
+  needs; leave the rest, since it stays reachable through `lc-missing`.
 - **Start with Filters**: Always choose filters first. Check your project's custom filters in `.llm-context/rules/` before defaulting to `lc/flt-base`.
 - **Use Descriptive Names**: Prefix temporary rules with `tmp-prm-` (e.g., `tmp-prm-api-debug`).
 - **Leverage Categories**:

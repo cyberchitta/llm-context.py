@@ -1,13 +1,13 @@
 ---
 name: lc-curate-context
-description: Create llm-context rules that define the minimal sufficient file set for a task, and pack that set for a chat, an MCP client, or a disposable sub-agent
+description: Decide which files a task actually needs, record that as a reusable llm-context rule, verify it against the codebase - including the files your selection references but leaves out - and pack it for your own context, a chat, or a sub-agent you dispatch. Load when choosing what code to put in front of a model, packing files for a sub-agent, or when a rule selects too much or too little.
 ---
 
 # Context Descriptor Creation
 
-Write rules that define the minimal sufficient context for a task.
+Three jobs, in order: **decide** what a task needs, **verify** the decision against the codebase, **pack** it for whoever is reading.
 
-The job is not to gather a lot of relevant code. It is to produce the smallest full-file and excerpted-file set that is still enough to finish the task.
+The first is not "gather a lot of relevant code" — it is to produce the smallest full-file and excerpted-file set that is still enough to finish the task. The second is what `lc-preview` is for, and it is not optional: a rule that looks right and omits the module its edit targets call will fail quietly. The third depends on the consumer, and getting it wrong is also quiet — see "Packing for a Sub-Agent".
 
 ## Workflow
 
