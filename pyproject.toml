@@ -47,7 +47,6 @@ dependencies = [
 
 [project.urls]
 Repository = "https://github.com/cyberchitta/llm-context.py"
-"User Guide" = "https://github.com/cyberchitta/llm-context.py/blob/main/docs/user-guide.md"
 Changelog = "https://github.com/cyberchitta/llm-context.py/blob/main/CHANGELOG.md"
 
 [project.scripts]

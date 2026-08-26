@@ -1,142 +1,66 @@
-# Primitive Rule Patterns
+# Rule Patterns
 
-Use the smallest primitive vocabulary that can express the task cleanly.
+Use the smallest primitive vocabulary that expresses the task cleanly.
 
-The grounded examples in this repo point to five core primitives and one common project-local primitive.
+## Primitives
 
-## Core Primitives
+| Primitive | Effect | Use when |
+|---|---|---|
+| `lc/flt-no-files` | Start from nothing | Surgical task; you know the likely files; you want exact control. **The usual default.** |
+| `lc/flt-base` | Broad code baseline, standard noise removed | Task spans a subsystem; you don't yet know the exact files; repo is small enough to stay inspectable. Verify with `lc-preview` — it can admit a lot. |
+| `lc/flt-no-full` | Suppress all full-file selection | You want structure only, e.g. surveying before deciding what needs full content. |
+| `lc/flt-no-outline` | Suppress all excerpted-file selection | You want exact bodies only; excerpting would add noise. |
+| `lc/exc-base` | Standard excerpting behaviour | Always — compose this into every task rule. |
 
-### `lc/flt-no-files`
+**`flt-repo-base`** is a convention, not a system rule: a project-local baseline in `.llm-context/rules/` capturing stable local noise (rarely-needed docs, tests, generated sources). Worth writing when several task rules need the same repo-specific baseline. If it is too broad, every rule that composes it silently over-selects.
 
-Start from nothing.
-
-Use when:
-- the task is surgical
-- you know the likely files
-- you want exact control over `full-files` and `excerpted-files`
-
-This should be the default starting point for many task rules.
-
-### `lc/flt-base`
-
-Start from a broad code-oriented baseline with standard noise removed.
-
-Use when:
-- the task spans a subsystem
-- you do not yet know the exact files
-- the repository is small enough that a broad baseline is still inspectable
-
-Risk:
-- can admit many unrelated files into `Full files`
-- must be verified with `lc-preview`
-
-### `lc/flt-no-full`
-
-Suppress all full-file selection.
-
-Use when:
-- you want structure only
-- you are surveying a subsystem before deciding what needs full content
-- you want an excerpt-heavy context
-
-### `lc/flt-no-outline`
-
-Suppress all excerpted-file selection.
-
-Use when:
-- you want only exact file bodies
-- excerpting would add noise
-- the selected set is already very small
-
-### `lc/exc-base`
-
-Standard excerpting behavior.
-
-Use when:
-- any file may need to be excerpted
-- you want the normal code-outliner / markdown / SFC behavior
-
-This is the standard excerpter primitive and should usually be composed into task rules.
-
-## Common Project-Local Primitive
-
-### `flt-repo-base`
-
-Repository-specific baseline filter.
-
-This is not a system primitive. It should live in `.llm-context/rules/` and capture local exclusions such as:
-- docs that are rarely needed
-- tests that should not be included by default
-- generated sources
-- project-specific resource folders
-
-Use when:
-- the repository has stable local noise that should be excluded by default
-- multiple task rules need the same repo-specific baseline
-
-Risk:
-- if this primitive is too broad, many task rules will silently over-select
-- `lc-preview` must confirm that it behaves as intended
-
-## Minimal Composition Recipes
+## Recipes
 
 ### 1. Surgical change
-
-Use this for tasks like improving `lc-preview` formatting.
 
 ```yaml
 compose:
   filters: [lc/flt-no-files]
   excerpters: [lc/exc-base]
 also-include:
-  full-files:
-    - "/<edit-targets>..."
-  excerpted-files:
-    - "/<supporting-context>..."
+  full-files: ["/<edit-targets>..."]
+  excerpted-files: ["/<supporting-context>..."]
 ```
 
-### 2. Surgical change with exact bodies only
-
-Use when excerpting adds no value.
+### 2. Surgical change, exact bodies only
 
 ```yaml
 compose:
   filters: [lc/flt-no-files, lc/flt-no-outline]
   excerpters: [lc/exc-base]
 also-include:
-  full-files:
-    - "/<edit-targets>..."
+  full-files: ["/<edit-targets>..."]
 ```
 
-### 3. Broad local baseline plus targeted additions
-
-Use when the repo already has a reliable `flt-repo-base`.
+### 3. Repo baseline plus targeted additions
 
 ```yaml
 compose:
   filters: [flt-repo-base]
   excerpters: [lc/exc-base]
 also-include:
-  full-files:
-    - "/<edit-targets>..."
-  excerpted-files:
-    - "/<supporting-context>..."
+  full-files: ["/<edit-targets>..."]
+  excerpted-files: ["/<supporting-context>..."]
 ```
 
-### 4. Broad baseline but full-file bias
+### 4. Repo baseline, full-file bias
 
-Use when you are editing docs, rules, or templates and excerpting is not helpful for the main target set.
+For editing docs, rules, or templates, where excerpting the main targets adds nothing.
 
 ```yaml
 compose:
   filters: [flt-repo-base, lc/flt-no-outline]
   excerpters: [lc/exc-base]
 also-include:
-  full-files:
-    - "/<primary-files>..."
+  full-files: ["/<primary-files>..."]
 ```
 
-### 5. Broad baseline but excerpt-only survey
+### 5. Excerpt-only survey
 
 Use before narrowing a task rule.
 
@@ -145,34 +69,30 @@ compose:
   filters: [flt-repo-base, lc/flt-no-full]
   excerpters: [lc/exc-base]
 also-include:
-  excerpted-files:
-    - "/<area-to-survey>..."
+  excerpted-files: ["/<area-to-survey>..."]
 ```
 
-### 6. Shared brief in sibling repo
+### 6. Shared brief in a sibling repo
 
-Use when the task depends on a style guide, editorial brief, or design-system doc that lives in a sibling checkout (e.g. `../other-repo/voice.md`) rather than inside the project root.
-
-`also-include` pathspecs are bounded by the project root (see SYNTAX.md "Scope"), so cross-repo paths silently match nothing. Workaround: inline the brief's content into the rule's markdown body and keep the in-repo selection minimal.
+`also-include` pathspecs are bounded by the project root (SYNTAX.md "Scope"), so `../other-repo/voice.md` silently matches nothing. Inline the brief into the rule body and keep the in-repo selection minimal.
 
 ```yaml
 compose:
   filters: [lc/flt-no-files]
   excerpters: [lc/exc-base]
 also-include:
-  full-files:
-    - "/<edit-targets>..."
+  full-files: ["/<edit-targets>..."]
 ---
 ## Voice (inlined from ../other-repo/voice.md)
 
 <paste the brief here>
 ```
 
-Drift risk: edits to the sibling-repo source won't propagate. Re-sync when the brief changes, and note the source path at the top of the inlined block so future readers know where to refresh from.
+Drift risk: edits to the sibling source won't propagate. Note the source path at the top of the inlined block so a future reader knows where to refresh from.
 
 ### 7. Curated reading pack, narrow topic
 
-Use for a `lc/flt-no-files` + `also-include` rule where the selected files all live in one or two directories (e.g. a curated set of articles) and the rest of the repo — data dumps, images, build scripts, unrelated skills — has nothing to do with the task.
+For a `lc/flt-no-files` + `also-include` set living in one or two directories, where the rest of the repo (data dumps, images, build output) has nothing to do with the task.
 
 ```yaml
 compose:
@@ -180,47 +100,44 @@ compose:
   excerpters: [lc/exc-base]
 overview: focused
 also-include:
-  full-files:
-    - "/<curated-reading-list>..."
+  full-files: ["/<curated-reading-list>..."]
 ```
 
-`overview: full` vs `focused` is not a "chat mode vs coding agent" distinction — it's about whether the consumer can act on the "request a missing file" instructions the overview template emits (`lc_missing` via MCP, or a human relaying `lc-missing` calls back into the chat), and, separately, whether `focused` would actually hide anything you'd want discoverable.
+`focused` collapses a directory to a one-line summary only when it holds **zero** selected files — any directory with at least one selected file is still listed file by file, exactly as under `full`. So it costs nothing in directories your selection already touches, and only trims ones already wholly unrelated. Prefer `full` when plausible follow-up requests could come from directories your selection doesn't touch and the consumer has a channel to service them.
 
-`focused` only collapses a directory into a one-line summary when it contains **zero** selected files — any directory holding at least one selected file still lists every file in it individually, `✓`/`✗` marked, exactly like `full`. So if your `also-include` set already touches the directory where a plausible follow-up request would come from (e.g. other files in the same `src/articles/`-style directory), `focused` costs nothing there. It only trims noise in directories that are already wholly unrelated to the task — which is also where `full`'s tree dump can balloon past the size of the actual curated content, on repos with large unrelated asset/data directories.
+### 8. Pack for a disposable sub-agent
 
-Reach for `full` instead when the plausible follow-up requests could come from directories your selection doesn't already touch, and you have a channel (MCP or human relay) to service them.
+The dispatcher writes the prompt; the rule supplies the files. Keep the rule free of instructions — the markdown body would just compete with the dispatcher's prompt.
+
+```yaml
+compose:
+  filters: [lc/flt-no-files, lc/flt-no-outline]
+  excerpters: [lc/exc-base]
+also-include:
+  full-files: ["/<everything-the-task-touches>..."]
+```
+
+```bash
+lc-context -r tmp-prm-task -a | claude -p 'Task here'
+```
+
+`lc/flt-no-outline` is what makes it a whole-files pack: no file arrives as a signature-only outline the child cannot act on. Verify in the output header, not in the rule — the generated context reports how many files are full, outlined, and excerpted, so a pass that depends on complete files can assert the outlined and excerpted counts are zero.
+
+`-a` renders the fetch instructions as shell commands the child runs itself, rather than MCP tool calls it has no server for. Run it from the repo root so they resolve. See COMMANDS.md for the three consumer renderings. See SKILL.md "Packing for a Sub-Agent".
 
 ## Anti-Patterns
 
-### Don't enumerate selected files in the markdown body
+**Don't enumerate selected files in the markdown body.** The generated context already lists every selected file with its status. A "Files in this pack" preamble duplicates that and goes stale on every selection change. The body is for task-specific instructions — what to do, what to watch for, what the files don't carry.
 
-The default `overview: full` already lists every selected file in the generated context (see SYNTAX.md "overview"). A "Files in this pack" preamble in the rule body duplicates that list and goes stale on every selection change.
-
-The markdown body is for task-specific instructions to the agent — what to do, what to watch out for, what context the files don't carry. Leave the file inventory to the template.
-
-## Heuristics from Real Tasks
-
-From the `lc-preview` task:
-- start with `lc/flt-no-files`
-- list edit targets in `full-files`
-- keep selection internals in `excerpted-files`
-- do not use a repo baseline unless preview proves it stays tight
-
-From the primitive-rule-docs task:
-- a repo baseline can be useful, but only if `lc-preview` shows it does not drag in unrelated files
-- if preview expands too far, fall back to `lc/flt-no-files`
-
-From the markdown-excerpter task:
-- a changed file and its direct test usually belong in `full-files`
-- neighboring infrastructure often belongs in `excerpted-files`
+**Don't rely on a filter to guarantee a property.** `lc/flt-no-outline` expresses "no excerpts", but a later edit can compose it away with no signal. If a pass depends on the property, check the counts in the generated header.
 
 ## Verification Checklist
 
-After writing a rule, run `lc-preview` and check:
+After writing a rule, run `lc-preview -r <rule>`:
 
 1. Are all intended edit targets in `Full files`?
 2. Did anything unrelated leak into `Full files`?
 3. Are support files in `Excerpted files` rather than `Full files`?
 4. Is the baseline primitive too broad for this task?
 
-If the answer to 2 or 4 is yes, narrow the primitive composition before changing the file lists.
+If 2 or 4 is yes, narrow the composition before touching the file lists.

@@ -4,79 +4,45 @@
 [![PyPI version](https://img.shields.io/pypi/v/llm-context.svg)](https://pypi.org/project/llm-context/)
 [![Downloads](https://static.pepy.tech/badge/llm-context/week)](https://pepy.tech/project/llm-context)
 
-**Smart context management for LLM development workflows.** Share relevant project files instantly through intelligent selection and rule-based filtering.
+**Smart context management for LLM development workflows.** Define the minimal file set a task needs with a composable rule, then pack it for a chat, an MCP client, or a disposable sub-agent.
 
-## The Problem
+Getting the right context into an LLM is friction-heavy: finding and copying files by hand wastes time, too much context hits token limits, too little misses what matters, and follow-up file requests mean more manual fetching. A rule describes the selection once; the tooling handles packing, follow-up fetches, and change tracking.
 
-Getting the right context into LLM conversations is friction-heavy:
+## Documentation lives in the skill
 
-- Manually finding and copying relevant files wastes time
-- Too much context hits token limits, too little misses important details
-- AI requests for additional files require manual fetching
-- Hard to track what changed during development sessions
+The full documentation is the **`lc-curate-context` skill**, installed into your project by `lc-init`. It is written to be read by an agent, and it is the only copy — this README is a landing page, not a manual.
 
-## The Solution
+| File | Contents |
+| --- | --- |
+| `SKILL.md` | Writing a rule; the workflow; packing for a sub-agent |
+| `COMMANDS.md` | CLI and MCP reference, including output routing |
+| `SYNTAX.md` | Rule file schema and every field |
+| `PATTERNS.md` | Reusable rule shapes |
+| `EXAMPLES.md` | Worked examples |
+| `TROUBLESHOOTING.md` | Failure cases |
 
-llm-context provides focused, task-specific project context through composable rules.
-
-**For humans using chat interfaces:**
-```bash
-lc-select   # Smart file selection
-lc-context  # Copy formatted context to clipboard
-# Paste and work - AI can access additional files via MCP
-```
-
-**For AI agents with CLI access:**
-```bash
-lc-preview tmp-prm-auth    # Validate rule selects right files
-lc-context tmp-prm-auth    # Get focused context for sub-agent
-```
-
-**For AI agents in chat (MCP tools):**
-- `lc_outlines` - Generate excerpted context from current rule
-- `lc_preview` - Validate rule effectiveness before use
-- `lc_missing` - Fetch specific files/implementations on demand
-
-> **Note**: This project was developed in collaboration with several Claude Sonnets (3.5, 3.6, 3.7, 4.0) and Groks (3, 4), using LLM Context itself to share code during development. All code is heavily human-curated by @restlessronin.
+Find them at `.claude/skills/lc-curate-context/` after `lc-init`. In Claude Code the skill loads automatically; elsewhere, read the files directly.
 
 ## Installation
 
 ```bash
 uv tool install "llm-context>=0.6.0"
-```
-
-### For Agents (Claude Code skill)
-
-If you're an agent setting llm-context up to help curate task contexts, run this once per project:
-
-```bash
-uv tool install "llm-context>=0.6.0"   # installs the lc-* commands globally
 cd <project-root>
-lc-init                                # creates .llm-context/, copies the lc-curate-context skill to .claude/skills/
+lc-init          # creates .llm-context/, installs the skill into .claude/skills/
 ```
 
-After `lc-init`, the `lc-curate-context` skill loads in this project's Claude Code session. It teaches how to compose a minimal task rule and verify it with `lc-preview` before generating context.
+Upgrading: `uv tool upgrade llm-context`, then any `lc-*` command refreshes the skill, rules and templates in place.
 
-To pick up a newer skill version, run `uv tool upgrade llm-context` and re-run `lc-init` — it refreshes the skill files in place.
+## Three ways to use it
 
-## Quick Start
-
-### Human Workflow (Clipboard)
+**Human, via clipboard** — generate context, paste into any chat.
 
 ```bash
-# One-time setup
-cd your-project
-lc-init
-
-# Daily usage
-lc-select
-lc-context
-# Paste into your LLM chat
+lc-select        # pin a file selection for the active rule
+lc-context       # copy the pack to the clipboard
 ```
 
-### MCP Integration (Recommended)
-
-Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+**Chat with MCP** — the model fetches what it needs on its own.
 
 ```jsonc
 {
@@ -89,46 +55,20 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
 }
 ```
 
-Restart Claude Desktop. Now AI can access additional files during conversations without manual copying.
+The `lc_missing`, `lc_changed`, `lc_outlines` and `lc_preview` tools let the model pull files it wasn't given and notice ones that changed underneath it.
 
-### Agent Workflow (CLI)
-
-AI agents with shell access use llm-context to create focused contexts:
+**Sub-agent, via a pipe** — a dispatcher writes the prompt, llm-context supplies the files.
 
 ```bash
-# Agent explores codebase
-lc-outlines
-
-# Agent creates focused rule for specific task
-# (via Skill or lc-rule-instructions)
-
-# Agent validates rule
-lc-preview tmp-prm-oauth-task
-
-# Agent uses context for sub-task
-lc-context tmp-prm-oauth-task
+lc-preview -r tmp-prm-auth              # check the rule selects what you expect
+lc-context -r tmp-prm-auth -a | claude -p 'Your task here'
 ```
 
-### Agent Workflow (MCP)
+`-r` is what routes output to stdout; without it `lc-context` copies to the clipboard, so a pipe or redirect gets nothing but log lines. These commands take no bare positional rule name — always `-r`. `-a` renders the pack's fetch instructions as shell commands the child runs itself, so from the repo root it can call `lc-missing` against the pack's timestamp for anything left out. See `SKILL.md` "Packing for a Sub-Agent".
 
-AI agents in chat environments use MCP tools:
+## Rules in one minute
 
-```bash
-# Explore codebase structure
-lc_outlines(root_path, rule_name)
-
-# Validate rule effectiveness  
-lc_preview(root_path, rule_name)
-
-# Fetch specific files/implementations
-lc_missing(root_path, param_type, data, timestamp)
-```
-
-## Core Concepts
-
-### Rules: Task-Specific Context Descriptors
-
-Rules are YAML+Markdown files that describe what context to provide for a task:
+A rule is YAML frontmatter plus optional markdown:
 
 ```yaml
 ---
@@ -139,254 +79,26 @@ compose:
 also-include:
   full-files: ["/src/auth/**", "/tests/auth/**"]
 ---
-Focus on authentication system and related tests.
+Focus on the authentication system and its tests.
 ```
 
-### Five Rule Categories
+Rules compose, and are named by category: `prm-` produces a context, `flt-` controls file inclusion, `ins-` supplies guidelines, `sty-` enforces coding standards, `exc-` configures excerpting. Files you expect to edit go in `full-files`; supporting code goes in `excerpted-files`, where it is reduced to signatures and definitions. See `SYNTAX.md` and `PATTERNS.md`.
 
-- **Prompt Rules (`prm-`)**: Generate project contexts (e.g., `lc/prm-developer`)
-- **Filter Rules (`flt-`)**: Control file inclusion (e.g., `lc/flt-base`, `lc/flt-no-files`)
-- **Instruction Rules (`ins-`)**: Provide guidelines (e.g., `lc/ins-developer`)
-- **Style Rules (`sty-`)**: Enforce coding standards (e.g., `lc/sty-python`)
-- **Excerpt Rules (`exc-`)**: Configure content extraction (e.g., `lc/exc-base`)
+## What a generated context contains
 
-### Rule Composition
+Complete contents for full files, structural excerpts for the rest, a filtered file listing marking what is and isn't included, and a timestamp that `lc-missing` and `lc-changed` resolve against.
 
-Build complex rules from simpler ones:
-
-```yaml
----
-instructions: [lc/ins-developer, lc/sty-python]
-compose:
-  filters: [lc/flt-base, project-filters]
-  excerpters: [lc/exc-base]
----
-```
-
-## Essential Commands
-
-| Command              | Purpose                                  |
-| -------------------- | ---------------------------------------- |
-| `lc-init`            | Initialize project configuration         |
-| `lc-select`          | Select files based on current rule       |
-| `lc-context`         | Generate and copy context                |
-| `lc-context -p`      | Include prompt instructions              |
-| `lc-context -m`      | Format as separate message               |
-| `lc-context -nt`     | No tools (manual workflow)               |
-| `lc-set-rule <name>` | Switch active rule                       |
-| `lc-preview <rule>`  | Validate rule selection and size         |
-| `lc-outlines`        | Get code structure excerpts              |
-| `lc-missing`         | Fetch files/implementations (manual MCP) |
-
-## AI-Assisted Rule Creation
-
-Let AI help create focused, task-specific rules. Two approaches depending on your environment:
-
-### Claude Skill (Interactive, Claude Desktop/Code)
-
-**How it works**: Global skill guides you through creating rules interactively. Examines your codebase as needed using MCP tools.
-
-**Setup**:
-```bash
-lc-init  # Installs skill to ~/.claude/skills/
-# Restart Claude Desktop or Claude Code
-```
-
-**Usage**:
-```bash
-# 1. Share project context
-lc-context  # Any rule - overview included
-
-# 2. Paste into Claude, then ask:
-# "Create a rule for refactoring authentication to JWT"
-# "I need a rule to debug the payment processing"
-```
-
-Claude will:
-1. Use project overview already in context
-2. Examine specific files via `lc-missing` as needed
-3. Ask clarifying questions about scope
-4. Generate optimized rule (`tmp-prm-<task>.md`)
-5. Provide validation instructions
-
-**Skill documentation** (progressively disclosed):
-- `Skill.md` - Quick workflow, decision patterns
-- `PATTERNS.md` - Common rule patterns
-- `SYNTAX.md` - Detailed reference
-- `EXAMPLES.md` - Complete walkthroughs
-- `TROUBLESHOOTING.md` - Problem solving
-
-### Instruction Rules (Works Anywhere)
-
-**How it works**: Load comprehensive rule-creation documentation into context, work with any LLM.
-
-**Usage**:
-```bash
-# 1. Load framework
-lc-set-rule lc/prm-rule-create
-lc-select
-lc-context -nt
-
-# 2. Paste into any LLM
-# "I need a rule for adding OAuth integration"
-
-# 3. LLM generates focused rule using framework
-
-# 4. Use the new rule
-lc-set-rule tmp-prm-oauth
-lc-select
-lc-context
-```
-
-**Included documentation**:
-- `lc/ins-rule-intro` - Introduction and overview
-- `lc/ins-rule-framework` - Complete decision framework
-
-### Comparison
-
-| Aspect                    | Skill                           | Instruction Rules        |
-| ------------------------- | ------------------------------- | ------------------------ |
-| **Setup**                 | Automatic with `lc-init`        | Already available        |
-| **Interaction**           | Interactive, uses `lc-missing`  | Static documentation     |
-| **File examination**      | Automatic via MCP               | Manual or via AI         |
-| **Best for**              | Claude Desktop/Code             | Any LLM, any environment |
-| **Updates**               | Automatic with version upgrades | Built-in to rules        |
-
-Both require sharing project context first. Both produce equivalent results.
-
-## Project Customization
-
-### Create Base Filters
-
-```bash
-cat > .llm-context/rules/flt-repo-base.md << 'EOF'
----
-description: "Repository-specific exclusions"
-compose:
-  filters: [lc/flt-base]
-gitignores:
-  full-files: ["*.md", "/tests", "/node_modules"]
-  excerpted-files: ["*.md", "/tests"]
----
-EOF
-```
-
-### Create Development Rule
-
-```bash
-cat > .llm-context/rules/prm-code.md << 'EOF'
----
-description: "Main development rule"
-instructions: [lc/ins-developer, lc/sty-python]
-compose:
-  filters: [flt-repo-base]
-  excerpters: [lc/exc-base]
----
-Additional project-specific guidelines and context.
-EOF
-
-lc-set-rule prm-code
-```
-
-## Deployment Patterns
-
-Choose format based on your LLM environment:
-
-| Pattern               | Command          | Use Case                  |
-| --------------------- | ---------------- | ------------------------- |
-| System Message        | `lc-context -p`  | AI Studio, etc.           |
-| Single User Message   | `lc-context -p -m` | Grok, etc.              |
-| Separate Messages     | `lc-prompt` + `lc-context -m` | Flexible placement |
-| Project Files (included) | `lc-context`  | Claude Projects, etc.     |
-| Project Files (searchable) | `lc-context -m` | Force into context     |
-
-See [Deployment Patterns](docs/user-guide.md#deployment-patterns) for details.
-
-## Key Features
-
-- **Intelligent Selection**: Rules automatically include/exclude appropriate files
-- **Context Validation**: Preview size and selection before generation
-- **Code Excerpting**: Extract structure while reducing tokens (15+ languages)
-- **MCP Integration**: AI accesses additional files without manual intervention
-- **Composable Rules**: Build complex contexts from reusable patterns
-- **AI-Assisted Creation**: Interactive skill or documentation-based approaches
-- **Agent-Friendly**: CLI and MCP interfaces for autonomous operation
-
-## Common Workflows
-
-### Daily Development (Human)
-
-```bash
-lc-set-rule prm-code
-lc-select
-lc-context
-# Paste into chat - AI accesses more files via MCP if needed
-```
-
-### Focused Task (Human or Agent)
-
-```bash
-# Share project context first
-lc-context
-
-# Then create focused rule:
-# Via Skill: "Create a rule for [task]"
-# Via Instructions: lc-set-rule lc/prm-rule-create && lc-context -nt
-
-# Validate and use
-lc-preview tmp-prm-task
-lc-context tmp-prm-task
-```
-
-### Agent Context Provisioning (CLI)
-
-```bash
-# Agent validates rule effectiveness
-lc-preview tmp-prm-refactor-auth
-
-# Agent generates context for sub-agent
-lc-context tmp-prm-refactor-auth > /tmp/context.md
-# Sub-agent reads context and executes task
-```
-
-### Agent Context Provisioning (MCP)
-
-```python
-# Agent validates rule
-preview = lc_preview(root_path="/path/to/project", rule_name="tmp-prm-task")
-
-# Agent generates context
-context = lc_outlines(root_path="/path/to/project")
-
-# Agent fetches additional files as needed
-files = lc_missing(root_path, "f", "['/proj/src/auth.py']", timestamp)
-```
-
-## Path Format
-
-All paths use project-relative format with project name prefix:
-
-```
-/{project-name}/src/module/file.py
-/{project-name}/tests/test_module.py
-```
-
-This enables multi-project context composition without path conflicts.
-
-**In rules**, patterns are project-relative without the prefix:
-```yaml
-also-include:
-  full-files:
-    - "/src/auth/**"      # ✓ Correct
-    - "/myproject/src/**" # ✗ Wrong - don't include project name
-```
+A pack is always partial — the listing is filtered by your `.gitignore` files and by the rule before anything is marked excluded, so files can exist that it never mentions. The header reports how many files are full, outlined and excerpted, so a consumer can check what it actually received rather than trusting the rule.
 
 ## Learn More
 
-- **[User Guide](docs/user-guide.md)** - Complete documentation with examples
-- **[Design Philosophy](https://www.cyberchitta.cc/articles/llm-ctx-why.html)** - Why llm-context exists
-- **[Real-world Examples](https://www.cyberchitta.cc/articles/full-context-magic.html)** - Using full context effectively
+- [Design Philosophy](https://www.cyberchitta.cc/articles/llm-ctx-why.html) — why llm-context exists
+- [Real-world Examples](https://www.cyberchitta.cc/articles/full-context-magic.html) — using full context effectively
 
 ## License
 
 Apache License, Version 2.0. See [LICENSE](LICENSE) for details.
+
+---
+
+Developed in collaboration with several Claude models and Groks, using LLM Context itself to share code during development. All code is heavily human-curated by [@restlessronin](https://github.com/restlessronin).

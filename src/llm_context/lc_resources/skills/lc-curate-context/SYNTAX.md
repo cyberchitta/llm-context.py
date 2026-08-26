@@ -1,8 +1,6 @@
 # Rule Syntax Reference
 
-Complete schema and field details for rule files.
-
-## Full Schema
+## Schema
 
 ```yaml
 ---
@@ -14,7 +12,7 @@ compose:
   filters: [<filter-rules>]     # File exclusion rules
   excerpters: [<exc-rules>]     # Excerpt configuration (required)
 
-instructions: [<ins-rules>]     # Optional: guidelines for the agent
+instructions: [<ins-rules>]     # Optional. Discards this file's markdown body.
 
 gitignores:                     # Additional exclusions (additive)
   full-files: [<patterns>]
@@ -38,227 +36,94 @@ excerpt-modes:                  # Override default excerpter
 excerpt-config:                 # Excerpter settings
   <mode>: {<config>}
 ---
-## Markdown Content
-Task-specific context and instructions for the agent.
+Task-specific instructions for the agent.
 ```
 
-## Field Reference
+## Fields
 
-### description (required)
+**`description`** (required) — one line, shown in rule listings.
 
-One-line task description. Appears in rule listings.
+**`overview`** — controls the directory tree rendered into the context. Default `full`: every file listed and annotated. `focused`: directories holding zero selected files collapse to a one-line summary; any directory with at least one selected file is still listed in full. Use `focused` where the tree would otherwise dominate the output — large repos, or a narrow selection alongside big irrelevant asset or data directories. See PATTERNS.md recipe 7.
 
-```yaml
-description: Add rate limiting to API endpoints
-```
+The tree is not an inventory of the repository. It is filtered by the repo's `.gitignore` files and by `gitignores.overview-files` before anything is marked `✗`.
 
-### overview
-
-Controls the directory tree rendered into the generated context. Default: `full`.
-
-```yaml
-overview: full      # Complete tree, every file annotated (✓ full, E excerpted, ✗ excluded)
-overview: focused   # Groups directories; expands only those with included files
-```
-
-Use `focused` for repositories where the full tree would dominate the output (1000+ files), or for a narrow `also-include` selection where the untouched directories are large and irrelevant (data dumps, images, build output) — `focused` only collapses directories with zero selected files, so it costs nothing in directories your selection already touches. See PATTERNS.md "Curated reading pack, narrow topic". Prefer `full` when the consumer can act on the "request a missing file" instructions (MCP tools, or a human relaying `lc-missing` calls) and plausible follow-up requests could come from directories outside the current selection. The default `full` overview already lists every selected file, so the rule's markdown body should not re-enumerate them — see PATTERNS.md "Anti-Patterns".
-
-### compose (required)
-
-Merge other rules into this one.
+**`compose`** (required) — merge other rules in. `filters` combine `gitignores`, `limit-to`, and `also-include`; `excerpters` combine `excerpt-modes` and `excerpt-config`. Always include `lc/exc-base`.
 
 ```yaml
 compose:
-  filters: [lc/flt-base]        # Always include base filters
-  excerpters: [lc/exc-base]     # Required for excerpting
+  filters: [lc/flt-base]
+  excerpters: [lc/exc-base]
 ```
 
-**filters:** Combine gitignores, limit-to, also-include from composed rules.
+**`gitignores`** — exclude matching files. Additive with composed filters.
 
-**excerpters:** Combine excerpt-modes and excerpt-config. Always include `lc/exc-base`.
+**`limit-to`** — include *only* matching files. Only the first `limit-to` per category survives composition, so define it in the rule itself rather than inheriting it.
 
-### gitignores
+**`also-include`** — force include, **bypassing all filters**, including gitignores. Be specific: `"/src/**"` will pull in `__pycache__` and `node_modules`.
 
-Exclude files matching patterns. Additive with composed filters.
-
-```yaml
-gitignores:
-  full-files:
-    - "**/test/**"
-    - "*.generated.py"
-  excerpted-files:
-    - "*.md"
-```
-
-### limit-to
-
-Only include files matching these patterns. **Warning:** Only the first `limit-to` per category is used in composition.
-
-```yaml
-limit-to:
-  full-files: ["/src/api/**"]
-  excerpted-files: ["/src/**"]
-```
-
-### also-include
-
-Force include files, **bypassing all filters**. Use with caution.
-
-```yaml
-also-include:
-  full-files:
-    - "/src/auth/**"
-    - "/config/settings.yaml"
-  excerpted-files:
-    - "/src/models/**"
-```
-
-**Warning:** `also-include` ignores gitignores. Be specific to avoid pulling in __pycache__, node_modules, etc.
-
-### implementations
-
-Extract specific function/class definitions from files.
+**`implementations`** — extract named definitions rather than whole files.
 
 ```yaml
 implementations:
   - ["/src/utils.py", "validate_token"]
-  - ["/src/auth.py", "AuthManager"]
 ```
 
-Useful when you need one function from a large file.
+**`instructions`** — compose instruction/style rules into the context. **Setting this discards the rule file's own markdown body.** Use one or the other.
 
-### instructions
-
-Reference instruction/style rules to include in context.
-
-```yaml
-instructions: [lc/ins-developer, lc/sty-python]
-```
-
-**Note:** When `instructions` is set, markdown content in the rule file is ignored.
-
-### excerpt-modes
-
-Override the default excerpter for specific file patterns.
+**`excerpt-modes`** — override the excerpter per pattern. Modes: `code-outliner` (default for code), `markdown`, `sfc` (Vue/Svelte).
 
 ```yaml
 excerpt-modes:
   "*.md": "markdown"
-  "*.vue": "sfc"
 ```
 
-Available modes: `code-outliner` (default for code), `markdown`, `sfc` (Vue/Svelte).
-
-### excerpt-config
-
-Configure excerpter behavior.
+**`excerpt-config`** — per-excerpter settings.
 
 ```yaml
 excerpt-config:
   markdown:
     with-code-blocks: true
-    with-lists: true
 ```
 
 ## Built-in Rules
 
-### Filters
-
-| Rule | Purpose |
-|------|---------|
+| Filters | |
+|---|---|
 | `lc/flt-base` | Standard exclusions (binaries, logs, caches, deps) |
-| `lc/flt-no-files` | Exclude everything (use with `also-include`) |
+| `lc/flt-no-files` | Exclude everything — use with `also-include` |
 | `lc/flt-no-full` | No full-content files |
 | `lc/flt-no-outline` | No excerpted files |
 
-### Excerpters
-
-| Rule | Purpose |
-|------|---------|
+| Excerpters | |
+|---|---|
 | `lc/exc-base` | Code outlining for all supported languages |
 
-### Instructions
-
-| Rule | Purpose |
-|------|---------|
+| Instructions | |
+|---|---|
 | `lc/ins-developer` | General development guidelines |
 | `lc/ins-rule-framework` | Full rule system documentation |
 
-### Styles
-
-| Rule | Purpose |
-|------|---------|
+| Styles | |
+|---|---|
 | `lc/sty-code` | Universal code principles |
 | `lc/sty-python` | Python-specific guidelines |
 | `lc/sty-javascript` | JavaScript-specific guidelines |
 
 ## Path Format
 
-In rule patterns, paths are relative to project root, starting with `/`:
+Rule patterns are project-root-relative and start with `/`:
 
 ```yaml
-# Correct patterns in rules
-"/src/file.py"              # Specific file
-"/src/**/*.py"              # Glob pattern
-"**/*.js"                   # Any depth
+"/src/file.py"     # specific file
+"/src/**/*.py"     # glob
+"**/*.js"          # any depth
 
-# Wrong
-"src/file.py"               # Missing leading /
-"/src/"                     # Directory (use /src/**)
+"src/file.py"      # WRONG - missing leading /
+"/src/"            # WRONG - directory; use /src/**
 ```
 
-**Output format:** In generated context and preview output, paths include the project directory name: `/{project-name}/src/file.py`. This enables combining context from multiple projects without path conflicts.
+Quote every pattern — an unquoted `- /src/**/*.py` is a YAML error.
 
-**Scope:** All pathspecs (`gitignores`, `limit-to`, `also-include`) are matched against files inside the project root. The selector never walks outside that root, so `../sibling-repo/foo.md` and absolute paths silently match nothing. For shared briefs that live in a sibling repo, inline the content into the rule's markdown body — see PATTERNS.md "Shared brief in sibling repo".
+**Output paths differ from rule paths.** Preview listings and generated context prefix the project directory name: `/{project-name}/src/file.py`. This lets context from several projects combine without collision. `lc-missing` takes paths in the *output* form.
 
-## Common Mistakes
-
-### 1. Missing excerpters
-
-```yaml
-# Wrong - will fail
-compose:
-  filters: [lc/flt-base]
-
-# Correct
-compose:
-  filters: [lc/flt-base]
-  excerpters: [lc/exc-base]
-```
-
-### 2. also-include pulling in noise
-
-```yaml
-# Dangerous - gets __pycache__, etc.
-also-include:
-  full-files: ["/src/**"]
-
-# Better - be specific
-also-include:
-  full-files: ["/src/auth/**", "/src/api/routes.py"]
-```
-
-### 3. Mixing instructions with markdown
-
-```yaml
-# Wrong - markdown will be ignored
-instructions: [lc/ins-developer]
----
-## This content is discarded!
-```
-
-Choose one: use `instructions` to compose, or write markdown directly.
-
-### 4. YAML syntax errors
-
-```yaml
-# Wrong - unquoted glob
-also-include:
-  full-files:
-    - /src/**/*.py
-
-# Correct - quoted
-also-include:
-  full-files:
-    - "/src/**/*.py"
-```
+**Scope.** All pathspecs are matched against files inside the project root; the selector never walks outside it, so `../sibling-repo/foo.md` and absolute paths silently match nothing. For a shared brief in a sibling repo, see PATTERNS.md recipe 6.

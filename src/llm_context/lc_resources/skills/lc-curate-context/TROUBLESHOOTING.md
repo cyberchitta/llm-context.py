@@ -1,84 +1,60 @@
 # Troubleshooting
 
-Common issues and solutions.
+## Pipe or redirect captured nothing
 
-## No Files Selected
+**Symptom:** `lc-context <rule> > pack.md` produces a file of two log lines, or a piped child answers as if it got no code.
 
-**Symptom:** Rule produces empty or near-empty context.
+**Cause:** `lc-context` takes no positional rule argument. The name is ignored, the *active* rule is used, and output goes to the **clipboard** — stdout gets only log messages. `lc-preview <rule>` fails louder, with `unrecognized arguments`.
 
-**Causes:**
+**Fix:** use `-r`, which both names the rule and routes to stdout.
 
-1. Paths missing leading `/`
-2. Path includes project name
-3. Pattern doesn't match actual structure
-4. Filters too aggressive
-
-**Debug with preview:**
-
-CLI: `lc-preview my-rule`
-MCP: `lc_preview` tool
-
-```
-Full files (0):
-Excerpted files (0):
+```bash
+lc-context -r my-rule > pack.md
+lc-context -r my-rule | claude -p 'Task here'
 ```
 
-**Fix:** Check path format:
+---
+
+## No files selected
+
+**Symptom:** the rule produces an empty or near-empty context; `lc-preview` shows `Full files (0)`.
+
+**Causes:** paths missing the leading `/`; path includes the project name; pattern doesn't match the real structure; filters too aggressive.
 
 ```yaml
 # Wrong
-- "src/file.py"              # Missing /
-- "/myproject/src/file.py"   # Has project name
+- "src/file.py"              # missing leading /
+- "/myproject/src/file.py"   # includes project name
 
 # Correct
 - "/src/file.py"
 - "/src/**/*.py"
 ```
 
----
-
-## Preview Looks Right But Context Is Empty
-
-**Symptom:** `lc-preview -r my-rule` shows the correct `Full files` list and sizes, but `lc-context` (via `lc-set-rule my-rule` + `lc-context`, or `lc-context -r my-rule`) produces a repository tree with everything marked `✗ Excluded` and no file content bodies at all — including files the rule explicitly lists in `also-include.full-files`.
-
-**Cause:** `lc-preview` computes its file selection fresh on every call. `lc-context` (and `lc-outlines`) instead read a selection that was persisted to `.llm-context/curr_ctx.yaml` by a prior `lc-select` call. For a rule that has never been selected before, that persisted entry is empty — `lc-preview` will still show the correct list (it isn't reading the persisted entry), but `lc-context` will emit nothing for that rule until `lc-select` runs.
-
-**Fix:** Always run `lc-select` after `lc-set-rule` and before the first `lc-context` / `lc-prompt` / `lc-outlines` call for a new or edited rule:
-
-```bash
-lc-set-rule my-rule
-lc-select        # required — populates the selection lc-context reads from
-lc-context -nt   # now emits real content
-```
-
-`lc-preview` is a validation tool, not a priming step — it does not substitute for `lc-select`. If you edit `also-include` on an already-selected rule, re-run `lc-select` to refresh the persisted selection before generating context again.
+Rule patterns are project-root-relative. Only *output* — preview listings and generated context — carries the `/{project-name}/` prefix.
 
 ---
 
-## Context Too Large
+## The context says files are excluded that I expected
 
-**Symptom:** Context exceeds target size (>100k tokens).
+Check the counts in the generated header first: it reports how many files are full, outlined, and excerpted. If `full` is lower than `lc-preview -r <rule>` showed, the rule changed between the two calls, or a composed filter is narrowing the selection.
 
-**Solutions:**
+Note that the file listing is **not** an inventory of the repository. It is filtered by the repo's `.gitignore` files and by the rule's `overview-files` ignores before anything is marked `✗`, so files can exist that never appear in the listing at all.
+
+---
+
+## Context too large
 
 1. **Move files from full to excerpted:**
 
 ```yaml
-# Before
-full-files: ["/src/**"]
-
-# After
 full-files: ["/src/core/**"]
 excerpted-files: ["/src/**"]
 ```
 
-2. **Use implementations for specific functions:**
+2. **Extract single definitions** instead of whole files:
 
 ```yaml
-# Instead of full file
-full-files: ["/src/large_utils.py"]
-
-# Extract just what's needed
 implementations:
   - ["/src/large_utils.py", "needed_function"]
 ```
@@ -87,138 +63,86 @@ implementations:
 
 ```yaml
 gitignores:
-  full-files:
-    - "**/test/**"
-    - "*.md"
+  full-files: ["**/test/**", "*.md"]
 ```
 
 ---
 
-## Missing excerpters Error
+## Missing excerpters error
 
-**Symptom:** Error about missing excerpters in compose.
+**Symptom:** an error about missing excerpters in `compose`.
 
-**Fix:** Always include `lc/exc-base`:
+**Fix:** every rule needs `lc/exc-base`.
 
 ```yaml
 compose:
   filters: [lc/flt-base]
-  excerpters: [lc/exc-base]   # Required
+  excerpters: [lc/exc-base]   # required
 ```
 
 ---
 
-## Rule Not Found
+## Rule not found
 
-**Symptom:** Command/tool fails with "rule not found".
+File must be at `.llm-context/rules/<name>.md`, with the `.md` extension and no typo in the name. Check with `ls .llm-context/rules/*.md`.
 
-**Causes:**
+---
 
-1. File not in `.llm-context/rules/`
-2. Missing `.md` extension
-3. Typo in rule name
+## also-include pulled in noise
 
-**Fix:** Verify file location:
+**Symptom:** the context includes `__pycache__`, `node_modules`, and similar.
 
-```bash
-ls .llm-context/rules/*.md
+**Cause:** `also-include` bypasses all filters, by design.
+
+**Fix:** be specific, or re-add exclusions explicitly.
+
+```yaml
+also-include:
+  full-files: ["/src/auth/**", "/src/api/routes.py"]
 ```
 
 ---
 
-## also-include Pulls in Noise
-
-**Symptom:** Context includes __pycache__, node_modules, etc.
-
-**Cause:** `also-include` bypasses all filters.
-
-**Fix:** Be specific:
+## YAML syntax error
 
 ```yaml
-# Dangerous
-also-include:
-  full-files: ["/src/**"]
-
-# Better
-also-include:
-  full-files:
-    - "/src/auth/**"
-    - "/src/api/routes.py"
-```
-
-Or add explicit exclusions:
-
-```yaml
-also-include:
-  full-files: ["/src/**"]
-gitignores:
-  full-files:
-    - "__pycache__"
-    - "*.pyc"
-    - "node_modules"
-```
-
----
-
-## YAML Syntax Error
-
-**Symptom:** Parse error on rule file.
-
-**Common mistakes:**
-
-```yaml
-# Wrong - unquoted glob with special chars
+# Wrong - unquoted glob
 also-include:
   full-files:
     - /src/**/*.py
 
-# Correct - quoted
+# Correct
 also-include:
   full-files:
     - "/src/**/*.py"
-
-# Wrong - bad indentation
-compose:
-filters: [lc/flt-base]
-
-# Correct
-compose:
-  filters: [lc/flt-base]
 ```
+
+Indentation matters too: `filters:` must be nested under `compose:`.
 
 ---
 
-## limit-to Conflicts
+## limit-to conflicts
 
-**Symptom:** Warning about multiple `limit-to` clauses.
+**Symptom:** a warning about multiple `limit-to` clauses.
 
-**Cause:** Composing rules that both have `limit-to`.
+**Cause:** only the first `limit-to` per category survives composition.
 
-**Fix:** Only the first `limit-to` per category is used. Put specific rule first, or define `limit-to` in the rule itself:
-
-```yaml
-compose:
-  filters: [lc/flt-base]   # No limit-to here
-limit-to:
-  full-files: ["/src/api/**"]   # Define here instead
-```
+**Fix:** define `limit-to` in the rule itself rather than inheriting it from a composed filter.
 
 ---
 
-## Markdown Content Ignored
+## Markdown content ignored
 
-**Symptom:** Rule markdown doesn't appear in context.
+**Cause:** the `instructions` field is set, which discards the rule's markdown body.
 
-**Cause:** Using `instructions` field.
+**Fix:** choose one — compose with `instructions: [...]`, or write markdown directly.
 
-```yaml
-# Markdown is ignored when instructions is set
-instructions: [lc/ins-developer]
 ---
-## This is discarded!
-```
 
-**Fix:** Choose one approach:
+## Stale context timestamp
 
-- Use `instructions: [...]` to compose from other rules (no markdown needed)
-- Or write markdown directly (no `instructions` field)
+**Symptom:** `lc-missing` fails with "No context found with timestamp …".
+
+**Cause:** these commands resolve a pack out of llm-context's own state by timestamp. A pack that llm-context did not generate — or one whose state was reset by `lc-init` — cannot be resolved.
+
+**Fix:** regenerate the context and use the new timestamp from its header.

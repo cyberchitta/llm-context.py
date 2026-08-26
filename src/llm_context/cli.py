@@ -27,7 +27,7 @@ def init_project(env: ExecutionEnvironment):
     log(INFO, f"LLM Context initialized for project: {env.state.project_layout.root_path}")
     log(
         INFO,
-        "See the user guide for setup and customization: https://github.com/cyberchitta/llm-context.py/blob/main/docs/user-guide.md",
+        "Documentation is the lc-curate-context skill, installed to .claude/skills/lc-curate-context/",
     )
     ProjectSetup.create(env.state.project_layout).initialize()
     return ExecutionResult(None, env)
