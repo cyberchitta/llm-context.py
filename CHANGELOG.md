@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [0.7.0] - 2026-08-26
 
+### Dependencies
+
+- **Pin `tree-sitter-language-pack` to 1.6.2.** 1.6.3 is the native rewrite: its
+  wheel ships only `_native/` with no `tree_sitter_language_pack` module, so the
+  import fails and every parse dies. The previous `>=0.13.0, <1.8` cap was set
+  against the 1.8.x API change and was only safe while 1.6.x had no wheels for
+  the supported interpreters; once those were published, a fresh install
+  resolved to a version that could not parse anything. **This affected 0.6.4 as
+  well** — anyone installing on Python 3.14 got a tool whose excerpting,
+  outlining and preview all failed. `tree-sitter` floor raised to 0.26.0
+
 ### Features
 
 - `lc-preview` reports "Referenced but not selected" — files defining symbols the
@@ -29,6 +40,9 @@ All notable changes to this project will be documented in this file.
 - Make `lc-missing -e` work on markdown files, which raised AttributeError for
   every excluded-section request
 - Capture bare PHP function calls as references
+- Distinguish "no gaps" from "could not parse anything" in `lc-preview` — a
+  tagger failing on every file produced an empty result, which reads as "your
+  selection is complete"
 
 ### Documentation
 
