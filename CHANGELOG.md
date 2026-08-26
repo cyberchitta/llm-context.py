@@ -2,6 +2,49 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - 2026-08-26
+
+### Features
+
+- `lc-preview` reports "Referenced but not selected" — files defining symbols the
+  selection uses but does not include, so a rule can be checked for the omission
+  its file lists cannot show. Built from `@reference.*` tag captures the parser
+  previously discarded; advisory only, and symbols defined in many files are
+  dropped rather than attributed
+- `lc-context -a` renders a pack's fetch instructions for an agent with a shell,
+  alongside the existing MCP-tool and human-relay renderings
+
+### Bug Fixes
+
+- Select files when a rule has no stored selection — `lc-context -r <rule>`
+  emitted a tree with every file excluded and no content for any rule that had
+  never been `lc-select`ed, which is every fresh task rule
+- Stop claiming the generated context is complete. The banner was keyed on the
+  overview mode rather than on what was included, so a pack of four files
+  announced itself as the whole project; the header now reports how many files
+  are full, outlined and excerpted
+- Emit fetch commands the pack's reader can actually run. `lc-changed` was
+  advertised with three arguments it does not accept, and the `lc_changed` tool
+  call carried a `rule_name` that is not a parameter
+- Make `lc-missing -e` work on markdown files, which raised AttributeError for
+  every excluded-section request
+- Capture bare PHP function calls as references
+
+### Documentation
+
+- The `lc-curate-context` skill is now the documentation, and the only copy. The
+  README is a landing page leading with agent usage; `docs/user-guide.md` is
+  removed, its command reference absorbed into the skill as `COMMANDS.md`
+- The skill summary states the whole job — decide, verify, pack — rather than
+  only rule authoring, and `lc/ins-rule-framework` teaches verification, which
+  it never mentioned
+- `CLAUDE.md` records where a drained field note lands
+
+### Migration
+
+- Config version 6.2. Upgrading refreshes each project's templates, system rules
+  and installed skill; without it none of the above reaches an existing install
+
 ## [0.6.4] - 2026-08-02
 
 ### Bug Fixes
