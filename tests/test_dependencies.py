@@ -93,6 +93,32 @@ class DependencyGapTest(unittest.TestCase):
         gaps = self.index([caller, f"/{self.name}/gone.py"]).gaps([caller])
         self.assertEqual(gaps, [])
 
+    def test_an_index_that_parsed_nothing_reports_itself_unusable(self):
+        """ "No gaps" and "could not look" must not render identically.
+
+        Every tagger call raising - a broken tree-sitter install, say - produced an
+        empty gap list, which reads as "your selection is closed".
+        """
+
+        class BrokenTagger:
+            def extract_definitions(self, source):
+                raise RuntimeError("no parser")
+
+            def extract_references(self, source):
+                raise RuntimeError("no parser")
+
+        caller = self.write("caller.py", "def run():\n    return helper()\n")
+        index = SymbolIndex.create(BrokenTagger(), self.root, [caller])
+        self.assertEqual(index.gaps([caller]), [])
+        self.assertTrue(index.unusable)
+
+    def test_a_working_index_is_not_unusable(self):
+        caller = self.write("caller.py", "def run():\n    return helper()\n")
+        self.assertFalse(self.index([caller]).unusable)
+
+    def test_an_empty_universe_is_not_unusable(self):
+        self.assertFalse(SymbolIndex.create(None, self.root, []).unusable)
+
     def test_empty_selection_has_no_gaps(self):
         caller = self.write("caller.py", "def run():\n    return helper()\n")
         self.assertEqual(self.index([caller]).gaps([]), [])

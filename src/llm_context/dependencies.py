@@ -33,12 +33,24 @@ class DependencyGap:
 class SymbolIndex:
     definers: dict[str, set[str]]
     referenced_by: dict[str, set[str]]
+    parsed: int = 0
+    failed: int = 0
+
+    @property
+    def unusable(self) -> bool:
+        """Nothing parsed at all - report that, rather than an empty result.
+
+        An empty gap list means "your selection is closed". A parser that failed
+        on every file produces the same empty list and means nothing of the sort.
+        """
+        return self.parsed == 0 and self.failed > 0
 
     @staticmethod
     def create(tagger, root_path: Path, rel_paths: list[str]) -> "SymbolIndex":
         converter = PathConverter.create(root_path)
         definers: dict[str, set[str]] = defaultdict(set)
         referenced_by: dict[str, set[str]] = defaultdict(set)
+        parsed = failed = 0
         for rel_path, abs_path in zip(rel_paths, converter.to_absolute(rel_paths)):
             if not to_language(rel_path):
                 continue
@@ -50,13 +62,15 @@ class SymbolIndex:
                 definitions = tagger.extract_definitions(source)
                 references = tagger.extract_references(source)
             except Exception:
+                failed += 1
                 continue
+            parsed += 1
             for definition in definitions:
                 if definition.name:
                     definers[definition.name.text].add(rel_path)
             for reference in references:
                 referenced_by[rel_path].add(reference.name)
-        return SymbolIndex(dict(definers), dict(referenced_by))
+        return SymbolIndex(dict(definers), dict(referenced_by), parsed, failed)
 
     def gaps(
         self, selected: list[str], max_defining_files: int = MAX_DEFINING_FILES

@@ -25,6 +25,7 @@ class ContextPreview:
     project_layout: ProjectLayout
     template_name: str
     dependency_gaps: list[DependencyGap]
+    dependency_index_unusable: bool = False
 
     @staticmethod
     def create(config: ContextSpec, tagger) -> "ContextPreview":
@@ -46,13 +47,9 @@ class ContextPreview:
         universe = FileSelector.create_ignorer(
             config.project_root_path, rule.get_ignore_patterns("overview")
         ).get_relative_files()
-        gaps = (
-            SymbolIndex.create(tagger, config.project_root_path, universe).gaps(
-                file_selection.files
-            )
-            if tagger
-            else []
-        )
+        index = SymbolIndex.create(tagger, config.project_root_path, universe) if tagger else None
+        gaps = index.gaps(file_selection.files) if index else []
+        index_unusable = bool(index and index.unusable)
         return ContextPreview(
             rule_name=rule.name,
             compose_filters=rule.compose.filters,
@@ -62,6 +59,7 @@ class ContextPreview:
             project_layout=config.project_layout,
             template_name=config.templates["preview"],
             dependency_gaps=gaps,
+            dependency_index_unusable=index_unusable,
         )
 
     @property
@@ -124,6 +122,7 @@ class ContextPreview:
                 for gap in self.dependency_gaps[:max_files]
             ],
             "dependency_gap_total": len(self.dependency_gaps),
+            "dependency_index_unusable": self.dependency_index_unusable,
         }
         template = Template.create(self.template_name, context, self.project_layout.templates_path)
         return template.render()

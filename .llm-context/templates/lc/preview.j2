@@ -27,7 +27,11 @@ none
 {%- endif %}
 
 Referenced but not selected
-{%- if dependency_gaps %}
+{%- if dependency_index_unusable %}
+UNAVAILABLE - no file could be parsed, so this check did not run. This is not
+the same as "nothing is missing". Usually a broken or incompatible
+tree-sitter-language-pack install.
+{%- elif dependency_gaps %}
 {%- for gap in dependency_gaps %}
 - {{ gap.rel_path }} ({{ gap.reference_count }} refs: {{ gap.symbols }}{% if gap.more_symbols %}, +{{ gap.more_symbols }} more{% endif %})
 {%- endfor %}
