@@ -13,7 +13,7 @@ from llm_context.excerpters.language_mapping import to_language
 from llm_context.excerpters.parser import Source
 from llm_context.excerpters.service import ExcerpterRegistry
 from llm_context.file_selector import FileSelector
-from llm_context.overviews import get_focused_overview, get_full_overview
+from llm_context.overviews import OverviewResult, get_focused_overview, get_full_overview
 from llm_context.rule import IGNORE_NOTHING, INCLUDE_ALL, Rule
 from llm_context.rule_parser import RuleLoader, RuleProvider
 from llm_context.state import FileSelection
@@ -143,7 +143,7 @@ class ContextCollector:
         excerpted_abs: list[str],
         rule_abs: list[str],
         diagram_ignores: list[str],
-    ) -> tuple[str, list[str]]:
+    ) -> OverviewResult:
         return (
             get_full_overview(self.root_path, full_abs, excerpted_abs, rule_abs, diagram_ignores)
             if overview_mode == "full"
@@ -370,7 +370,7 @@ class ContextGenerator:
         )
         outlined_abs = self.converter.to_absolute(outlined_rel)
         other_excerpted_abs = self.converter.to_absolute(other_excerpted_rel)
-        overview_string, sample_excluded_files = self.collector.overview(
+        overview_result = self.collector.overview(
             descriptor.overview,
             self.full_abs,
             other_excerpted_abs,
@@ -381,15 +381,20 @@ class ContextGenerator:
             "project_name": self.project_root.name,
             "context_timestamp": context_timestamp,
             "abs_root_path": str(self.project_root),
-            "overview": overview_string,
+            "overview": overview_result.text,
             "overview_mode": descriptor.overview,
+            "full_count": len(files),
+            "outlined_count": len(outlined_rel),
+            "excerpted_count": len(other_excerpted_rel),
+            "listed_count": overview_result.listed_count,
+            "excluded_count": overview_result.excluded_count,
             "files": files,
             "excerpts": excerpts,
             "implementations": implementations,
             "sample_requested_files": self.converter.to_relative(
                 self.collector.sample_file_abs(self.full_abs)
             ),
-            "sample_excluded_files": sample_excluded_files,
+            "sample_excluded_files": overview_result.sample_excluded,
             "prompt": descriptor.get_instructions() if settings.with_prompt else None,
             "project_notes": descriptor.get_project_notes(layout),
             "with_tools": settings.with_tools,

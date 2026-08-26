@@ -1,55 +1,24 @@
-# {% if with_tools %}Repository{% else %}Detailed Repository{% endif %} Content: **{{ project_name }}**
+# Repository Content: **{{ project_name }}**
 
-## Instructions for AI: {% if overview_mode == "focused" %}⚠️ FOCUSED PROJECT CONTEXT PROVIDED - {% if with_tools %}USE TOOLS FOR ADDITIONAL FILES{% else %}USE COMMANDS FOR ADDITIONAL FILES{% endif %} ⚠️{% else %}⚠️ COMPLETE PROJECT CONTEXT PROVIDED - NO NEED TO REQUEST ADDITIONAL CONTEXT ⚠️{% endif %}
+## What this context contains
 
-## Quick Reference
-- ✓ = Full content included below
-{% if excerpts -%}
-- O = Outlined content (definitions/functions only)
-- E = Excerpted content (specific sections extracted)
-{% endif -%}
-{% if sample_excluded_files -%}
-- ✗ = Excluded (not included)
+- **{{ full_count }}** file(s) included in full — marked ✓ below
+{% if outlined_count %}- **{{ outlined_count }}** outlined — signatures and definitions only, not the source — marked O
+{% endif %}{% if excerpted_count %}- **{{ excerpted_count }}** excerpted — selected sections only — marked E
+{% endif %}{% if excluded_count %}- **{{ excluded_count }}** listed but not included — marked ✗
 {% endif %}
+**This is a partial view of _/{{ project_name }}_.** The listing below is itself filtered — by the repository's `.gitignore` files and by this rule's own overview ignores — so files may exist in the project that do not appear below at all. Treat the listing as the set of files this context knows about, not as an inventory of the repository.
 
 > Generation timestamp: {{ context_timestamp }}
 > {% if with_tools %}For updates: Use lc-changed to identify changes, then lc-missing for specific files{% else %}For updates: Use the lc-missing commands shown below{% endif %}
 
-{% if overview_mode == "focused" -%}
-This context presents a focused view of the _/{{ project_name }}_ repository, including complete contents for key files and excerpted content for important code sections. {% if with_tools %}Additional files can be retrieved using the lc-missing tool.{% else %}Additional files can be requested using the lc-missing commands shown below.{% endif %}
-{%- else -%}
-This context presents a comprehensive view of the _/{{ project_name }}_ repository.
-{%- endif %}
+## Instructions for AI
 
+1. **Anything marked ✓ is included below in full.** Read it from this document rather than requesting it again.
+2. **Anything marked{% if excerpts %} O, E,{% endif %} or ✗ — or not listed at all — is not in this context.** Never infer its contents from naming conventions, sibling files, or partial information. {% if with_tools %}Fetch it with lc-missing{% else %}Request it using the commands below{% endif %}, or say plainly that you could not see it.
+3. **Check the repository structure below** to confirm a file's status before acting on it.
 {% if sample_requested_files or sample_excluded_files %}
-## Instructions for AI: 📂 Before {% if with_tools %}Accessing{% else %}Requesting{% endif %} Any Files
-
-1. **SEARCH THIS DOCUMENT** to check if the file is already included below
-2. **CHECK the repository structure** below to confirm file status (✓,{% if excerpts %} O, E,{% endif %} or ✗)
-3. {% if overview_mode == "focused" %}{% if with_tools %}Use lc-missing for ✗{% if excerpts %}, O, or E{% endif %} files that are needed for your analysis{% else %}Use lc-missing commands below for ✗{% if excerpts %}, O, or E{% endif %} files that are needed{% endif %}{% else %}Only request ✗{% if excerpts %}, O, or E{% endif %} files that are absolutely necessary for your analysis{% endif %}
-4. **Never assume file contents** - if a file is ✗, O, or E and you need it to answer accurately, use lc_missing to fetch it first.  Don't guess at the contents based on conventions / patterns / partial information, etc.
-
-{% if with_tools %}
-{% if overview_mode == "focused" -%}
-Use lc-missing for:
-- Any ✗{% if excerpts %}, O, or E{% endif %} files you need to examine
-- Files modified since context generation (use lc-changed to identify these)
-{%- else -%}
-Only use lc-missing for:
-- Files modified since context generation (use lc-changed to identify these)
-- Files marked ✗{% if excerpts %}, O, or E{% endif %} in the repository structure that you need to examine
-{%- endif %}
-
-{% if excerpts %}
-**EFFICIENCY TIP:** 
-- For O files: Use lc-missing with param_type "i" to get specific implementations
-- For E files: Use lc-missing with param_type "e" to get excluded sections
-- For complete files: Use lc-missing with param_type "f"
-{% endif %}
-{% endif %}
-
 ### How to Request Missing Files
-
 {% if with_tools %}
 Using the lc-missing tool:
    **ROOT PATH must be: {{ abs_root_path }}**
@@ -72,6 +41,12 @@ Using the lc-missing tool:
      "timestamp": {{ context_timestamp }}
    }
    ```
+{% if excerpts %}
+**EFFICIENCY TIP:** 
+- For O files: Use lc-missing with param_type "i" to get specific implementations
+- For E files: Use lc-missing with param_type "e" to get excluded sections
+- For complete files: Use lc-missing with param_type "f"
+{% endif %}
 {% else %}
 For files, the user should run:
 ```bash
@@ -89,11 +64,6 @@ lc-changed "{{ abs_root_path }}" lc/prm-developer {{ context_timestamp }}
 
 {% if overview_mode == "focused" -%}
 This focused view shows complete file details for directories containing included files, and folder summaries for directories with only excluded files.
-{%- else -%}
-```
-Status: ✓=Full content, O=Outlined content, E=Excerpted content, ✗=Excluded
-Format: status path bytes (size) age
-```
 {%- endif %}
 
 ```

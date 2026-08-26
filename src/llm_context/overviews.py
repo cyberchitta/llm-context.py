@@ -15,6 +15,18 @@ STATUS_DESCRIPTIONS = {
 
 
 @dataclass(frozen=True)
+class OverviewResult:
+    text: str
+    sample_excluded: list[str]
+    listed_count: int
+    excluded_count: int
+
+    @staticmethod
+    def empty() -> "OverviewResult":
+        return OverviewResult("No files found", [], 0, 0)
+
+
+@dataclass(frozen=True)
 class OverviewHelper:
     root_dir: str
     full_files: set[str]
@@ -48,8 +60,10 @@ class OverviewHelper:
             f"{format_age(os.path.getmtime(abs_path))}",
         )
 
-    def sample_excluded_files(self, abs_paths: list[str]) -> list[str]:
-        excluded_files = [path for path in abs_paths if self.get_status(path) == "✗"]
+    def excluded_files(self, abs_paths: list[str]) -> list[str]:
+        return [path for path in abs_paths if self.get_status(path) == "✗"]
+
+    def sample_excluded_files(self, excluded_files: list[str]) -> list[str]:
         converter = PathConverter.create(Path(self.root_dir))
         sample_excluded = (
             random.sample(excluded_files, min(2, len(excluded_files))) if excluded_files else []
@@ -68,15 +82,19 @@ class FullOverview:
         helper = OverviewHelper(root_dir, full_files, excerpted_files, outlined_files)
         return FullOverview(helper)
 
-    def generate(self, abs_paths: list[str]) -> tuple[str, list[str]]:
+    def generate(self, abs_paths: list[str]) -> OverviewResult:
         if not abs_paths:
-            return "No files found", []
+            return OverviewResult.empty()
         entries = [self.helper.get_file_info(path) for path in sorted(abs_paths)]
         header = self.helper.format_legend_header(abs_paths)
         rows = [f"{status} {entry}" for status, entry in entries]
-        overview_string = header + "\n".join(rows)
-        sample_excluded_files = self.helper.sample_excluded_files(abs_paths)
-        return overview_string, sample_excluded_files
+        excluded = self.helper.excluded_files(abs_paths)
+        return OverviewResult(
+            header + "\n".join(rows),
+            self.helper.sample_excluded_files(excluded),
+            len(abs_paths),
+            len(excluded),
+        )
 
 
 @dataclass(frozen=True)
@@ -127,9 +145,9 @@ class FocusedOverview:
         total_size = sum(os.path.getsize(f) for f in files_in_folder)
         return f"{folder_display} ({len(files_in_folder)} files, {_format_size(total_size)})"
 
-    def generate(self, abs_paths: list[str]) -> tuple[str, list[str]]:
+    def generate(self, abs_paths: list[str]) -> OverviewResult:
         if not abs_paths:
-            return "No files found", []
+            return OverviewResult.empty()
         folders = self._group_files_by_immediate_parent(abs_paths)
         header = self.helper.format_legend_header(abs_paths)
         sections = []
@@ -139,9 +157,13 @@ class FocusedOverview:
                 sections.append(self._format_folder_with_file_details(folder_path, files_in_folder))
             else:
                 sections.append(self._format_folder_summary(folder_path, files_in_folder))
-        overview_string = header + "\n".join(sections)
-        sample_excluded_files = self.helper.sample_excluded_files(abs_paths)
-        return overview_string, sample_excluded_files
+        excluded = self.helper.excluded_files(abs_paths)
+        return OverviewResult(
+            header + "\n".join(sections),
+            self.helper.sample_excluded_files(excluded),
+            len(abs_paths),
+            len(excluded),
+        )
 
 
 def get_full_overview(
@@ -150,7 +172,7 @@ def get_full_overview(
     excerpted_files: list[str],
     outlined_files: list[str],
     overview_ignores: list[str] = [],
-) -> tuple[str, list[str]]:
+) -> OverviewResult:
     overview_ignorer = FileSelector.create_ignorer(project_root, overview_ignores)
     abs_paths = overview_ignorer.get_files()
     overview = FullOverview.create(
@@ -165,7 +187,7 @@ def get_focused_overview(
     excerpted_files: list[str],
     outlined_files: list[str],
     overview_ignores: list[str] = [],
-) -> tuple[str, list[str]]:
+) -> OverviewResult:
     overview_ignorer = FileSelector.create_ignorer(project_root, overview_ignores)
     abs_paths = overview_ignorer.get_files()
     overview = FocusedOverview.create(
