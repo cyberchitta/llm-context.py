@@ -11,9 +11,10 @@ All notable changes to this project will be documented in this file.
   import fails and every parse dies. The previous `>=0.13.0, <1.8` cap was set
   against the 1.8.x API change and was only safe while 1.6.x had no wheels for
   the supported interpreters; once those were published, a fresh install
-  resolved to a version that could not parse anything. **This affected 0.6.4 as
-  well** — anyone installing on Python 3.14 got a tool whose excerpting,
-  outlining and preview all failed. `tree-sitter` floor raised to 0.26.0
+  resolved to a version that could not parse anything. **This affected 0.6.3,
+  the previous release, on Python 3.14** — that interpreter resolves to 1.6.3
+  and every parse fails; Python 3.12 and 3.13 resolve to 1.6.2 and are
+  unaffected. `tree-sitter` floor raised to 0.26.0
 
 ### Features
 
