@@ -1,5 +1,9 @@
 # LLM Context
 
+[简体中文](README_zh-CN.md) | [English](README.md)
+
+# LLM Context
+
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![PyPI version](https://img.shields.io/pypi/v/llm-context.svg)](https://pypi.org/project/llm-context/)
 [![Downloads](https://static.pepy.tech/badge/llm-context/week)](https://pepy.tech/project/llm-context)
