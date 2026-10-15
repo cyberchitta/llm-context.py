@@ -57,7 +57,7 @@ compose:
 
 **`gitignores`** — exclude matching files. Additive with composed filters.
 
-**`limit-to`** — include *only* matching files. Only the first `limit-to` per category survives composition, so define it in the rule itself rather than inheriting it.
+**`limit-to`** — include *only* matching files. Only the first non-empty `limit-to` per category survives composition. Composed filters are processed before the rule itself, so a local clause cannot override an inherited one. To define it locally, compose filters that do not already set it for that category.
 
 **`also-include`** — force include, **bypassing all filters**, including gitignores. Be specific: `"/src/**"` will pull in `__pycache__` and `node_modules`.
 
@@ -122,7 +122,7 @@ Rule patterns are project-root-relative and start with `/`:
 "/src/"            # WRONG - directory; use /src/**
 ```
 
-Quote every pattern — an unquoted `- /src/**/*.py` is a YAML error.
+Quoting patterns is recommended. An unquoted `/src/**/*.py` is valid YAML, but a pattern beginning with `*` must be quoted so YAML does not interpret it as an alias.
 
 **Output paths differ from rule paths.** Preview listings and generated context prefix the project directory name: `/{project-name}/src/file.py`. This lets context from several projects combine without collision. `lc-missing` takes paths in the *output* form.
 
