@@ -165,7 +165,7 @@ class PathConverter:
         return str(self.root / Path(path[len(self.root.name) + 2 :]))
 
     def _make_relative(self, path: str) -> str:
-        return f"/{self.root.name}/{Path(path).relative_to(self.root)}"
+        return f"/{self.root.name}/{Path(path).relative_to(self.root).as_posix()}"
 
 
 def log(level: int, msg: str) -> None:
