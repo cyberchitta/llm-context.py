@@ -55,7 +55,7 @@ class GitIgnorer:
                 if content:
                     patterns = content.splitlines()
                     relpath = os.path.relpath(root, top)
-                    fixpath = "/" if relpath == "." else f"/{relpath}"
+                    fixpath = "/" if relpath == "." else f"/{Path(relpath).as_posix()}"
                     gitignores.append((fixpath, patterns))
         return gitignores
 
@@ -173,7 +173,7 @@ class FileSelector:
         return files + subdir_files
 
     def _relative_path(self, dir: str, filename: str) -> str:
-        return f"/{os.path.normpath(os.path.join(dir, filename))}"
+        return f"/{Path(dir, filename).as_posix()}"
 
 
 @dataclass(frozen=True)

@@ -44,7 +44,10 @@ class TestPathConverter(unittest.TestCase):
             "/home/user/project/tests/test_main.py",
             "/home/user/project/README.md",
         ]
-        self.assertEqual(self.converter.to_absolute(relative_paths), expected_absolute_paths)
+        self.assertEqual(
+            self.converter.to_absolute(relative_paths),
+            [str(Path(path)) for path in expected_absolute_paths],
+        )
 
     def test_to_relative_conversion(self):
         absolute_paths = [
