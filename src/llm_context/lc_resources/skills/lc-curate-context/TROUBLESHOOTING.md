@@ -112,7 +112,7 @@ File must be at `.llm-context/rules/<name>.md`, with the `.md` extension and no 
 
 **Cause:** `also-include` bypasses all filters, by design.
 
-**Fix:** be specific, or re-add exclusions explicitly.
+**Fix:** use more specific include patterns. Adding `gitignores` cannot exclude files forced in by `also-include`.
 
 ```yaml
 also-include:
@@ -127,12 +127,12 @@ also-include:
 # Wrong - unquoted glob
 also-include:
   full-files:
-    - /src/**/*.py
+    - **/*.py
 
 # Correct
 also-include:
   full-files:
-    - "/src/**/*.py"
+    - "**/*.py"
 ```
 
 Indentation matters too: `filters:` must be nested under `compose:`.
@@ -145,7 +145,7 @@ Indentation matters too: `filters:` must be nested under `compose:`.
 
 **Cause:** only the first `limit-to` per category survives composition.
 
-**Fix:** define `limit-to` in the rule itself rather than inheriting it from a composed filter.
+**Fix:** remove the competing clause. If the task rule defines `limit-to` locally, compose filters that do not already set it for the same category: filters are processed first, so their non-empty clause wins over the local one.
 
 ---
 
