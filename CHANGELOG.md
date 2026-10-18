@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.1] - 2026-10-19
+
+### Bug Fixes
+
+- A rule's `implementations` now reach the pack. The paths were passed to the
+  collector without the project-name prefix, so the lookup sliced the filename
+  and found nothing, and the context template never rendered the result. Packs
+  gain a "Selected Implementations" section when a rule names any
+- Keep namespaced context paths POSIX on Windows. Nested files rendered as
+  `/project/src\helper.py` in previews, stored selections and packs, and nested
+  `.gitignore` prefixes used native separators. Selections stored on Windows
+  before this release keep the old form; re-run `lc-select` to refresh them
+
+### Dependencies
+
+- Raise security floors past published advisories: `mcp>=2.2.0`
+  (CVE-2026-59951), `cryptography>=50.0.0`, `PyJWT>=2.15.0`, and new floors
+  for the indirect `anyio>=4.14.2`, `httpx2>=2.12.0` and `httpcore2>=2.10.0`
+
+### Documentation
+
+- An unquoted `/src/**/*.py` is valid YAML; only a pattern starting with `*`
+  must be quoted
+- Composed filters are merged before the rule's own clauses, so an inherited
+  `limit-to` cannot be overridden locally
+- Adding `gitignores` cannot remove a file forced in by `also-include`; narrow
+  the include pattern instead
+
+### Migration
+
+- Config version 6.3. Upgrading refreshes each project's templates and installed
+  skill; without it the implementations section and the corrected docs do not
+  reach an existing install
+
 ## [0.7.0] - 2026-08-26
 
 ### Dependencies
