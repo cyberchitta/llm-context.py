@@ -44,6 +44,11 @@ All notable changes to this project will be documented in this file.
 - Distinguish "no gaps" from "could not parse anything" in `lc-preview` — a
   tagger failing on every file produced an empty result, which reads as "your
   selection is complete"
+- Migrate to the mcp 2.x server API, which renamed FastMCP to MCPServer
+
+### Refactor
+
+- Remove shell tab completion; lc-init no longer writes to ~/.zshrc or ~/.local/share
 
 ### Documentation
 
@@ -59,16 +64,6 @@ All notable changes to this project will be documented in this file.
 
 - Config version 6.2. Upgrading refreshes each project's templates, system rules
   and installed skill; without it none of the above reaches an existing install
-
-## [0.6.4] - 2026-08-02
-
-### Bug Fixes
-
-- Migrate to the mcp 2.x server API, which renamed FastMCP to MCPServer
-
-### Refactor
-
-- Remove shell tab completion; lc-init no longer writes to ~/.zshrc or ~/.local/share
 
 ## [0.6.3] - 2026-07-28
 
