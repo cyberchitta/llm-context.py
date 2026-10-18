@@ -21,7 +21,7 @@ def test_context_extracts_project_relative_rule_implementation(
     cli.init_project()
     (root / "src").mkdir()
     (root / "src" / "helper.py").write_text('def useful():\n    return "IMPLEMENTATION_BODY"\n')
-    (root / ".llm-context" / "rules" / "prm-definition.md").write_text('''---
+    (root / ".llm-context" / "rules" / "prm-definition.md").write_text("""---
 description: Extract only a definition
 compose:
   filters: [lc/flt-no-files]
@@ -29,7 +29,7 @@ compose:
 implementations:
   - ["/src/helper.py", "useful"]
 ---
-''')
+""")
     capsys.readouterr()
     monkeypatch.setattr("sys.argv", ["lc-context", "-r", "prm-definition"])
     cli.context()

@@ -370,7 +370,10 @@ class ContextGenerator:
         excerpts = self.collector.excerpts(self.tagger, self.excerpted_rel, descriptor)
         implementations = self.collector.definitions(
             self.tagger,
-            [(f"/{self.project_root.name}{path}", name) for path, name in descriptor.implementations],
+            [
+                (f"/{self.project_root.name}{path}", name)
+                for path, name in descriptor.implementations
+            ],
         )
         files = self.collector.files(self.full_rel)
         settings = self.settings

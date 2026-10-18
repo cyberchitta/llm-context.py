@@ -24,7 +24,7 @@ def project(tmp_path, monkeypatch):
 
 @pytest.mark.parametrize("overview", ["full", "focused"])
 def test_cli_uses_posix_paths_for_nested_files(project, monkeypatch, capsys, overview):
-    (project / ".llm-context" / "rules" / "prm-test.md").write_text(f'''---
+    (project / ".llm-context" / "rules" / "prm-test.md").write_text(f"""---
 description: Nested files
 overview: {overview}
 compose:
@@ -33,7 +33,7 @@ compose:
 also-include:
   full-files: ["/src/helper.py"]
 ---
-''')
+""")
     capsys.readouterr()
     monkeypatch.setattr("sys.argv", ["lc-preview", "-r", "prm-test"])
     cli.preview()
