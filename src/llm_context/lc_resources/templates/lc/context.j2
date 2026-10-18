@@ -21,4 +21,12 @@
 {% include 'lc/excerpts.j2' %}
 {% endif %}
 
+{% if implementations %}
+## Selected Implementations
+
+{% with definitions=implementations %}
+{% include 'lc/definitions.j2' %}
+{% endwith %}
+{% endif %}
+
 {% include 'lc/end-prompt.j2' %}

@@ -54,7 +54,7 @@ class OverviewHelper:
     def get_file_info(self, abs_path: str) -> tuple[str, str]:
         return (
             self.get_status(abs_path),
-            f"/{Path(self.root_dir).name}/{Path(abs_path).relative_to(self.root_dir)} "
+            f"/{Path(self.root_dir).name}/{Path(abs_path).relative_to(self.root_dir).as_posix()} "
             f"{os.path.getsize(abs_path)}"
             f"({_format_size(os.path.getsize(abs_path))})"
             f"{format_age(os.path.getmtime(abs_path))}",
@@ -122,9 +122,9 @@ class FocusedOverview:
 
     def _format_folder_with_file_details(self, folder_path: str, files_in_folder: list[str]) -> str:
         root_name = Path(self.helper.root_dir).name
-        folder_relative = Path(folder_path).relative_to(self.helper.root_dir)
+        folder_relative = Path(folder_path).relative_to(self.helper.root_dir).as_posix()
         folder_display = (
-            f"/{root_name}/{folder_relative}/" if str(folder_relative) != "." else f"/{root_name}/"
+            f"/{root_name}/{folder_relative}/" if folder_relative != "." else f"/{root_name}/"
         )
         lines = [f"{folder_display} ({len(files_in_folder)} files)"]
         for file_path in sorted(files_in_folder):
@@ -138,9 +138,9 @@ class FocusedOverview:
 
     def _format_folder_summary(self, folder_path: str, files_in_folder: list[str]) -> str:
         root_name = Path(self.helper.root_dir).name
-        folder_relative = Path(folder_path).relative_to(self.helper.root_dir)
+        folder_relative = Path(folder_path).relative_to(self.helper.root_dir).as_posix()
         folder_display = (
-            f"/{root_name}/{folder_relative}/" if str(folder_relative) != "." else f"/{root_name}/"
+            f"/{root_name}/{folder_relative}/" if folder_relative != "." else f"/{root_name}/"
         )
         total_size = sum(os.path.getsize(f) for f in files_in_folder)
         return f"{folder_display} ({len(files_in_folder)} files, {_format_size(total_size)})"
