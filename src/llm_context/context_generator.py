@@ -368,7 +368,10 @@ class ContextGenerator:
         descriptor = self.spec.rule
         layout = self.spec.project_layout
         excerpts = self.collector.excerpts(self.tagger, self.excerpted_rel, descriptor)
-        implementations = self.collector.definitions(self.tagger, descriptor.implementations)
+        implementations = self.collector.definitions(
+            self.tagger,
+            [(f"/{self.project_root.name}{path}", name) for path, name in descriptor.implementations],
+        )
         files = self.collector.files(self.full_rel)
         settings = self.settings
         context_timestamp = datetime.now().timestamp()
