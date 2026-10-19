@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
   failure arrived as a bare `Error executing tool <name>`, hiding the messages
   written for the model: a stale context timestamp, a malformed path, an
   unknown rule or `param_type`
+- Rule resolution errors no longer end their wrapped message with a doubled
+  period
 
 ### Notes
 

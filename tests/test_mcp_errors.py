@@ -27,8 +27,9 @@ def test_stale_timestamp_message_reaches_the_model(project):
 
 
 def test_unknown_rule_message_reaches_the_model(project):
-    with pytest.raises(ToolError, match="no-such-rule"):
+    with pytest.raises(ToolError, match="no-such-rule") as error:
         call("lc_preview", root_path=str(project), rule_name="no-such-rule")
+    assert ".." not in str(error.value)
 
 
 def test_unknown_param_type_message_reaches_the_model(project):

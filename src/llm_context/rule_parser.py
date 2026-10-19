@@ -76,7 +76,7 @@ class RuleLoader:
             return RuleParser.parse(content, path)
         except Exception as e:
             raise RuleResolutionError(
-                f"Failed to parse rule file '{name}.md': {str(e)}. This may indicate outdated rule syntax. "
+                f"Failed to parse rule file '{name}.md': {str(e).rstrip('.')}. This may indicate outdated rule syntax. "
                 f"Consider updating the rule or switching to '{DEFAULT_CODE_RULE}' with: lc-set-rule {DEFAULT_CODE_RULE}"
             )
 

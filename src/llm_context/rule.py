@@ -209,7 +209,7 @@ class RuleResolver:
             raise
         except Exception as e:
             raise RuleResolutionError(
-                f"Failed to resolve rule '{rule_name}': {str(e)}. "
+                f"Failed to resolve rule '{rule_name}': {str(e).rstrip('.')}. "
                 f"This may indicate outdated rule syntax or missing dependencies. "
                 f"Consider updating the rule or switching to '{DEFAULT_CODE_RULE}' with: lc-set-rule {DEFAULT_CODE_RULE}"
             )
