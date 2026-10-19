@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.2] - 2026-10-19
+
+### Bug Fixes
+
+- MCP tool errors reach the model again. Since the move to mcp 2.x, every
+  failure arrived as a bare `Error executing tool <name>`, hiding the messages
+  written for the model: a stale context timestamp, a malformed path, an
+  unknown rule or `param_type`
+
+### Notes
+
+- 0.7.1 was tagged but never published to PyPI; 0.7.2 carries its changes too
+
 ## [0.7.1] - 2026-10-19
 
 ### Bug Fixes
