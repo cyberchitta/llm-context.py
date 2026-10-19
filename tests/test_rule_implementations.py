@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 
 from llm_context import cli
@@ -7,18 +5,9 @@ from llm_context import cli
 
 @pytest.mark.parametrize("project_name", ["p", "long-project-name"])
 def test_context_extracts_project_relative_rule_implementation(
-    tmp_path, monkeypatch, capsys, project_name
+    make_project, monkeypatch, capsys, project_name
 ):
-    root = tmp_path / project_name
-    root.mkdir()
-    home = tmp_path / "home"
-    home.mkdir()
-    monkeypatch.setattr(Path, "home", lambda: home)
-    monkeypatch.setattr("pyperclip.copy", lambda _: pytest.fail("Unexpected clipboard write"))
-    monkeypatch.chdir(root)
-    (root / ".gitignore").write_text(".claude/\n")
-    monkeypatch.setattr("sys.argv", ["lc-init"])
-    cli.init_project()
+    root = make_project(project_name)
     (root / "src").mkdir()
     (root / "src" / "helper.py").write_text('def useful():\n    return "IMPLEMENTATION_BODY"\n')
     (root / ".llm-context" / "rules" / "prm-definition.md").write_text("""---

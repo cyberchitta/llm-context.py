@@ -1,22 +1,11 @@
-from pathlib import Path
-
 import pytest
 
 from llm_context import cli
 
 
 @pytest.fixture
-def project(tmp_path, monkeypatch):
-    root = tmp_path / "project"
-    root.mkdir()
-    home = tmp_path / "home"
-    home.mkdir()
-    monkeypatch.setattr(Path, "home", lambda: home)
-    monkeypatch.setattr("pyperclip.copy", lambda _: pytest.fail("Unexpected clipboard write"))
-    monkeypatch.chdir(root)
-    (root / ".gitignore").write_text(".claude/\n")
-    monkeypatch.setattr("sys.argv", ["lc-init"])
-    cli.init_project()
+def project(make_project):
+    root = make_project()
     (root / "src").mkdir()
     (root / "src" / "helper.py").write_text('def useful():\n    return "HELPER_BODY"\n')
     return root
