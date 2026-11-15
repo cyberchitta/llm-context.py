@@ -6,7 +6,7 @@ authors = [
   { name = "restlessronin", email = "88921269+restlessronin@users.noreply.github.com" },
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.15,<3.16"
 license = "Apache-2.0"
 keywords = ["llm", "ai", "context", "code", "clipboard", "chat"]
 classifiers = [
@@ -76,14 +76,14 @@ pythonpath = ["src"]
 filterwarnings = ["ignore::FutureWarning"]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.15"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
 
 [tool.ruff]
 line-length = 100
-target-version = "py313"
+target-version = "py315"
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
